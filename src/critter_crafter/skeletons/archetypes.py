@@ -19,6 +19,14 @@ from ..recipes.rng import SplitMix64
 PRESETS = ("compact", "balanced", "elongated")
 FAMILIES = ("biped", "quadruped", "crawler", "hexapod", "radial", "serpentine", "dragger")
 _GROUND_CLEARANCE_M = .0075
+# Hands rest a centimetre higher than feet: a forearm sloping down to a planted hand would otherwise
+# dip its rounded volume below the floor.
+_HAND_CLEARANCE_M = .0175
+
+
+def _contact_clearance(kind: str) -> float:
+    return 0.0 if kind in {"sliding", "body"} else _HAND_CLEARANCE_M if kind == "hand" else _GROUND_CLEARANCE_M
+
 # Neutral hip-to-foot distance as a fraction of chain reach (stepping margin).
 _INSECT_EXTENSION = .70
 _LIMB_EXTENSION = .84
@@ -175,6 +183,24 @@ def _mammal_leg(leg: dict[str, Any], *, fore: bool = False, fit_hip: bool = True
     leg["_extension_target"] = _LIMB_EXTENSION
     if fit_hip:
         leg["_hip_height"] = leg["origin_m"][1]
+
+
+def _ground_by_first_joint(branch: dict[str, Any]) -> None:
+    """Swing the first joint (within its limits) until the contact meets the ground, keeping length."""
+    lo, hi = _bone_limits(branch["binding_profile_id"])[0]
+    def height(angle: float) -> float:
+        angles = [angle] + list(branch["stance_deg"][1:])
+        return _contact_height(branch, angles, None, branch["stance_z_deg"]) - _contact_clearance(branch["contacts"][0]["kind"])
+    # Raising the first joint (toward ``up``) lifts the contact; find the zero crossing.
+    if height(lo) > 0 or height(hi) < 0:
+        return
+    for _ in range(50):
+        mid = (lo + hi) / 2
+        if height(mid) > 0:
+            hi = mid
+        else:
+            lo = mid
+    branch["stance_deg"][0] = round((lo + hi) / 2, 3)
 
 
 def _fit_leg_to_hip(branch: dict[str, Any], hip_height: float) -> None:
@@ -360,43 +386,46 @@ def _serpentine(a: dict[str, Any], h: float, length: float, width: float) -> tup
 
 
 def _dragger(a: dict[str, Any], h: float, length: float, width: float) -> tuple[list[dict[str, Any]], list[str], list[str], str]:
-    """Draggers rest their torso on the ground and haul it with their arms: each hand reaches far
-    ahead, plants, and pulls the sliding body up to it (runtime "drag" gait). The dragged tail lies
-    flat behind the torso. The puller has long reaching arms and a slightly raised chest; the belly
-    hauler is flatter, broader and shorter-armed."""
+    """Draggers crawl like a legless zombie: the chest lies on the ground, the head is raised, and the
+    arms reach out nearly horizontally, slap down far ahead and haul the sliding body up to the hand
+    (runtime "drag" gait). The dragged remains trail flat behind. The puller is long-armed and narrow;
+    the belly hauler is broader and heavier with a longer trailing body."""
     pull = a["variant"] == "pull"
-    body_length = length * (.62 if pull else .72)
+    body_length = length * (.55 if pull else .66)
     radius = body_length * _PROFILE_GIRTH["spine3_axial"] * .5
-    pitch = math.radians(8.0 if pull else 0.0)
     rear_z = -body_length * .5
     core = _branch("core", "spine3", None, origin=_v(0, radius + _GROUND_CLEARANCE_M, rear_z),
-                   direction=[0, math.sin(pitch), math.cos(pitch)], up=[0, 1, 0], length=body_length, role="core")
+                   direction=[0, 0, 1], up=[0, 1, 0], length=body_length, role="core")
     branches = [core]
-    # Shoulders sit at the spine's "end" joint (two thirds along), on the flanks of the torso.
     along = body_length * (_PROFILE_FRACTIONS["spine3_axial"][0] + _PROFILE_FRACTIONS["spine3_axial"][1])
-    shoulder_y = core["origin_m"][1] + along * math.sin(pitch) + radius * .35
-    shoulder_z = rear_z + along * math.cos(pitch)
-    arm_length = length * (.62 if pull else .45) * a["limb_scale"]
-    spread = .45 if pull else .8
+    # Shoulders at chest height on the flanks: the arms start level with the torso, not above it.
+    shoulder_y = core["origin_m"][1] + radius * .15
+    shoulder_z = rear_z + along
+    arm_length = length * (.66 if pull else .52) * a["limb_scale"]
+    spread = .3 if pull else .55
     for side, sx, phase in (("L", 1, 0.0), ("R", -1, math.pi)):
         arm = _branch(
             f"arm_{side}", "limb3", "core",
-            origin=_v(sx * radius * (.9 if pull else 1.1), shoulder_y, shoulder_z),
-            direction=[sx * spread, -.35, 1.0], up=[0, 1, 0],
+            origin=_v(sx * radius * (.95 if pull else 1.1), shoulder_y, shoulder_z),
+            direction=[sx * spread, -.12, 1.0], up=[0, 1, 0],
             length=arm_length, side=side, attach=2,
             mirror_of="arm_L" if side == "R" else "", role="locomotor",
-            phase=phase, support=.72, contact="hand", parent_joint="end",
+            phase=phase, support=.6, contact="hand", parent_joint="end",
         )
-        # Reaching arm, elbow up like a crawling climber: the upper arm rises toward ``up``, the forearm
-        # flexes down (profile flexion is bone -X) and the hand settles flat.
-        arm["stance_deg"] = [25.0, -60.0, 20.0]
-        arm["_extension_target"] = .80
-        arm["_hip_height"] = arm["origin_m"][1]
+        # Mid-pull: the upper arm lifts toward ``up``, the forearm folds down to the ground (profile
+        # flexion is bone -X), the hand lies flat. At the far end of the stroke the arm is almost straight.
+        arm["stance_deg"] = [30.0, -75.0, 30.0]
+        arm["_extension_target"] = .72
+        arm["_ground_contact"] = True
         branches.append(arm)
+    # Raised head looking forward, carried off the ground by the neck.
+    branches.append(_branch("head", "head1", "core", origin=_v(0, core["origin_m"][1] + radius * .5, rear_z + body_length),
+                            direction=[0, .55, 1], up=[0, 1, 0], length=body_length * .3,
+                            role="head", attach=2, parent_joint="end"))
     branches.append(_branch(
         "belly", "tentacle8", "core",
         origin=_v(0, core["origin_m"][1], rear_z), direction=[0, 0, -1], up=[0, 1, 0],
-        length=length * (.42 if pull else .56), role="locomotor", support=.92, contact="body",
+        length=length * (.45 if pull else .6), role="locomotor", support=.92, contact="body",
         parent_joint="pelvis",
     ))
     support = ["arm_L", "arm_R", "belly"]
@@ -493,7 +522,7 @@ def _neutral_pose(branches: list[dict[str, Any]], support_branches: list[str]) -
                               "rotation_xyzw": [round(value, 8) for value in quat]})
         if branch["branch_id"] in support_branches and branch.get("contacts"):
             for contact in branch["contacts"]:
-                target_height = 0.0 if contact["kind"] in {"sliding", "body"} else _GROUND_CLEARANCE_M
+                target_height = _contact_clearance(contact["kind"])
                 support_heights.append(target_height - _contact_height(branch, angles, contact, z_angles))
     root_lift = max(support_heights) if support_heights else 0.0
     return {"root_offset_m": [0.0, round(root_lift, 4), 0.0], "rotations": rotations}
@@ -530,7 +559,7 @@ def _align_distributed_supports(branches: list[dict[str, Any]], support_branches
     """Align a body surface to ground without sacrificing mixed limb tip clearance."""
     supports = [branch for branch in branches if branch["branch_id"] in support_branches]
     limb_offsets = [
-        _GROUND_CLEARANCE_M - _contact_height(branch, branch["stance_deg"], contact, branch["stance_z_deg"])
+        _contact_clearance(contact["kind"]) - _contact_height(branch, branch["stance_deg"], contact, branch["stance_z_deg"])
         for branch in supports for contact in branch.get("contacts", [])
         if contact["kind"] not in {"sliding", "body"}
     ]
@@ -576,9 +605,12 @@ def build_candidate(archetype: str, preset: str, seed: int = 1, style: str = "an
     for branch in branches:
         target = branch.pop("_extension_target", None)
         hip = branch.pop("_hip_height", None)
+        ground = branch.pop("_ground_contact", False)
         if target is not None:
             # Compact presets crouch lower, elongated ones stand taller.
             _tune_extension(branch, target - (shape["stance"] - 1.0) * .25)
+        if ground:
+            _ground_by_first_joint(branch)
         if hip is not None:
             # Presets keep their limb proportion: longer-limbed presets stand taller on the same torso.
             # Grounded torsos (draggers) never rise: their arms only reach further.

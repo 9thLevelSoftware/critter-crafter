@@ -142,6 +142,8 @@ namespace CritterCrafter
         public string gait;
         /// <summary>The torso rests on the ground: no bob, no body height or tilt from the feet.</summary>
         public bool body_on_ground;
+        /// <summary>Grounded bodies pitch/roll about this point (catalog frame; the rear of the torso).</summary>
+        public double[] body_pivot_m;
         /// <summary>Branch whose baked strike plays during telegraph/attack (IK released).</summary>
         public string attack_branch_id;
         public double hip_height_m;

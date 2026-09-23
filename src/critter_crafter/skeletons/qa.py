@@ -145,7 +145,7 @@ def evaluate_motion(skeleton: dict, motion: dict, penetration_m: float = .005,
                 # Foot/hand records currently mark the deforming tip axis, up
                 # to 7.5 mm above its rounded sole. This ground proximity band
                 # is independent of the stricter planted-drift threshold.
-                ground_band = .01 if kind in ("foot", "hand") else .005
+                ground_band = .01 if kind == "foot" else .02 if kind == "hand" else .005
                 if contact.get("planted") and abs(pos[1]) > ground_band + 1e-6:
                     fail("CC_CONTACT_GROUND", f"{cid}: planted point {pos[1]:.6f} m from ground", name, frame)
                 if "target_m" in contact and _vector(contact["target_m"]):
@@ -227,5 +227,6 @@ def evaluate_motion(skeleton: dict, motion: dict, penetration_m: float = .005,
             "contacts_checked": sum(len(s.get("contacts", [])) for c in clips.values() for s in c.get("samples", [])),
             "joint_limits_checked": len(limits),
             "thresholds": {"drift_m": "max(0.005, 0.01 * chain_length_m)", "penetration_m": penetration_m,
-                           "foot_tip_ground_proximity_m": .01, "body_ground_proximity_m": .005},
+                           "foot_tip_ground_proximity_m": .01, "hand_tip_ground_proximity_m": .02,
+                           "body_ground_proximity_m": .005},
             "metrics": metrics, "diagnostics": diagnostics}

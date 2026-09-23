@@ -96,11 +96,11 @@ def _slide_block(skeleton: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-DRAG_DUTY_WALK = .72     # long, slow pull; quick reach
-DRAG_DUTY_RUN = .62
+DRAG_DUTY_WALK = .6      # one arm hauls while the other reaches over
+DRAG_DUTY_RUN = .55
 DRAG_CADENCE_WALK = 1.0
 DRAG_CADENCE_RUN = 1.8
-DRAG_LIFT_FRACTION = .25
+DRAG_LIFT_FRACTION = .38     # the reaching arm lifts high over the head
 
 
 def _drag_block(skeleton: dict[str, Any], legs: list[dict[str, Any]], legs_src: list[dict[str, Any]]) -> dict[str, Any]:
@@ -133,8 +133,13 @@ def _drag_block(skeleton: dict[str, Any], legs: list[dict[str, Any]], legs_src: 
         attack_branch = resolve_attack(skeleton)["effector"]["branch_id"]
     except (AttackPlanError, KeyError):
         pass
+    core = next((b for b in skeleton["branches"] if b.get("gait_role") == "core"), None)
+    # Heave pivot: the rear of the grounded torso (hips), at ground height, so lifting the chest never
+    # sinks the hips or the dragged remains into the floor.
+    pivot = [0.0, 0.0, float(core["snap"]["position_m"][2])] if core else [0.0, 0.0, 0.0]
     return {
         "version": LOCOMOTION_VERSION, "mode": "legs", "gait": "drag", "body_on_ground": True,
+        "body_pivot_m": mu.r6v(pivot),
         "attack_branch_id": attack_branch,
         "hip_height_m": mu.r6(sum(l["hip_m"][1] - l["home_m"][1] for l in legs) / len(legs)),
         "leg_length_m": mu.r6(leg_length), "usable_stroke_m": mu.r6(stroke), "min_support": 0,

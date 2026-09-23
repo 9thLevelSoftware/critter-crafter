@@ -78,7 +78,7 @@ namespace CritterCrafter.Review
             // Rendering happens in LateUpdate (end-of-frame coroutines never run in batch mode), before
             // the player loop's skinning pass, so skinning is recalculated on render.
             foreach (var smr in gait.GetComponentsInChildren<SkinnedMeshRenderer>(true))
-                smr.forceMatrixRecalculationPerRender = true;
+                { smr.forceMatrixRecalculationPerRender = true; smr.updateWhenOffscreen = true; }
             Place(0f);
             gait.ResetFeet();
             _started = true;

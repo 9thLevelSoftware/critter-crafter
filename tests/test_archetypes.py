@@ -237,7 +237,7 @@ def test_dragger_mixed_supports_keep_belly_on_ground_and_hands_above_it() -> Non
                           for i in range(len(branch["stance_deg"]))]
                 for contact in branch["contacts"]:
                     height = root_y + _contact_height(branch, angles, contact, branch["stance_z_deg"])
-                    expected = 0.0 if contact["kind"] == "body" else 7.5e-3
+                    expected = {"body": 0.0, "hand": 1.75e-2}.get(contact["kind"], 7.5e-3)
                     assert math.isclose(height, expected, abs_tol=1e-4)
 
 
@@ -251,10 +251,11 @@ def test_draggers_rest_their_torso_on_the_ground_and_reach_forward() -> None:
             # Torso underside on the ground (within a centimetre), shoulders low on its flanks.
             underside = core["origin_m"][1] + root_y - core["girth_m"] * .5
             assert abs(underside) < .01, (doc["skeleton_id"], underside)
-            assert arm["origin_m"][1] + root_y < core["girth_m"] * 1.2
+            # Shoulders at chest height: level with the torso, not propped above it.
+            assert arm["origin_m"][1] + root_y < core["girth_m"] * .7
             # The hand plants ahead of the shoulder.
             hand = _contact_point_world(arm, arm["stance_deg"], arm["contacts"][0], arm["stance_z_deg"])
-            assert hand[2] > arm["origin_m"][2] + .1 * arm["length_m"]
+            assert hand[2] > arm["origin_m"][2] + .3 * arm["length_m"]
             assert doc["anatomy"]["support_branches"] == ["arm_L", "arm_R", "belly"]
             assert [contact["bone_index"] for contact in belly["contacts"]] == [1, 4, 7]
         assert _branch(puller, "arm_L")["length_m"] / puller["anatomy"]["silhouette"]["length_m"] > \

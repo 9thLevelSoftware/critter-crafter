@@ -93,7 +93,7 @@ namespace CritterCrafter.Locomotion
         Vector3 _lastPosition;
         Vector3 _velocity;
         double _clock;
-        float _bodyHeight, _bodyPitch, _bodyRoll;
+        float _bodyHeight, _bodyPitch, _bodyRoll, _bodySurge;
         float _lastYaw, _yawLag;
         GaitParams _params;
 
@@ -446,24 +446,46 @@ namespace CritterCrafter.Locomotion
         }
 
         [Tooltip("Shoulder roll toward the pulling arm for grounded (dragging) bodies (degrees).")]
-        public float dragRollDeg = 6f;
+        public float dragRollDeg = 8f;
+        [Tooltip("Crawl lurch: body surge amplitude as a fraction of the pull stroke.")]
+        public float dragSurge = 0.18f;
+        [Tooltip("Crawl heave: chest lift at mid-pull (degrees).")]
+        public float dragHeaveDeg = 6f;
 
         void UpdateBody(float dt, float speed)
         {
             if (body == null) return;
             if (_block.body_on_ground)
             {
-                // The torso slides on the ground: no bob and no height from the hands. The shoulders roll
-                // toward the arm that is pulling so the effort reads.
-                int left = 0, right = 0;
+                // Crawling haul: the torso slides on the ground. Each planted hand drags the body in a
+                // pulse: it lags as the hand slaps down, surges through the pull, and the chest lifts
+                // mid-pull and rolls toward the hauling arm. The root (agent) still moves smoothly.
+                float pull = -1f;
+                int side = 0;
                 foreach (var leg in legs)
-                    if (leg.planted && !leg.forced) { if (leg.homeLocal.x < 0f) left++; else right++; }
-                float dragRoll = speed > 0.05f && left + right > 0 ? dragRollDeg * (right - left) / (float)(left + right) : 0f;
-                float kg = 1f - Mathf.Exp(-dt / 0.15f);
+                {
+                    if (!leg.planted || leg.forced || _params.duty <= 0.0) continue;
+                    double phase = StepPlanner.LegPhase(_clock, StepPlanner.LegOffset(ToPlanner(leg), _run));
+                    float u = Mathf.Clamp01((float)(phase / _params.duty));
+                    if (pull < 0f || u < pull) { pull = u; side = leg.homeLocal.x < 0f ? -1 : 1; }
+                }
+                bool hauling = speed > 0.05f && pull >= 0f;
+                float strength = hauling ? Mathf.Clamp01(speed / Mathf.Max(0.1f, (float)_block.v_walk_mps)) : 0f;
+                float surge = hauling ? -dragSurge * (float)_block.usable_stroke_m * strength * Mathf.Cos(Mathf.PI * pull) : 0f;
+                float heave = hauling ? -dragHeaveDeg * strength * Mathf.Sin(Mathf.PI * pull) : 0f;
+                float dragRoll = hauling ? dragRollDeg * side * Mathf.Sin(Mathf.PI * pull) : 0f;
+                float kg = 1f - Mathf.Exp(-dt / 0.06f);
                 _bodyHeight = Mathf.Lerp(_bodyHeight, 0f, kg);
-                _bodyPitch = Mathf.Lerp(_bodyPitch, 0f, kg);
+                _bodySurge = Mathf.Lerp(_bodySurge, surge, kg);
+                _bodyPitch = Mathf.Lerp(_bodyPitch, heave, kg);
                 _bodyRoll = Mathf.Lerp(_bodyRoll, dragRoll, kg);
-                body.localPosition = bodyBaseLocalPosition + Vector3.up * _bodyHeight;
+                // Pitch and roll about the rear of the torso so the hips and trailing body stay grounded.
+                Vector3 pivot = _block.body_pivot_m != null && _block.body_pivot_m.Length == 3
+                    ? CritterFrame.Position(_block.body_pivot_m) : Vector3.zero;
+                Quaternion tilt = Quaternion.Euler(_bodyPitch, 0f, _bodyRoll);
+                Quaternion yawLag = Quaternion.Euler(0f, _yawLag, 0f);
+                Vector3 about = yawLag * pivot;
+                body.localPosition = bodyBaseLocalPosition + Vector3.forward * _bodySurge + about - yawLag * (tilt * pivot);
                 body.localRotation = BodyRotation();
                 return;
             }
