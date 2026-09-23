@@ -77,4 +77,6 @@ When an archived v2 package is available, it is dependency-free at runtime and i
 
 The v3 foundation with runtime locomotion covers 13 archetypes (39 draft candidates). Locomotion for every family has been reviewed visually in Unity captures; the tentacle radial archetype was retired. The delivery notes below predate that work.
 
+For the current state, decisions and next steps, start with [docs/handoff.md](docs/handoff.md).
+
 The v3 foundation implementation and its draft candidates are in review. Automated schema, generator, motion, export, Unity, freshness, and package verification passed; independent visual approval remains open. Candidate visual quality requires human approval, and the acceptance matrix in `work/rebuild-foundation/acceptance.md` remains the source of delivery status.
