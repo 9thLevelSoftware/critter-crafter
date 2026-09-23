@@ -128,3 +128,16 @@ def test_slide_mode_phase_rate(catalog):
     params = stepper.slide_params(block, block["v_walk_mps"])
     assert params["cadence_hz"] == pytest.approx(1.0)
     assert stepper.slide_params(block, 100.0)["overspeed"]
+
+
+def test_every_skeleton_passes_static_locomotion_qa(catalog):
+    from critter_crafter.locomotion.qa import evaluate_locomotion
+    problems = {s["skeleton_id"]: evaluate_locomotion(s) for s in catalog["skeletons"]}
+    assert {k: v for k, v in problems.items() if v} == {}
+
+
+def test_locomotion_golden_matches_current_planner(catalog):
+    import json
+    from critter_crafter.locomotion.qa import golden_rows
+    golden = json.loads((paths().root / "tests" / "golden_v3" / "locomotion.json").read_text(encoding="utf-8"))
+    assert golden["rows"] == json.loads(json.dumps(golden_rows(catalog))), "run `critter recipe golden`"

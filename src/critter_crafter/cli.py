@@ -168,7 +168,10 @@ def recipe_golden(seeds: str, out: Path | None) -> None:
             rows.append({"pool_id": p["pool_id"], "seed": s, "canonical": canonical(generate(cat, p["pool_id"], s))})
     doc = {"generator": "cc-gen-3", "fixture_only_approval": True, "rows": rows}
     (gdir / "recipes.json").write_text(json.dumps(doc, indent=1) + "\n", encoding="utf-8", newline="\n")
-    click.echo(f"wrote {len(rows)} golden rows to {gdir}")
+    from .locomotion.qa import golden_rows
+    locomotion = {"planner": "stepper-1", "rows": golden_rows(cat)}
+    (gdir / "locomotion.json").write_text(json.dumps(locomotion, indent=1) + "\n", encoding="utf-8", newline="\n")
+    click.echo(f"wrote {len(rows)} golden rows and {len(locomotion['rows'])} locomotion rows to {gdir}")
 
 
 from .library import commands as _library_commands  # noqa: E402

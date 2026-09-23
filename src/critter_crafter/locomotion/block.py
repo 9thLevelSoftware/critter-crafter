@@ -45,6 +45,44 @@ def _stroke(hip: mu.Vec, home: mu.Vec, reach: float) -> float:
     return max(0.0, 2.0 * min(forward, backward))
 
 
+MAX_COXA_YAW_DEG = 45.0     # matches CreatureGait.MaxCoxaYawDeg
+
+
+def _hinge4_stroke(pose: dict[str, Any], chain: list[str], home: mu.Vec) -> tuple[float, float]:
+    """Forward/back reachable chord for an insect leg as the runtime solves it: the coxa yaws toward
+    the foot (clamped), the ankle keeps its neutral offset in that yawed frame, and femur + tibia must
+    reach the ankle from the (yawed) femur root. Returns (stroke, stance shift): fanned legs have more
+    room on one side of their neutral foot, so the stance is centred in the chord."""
+    coxa, femur0, ankle0 = pose[chain[0]]["head"], pose[chain[1]]["head"], pose[chain[3]]["head"]
+    reach = REACH_FRACTION * (pose[chain[1]]["length"] + pose[chain[2]]["length"])
+    ankle_offset = mu.sub(ankle0, home)
+    femur_offset = mu.sub(femur0, coxa)
+    neutral = math.atan2(home[0] - coxa[0], home[2] - coxa[2])
+    limit = math.radians(MAX_COXA_YAW_DEG)
+
+    def rot_y(v: mu.Vec, angle: float) -> mu.Vec:
+        c, s = math.cos(angle), math.sin(angle)
+        return (c * v[0] + s * v[2], v[1], -s * v[0] + c * v[2])
+
+    def reachable(shift: float) -> bool:
+        foot = (home[0], home[1], home[2] + shift)
+        yaw = math.atan2(foot[0] - coxa[0], foot[2] - coxa[2]) - neutral
+        yaw = (yaw + math.pi) % (2 * math.pi) - math.pi
+        yaw = max(-limit, min(limit, yaw))
+        femur = mu.add(coxa, rot_y(femur_offset, yaw))
+        ankle = mu.add(foot, rot_y(ankle_offset, yaw))
+        return mu.length(mu.sub(ankle, femur)) <= reach
+
+    def extent(sign: float) -> float:
+        step, shift = .005, 0.0
+        while shift < 3.0 and reachable(sign * (shift + step)):
+            shift += step
+        return shift
+
+    forward, backward = extent(1.0), extent(-1.0)
+    return forward + backward, (forward - backward) * .5
+
+
 def minimum_support(family: str) -> int:
     return 2 if family in FOUR_LEG_FAMILIES else 1
 
@@ -164,12 +202,15 @@ def locomotion_block(skeleton: dict[str, Any]) -> dict[str, Any]:
         chain = branch["bone_names"][:index + 1]
         hip = pose[chain[0]]["head"]
         home = contact_world(pose, branch, contact)
+        shift = 0.0
         reach = sum(pose[name]["length"] for name in chain)
         # The runtime two-bone hinge (limb3) holds the foot's angle, so what must stay within reach is the
         # ankle, from the hip, with thigh + shin. The stroke is measured for that point.
         if branch.get("template") == "limb3" and len(chain) == 3:
             ankle = pose[chain[2]]["head"]
             stroke_m = _stroke(hip, ankle, pose[chain[0]]["length"] + pose[chain[1]]["length"])
+        elif branch.get("template") == "insect_leg4" and len(chain) == 4:
+            stroke_m, shift = _hinge4_stroke(pose, chain, home)
         else:
             stroke_m = _stroke(hip, home, reach)
         legs.append({
@@ -183,6 +224,7 @@ def locomotion_block(skeleton: dict[str, Any]) -> dict[str, Any]:
             "home_m": mu.r6v(home),
             "reach_m": mu.r6(reach),
             "stroke_m": mu.r6(stroke_m),
+            "stance_shift_m": mu.r6(shift),
             # Swing lift must read from an isometric camera: at least 18% of reach.
             "clearance_m": mu.r6(max(STEP_LIFT_FRACTION * reach,
                                      float(branch.get("gait", {}).get("clearance_m", 0.0)))),

@@ -90,6 +90,10 @@ def _qa(cat: dict, source: Path, selected: list[dict]) -> list[dict]:
             report["content_fingerprint"] = fingerprint
             report["attack"] = evaluate_actions(skel, motion)
             report["diagnostics"].extend(report["attack"]["diagnostics"])
+            # Runtime locomotion: speed bands, support and step rate at the published speeds.
+            from ..locomotion.qa import evaluate_locomotion
+            report["locomotion"] = evaluate_locomotion(skel)
+            report["diagnostics"].extend(report["locomotion"])
             expected_profiles = [{k: p[k] for k in ("binding_profile_id", "binding_profile_version", "binding_profile_hash")}
                                  for p in skeleton_profiles(cat, skel)]
             key = lambda p: (p["binding_profile_id"], p["binding_profile_version"])

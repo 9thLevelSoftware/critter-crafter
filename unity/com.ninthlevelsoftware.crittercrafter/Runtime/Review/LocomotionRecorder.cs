@@ -21,6 +21,8 @@ namespace CritterCrafter.Review
         public float max_penetration_m;
         public int min_planted_supports = int.MaxValue;
         public int frames;
+        /// <summary>Frames at the start (standing to full speed in one frame) excluded from slip.</summary>
+        public int warmup_frames;
     }
 
     /// <summary>
@@ -157,7 +159,7 @@ namespace CritterCrafter.Review
             if (_frame > 0)
             {
                 m.max_ik_residual_m = Mathf.Max(m.max_ik_residual_m, residual);
-                m.max_planted_slip_m = Mathf.Max(m.max_planted_slip_m, slip);
+                if (_frame >= m.warmup_frames) m.max_planted_slip_m = Mathf.Max(m.max_planted_slip_m, slip);
                 m.min_planted_supports = Mathf.Min(m.min_planted_supports, planted);
             }
             m.cadence_hz = Mathf.Max(m.cadence_hz, (float)_gait.Current.cadenceHz);

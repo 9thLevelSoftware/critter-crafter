@@ -216,9 +216,11 @@ namespace CritterCrafter.Locomotion
                 foreach (var leg in legs)
                 {
                     double offset = StepPlanner.LegOffset(ToPlanner(leg), _run);
-                    if (StepPlanner.InStance(StepPlanner.LegPhase(_clock, offset), _params.duty))
+                    double phase = StepPlanner.LegPhase(_clock, offset);
+                    if (StepPlanner.InStance(phase, _params.duty))
                         leg.lastSwingCycle = Math.Floor(_clock + offset) - 1;
                 }
+
             }
             _wasMoving = moving;
             if (moving) _clock += _params.cadenceHz * dt;
@@ -524,9 +526,11 @@ namespace CritterCrafter.Locomotion
             _bodyHeight = Mathf.Lerp(_bodyHeight, height, k);
             _bodyPitch = Mathf.Lerp(_bodyPitch, pitch, k);
             _bodyRoll = Mathf.Lerp(_bodyRoll, roll, k);
-            // A small vertical bob at twice the stride frequency while moving.
+            // A small vertical dip at twice the stride frequency while moving. It only ever lowers the
+            // body: raising the hips would cost reach exactly when a trailing foot is furthest back.
             float bob = speed > 0.05f
-                ? 0.03f * (float)_block.hip_height_m * (float)_params.weight * Mathf.Cos((float)(_clock * 4.0 * Math.PI))
+                ? -0.03f * (float)_block.hip_height_m * (float)_params.weight
+                  * (0.5f + 0.5f * Mathf.Cos((float)(_clock * 4.0 * Math.PI)))
                 : 0f;
             body.localPosition = bodyBaseLocalPosition + Vector3.up * (_bodyHeight + bob);
             body.localRotation = BodyRotation();
