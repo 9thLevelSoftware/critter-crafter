@@ -148,7 +148,12 @@ namespace CritterCrafter.Editor
                 var builder = creature.Animator.GetComponent<RigBuilder>();
                 if (builder.graph.IsValid()) builder.graph.SetTimeUpdateMode(DirectorUpdateMode.Manual);
 
+                // Edit-mode capture has no player loop, so skinned meshes are not re-skinned per frame
+                // unless forced; without this the leg meshes stay frozen while the bones move.
+                foreach (var smr in creature.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+                    smr.forceMatrixRecalculationPerRender = true;
                 var path = CoursePath(speed);
+                const int frameStep = 1;
                 var cam = MakeCamera(holder.transform, cell, out var rt);
                 float size = Mathf.Max(1.6f, 0.9f * Mathf.Max(creature.NeutralBoundsLocal.size.x, creature.NeutralBoundsLocal.size.z));
                 cam.orthographicSize = size;
@@ -200,7 +205,7 @@ namespace CritterCrafter.Editor
                     metrics.cadence_hz = Mathf.Max(metrics.cadence_hz, (float)gait.Current.cadenceHz);
                     metrics.overspeed |= gait.Current.overspeed;
 
-                    if (frame % 2 == 0)
+                    if (frame % frameStep == 0)
                     {
                         var target = pos + Vector3.up * (float)block.hip_height_m * 0.6f;
                         cam.transform.position = target + new Vector3(16f, 18f, 16f).normalized * 30f;
@@ -211,7 +216,7 @@ namespace CritterCrafter.Editor
                         tex.ReadPixels(new Rect(0, 0, cell, cell), 0, 0);
                         tex.Apply();
                         RenderTexture.active = null;
-                        File.WriteAllBytes(Path.Combine(outDir, $"frame_{frame / 2:0000}.png"), tex.EncodeToPNG());
+                        File.WriteAllBytes(Path.Combine(outDir, $"frame_{frame / frameStep:0000}.png"), tex.EncodeToPNG());
                         Object.DestroyImmediate(tex);
                     }
                 }
