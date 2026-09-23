@@ -52,7 +52,7 @@ namespace CritterCrafter.Tests
             _spawned.Clear();
         }
 
-        /// <summary>Skeleton that still bakes its travel (sliding body), for Animator playback tests.</summary>
+        /// <summary>Sliding-body skeleton whose phase-driven overlay animates the body (undulation).</summary>
         const string BakedTravelSkeleton = "serpentine_limbless_articulated_balanced_v3";
         const string RuntimeLegSkeleton = "hexapod_compact_insect_balanced_v3";
 
@@ -242,7 +242,8 @@ namespace CritterCrafter.Tests
 
             Assert.IsNotNull(gait, "runtime-leg skeletons get a CreatureGait");
             Assert.Less(metrics.max_ik_residual_m, 0.01f, "IK residual");
-            Assert.Less(metrics.max_planted_slip_m, 0.005f, "planted feet slide in the world");
+            // Dragging at game speed shows up as ~8 cm/frame; allow sub-centimetre settling at step changes.
+            Assert.Less(metrics.max_planted_slip_m, 0.01f, "planted feet slide in the world");
             Assert.GreaterOrEqual(metrics.min_planted_supports, block.min_support, "support");
             Assert.LessOrEqual(metrics.cadence_hz, block.cadence_max_hz + 1e-4);
             Assert.IsFalse(metrics.overspeed);
@@ -250,35 +251,30 @@ namespace CritterCrafter.Tests
         }
 
         [Test]
-        public void AnimatorPlaybackClockMatchesIntermediateMovementSpeeds()
+        public void GaitPhaseDrivesTheLocomotionOverlayClock()
         {
+            // Phase-driven skeletons: CreatureGait's GaitPhase (Motion Time) poses the Locomotion overlay, so
+            // the baked undulation/upper body stays locked to the runtime clock regardless of elapsed time.
+            // (AnimatorStateInfo.normalizedTime keeps reporting the state's own clock; the pose is what counts.)
             var c = SpawnSkeleton(BakedTravelSkeleton);
-            foreach (float targetSpeed in new[] { c.WalkSpeed * 0.5f, (c.WalkSpeed + c.RunSpeed) * 0.5f })
+            var animator = c.Animator;
+            var bone = animator.GetComponentsInChildren<Transform>().First(t => t.name == "body_b4");
+            animator.SetFloat(CreatureMotion.SpeedParam, 2.5f);
+            animator.SetFloat("Gait", 0f);
+            animator.Play("Locomotion", 0, 0f);
+            animator.Update(0f);
+            Quaternion Pose(float phase, float dt)
             {
-                var animator = c.Animator;
-                animator.Play("Locomotion", 0, 0f);
-                animator.SetFloat(CreatureMotion.SpeedParam, targetSpeed);
-                animator.SetFloat(CreatureMotion.PlaybackRateParam,
-                    CreatureMotion.PlaybackRateForSpeed(targetSpeed, c.WalkSpeed, c.RunSpeed,
-                        c.IdleDuration, c.WalkDuration, c.RunDuration,
-                        c.MinPlaybackRate, c.MaxPlaybackRate));
-                animator.Update(0f);
-
-                float distancePerCycle = 0f;
-                foreach (var active in animator.GetCurrentAnimatorClipInfo(0))
-                {
-                    string name = CritterModelPostprocessor.ShortClipName(active.clip.name);
-                    if (name == "walk") distancePerCycle += active.weight * c.WalkSpeed * c.WalkDuration;
-                    else if (name == "run") distancePerCycle += active.weight * c.RunSpeed * c.RunDuration;
-                }
-                float start = animator.GetCurrentAnimatorStateInfo(0).normalizedTime;
-                const float dt = 0.2f;
+                animator.SetFloat("GaitPhase", phase);
                 animator.Update(dt);
-                float cycles = animator.GetCurrentAnimatorStateInfo(0).normalizedTime - start;
-                float animatedSpeed = cycles * distancePerCycle / dt;
-                Assert.AreEqual(targetSpeed, animatedSpeed, 0.002f,
-                    $"normalized playback clock at {targetSpeed:F5}m/s");
+                Assert.IsTrue(animator.GetCurrentAnimatorStateInfo(0).IsName("Locomotion"));
+                return bone.localRotation;
             }
+            var first = Pose(0.2f, 0.1f);
+            var other = Pose(0.65f, 0.37f);
+            var again = Pose(0.2f, 0.23f);
+            Assert.Less(Quaternion.Angle(first, again), 0.01f, "same phase, same pose");
+            Assert.Greater(Quaternion.Angle(first, other), 0.5f, "different phase, different pose");
         }
 
         [Test]

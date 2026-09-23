@@ -157,6 +157,39 @@ def _paired_legs(branches: list[dict[str, Any]], *, prefix: str, parent: str, po
     return added
 
 
+def _insect_leg(leg: dict[str, Any]) -> None:
+    """Sprawled insect/arachnid leg bending in its vertical plane: the coxa rises, femur and tibia flex
+    downward (profile flexion is bone -X), so the knee sits above the body."""
+    leg["up"] = [0, 1, 0]
+    leg["stance_deg"] = [45.0, -60.0, -70.0, 10.0]
+    leg["_extension_target"] = _INSECT_EXTENSION
+
+
+def _mammal_leg(leg: dict[str, Any], *, fore: bool = False, fit_hip: bool = True) -> None:
+    """Crouch a limb3 leg to the stepping extension and (optionally) size it so the hip keeps its height.
+
+    Fore legs flip their bend reference (``up`` backwards) so the elbow points back while the
+    profile's one-way knee flexion (bone -X) is preserved.
+    """
+    if fore:
+        leg["up"] = [0, 0, -1]
+    leg["_extension_target"] = _LIMB_EXTENSION
+    if fit_hip:
+        leg["_hip_height"] = leg["origin_m"][1]
+
+
+def _fit_leg_to_hip(branch: dict[str, Any], hip_height: float) -> None:
+    """Scale the leg so its neutral contact meets the ground with the hip at ``hip_height``.
+
+    The neutral shape (angles) is length-independent, so the drop scales linearly with length.
+    """
+    contact_y = _contact_height(branch, branch["stance_deg"], None, branch["stance_z_deg"])
+    drop = branch["origin_m"][1] - contact_y
+    if drop <= 1e-6:
+        return
+    _refresh_branch_dimensions(branch, (hip_height - _GROUND_CLEARANCE_M) / drop)
+
+
 def _extension(branch: dict[str, Any], angles: list[float]) -> float:
     """Hip-to-contact distance over chain reach for a candidate stance."""
     fractions = _PROFILE_FRACTIONS[branch["binding_profile_id"]]
@@ -166,6 +199,26 @@ def _extension(branch: dict[str, Any], angles: list[float]) -> float:
     return mu.length(mu.sub(point, branch["origin_m"])) / reach
 
 
+_LIMIT_MARGIN_DEG = 3.0
+_BONE_LIMIT_CACHE: dict[str, list[tuple[float, float]]] = {}
+
+
+def _bone_limits(profile_id: str) -> list[tuple[float, float]]:
+    """Per-joint swing limits in bone space (+X toward ``up``); profile flexion is bone -X."""
+    if profile_id not in _BONE_LIMIT_CACHE:
+        doc = json.loads((paths().data / "binding_profiles" / f"{profile_id}.binding.json").read_text(encoding="utf-8"))
+        _BONE_LIMIT_CACHE[profile_id] = [
+            (-float(j["limits_deg"]["swing_x"][1]) + _LIMIT_MARGIN_DEG,
+             -float(j["limits_deg"]["swing_x"][0]) - _LIMIT_MARGIN_DEG)
+            for j in doc["joints"]]
+    return _BONE_LIMIT_CACHE[profile_id]
+
+
+def _scaled_stance(branch: dict[str, Any], base: list[float], k: float) -> list[float]:
+    limits = _bone_limits(branch["binding_profile_id"])
+    return [round(min(hi, max(lo, a * k)), 3) for a, (lo, hi) in zip(base, limits)]
+
+
 def _tune_extension(branch: dict[str, Any], target: float) -> None:
     """Scale the authored stance so the neutral contact sits at ``target`` of full reach.
 
@@ -173,18 +226,19 @@ def _tune_extension(branch: dict[str, Any], target: float) -> None:
     runtime foot placement needs compression and extension margin around home.
     """
     base = list(branch["stance_deg"])
-    # Never scale any joint past 150 degrees: extension is not monotonic beyond that.
+    # Scaled angles are clamped to the profile's joint limits; never scale past 150 degrees, where
+    # extension stops being monotonic.
     lo, hi = 0.0, min(4.0, 150.0 / max(1e-6, max(abs(a) for a in base)))
-    if _extension(branch, [a * hi for a in base]) > target:
-        branch["stance_deg"] = [round(a * hi, 3) for a in base]
+    if _extension(branch, _scaled_stance(branch, base, hi)) > target:
+        branch["stance_deg"] = _scaled_stance(branch, base, hi)
         return
     for _ in range(40):
         mid = (lo + hi) / 2
-        if _extension(branch, [a * mid for a in base]) > target:
+        if _extension(branch, _scaled_stance(branch, base, mid)) > target:
             lo = mid
         else:
             hi = mid
-    branch["stance_deg"] = [round(a * (lo + hi) / 2, 3) for a in base]
+    branch["stance_deg"] = _scaled_stance(branch, base, (lo + hi) / 2)
 
 
 def _biped(a: dict[str, Any], h: float, length: float, width: float) -> tuple[list[dict[str, Any]], list[str], list[str], str]:
@@ -194,8 +248,9 @@ def _biped(a: dict[str, Any], h: float, length: float, width: float) -> tuple[li
                         up=[0, 0, 1], length=torso_length, role="core")]
     leg_len = h * (0.72 if a["variant"] == "plantigrade" else 0.78) * a["limb_scale"]
     leg_profile = "limb3_digitigrade" if a["variant"] == "digitigrade" else "limb3_plantigrade"
-    _paired_legs(branches, prefix="leg", parent="core", positions=[(width * .38, h * .48, 0)],
-                 length=leg_len, template="limb3", profile_id=leg_profile)
+    for leg in _paired_legs(branches, prefix="leg", parent="core", positions=[(width * .38, h * .48, 0)],
+                            length=leg_len, template="limb3", profile_id=leg_profile):
+        _mammal_leg(leg)
     arm_len = h * .42 * a["limb_scale"]
     shoulder_x = min(width * .34, (torso_length * _PROFILE_GIRTH["spine3_axial"] +
                                    arm_len * _PROFILE_GIRTH["limb3_plantigrade"]) * .46)
@@ -215,8 +270,16 @@ def _quadruped(a: dict[str, Any], h: float, length: float, width: float) -> tupl
     branches = [_core(h, length * .68, width)]
     leg = h * (1.0 if a["variant"] == "stocky" else 1.12) * a["limb_scale"]
     leg_profile = "limb3_digitigrade" if a["variant"] == "lean" else "limb3_plantigrade"
-    _paired_legs(branches, prefix="leg", parent="core", positions=[(width * .48, h, length * .25), (width * .48, h, -length * .25)],
-                 length=leg, template="limb3", attach=1, profile_id=leg_profile)
+    legs = _paired_legs(branches, prefix="leg", parent="core",
+                        positions=[(width * .48, h, length * .25), (width * .48, h, -length * .25)],
+                        length=leg, template="limb3", attach=1, profile_id=leg_profile)
+    # Lateral-sequence walk (hind L, fore L, hind R, fore R a quarter cycle apart); diagonal trot run.
+    walk = {"leg_L1": 0.0, "leg_L0": .25, "leg_R1": .5, "leg_R0": .75}
+    trot = {"leg_L0": 0.0, "leg_R1": 0.0, "leg_R0": .5, "leg_L1": .5}
+    for leg in legs:
+        _mammal_leg(leg, fore=leg["branch_id"].endswith("0"))
+        leg["gait"]["phase_rad"] = round(walk[leg["branch_id"]] * 2 * math.pi, 6)
+        leg["gait"]["run_phase_rad"] = round(trot[leg["branch_id"]] * 2 * math.pi, 6)
     branches.append(_branch("head", "head1", "core", origin=_v(0, h, length * .38), direction=[0, .05, 1], up=[0, 1, 0], length=length * .18, role="head", attach=2, parent_joint="end"))
     return branches, ["leg_L0", "leg_R0", "leg_L1", "leg_R1"], ["leg_L0", "leg_R0", "leg_L1", "leg_R1"], "bilateral"
 
@@ -228,11 +291,18 @@ def _crawler(a: dict[str, Any], h: float, length: float, width: float) -> tuple[
         angles = (90, 210, 330)
         for i, deg in enumerate(angles):
             rad = math.radians(deg); bid = f"leg_{i}"; supports.append(bid)
-            branches.append(_branch(bid, "insect_leg4", "core", origin=_v(math.sin(rad) * width * .22, h, math.cos(rad) * length * .18), direction=[math.sin(rad), -0.8, math.cos(rad)], up=[0, 1, 0], length=width * .68 * a["limb_scale"], role="locomotor", phase=i * 2 * math.pi / 3, support=.62, contact="foot", parent_joint="upper"))
+            leg = _branch(bid, "insect_leg4", "core", origin=_v(math.sin(rad) * width * .22, h, math.cos(rad) * length * .18), direction=[math.sin(rad), 0.0, math.cos(rad)], up=[0, 1, 0], length=width * .80 * a["limb_scale"], role="locomotor", phase=i * 2 * math.pi / 3, support=.62, contact="foot", parent_joint="upper")
+            _insect_leg(leg)
+            branches.append(leg)
         symmetry = "radial_3"
     else:
         for i, z in enumerate((-.22, -.07, .08, .23)):
-            _paired_legs(branches, prefix=f"leg{i}", parent="core", positions=[(width * .23, h, z * length)], length=width * .56 * a["limb_scale"], template="insect_leg4", attach=0, phases=(0 if i % 2 == 0 else math.pi, math.pi if i % 2 == 0 else 0))
+            fan = (-.6, -.2, .2, .6)[i]
+            for leg in _paired_legs(branches, prefix=f"leg{i}", parent="core", positions=[(width * .12, h, z * length)],
+                                    length=width * .66 * a["limb_scale"], template="insect_leg4", attach=0,
+                                    phases=(0 if i % 2 == 0 else math.pi, math.pi if i % 2 == 0 else 0),
+                                    direction=lambda sx, _i, fan=fan: [sx * 1.0, 0.0, fan], up=[0, 1, 0]):
+                _insect_leg(leg)
             supports.extend((f"leg{i}_L", f"leg{i}_R"))
         symmetry = "bilateral"
     return branches, supports, supports, symmetry
@@ -264,7 +334,12 @@ def _radial(a: dict[str, Any], h: float, length: float, width: float) -> tuple[l
     for i in range(count):
         angle = 2 * math.pi * i / count; bid = f"arm_{i}"; supports.append(bid)
         vertical = 0.0 if template == "tentacle8" else -.72
-        branches.append(_branch(bid, template, "core", origin=_v(math.sin(angle) * width * .16, h, math.cos(angle) * length * .16), direction=[math.sin(angle), vertical, math.cos(angle)], up=[0, 1, 0], length=width * .58 * a["limb_scale"], role="locomotor", phase=angle, support=.68, contact="sliding" if template == "tentacle8" else "foot", parent_joint="upper"))
+        arm = _branch(bid, template, "core", origin=_v(math.sin(angle) * width * .16, h, math.cos(angle) * length * .16), direction=[math.sin(angle), vertical, math.cos(angle)], up=[0, 1, 0], length=width * .58 * a["limb_scale"], role="locomotor", phase=angle, support=.68, contact="sliding" if template == "tentacle8" else "foot", parent_joint="upper")
+        if template == "insect_leg4":
+            arm["direction"] = [math.sin(angle), 0.0, math.cos(angle)]
+            _insect_leg(arm)
+            arm["gait"]["run_phase_rad"] = round((i % 2) * math.pi, 6)
+        branches.append(arm)
     return branches, supports, supports, f"radial_{count}"
 
 
@@ -273,9 +348,13 @@ def _serpentine(a: dict[str, Any], h: float, length: float, width: float) -> tup
                 _branch("body", "tentacle8", "core", origin=_v(0, h * .28, length * .35), direction=[0, 0, -1], up=[0, 1, 0], length=length * .9, role="locomotor", support=.8, contact="sliding", parent_joint="upper")]
     if a["variant"] == "limbless":
         return branches, ["body"], ["body"], "bilateral"
+    # Legged serpentines carry the body clear of the ground on their legs: the hips sit at body height.
+    body_y = h * .55
+    branches[1]["origin_m"][1] = round(body_y, 4)
     supports: list[str] = []
     for i, z in enumerate((.12, -.12)):
-        _paired_legs(branches, prefix=f"leg{i}", parent="body", positions=[(width * .28, h * .78, z * length)], length=h * .75 * a["limb_scale"], template="limb3", attach=3)
+        for leg in _paired_legs(branches, prefix=f"leg{i}", parent="body", positions=[(width * .28, body_y, z * length)], length=h * .75 * a["limb_scale"], template="limb3", attach=3):
+            _mammal_leg(leg)
         supports.extend((f"leg{i}_L", f"leg{i}_R"))
     branches[1].pop("contacts")
     return branches, supports, supports, "bilateral"
@@ -302,6 +381,7 @@ def _dragger(a: dict[str, Any], h: float, length: float, width: float) -> tuple[
             # a convex arc above the planted hand.  This preserves full arm
             # reach without letting its rounded volume dip through the floor.
             arm["stance_deg"] = [10.0, -50.0, -10.0]
+            arm["_extension_target"] = _LIMB_EXTENSION
             branches.append(arm)
         branches.append(_branch(
             "belly", "tentacle8", "core",
@@ -313,7 +393,9 @@ def _dragger(a: dict[str, Any], h: float, length: float, width: float) -> tuple[
         return branches, support, support, "bilateral"
 
     branches = [_core(h, length * .65, width)]
-    _paired_legs(branches, prefix="arm", parent="core", positions=[(width * .38, h, length * .24)], length=length * .54 * a["limb_scale"], template="limb3", contact="hand", attach=2)
+    for arm in _paired_legs(branches, prefix="arm", parent="core", positions=[(width * .38, h, length * .24)], length=length * .54 * a["limb_scale"], template="limb3", contact="hand", attach=2):
+        # Pulling forelimbs: elbows point back, crouched so the hands have room to reach and pull.
+        _mammal_leg(arm, fore=True, fit_hip=False)
     branches.append(_branch("belly", "tentacle8", "core", origin=_v(0, h * .55, -length * .2), direction=[0, 0, -1], up=[0, 1, 0], length=length * .42, role="locomotor", support=.9, contact="body", parent_joint="upper"))
     support = ["arm_L", "arm_R", "belly"]
     return branches, support, ["arm_L", "arm_R", "belly"], "bilateral"
@@ -491,9 +573,13 @@ def build_candidate(archetype: str, preset: str, seed: int = 1, style: str = "an
         _apply_horror_modifier(branches)
     for branch in branches:
         target = branch.pop("_extension_target", None)
+        hip = branch.pop("_hip_height", None)
         if target is not None:
             # Compact presets crouch lower, elongated ones stand taller.
             _tune_extension(branch, target - (shape["stance"] - 1.0) * .25)
+        if hip is not None:
+            # Presets keep their limb proportion: longer-limbed presets stand taller on the same torso.
+            _fit_leg_to_hip(branch, hip * shape["limb"])
     _align_distributed_supports(branches, supports)
     _socketize(branches)
     bone_count = 1 + sum(_FRACTIONS[b["template"]] for b in branches)

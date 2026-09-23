@@ -85,3 +85,46 @@ def test_cadence_cap_scales_with_leg_size():
     assert cadence_max_hz(.25) == 6.0
     assert cadence_max_hz(1.0) == pytest.approx(3.0)
     assert cadence_max_hz(4.0) == 2.0
+
+
+def test_every_skeleton_publishes_a_runtime_mode(catalog):
+    modes = {}
+    for skeleton in catalog["skeletons"]:
+        modes.setdefault(skeleton["family"], set()).add(skeleton["locomotion"]["mode"])
+    for family in ("biped", "quadruped", "crawler", "hexapod", "dragger"):
+        assert modes[family] == {"legs"}, family
+    assert modes["serpentine"] == {"legs", "slide"}
+    assert modes["radial"] == {"legs", "slide"}
+
+
+def test_legged_bands_are_consistent_and_most_reach_game_speed(catalog):
+    slow = set()
+    for skeleton in catalog["skeletons"]:
+        block = skeleton["locomotion"]
+        if block["mode"] != "legs":
+            continue
+        assert 0 < block["v_walk_mps"] < block["v_run_mps"] <= block["v_max_mps"], skeleton["skeleton_id"]
+        if stepper.gait_params(block, GAME_SPEED)["overspeed"]:
+            slow.add(skeleton["anatomy"]["archetype_id"])
+    # Belly haulers and three-legged tripods (long duty to keep two feet down) are slower; the game
+    # reads v_max from the catalog rather than forcing a uniform speed.
+    assert slow <= {"dragger_belly_hauler", "crawler_alien_tripod"}
+
+
+def test_quadrupeds_walk_in_lateral_sequence_and_trot_when_running(catalog):
+    for skeleton in catalog["skeletons"]:
+        if skeleton["family"] != "quadruped":
+            continue
+        legs = {leg["branch_id"]: leg for leg in skeleton["locomotion"]["legs"]}
+        walk = {k: v["walk_phase"] for k, v in legs.items()}
+        run = {k: v["run_phase"] for k, v in legs.items()}
+        assert walk == {"leg_L1": 0.0, "leg_L0": .25, "leg_R1": .5, "leg_R0": .75}
+        assert run["leg_L0"] == run["leg_R1"] and run["leg_R0"] == run["leg_L1"]
+        assert run["leg_L0"] != run["leg_R0"]
+
+
+def test_slide_mode_phase_rate(catalog):
+    block = next(s["locomotion"] for s in catalog["skeletons"] if s["locomotion"]["mode"] == "slide")
+    params = stepper.slide_params(block, block["v_walk_mps"])
+    assert params["cadence_hz"] == pytest.approx(1.0)
+    assert stepper.slide_params(block, 100.0)["overspeed"]

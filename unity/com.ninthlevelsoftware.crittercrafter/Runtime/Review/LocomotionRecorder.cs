@@ -45,6 +45,7 @@ namespace CritterCrafter.Review
         readonly Dictionary<string, Transform> _tips = new Dictionary<string, Transform>();
         readonly Dictionary<string, Vector3> _lastPlanted = new Dictionary<string, Vector3>();
         readonly StringBuilder _csv = new StringBuilder("frame,time,speed,residual,slip,planted_supports\n");
+        readonly StringBuilder _legCsv = new StringBuilder("frame,leg,planted,forced,ankle_reach_frac,hip_y,foot_x,foot_y,foot_z\n");
 
         /// <param name="outDir">Frame/metrics folder, or null to measure only.</param>
         public void Begin(CreatureGait gait, List<ReviewCourse.Waypoint> path, LocomotionMetrics metrics,
@@ -114,6 +115,7 @@ namespace CritterCrafter.Review
                     if (_outDir != null)
                     {
                         File.WriteAllText(Path.Combine(_outDir, "frames.csv"), _csv.ToString());
+                        File.WriteAllText(Path.Combine(_outDir, "legs.csv"), _legCsv.ToString());
                         File.WriteAllText(Path.Combine(_outDir, "metrics.json"), JsonUtility.ToJson(Metrics, true));
                     }
                 }
@@ -137,6 +139,19 @@ namespace CritterCrafter.Review
                 now[leg.branchId] = p;
                 if (_lastPlanted.TryGetValue(leg.branchId, out var last)) slip = Mathf.Max(slip, Vector3.Distance(last, p));
             }
+            foreach (var leg in _gait.Legs)
+            {
+                // Hinge legs: ankle target distance from the hinge root as a fraction of thigh + shin.
+                float frac = -1f;
+                if (leg.hinge && leg.target != null && leg.hip != null && leg.hingeReach > 0f)
+                {
+                    Transform root = leg.coxaAim != null ? leg.hip.GetChild(0) : leg.hip;
+                    frac = Vector3.Distance(root.position, leg.target.position) / leg.hingeReach;
+                }
+                _legCsv.AppendLine(string.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4:F3},{5:F3},{6:F3},{7:F3},{8:F3}",
+                    _frame, leg.branchId, leg.planted ? 1 : 0, leg.forced ? 1 : 0, frac,
+                    leg.hip != null ? leg.hip.position.y : 0f, leg.position.x, leg.position.y, leg.position.z));
+            }
             _lastPlanted.Clear();
             foreach (var kv in now) _lastPlanted[kv.Key] = kv.Value;
             if (_frame > 0)
@@ -155,7 +170,8 @@ namespace CritterCrafter.Review
         {
             if (_camera == null) return;
             var block = _gait.Block;
-            var target = _gait.transform.position + Vector3.up * (float)block.hip_height_m * 0.6f;
+            float height = block.hip_height_m > 0.0 ? (float)block.hip_height_m : 0.3f;
+            var target = _gait.transform.position + Vector3.up * height * 0.6f;
             _camera.transform.position = target + new Vector3(16f, 18f, 16f).normalized * 30f;
             _camera.transform.LookAt(target);
             _camera.Render();

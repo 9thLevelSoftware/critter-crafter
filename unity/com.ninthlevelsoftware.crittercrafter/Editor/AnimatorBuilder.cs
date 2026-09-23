@@ -50,7 +50,7 @@ namespace CritterCrafter.Editor
                 return value > 0.0 ? (float)value : fallback;
             }
 
-            if (skeleton?.locomotion != null && skeleton.locomotion.HasLegs)
+            if (skeleton?.locomotion != null && skeleton.locomotion.IsPhaseDriven)
             {
                 BuildRuntimeLegStates(ctrl, sm, Clip, out var idleState);
                 AddActionStates(ctrl, sm, idleState, Clip, skeleton);

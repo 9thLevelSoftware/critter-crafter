@@ -150,9 +150,14 @@ namespace CritterCrafter
         public double v_walk_mps;
         public double v_run_mps;
         public double v_max_mps;
+        /// <summary>Slide mode: ground travel per undulation cycle of the phase-driven walk/run clips.</summary>
+        public double travel_per_cycle_m;
         public LocomotionLeg[] legs;
 
         public bool HasLegs => mode == "legs" && legs != null && legs.Length > 0;
+        public bool Slides => mode == "slide" && travel_per_cycle_m > 0.0;
+        /// <summary>Walk/run clips are one-cycle overlays driven by CreatureGait's GaitPhase.</summary>
+        public bool IsPhaseDriven => HasLegs || Slides;
     }
 
     [Serializable]

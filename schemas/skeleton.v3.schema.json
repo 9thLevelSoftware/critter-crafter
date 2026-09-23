@@ -4,108 +4,500 @@
   "title": "skeleton.v3.schema.json",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "skeleton_id", "family", "locomotion_hint", "status", "branches", "neutral_pose", "anatomy"],
+  "required": [
+    "schema_version",
+    "skeleton_id",
+    "family",
+    "locomotion_hint",
+    "status",
+    "branches",
+    "neutral_pose",
+    "anatomy"
+  ],
   "properties": {
-    "schema_version": {"const": "3.0.0"},
-    "skeleton_id": {"$ref": "#/$defs/id"},
-    "family": {"enum": ["biped", "quadruped", "hexapod", "crawler", "serpentine", "radial", "dragger"]},
-    "locomotion_hint": {"enum": ["biped", "quadruped", "crawl", "drag", "slither"]},
-    "status": {"enum": ["draft", "approved", "rejected"]},
-    "symmetry_pct": {"type": "integer", "minimum": 0, "maximum": 100},
-    "branches": {"type": "array", "minItems": 1, "maxItems": 16, "items": {"$ref": "#/$defs/branch"}},
+    "schema_version": {
+      "const": "3.0.0"
+    },
+    "skeleton_id": {
+      "$ref": "#/$defs/id"
+    },
+    "family": {
+      "enum": [
+        "biped",
+        "quadruped",
+        "hexapod",
+        "crawler",
+        "serpentine",
+        "radial",
+        "dragger"
+      ]
+    },
+    "locomotion_hint": {
+      "enum": [
+        "biped",
+        "quadruped",
+        "crawl",
+        "drag",
+        "slither"
+      ]
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "approved",
+        "rejected"
+      ]
+    },
+    "symmetry_pct": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "branches": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "items": {
+        "$ref": "#/$defs/branch"
+      }
+    },
     "neutral_pose": {
-      "type": "object", "additionalProperties": false,
-      "required": ["root_offset_m", "rotations"],
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "root_offset_m",
+        "rotations"
+      ],
       "properties": {
-        "root_offset_m": {"$ref": "#/$defs/vec3"},
-        "rotations": {"type": "array", "minItems": 1, "maxItems": 120, "items": {
-          "type": "object", "additionalProperties": false,
-          "required": ["bone_name", "rotation_xyzw"],
-          "properties": {"bone_name": {"type": "string"}, "rotation_xyzw": {"$ref": "#/$defs/quat"}}
-        }}
+        "root_offset_m": {
+          "$ref": "#/$defs/vec3"
+        },
+        "rotations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 120,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "bone_name",
+              "rotation_xyzw"
+            ],
+            "properties": {
+              "bone_name": {
+                "type": "string"
+              },
+              "rotation_xyzw": {
+                "$ref": "#/$defs/quat"
+              }
+            }
+          }
+        }
       }
     },
     "anatomy": {
-      "type": "object", "additionalProperties": false,
-      "required": ["archetype_id", "body_plan", "support_branches", "contact_branches", "symmetry", "landmarks", "budgets"],
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "archetype_id",
+        "body_plan",
+        "support_branches",
+        "contact_branches",
+        "symmetry",
+        "landmarks",
+        "budgets"
+      ],
       "properties": {
-        "archetype_id": {"$ref": "#/$defs/id"},
-        "body_plan": {"type": "string"},
-        "style": {"type": "string"},
-        "support_branches": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
-        "contact_branches": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
-        "symmetry": {"type": "object", "additionalProperties": false, "required": ["kind"], "properties": {
-          "kind": {"enum": ["bilateral", "radial", "asymmetric"]},
-          "pairs": {"type": "array", "items": {"type": "array", "items": {"type": "string"}, "minItems": 2, "maxItems": 2}},
-          "ring_count": {"type": "integer", "minimum": 1}
-        }},
-        "landmarks": {"type": "object", "additionalProperties": {"type": "string"}},
-        "silhouette": {"type": "object", "additionalProperties": false, "required": ["height_m", "length_m", "width_m"], "properties": {
-          "height_m": {"type": "number", "exclusiveMinimum": 0},
-          "length_m": {"type": "number", "exclusiveMinimum": 0},
-          "width_m": {"type": "number", "exclusiveMinimum": 0}
-        }},
-        "budgets": {"type": "object", "additionalProperties": false, "required": ["bones", "parts", "triangles"], "properties": {
-          "bones": {"type": "integer", "minimum": 1, "maximum": 120},
-          "parts": {"type": "integer", "minimum": 1, "maximum": 16},
-          "triangles": {"type": "integer", "minimum": 1, "maximum": 30000}
-        }}
+        "archetype_id": {
+          "$ref": "#/$defs/id"
+        },
+        "body_plan": {
+          "type": "string"
+        },
+        "style": {
+          "type": "string"
+        },
+        "support_branches": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "contact_branches": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "symmetry": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "bilateral",
+                "radial",
+                "asymmetric"
+              ]
+            },
+            "pairs": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 2,
+                "maxItems": 2
+              }
+            },
+            "ring_count": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "landmarks": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "silhouette": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "height_m",
+            "length_m",
+            "width_m"
+          ],
+          "properties": {
+            "height_m": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "length_m": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "width_m": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          }
+        },
+        "budgets": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "bones",
+            "parts",
+            "triangles"
+          ],
+          "properties": {
+            "bones": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 120
+            },
+            "parts": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 16
+            },
+            "triangles": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 30000
+            }
+          }
+        }
       }
     },
-    "provenance": {"type": "object"}
+    "provenance": {
+      "type": "object"
+    }
   },
   "$defs": {
-    "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
-    "branch_name": {"type": "string", "pattern": "^[a-z][A-Za-z0-9_]*$"},
-    "vec3": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3},
-    "quat": {"type": "array", "items": {"type": "number"}, "minItems": 4, "maxItems": 4},
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "branch_name": {
+      "type": "string",
+      "pattern": "^[a-z][A-Za-z0-9_]*$"
+    },
+    "vec3": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "quat": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 4,
+      "maxItems": 4
+    },
     "branch": {
-      "type": "object", "additionalProperties": false,
-      "required": ["branch_id", "template", "parent_branch", "direction", "up", "length_m", "girth_m", "size_class", "side", "required", "accepts", "connector_size_class", "binding_profile_id", "binding_profile_version", "socket", "gait"],
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "branch_id",
+        "template",
+        "parent_branch",
+        "direction",
+        "up",
+        "length_m",
+        "girth_m",
+        "size_class",
+        "side",
+        "required",
+        "accepts",
+        "connector_size_class",
+        "binding_profile_id",
+        "binding_profile_version",
+        "socket",
+        "gait"
+      ],
       "properties": {
-        "branch_id": {"$ref": "#/$defs/branch_name"},
-        "template": {"$ref": "#/$defs/id"},
-        "parent_branch": {"type": ["string", "null"]},
-        "attach_bone_index": {"type": "integer"},
-        "origin_m": {"$ref": "#/$defs/vec3"},
-        "direction": {"$ref": "#/$defs/vec3"},
-        "up": {"$ref": "#/$defs/vec3"},
-        "length_m": {"type": "number", "exclusiveMinimum": 0},
-        "girth_m": {"type": "number", "exclusiveMinimum": 0},
-        "size_class": {"enum": ["S", "M", "L"]},
-        "side": {"enum": ["symmetric", "L", "R", "C"]},
-        "required": {"type": "boolean"},
-        "optional_fill_pct": {"type": "integer", "minimum": 0, "maximum": 100},
-        "mirror_of": {"type": "string"},
-        "accepts": {"type": "object", "additionalProperties": false, "required": ["categories"], "properties": {
-          "categories": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["core", "limb", "head", "tail", "appendage", "connector"]}},
-          "templates": {"type": "array", "items": {"$ref": "#/$defs/id"}},
-          "tags_any": {"type": "array", "items": {"type": "string"}}
-        }},
-        "connector_size_class": {"enum": ["S", "M", "L", null]},
-        "binding_profile_id": {"$ref": "#/$defs/id"},
-        "binding_profile_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
-        "socket": {"type": "object", "additionalProperties": false, "required": ["parent_joint", "position_m", "rotation_xyzw"], "properties": {
-          "parent_joint": {"type": "string", "minLength": 1},
-          "position_m": {"$ref": "#/$defs/vec3"},
-          "rotation_xyzw": {"$ref": "#/$defs/quat"}
-        }},
-        "gait": {"type": "object", "additionalProperties": false, "required": ["role", "phase_rad", "support_phase", "bend_pole_m", "stride_m", "clearance_m", "cadence_hz"], "properties": {
-          "role": {"enum": ["core", "locomotor", "manipulator", "head", "sway", "none"]},
-          "phase_rad": {"type": "number"},
-          "support_phase": {"type": "number", "minimum": 0, "maximum": 1},
-          "bend_pole_m": {"$ref": "#/$defs/vec3"},
-          "stride_m": {"type": "number", "minimum": 0},
-          "clearance_m": {"type": "number", "minimum": 0},
-          "cadence_hz": {"type": "number", "minimum": 0}
-        }},
-        "contacts": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["kind", "bone_index", "local_point_m"], "properties": {
-          "kind": {"enum": ["foot", "hand", "sliding", "body"]},
-          "bone_index": {"type": "integer", "minimum": 0},
-          "local_point_m": {"$ref": "#/$defs/vec3"}
-        }}},
-        "stance_deg": {"type": "array", "maxItems": 16, "items": {"type": "number", "minimum": -180, "maximum": 180}},
-        "stance_z_deg": {"type": "array", "maxItems": 16, "items": {"type": "number", "minimum": -180, "maximum": 180}}
+        "branch_id": {
+          "$ref": "#/$defs/branch_name"
+        },
+        "template": {
+          "$ref": "#/$defs/id"
+        },
+        "parent_branch": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "attach_bone_index": {
+          "type": "integer"
+        },
+        "origin_m": {
+          "$ref": "#/$defs/vec3"
+        },
+        "direction": {
+          "$ref": "#/$defs/vec3"
+        },
+        "up": {
+          "$ref": "#/$defs/vec3"
+        },
+        "length_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "girth_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "size_class": {
+          "enum": [
+            "S",
+            "M",
+            "L"
+          ]
+        },
+        "side": {
+          "enum": [
+            "symmetric",
+            "L",
+            "R",
+            "C"
+          ]
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "optional_fill_pct": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "mirror_of": {
+          "type": "string"
+        },
+        "accepts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "categories"
+          ],
+          "properties": {
+            "categories": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "core",
+                  "limb",
+                  "head",
+                  "tail",
+                  "appendage",
+                  "connector"
+                ]
+              }
+            },
+            "templates": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/id"
+              }
+            },
+            "tags_any": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "connector_size_class": {
+          "enum": [
+            "S",
+            "M",
+            "L",
+            null
+          ]
+        },
+        "binding_profile_id": {
+          "$ref": "#/$defs/id"
+        },
+        "binding_profile_version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "socket": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "parent_joint",
+            "position_m",
+            "rotation_xyzw"
+          ],
+          "properties": {
+            "parent_joint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "position_m": {
+              "$ref": "#/$defs/vec3"
+            },
+            "rotation_xyzw": {
+              "$ref": "#/$defs/quat"
+            }
+          }
+        },
+        "gait": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "phase_rad",
+            "support_phase",
+            "bend_pole_m",
+            "stride_m",
+            "clearance_m",
+            "cadence_hz"
+          ],
+          "properties": {
+            "role": {
+              "enum": [
+                "core",
+                "locomotor",
+                "manipulator",
+                "head",
+                "sway",
+                "none"
+              ]
+            },
+            "phase_rad": {
+              "type": "number"
+            },
+            "support_phase": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "bend_pole_m": {
+              "$ref": "#/$defs/vec3"
+            },
+            "stride_m": {
+              "type": "number",
+              "minimum": 0
+            },
+            "clearance_m": {
+              "type": "number",
+              "minimum": 0
+            },
+            "cadence_hz": {
+              "type": "number",
+              "minimum": 0
+            },
+            "run_phase_rad": {
+              "type": "number"
+            }
+          }
+        },
+        "contacts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "bone_index",
+              "local_point_m"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "foot",
+                  "hand",
+                  "sliding",
+                  "body"
+                ]
+              },
+              "bone_index": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "local_point_m": {
+                "$ref": "#/$defs/vec3"
+              }
+            }
+          }
+        },
+        "stance_deg": {
+          "type": "array",
+          "maxItems": 16,
+          "items": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
+          }
+        },
+        "stance_z_deg": {
+          "type": "array",
+          "maxItems": 16,
+          "items": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
+          }
+        }
       }
     }
   }

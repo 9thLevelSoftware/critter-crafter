@@ -56,6 +56,8 @@ namespace CritterCrafter.Locomotion
             [NonSerialized] public float swingDuration;
             [NonSerialized] public double lastSwingCycle = double.MinValue;
             [NonSerialized] public Vector3 home;
+            /// <summary>Last frame's target was beyond reach and had to be pulled in.</summary>
+            [NonSerialized] public bool clamped;
             [NonSerialized] public float weight = 1f;
         }
 
@@ -166,7 +168,7 @@ namespace CritterCrafter.Locomotion
         public void Step(float dt)
         {
             if (_block == null) Bind();
-            if (_block == null || !_block.HasLegs || legs.Count == 0) return;
+            if (_block == null || !(_block.HasLegs && legs.Count > 0 || _block.Slides)) return;
             if (!_initialised) ResetFeet();
             if (dt <= 0f) return;
 
@@ -188,6 +190,16 @@ namespace CritterCrafter.Locomotion
             _lastYaw = yaw;
             // Apply the body yaw now: hip positions used for reach checks below must already reflect it.
             if (body != null) body.localRotation = BodyRotation();
+
+            if (_block.Slides)
+            {
+                // Limbless travel: advance the phase-driven undulation with ground speed.
+                _params = StepPlanner.SlideParams(_block, speed);
+                if (speed > 0.05f) _clock += _params.cadenceHz * dt;
+                if (body != null) body.localRotation = BodyRotation();
+                UpdateAnimator(speed);
+                return;
+            }
 
             _params = StepPlanner.Params(_block, speed);
             // Hysteresis around the walk/run pattern switch keeps the pattern from chattering.
@@ -289,7 +301,8 @@ namespace CritterCrafter.Locomotion
                 if (!leg.hinge || leg.coxa == null)
                 {
                     Vector3 reachable = ClampToReach(leg, leg.position);
-                    if (leg.planted && reachable != leg.position) leg.plant = reachable;
+                    leg.clamped = reachable != leg.position;
+                    if (leg.planted && leg.clamped) leg.plant = reachable;
                     leg.position = reachable;
                     leg.target.position = leg.position;
                     continue;
@@ -306,7 +319,8 @@ namespace CritterCrafter.Locomotion
                 Vector3 ankle = leg.position + frame * leg.ankleOffset;
                 Vector3 reach = ankle - femur;
                 float max = HingeReachFraction * leg.hingeReach;
-                if (reach.sqrMagnitude > max * max)
+                leg.clamped = reach.sqrMagnitude > max * max;
+                if (leg.clamped)
                 {
                     ankle = femur + reach.normalized * max;
                     leg.position = ankle - frame * leg.ankleOffset;
@@ -356,7 +370,8 @@ namespace CritterCrafter.Locomotion
         {
             // Instant heading changes (agents with huge angular speed) leave planted feet far from home or
             // out of reach; re-step them early rather than stretching the chain.
-            if (leg.hip != null && Vector3.Distance(leg.hip.position, leg.plant) > 0.92f * leg.reach) return true;
+            if (leg.clamped) return true;
+            if (!leg.hinge && leg.hip != null && Vector3.Distance(leg.hip.position, leg.plant) > 0.92f * leg.reach) return true;
             return Strain(leg, home) > Mathf.Max(0.6f * leg.stroke, 0.35f * leg.reach);
         }
 

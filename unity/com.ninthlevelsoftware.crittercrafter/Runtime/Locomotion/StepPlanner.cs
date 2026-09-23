@@ -71,6 +71,23 @@ namespace CritterCrafter.Locomotion
             return p;
         }
 
+        /// <summary>Undulation rate for a sliding body: one cycle per travel_per_cycle_m, capped at cadence_max.</summary>
+        public static GaitParams SlideParams(LocomotionData block, double speed)
+        {
+            var p = new GaitParams { weight = GaitWeight(block, speed) };
+            if (speed <= EpsilonSpeed || block.travel_per_cycle_m <= 0.0)
+            {
+                p.weight = 0.0;
+                return p;
+            }
+            double cadence = speed / block.travel_per_cycle_m;
+            p.overspeed = cadence > block.cadence_max_hz;
+            p.cadenceHz = Math.Min(cadence, block.cadence_max_hz);
+            p.strideM = block.travel_per_cycle_m;
+            p.run = p.weight >= WalkRunSwitch;
+            return p;
+        }
+
         public static double LegOffset(LocomotionLeg leg, bool run) => run ? leg.run_phase : leg.walk_phase;
 
         public static double LegPhase(double clock, double offset)

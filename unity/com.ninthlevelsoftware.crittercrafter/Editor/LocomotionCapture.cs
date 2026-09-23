@@ -147,11 +147,14 @@ namespace CritterCrafter.Editor
         public static CritterRecipe ReferenceRecipe(CatalogData catalog, SkeletonData skeleton)
         {
             var fills = new List<RecipeFill>();
+            // Same connector budget as the generator: parts + connectors never exceed max_parts.
+            int connectorSlots = Mathf.Max(0, Mathf.Min(catalog.limits.max_parts, 16) - skeleton.branches.Length);
             foreach (var br in skeleton.branches)
             {
                 var part = catalog.FindPart(ReferenceId(skeleton.skeleton_id, br.branch_id, false));
                 if (part == null) continue;
-                var conn = catalog.FindPart(ReferenceId(skeleton.skeleton_id, br.branch_id, true));
+                var conn = connectorSlots > 0 ? catalog.FindPart(ReferenceId(skeleton.skeleton_id, br.branch_id, true)) : null;
+                if (conn != null && RecipeGenerator.ConnectorAccepted(conn, br)) connectorSlots--;
                 fills.Add(new RecipeFill
                 {
                     branch_id = br.branch_id, part_id = part.part_id,

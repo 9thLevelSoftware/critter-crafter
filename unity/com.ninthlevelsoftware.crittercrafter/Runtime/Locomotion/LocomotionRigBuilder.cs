@@ -55,9 +55,17 @@ namespace CritterCrafter.Locomotion
             var skeleton = creature != null ? creature.Skeleton : null;
             var block = skeleton?.locomotion;
             var animator = creature != null ? creature.Animator : null;
-            if (block == null || !block.HasLegs || animator == null) return null;
+            if (block == null || !block.IsPhaseDriven || animator == null) return null;
 
             var animRoot = animator.transform;
+            if (block.Slides)
+            {
+                // No feet to place: only the gait clock that drives the baked undulation.
+                var slider = creature.gameObject.GetComponent<CreatureGait>();
+                if (slider == null) slider = creature.gameObject.AddComponent<CreatureGait>();
+                slider.Configure(animRoot, null, new List<CreatureGait.Leg>(), groundMask);
+                return slider;
+            }
             var bones = new Dictionary<string, Transform>();
             foreach (var t in animRoot.GetComponentsInChildren<Transform>(true))
                 if (!bones.ContainsKey(t.name)) bones[t.name] = t;

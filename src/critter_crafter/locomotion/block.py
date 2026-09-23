@@ -65,8 +65,35 @@ def _min_duty(phases: list[float], floor: float, minimum: int) -> float:
 
 
 def _patterns(skeleton: dict[str, Any], legs: list[dict[str, Any]]) -> tuple[list[float], list[float]]:
-    walk = [round((float(b.get("gait_phase_rad", 0.0)) / (2 * math.pi)) % 1.0, 6) for b in legs]
-    return walk, list(walk)
+    """Walk phases from gait.phase_rad; run phases from gait.run_phase_rad (e.g. a quadruped trot)."""
+    def cycles(rad: float) -> float:
+        return round((rad / (2 * math.pi)) % 1.0, 6)
+    walk = [cycles(float(b.get("gait_phase_rad", b.get("gait", {}).get("phase_rad", 0.0)))) for b in legs]
+    run = [cycles(float(b.get("gait", {}).get("run_phase_rad", b.get("gait_phase_rad", 0.0)))) for b in legs]
+    return walk, run
+
+
+SLIDE_TRAVEL_FRACTION = .6   # body travel per undulation cycle, as a fraction of the sliding chain
+SLIDE_CADENCE_WALK = 1.0
+SLIDE_CADENCE_RUN = 2.0
+SLIDE_CADENCE_MAX = 3.0
+
+
+def _slide_block(skeleton: dict[str, Any]) -> dict[str, Any]:
+    """Limbless travel (serpentine, tentacle radial): the baked undulation is phase-driven at runtime,
+    advancing one cycle per ``travel_per_cycle_m`` of ground travel."""
+    sliding = [b for b in skeleton["branches"]
+               if b.get("gait_role") == "locomotor"
+               and any(c.get("kind") in ("body", "sliding") for c in b.get("contacts") or [])]
+    if not sliding:
+        return {"version": LOCOMOTION_VERSION, "mode": "none", "legs": []}
+    travel = SLIDE_TRAVEL_FRACTION * max(float(b["length_m"]) for b in sliding)
+    return {
+        "version": LOCOMOTION_VERSION, "mode": "slide", "attack_branch_id": "",
+        "travel_per_cycle_m": mu.r6(travel), "cadence_max_hz": SLIDE_CADENCE_MAX,
+        "v_walk_mps": mu.r6(travel * SLIDE_CADENCE_WALK), "v_run_mps": mu.r6(travel * SLIDE_CADENCE_RUN),
+        "v_max_mps": mu.r6(travel * SLIDE_CADENCE_MAX), "legs": [],
+    }
 
 
 def locomotion_block(skeleton: dict[str, Any]) -> dict[str, Any]:
@@ -85,6 +112,13 @@ def locomotion_block(skeleton: dict[str, Any]) -> dict[str, Any]:
         hip = pose[chain[0]]["head"]
         home = contact_world(pose, branch, contact)
         reach = sum(pose[name]["length"] for name in chain)
+        # The runtime two-bone hinge (limb3) holds the foot's angle, so what must stay within reach is the
+        # ankle, from the hip, with thigh + shin. The stroke is measured for that point.
+        if branch.get("template") == "limb3" and len(chain) == 3:
+            ankle = pose[chain[2]]["head"]
+            stroke_m = _stroke(hip, ankle, pose[chain[0]]["length"] + pose[chain[1]]["length"])
+        else:
+            stroke_m = _stroke(hip, home, reach)
         legs.append({
             "branch_id": branch["branch_id"],
             # limb3: two-bone (thigh, shin; foot keeps its angle). insect_leg4: hinge over femur,
@@ -95,7 +129,7 @@ def locomotion_block(skeleton: dict[str, Any]) -> dict[str, Any]:
             "hip_m": mu.r6v(hip),
             "home_m": mu.r6v(home),
             "reach_m": mu.r6(reach),
-            "stroke_m": mu.r6(_stroke(hip, home, reach)),
+            "stroke_m": mu.r6(stroke_m),
             # Swing lift must read from an isometric camera: at least 18% of reach.
             "clearance_m": mu.r6(max(STEP_LIFT_FRACTION * reach,
                                      float(branch.get("gait", {}).get("clearance_m", 0.0)))),
@@ -104,7 +138,8 @@ def locomotion_block(skeleton: dict[str, Any]) -> dict[str, Any]:
             "support": branch["branch_id"] in set(skeleton.get("anatomy", {}).get("support_branches", [])),
         })
     if not legs:
-        return {"version": LOCOMOTION_VERSION, "mode": "none", "legs": []}
+        return _slide_block(skeleton)
+    # Legs present: any sliding/body contacts (a dragger's belly) are passive and ride along.
     # Degenerate fixtures (hip at or below the contact) still compile; they simply cannot walk.
     hip_height = max(0.0, sum(l["hip_m"][1] - l["home_m"][1] for l in legs) / len(legs))
     leg_length = sum(l["reach_m"] for l in legs) / len(legs)

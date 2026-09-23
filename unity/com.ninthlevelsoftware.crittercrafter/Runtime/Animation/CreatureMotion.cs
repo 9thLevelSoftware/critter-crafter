@@ -34,7 +34,7 @@ namespace CritterCrafter
 
         public CreatureState State => _state;
 
-        bool RuntimeLegs => _creature != null && _creature.Skeleton?.locomotion != null && _creature.Skeleton.locomotion.HasLegs;
+        bool RuntimeLegs => _creature != null && _creature.Skeleton?.locomotion != null && _creature.Skeleton.locomotion.IsPhaseDriven;
 
         void Awake()
         {

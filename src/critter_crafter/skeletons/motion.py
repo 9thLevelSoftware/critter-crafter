@@ -305,10 +305,7 @@ def runtime_legs(skeleton: dict[str, Any]) -> bool:
     Skeletons whose locomotion includes sliding or body contacts still bake their
     travel until the runtime slide model lands.
     """
-    if skeleton.get("locomotion", {}).get("mode") != "legs":
-        return False
-    return not any(branch_role(b) == "locomotor" and c.get("kind") in ("body", "sliding")
-                   for b in skeleton["branches"] for c in b.get("contacts") or [])
+    return skeleton.get("locomotion", {}).get("mode") in ("legs", "slide")
 
 
 def build_motion(skeleton: dict[str, Any], gait: dict[str, Any]) -> dict[str, Any]:

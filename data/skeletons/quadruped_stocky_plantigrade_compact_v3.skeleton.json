@@ -98,10 +98,10 @@
       "up": [
         0,
         0,
-        1
+        -1
       ],
-      "length_m": 0.7774,
-      "girth_m": 0.171,
+      "length_m": 1.0033,
+      "girth_m": 0.2207,
       "size_class": "M",
       "side": "L",
       "required": true,
@@ -124,29 +124,30 @@
           0.4905
         ],
         "rotation_xyzw": [
+          -0.08298669,
           0.67410968,
-          0.08298669,
-          0.08967697,
-          0.72845548
+          -0.72845548,
+          0.08967697
         ]
       },
       "gait": {
         "role": "locomotor",
-        "phase_rad": 0.0,
+        "phase_rad": 1.570796,
         "support_phase": 0.58,
         "bend_pole_m": [
           0.4041,
           1.0834,
           0.0918
         ],
-        "stride_m": 0.3265,
-        "clearance_m": 0.0933,
-        "cadence_hz": 1.5
+        "stride_m": 0.4214,
+        "clearance_m": 0.1204,
+        "cadence_hz": 1.5,
+        "run_phase_rad": 0.0
       },
       "stance_deg": [
-        13.68,
-        -31.92,
-        18.24
+        32.891,
+        -76.745,
+        32.0
       ],
       "stance_z_deg": [
         0.0,
@@ -159,7 +160,7 @@
           "bone_index": 2,
           "local_point_m": [
             0.0,
-            0.0777,
+            0.1003,
             0.0
           ]
         }
@@ -183,10 +184,10 @@
       "up": [
         0,
         0,
-        1
+        -1
       ],
-      "length_m": 0.7774,
-      "girth_m": 0.171,
+      "length_m": 1.0033,
+      "girth_m": 0.2207,
       "size_class": "M",
       "side": "R",
       "required": true,
@@ -209,29 +210,30 @@
           0.4905
         ],
         "rotation_xyzw": [
-          0.67410968,
           -0.08298669,
-          -0.08967697,
-          0.72845548
+          -0.67410968,
+          0.72845548,
+          0.08967697
         ]
       },
       "gait": {
         "role": "locomotor",
-        "phase_rad": 3.141593,
+        "phase_rad": 4.712389,
         "support_phase": 0.58,
         "bend_pole_m": [
           -0.4041,
           1.0834,
           0.0918
         ],
-        "stride_m": 0.3265,
-        "clearance_m": 0.0933,
-        "cadence_hz": 1.5
+        "stride_m": 0.4214,
+        "clearance_m": 0.1204,
+        "cadence_hz": 1.5,
+        "run_phase_rad": 3.141593
       },
       "stance_deg": [
-        13.68,
-        -31.92,
-        18.24
+        32.891,
+        -76.745,
+        32.0
       ],
       "stance_z_deg": [
         0.0,
@@ -245,7 +247,7 @@
           "bone_index": 2,
           "local_point_m": [
             0.0,
-            0.0777,
+            0.1003,
             0.0
           ]
         }
@@ -271,8 +273,8 @@
         0,
         1
       ],
-      "length_m": 0.7774,
-      "girth_m": 0.171,
+      "length_m": 0.9863,
+      "girth_m": 0.217,
       "size_class": "M",
       "side": "L",
       "required": true,
@@ -310,14 +312,15 @@
           1.0834,
           -0.5918
         ],
-        "stride_m": 0.3265,
-        "clearance_m": 0.0933,
-        "cadence_hz": 1.5
+        "stride_m": 0.4142,
+        "clearance_m": 0.1184,
+        "cadence_hz": 1.5,
+        "run_phase_rad": 3.141593
       },
       "stance_deg": [
-        13.68,
-        -31.92,
-        18.24
+        32.891,
+        -76.745,
+        32.0
       ],
       "stance_z_deg": [
         0.0,
@@ -330,7 +333,7 @@
           "bone_index": 2,
           "local_point_m": [
             0.0,
-            0.0777,
+            0.0986,
             0.0
           ]
         }
@@ -356,8 +359,8 @@
         0,
         1
       ],
-      "length_m": 0.7774,
-      "girth_m": 0.171,
+      "length_m": 0.9863,
+      "girth_m": 0.217,
       "size_class": "M",
       "side": "R",
       "required": true,
@@ -395,14 +398,15 @@
           1.0834,
           -0.5918
         ],
-        "stride_m": 0.3265,
-        "clearance_m": 0.0933,
-        "cadence_hz": 1.5
+        "stride_m": 0.4142,
+        "clearance_m": 0.1184,
+        "cadence_hz": 1.5,
+        "run_phase_rad": 0.0
       },
       "stance_deg": [
-        13.68,
-        -31.92,
-        18.24
+        32.891,
+        -76.745,
+        32.0
       ],
       "stance_z_deg": [
         0.0,
@@ -416,7 +420,7 @@
           "bone_index": 2,
           "local_point_m": [
             0.0,
-            0.0777,
+            0.0986,
             0.0
           ]
         }
@@ -496,7 +500,7 @@
   "neutral_pose": {
     "root_offset_m": [
       0.0,
-      -0.1486,
+      -0.106,
       0.0
     ],
     "rotations": [
@@ -539,109 +543,109 @@
       {
         "bone_name": "leg_L0_b0",
         "rotation_xyzw": [
-          0.11909716,
+          0.28310318,
           0.0,
           0.0,
-          0.9928826
+          0.95908946
         ]
       },
       {
         "bone_name": "leg_L0_b1",
         "rotation_xyzw": [
-          -0.2749662,
+          -0.62077156,
           0.0,
           0.0,
-          0.96145389
+          0.7839915
         ]
       },
       {
         "bone_name": "leg_L0_b2",
         "rotation_xyzw": [
-          0.15850273,
+          0.27563736,
           0.0,
           0.0,
-          0.98735854
+          0.9612617
         ]
       },
       {
         "bone_name": "leg_R0_b0",
         "rotation_xyzw": [
-          0.11909716,
+          0.28310318,
           0.0,
           0.0,
-          0.9928826
+          0.95908946
         ]
       },
       {
         "bone_name": "leg_R0_b1",
         "rotation_xyzw": [
-          -0.2749662,
+          -0.62077156,
           0.0,
           0.0,
-          0.96145389
+          0.7839915
         ]
       },
       {
         "bone_name": "leg_R0_b2",
         "rotation_xyzw": [
-          0.15850273,
+          0.27563736,
           0.0,
           0.0,
-          0.98735854
+          0.9612617
         ]
       },
       {
         "bone_name": "leg_L1_b0",
         "rotation_xyzw": [
-          0.11909716,
+          0.28310318,
           0.0,
           0.0,
-          0.9928826
+          0.95908946
         ]
       },
       {
         "bone_name": "leg_L1_b1",
         "rotation_xyzw": [
-          -0.2749662,
+          -0.62077156,
           0.0,
           0.0,
-          0.96145389
+          0.7839915
         ]
       },
       {
         "bone_name": "leg_L1_b2",
         "rotation_xyzw": [
-          0.15850273,
+          0.27563736,
           0.0,
           0.0,
-          0.98735854
+          0.9612617
         ]
       },
       {
         "bone_name": "leg_R1_b0",
         "rotation_xyzw": [
-          0.11909716,
+          0.28310318,
           0.0,
           0.0,
-          0.9928826
+          0.95908946
         ]
       },
       {
         "bone_name": "leg_R1_b1",
         "rotation_xyzw": [
-          -0.2749662,
+          -0.62077156,
           0.0,
           0.0,
-          0.96145389
+          0.7839915
         ]
       },
       {
         "bone_name": "leg_R1_b2",
         "rotation_xyzw": [
-          0.15850273,
+          0.27563736,
           0.0,
           0.0,
-          0.98735854
+          0.9612617
         ]
       },
       {

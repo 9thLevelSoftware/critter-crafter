@@ -59,6 +59,16 @@ def gait_params(block: dict[str, Any], speed: float) -> dict[str, Any]:
             "overspeed": overspeed}
 
 
+def slide_params(block: dict[str, Any], speed: float) -> dict[str, Any]:
+    """Undulation rate for a sliding body: one cycle per travel_per_cycle_m, capped at cadence_max."""
+    w = gait_weight(block, speed)
+    if speed <= EPSILON_SPEED:
+        return {"weight": 0.0, "cadence_hz": 0.0, "overspeed": False}
+    cadence = speed / float(block["travel_per_cycle_m"])
+    overspeed = cadence > float(block["cadence_max_hz"])
+    return {"weight": w, "cadence_hz": min(cadence, float(block["cadence_max_hz"])), "overspeed": overspeed}
+
+
 def leg_offset(leg: dict[str, Any], run: bool) -> float:
     return float(leg["run_phase"] if run else leg["walk_phase"])
 

@@ -20,7 +20,8 @@ def test_biped_candidate_has_grounded_symmetric_support_and_motion_metadata() ->
     assert doc["schema_version"] == "3.0.0"
     assert doc["skeleton_id"] == "biped_plantigrade_humanoid_balanced_v3"
     assert doc["anatomy"]["support_branches"] == ["leg_L", "leg_R"]
-    assert doc["neutral_pose"]["root_offset_m"][1] > 0
+    # Legs are sized so the neutral feet meet the ground with the hip at its designed height.
+    assert abs(doc["neutral_pose"]["root_offset_m"][1]) < .01
     left, right = _branch(doc, "leg_L"), _branch(doc, "leg_R")
     assert right["mirror_of"] == "leg_L"
     assert left["gait"]["support_phase"] == right["gait"]["support_phase"]
