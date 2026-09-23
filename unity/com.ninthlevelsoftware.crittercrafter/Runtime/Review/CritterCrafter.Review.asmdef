@@ -1,0 +1,10 @@
+{
+  "name": "CritterCrafter.Review",
+  "rootNamespace": "CritterCrafter.Review",
+  "references": ["CritterCrafter.Runtime", "CritterCrafter.Locomotion"],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "autoReferenced": true,
+  "noEngineReferences": false
+}

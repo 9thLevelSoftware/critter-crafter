@@ -2662,7 +2662,7 @@
             ],
             "reach_m": 1.285101,
             "stroke_m": 0.0,
-            "clearance_m": 0.1542,
+            "clearance_m": 0.231318,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -2692,7 +2692,7 @@
             ],
             "reach_m": 1.285101,
             "stroke_m": 0.0,
-            "clearance_m": 0.1542,
+            "clearance_m": 0.231318,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -3991,7 +3991,7 @@
             ],
             "reach_m": 1.040401,
             "stroke_m": 0.0,
-            "clearance_m": 0.1248,
+            "clearance_m": 0.187272,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -4021,7 +4021,7 @@
             ],
             "reach_m": 1.040401,
             "stroke_m": 0.0,
-            "clearance_m": 0.1248,
+            "clearance_m": 0.187272,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -5320,7 +5320,7 @@
             ],
             "reach_m": 1.525702,
             "stroke_m": 0.0,
-            "clearance_m": 0.1831,
+            "clearance_m": 0.274626,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -5350,7 +5350,7 @@
             ],
             "reach_m": 1.525702,
             "stroke_m": 0.0,
-            "clearance_m": 0.1831,
+            "clearance_m": 0.274626,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -6649,7 +6649,7 @@
             ],
             "reach_m": 1.2517,
             "stroke_m": 0.0,
-            "clearance_m": 0.1502,
+            "clearance_m": 0.225306,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -6679,7 +6679,7 @@
             ],
             "reach_m": 1.2517,
             "stroke_m": 0.0,
-            "clearance_m": 0.1502,
+            "clearance_m": 0.225306,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -7978,7 +7978,7 @@
             ],
             "reach_m": 1.0134,
             "stroke_m": 0.0,
-            "clearance_m": 0.1216,
+            "clearance_m": 0.182412,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -8008,7 +8008,7 @@
             ],
             "reach_m": 1.0134,
             "stroke_m": 0.0,
-            "clearance_m": 0.1216,
+            "clearance_m": 0.182412,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -9307,7 +9307,7 @@
             ],
             "reach_m": 1.486101,
             "stroke_m": 0.0,
-            "clearance_m": 0.1783,
+            "clearance_m": 0.267498,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -9337,7 +9337,7 @@
             ],
             "reach_m": 1.486101,
             "stroke_m": 0.0,
-            "clearance_m": 0.1783,
+            "clearance_m": 0.267498,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -10302,7 +10302,7 @@
         "legs": [
           {
             "branch_id": "leg_0",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg_0_b0",
               "leg_0_b1",
@@ -10326,14 +10326,14 @@
             ],
             "reach_m": 0.8428,
             "stroke_m": 0.520091,
-            "clearance_m": 0.1011,
+            "clearance_m": 0.151704,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "leg_1",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg_1_b0",
               "leg_1_b1",
@@ -10357,14 +10357,14 @@
             ],
             "reach_m": 0.8428,
             "stroke_m": 0.241917,
-            "clearance_m": 0.1011,
+            "clearance_m": 0.151704,
             "walk_phase": 0.333333,
             "run_phase": 0.333333,
             "support": true
           },
           {
             "branch_id": "leg_2",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg_2_b0",
               "leg_2_b1",
@@ -10388,7 +10388,7 @@
             ],
             "reach_m": 0.8428,
             "stroke_m": 0.241917,
-            "clearance_m": 0.1011,
+            "clearance_m": 0.151704,
             "walk_phase": 0.666667,
             "run_phase": 0.666667,
             "support": true
@@ -11353,7 +11353,7 @@
         "legs": [
           {
             "branch_id": "leg_0",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg_0_b0",
               "leg_0_b1",
@@ -11377,14 +11377,14 @@
             ],
             "reach_m": 0.8306,
             "stroke_m": 0.636409,
-            "clearance_m": 0.0997,
+            "clearance_m": 0.149508,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "leg_1",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg_1_b0",
               "leg_1_b1",
@@ -11408,14 +11408,14 @@
             ],
             "reach_m": 0.8306,
             "stroke_m": 0.39104,
-            "clearance_m": 0.0997,
+            "clearance_m": 0.149508,
             "walk_phase": 0.333333,
             "run_phase": 0.333333,
             "support": true
           },
           {
             "branch_id": "leg_2",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg_2_b0",
               "leg_2_b1",
@@ -11439,7 +11439,7 @@
             ],
             "reach_m": 0.8306,
             "stroke_m": 0.39104,
-            "clearance_m": 0.0997,
+            "clearance_m": 0.149508,
             "walk_phase": 0.666667,
             "run_phase": 0.666667,
             "support": true
@@ -12404,7 +12404,7 @@
         "legs": [
           {
             "branch_id": "leg_0",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg_0_b0",
               "leg_0_b1",
@@ -12428,14 +12428,14 @@
             ],
             "reach_m": 0.8495,
             "stroke_m": 0.396551,
-            "clearance_m": 0.1019,
+            "clearance_m": 0.15291,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "leg_1",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg_1_b0",
               "leg_1_b1",
@@ -12459,14 +12459,14 @@
             ],
             "reach_m": 0.8495,
             "stroke_m": 0.130326,
-            "clearance_m": 0.1019,
+            "clearance_m": 0.15291,
             "walk_phase": 0.333333,
             "run_phase": 0.333333,
             "support": true
           },
           {
             "branch_id": "leg_2",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg_2_b0",
               "leg_2_b1",
@@ -12490,7 +12490,7 @@
             ],
             "reach_m": 0.8495,
             "stroke_m": 0.130326,
-            "clearance_m": 0.1019,
+            "clearance_m": 0.15291,
             "walk_phase": 0.666667,
             "run_phase": 0.666667,
             "support": true
@@ -14694,7 +14694,7 @@
         "legs": [
           {
             "branch_id": "leg0_L",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg0_L_b0",
               "leg0_L_b1",
@@ -14718,14 +14718,14 @@
             ],
             "reach_m": 0.7623,
             "stroke_m": 0.156392,
-            "clearance_m": 0.0915,
+            "clearance_m": 0.137214,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "leg0_R",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg0_R_b0",
               "leg0_R_b1",
@@ -14749,14 +14749,14 @@
             ],
             "reach_m": 0.7623,
             "stroke_m": 0.156392,
-            "clearance_m": 0.0915,
+            "clearance_m": 0.137214,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
           },
           {
             "branch_id": "leg1_L",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg1_L_b0",
               "leg1_L_b1",
@@ -14780,14 +14780,14 @@
             ],
             "reach_m": 0.7623,
             "stroke_m": 0.156392,
-            "clearance_m": 0.0915,
+            "clearance_m": 0.137214,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
           },
           {
             "branch_id": "leg1_R",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg1_R_b0",
               "leg1_R_b1",
@@ -14811,14 +14811,14 @@
             ],
             "reach_m": 0.7623,
             "stroke_m": 0.156392,
-            "clearance_m": 0.0915,
+            "clearance_m": 0.137214,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "leg2_L",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg2_L_b0",
               "leg2_L_b1",
@@ -14842,14 +14842,14 @@
             ],
             "reach_m": 0.7623,
             "stroke_m": 0.156392,
-            "clearance_m": 0.0915,
+            "clearance_m": 0.137214,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "leg2_R",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg2_R_b0",
               "leg2_R_b1",
@@ -14873,14 +14873,14 @@
             ],
             "reach_m": 0.7623,
             "stroke_m": 0.156392,
-            "clearance_m": 0.0915,
+            "clearance_m": 0.137214,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
           },
           {
             "branch_id": "leg3_L",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg3_L_b0",
               "leg3_L_b1",
@@ -14904,14 +14904,14 @@
             ],
             "reach_m": 0.7623,
             "stroke_m": 0.156392,
-            "clearance_m": 0.0915,
+            "clearance_m": 0.137214,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
           },
           {
             "branch_id": "leg3_R",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg3_R_b0",
               "leg3_R_b1",
@@ -14935,7 +14935,7 @@
             ],
             "reach_m": 0.7623,
             "stroke_m": 0.156392,
-            "clearance_m": 0.0915,
+            "clearance_m": 0.137214,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -17139,7 +17139,7 @@
         "legs": [
           {
             "branch_id": "leg0_L",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg0_L_b0",
               "leg0_L_b1",
@@ -17163,14 +17163,14 @@
             ],
             "reach_m": 0.7513,
             "stroke_m": 0.208443,
-            "clearance_m": 0.0902,
+            "clearance_m": 0.135234,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "leg0_R",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg0_R_b0",
               "leg0_R_b1",
@@ -17194,14 +17194,14 @@
             ],
             "reach_m": 0.7513,
             "stroke_m": 0.208443,
-            "clearance_m": 0.0902,
+            "clearance_m": 0.135234,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
           },
           {
             "branch_id": "leg1_L",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg1_L_b0",
               "leg1_L_b1",
@@ -17225,14 +17225,14 @@
             ],
             "reach_m": 0.7513,
             "stroke_m": 0.208443,
-            "clearance_m": 0.0902,
+            "clearance_m": 0.135234,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
           },
           {
             "branch_id": "leg1_R",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg1_R_b0",
               "leg1_R_b1",
@@ -17256,14 +17256,14 @@
             ],
             "reach_m": 0.7513,
             "stroke_m": 0.208443,
-            "clearance_m": 0.0902,
+            "clearance_m": 0.135234,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "leg2_L",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg2_L_b0",
               "leg2_L_b1",
@@ -17287,14 +17287,14 @@
             ],
             "reach_m": 0.7513,
             "stroke_m": 0.208443,
-            "clearance_m": 0.0902,
+            "clearance_m": 0.135234,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "leg2_R",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg2_R_b0",
               "leg2_R_b1",
@@ -17318,14 +17318,14 @@
             ],
             "reach_m": 0.7513,
             "stroke_m": 0.208443,
-            "clearance_m": 0.0902,
+            "clearance_m": 0.135234,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
           },
           {
             "branch_id": "leg3_L",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg3_L_b0",
               "leg3_L_b1",
@@ -17349,14 +17349,14 @@
             ],
             "reach_m": 0.7513,
             "stroke_m": 0.208443,
-            "clearance_m": 0.0902,
+            "clearance_m": 0.135234,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
           },
           {
             "branch_id": "leg3_R",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg3_R_b0",
               "leg3_R_b1",
@@ -17380,7 +17380,7 @@
             ],
             "reach_m": 0.7513,
             "stroke_m": 0.208443,
-            "clearance_m": 0.0902,
+            "clearance_m": 0.135234,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -19584,7 +19584,7 @@
         "legs": [
           {
             "branch_id": "leg0_L",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg0_L_b0",
               "leg0_L_b1",
@@ -19608,14 +19608,14 @@
             ],
             "reach_m": 0.7684,
             "stroke_m": 0.104709,
-            "clearance_m": 0.0922,
+            "clearance_m": 0.138312,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "leg0_R",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg0_R_b0",
               "leg0_R_b1",
@@ -19639,14 +19639,14 @@
             ],
             "reach_m": 0.7684,
             "stroke_m": 0.104709,
-            "clearance_m": 0.0922,
+            "clearance_m": 0.138312,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
           },
           {
             "branch_id": "leg1_L",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg1_L_b0",
               "leg1_L_b1",
@@ -19670,14 +19670,14 @@
             ],
             "reach_m": 0.7684,
             "stroke_m": 0.104709,
-            "clearance_m": 0.0922,
+            "clearance_m": 0.138312,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
           },
           {
             "branch_id": "leg1_R",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg1_R_b0",
               "leg1_R_b1",
@@ -19701,14 +19701,14 @@
             ],
             "reach_m": 0.7684,
             "stroke_m": 0.104709,
-            "clearance_m": 0.0922,
+            "clearance_m": 0.138312,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "leg2_L",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg2_L_b0",
               "leg2_L_b1",
@@ -19732,14 +19732,14 @@
             ],
             "reach_m": 0.7684,
             "stroke_m": 0.104709,
-            "clearance_m": 0.0922,
+            "clearance_m": 0.138312,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "leg2_R",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg2_R_b0",
               "leg2_R_b1",
@@ -19763,14 +19763,14 @@
             ],
             "reach_m": 0.7684,
             "stroke_m": 0.104709,
-            "clearance_m": 0.0922,
+            "clearance_m": 0.138312,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
           },
           {
             "branch_id": "leg3_L",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg3_L_b0",
               "leg3_L_b1",
@@ -19794,14 +19794,14 @@
             ],
             "reach_m": 0.7684,
             "stroke_m": 0.104709,
-            "clearance_m": 0.0922,
+            "clearance_m": 0.138312,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
           },
           {
             "branch_id": "leg3_R",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg3_R_b0",
               "leg3_R_b1",
@@ -19825,7 +19825,7 @@
             ],
             "reach_m": 0.7684,
             "stroke_m": 0.104709,
-            "clearance_m": 0.0922,
+            "clearance_m": 0.138312,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -20966,7 +20966,7 @@
             ],
             "reach_m": 0.743401,
             "stroke_m": 0.138889,
-            "clearance_m": 0.0892,
+            "clearance_m": 0.133812,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -20996,7 +20996,7 @@
             ],
             "reach_m": 0.743401,
             "stroke_m": 0.138889,
-            "clearance_m": 0.0892,
+            "clearance_m": 0.133812,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -22137,7 +22137,7 @@
             ],
             "reach_m": 0.536399,
             "stroke_m": 0.1628,
-            "clearance_m": 0.0644,
+            "clearance_m": 0.096552,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -22167,7 +22167,7 @@
             ],
             "reach_m": 0.536399,
             "stroke_m": 0.1628,
-            "clearance_m": 0.0644,
+            "clearance_m": 0.096552,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -23308,7 +23308,7 @@
             ],
             "reach_m": 1.0657,
             "stroke_m": 0.107699,
-            "clearance_m": 0.1279,
+            "clearance_m": 0.191826,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -23338,7 +23338,7 @@
             ],
             "reach_m": 1.0657,
             "stroke_m": 0.107699,
-            "clearance_m": 0.1279,
+            "clearance_m": 0.191826,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -24479,7 +24479,7 @@
             ],
             "reach_m": 0.8113,
             "stroke_m": 0.0,
-            "clearance_m": 0.0974,
+            "clearance_m": 0.146034,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -24509,7 +24509,7 @@
             ],
             "reach_m": 0.8113,
             "stroke_m": 0.0,
-            "clearance_m": 0.0974,
+            "clearance_m": 0.146034,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -25650,7 +25650,7 @@
             ],
             "reach_m": 0.5855,
             "stroke_m": 0.0,
-            "clearance_m": 0.0703,
+            "clearance_m": 0.10539,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -25680,7 +25680,7 @@
             ],
             "reach_m": 0.5855,
             "stroke_m": 0.0,
-            "clearance_m": 0.0703,
+            "clearance_m": 0.10539,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -26821,7 +26821,7 @@
             ],
             "reach_m": 1.1631,
             "stroke_m": 0.0,
-            "clearance_m": 0.1396,
+            "clearance_m": 0.209358,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -26851,7 +26851,7 @@
             ],
             "reach_m": 1.1631,
             "stroke_m": 0.0,
-            "clearance_m": 0.1396,
+            "clearance_m": 0.209358,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -28627,7 +28627,7 @@
         "legs": [
           {
             "branch_id": "leg0_L",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg0_L_b0",
               "leg0_L_b1",
@@ -28651,14 +28651,14 @@
             ],
             "reach_m": 0.8229,
             "stroke_m": 0.734871,
-            "clearance_m": 0.0987,
+            "clearance_m": 0.148122,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "leg0_R",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg0_R_b0",
               "leg0_R_b1",
@@ -28682,14 +28682,14 @@
             ],
             "reach_m": 0.8229,
             "stroke_m": 0.734871,
-            "clearance_m": 0.0987,
+            "clearance_m": 0.148122,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
           },
           {
             "branch_id": "leg1_L",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg1_L_b0",
               "leg1_L_b1",
@@ -28713,14 +28713,14 @@
             ],
             "reach_m": 0.8229,
             "stroke_m": 1.057031,
-            "clearance_m": 0.0987,
+            "clearance_m": 0.148122,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
           },
           {
             "branch_id": "leg1_R",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg1_R_b0",
               "leg1_R_b1",
@@ -28744,14 +28744,14 @@
             ],
             "reach_m": 0.8229,
             "stroke_m": 1.057031,
-            "clearance_m": 0.0987,
+            "clearance_m": 0.148122,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "leg2_L",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg2_L_b0",
               "leg2_L_b1",
@@ -28775,14 +28775,14 @@
             ],
             "reach_m": 0.8229,
             "stroke_m": 0.734871,
-            "clearance_m": 0.0987,
+            "clearance_m": 0.148122,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "leg2_R",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg2_R_b0",
               "leg2_R_b1",
@@ -28806,7 +28806,7 @@
             ],
             "reach_m": 0.8229,
             "stroke_m": 0.734871,
-            "clearance_m": 0.0987,
+            "clearance_m": 0.148122,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -30582,7 +30582,7 @@
         "legs": [
           {
             "branch_id": "leg0_L",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg0_L_b0",
               "leg0_L_b1",
@@ -30606,14 +30606,14 @@
             ],
             "reach_m": 0.811,
             "stroke_m": 0.800333,
-            "clearance_m": 0.0973,
+            "clearance_m": 0.14598,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "leg0_R",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg0_R_b0",
               "leg0_R_b1",
@@ -30637,14 +30637,14 @@
             ],
             "reach_m": 0.811,
             "stroke_m": 0.800333,
-            "clearance_m": 0.0973,
+            "clearance_m": 0.14598,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
           },
           {
             "branch_id": "leg1_L",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg1_L_b0",
               "leg1_L_b1",
@@ -30668,14 +30668,14 @@
             ],
             "reach_m": 0.811,
             "stroke_m": 1.100423,
-            "clearance_m": 0.0973,
+            "clearance_m": 0.14598,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
           },
           {
             "branch_id": "leg1_R",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg1_R_b0",
               "leg1_R_b1",
@@ -30699,14 +30699,14 @@
             ],
             "reach_m": 0.811,
             "stroke_m": 1.100423,
-            "clearance_m": 0.0973,
+            "clearance_m": 0.14598,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "leg2_L",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg2_L_b0",
               "leg2_L_b1",
@@ -30730,14 +30730,14 @@
             ],
             "reach_m": 0.811,
             "stroke_m": 0.800333,
-            "clearance_m": 0.0973,
+            "clearance_m": 0.14598,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "leg2_R",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg2_R_b0",
               "leg2_R_b1",
@@ -30761,7 +30761,7 @@
             ],
             "reach_m": 0.811,
             "stroke_m": 0.800333,
-            "clearance_m": 0.0973,
+            "clearance_m": 0.14598,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -32537,7 +32537,7 @@
         "legs": [
           {
             "branch_id": "leg0_L",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg0_L_b0",
               "leg0_L_b1",
@@ -32561,14 +32561,14 @@
             ],
             "reach_m": 0.8295,
             "stroke_m": 0.670592,
-            "clearance_m": 0.0995,
+            "clearance_m": 0.14931,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "leg0_R",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg0_R_b0",
               "leg0_R_b1",
@@ -32592,14 +32592,14 @@
             ],
             "reach_m": 0.8295,
             "stroke_m": 0.670592,
-            "clearance_m": 0.0995,
+            "clearance_m": 0.14931,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
           },
           {
             "branch_id": "leg1_L",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg1_L_b0",
               "leg1_L_b1",
@@ -32623,14 +32623,14 @@
             ],
             "reach_m": 0.8295,
             "stroke_m": 1.008585,
-            "clearance_m": 0.0995,
+            "clearance_m": 0.14931,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
           },
           {
             "branch_id": "leg1_R",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg1_R_b0",
               "leg1_R_b1",
@@ -32654,14 +32654,14 @@
             ],
             "reach_m": 0.8295,
             "stroke_m": 1.008585,
-            "clearance_m": 0.0995,
+            "clearance_m": 0.14931,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "leg2_L",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg2_L_b0",
               "leg2_L_b1",
@@ -32685,14 +32685,14 @@
             ],
             "reach_m": 0.8295,
             "stroke_m": 0.670592,
-            "clearance_m": 0.0995,
+            "clearance_m": 0.14931,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "leg2_R",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg2_R_b0",
               "leg2_R_b1",
@@ -32716,7 +32716,7 @@
             ],
             "reach_m": 0.8295,
             "stroke_m": 0.670592,
-            "clearance_m": 0.0995,
+            "clearance_m": 0.14931,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -34492,7 +34492,7 @@
         "legs": [
           {
             "branch_id": "leg0_L",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg0_L_b0",
               "leg0_L_b1",
@@ -34516,14 +34516,14 @@
             ],
             "reach_m": 0.9905,
             "stroke_m": 0.88456,
-            "clearance_m": 0.1189,
+            "clearance_m": 0.17829,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "leg0_R",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg0_R_b0",
               "leg0_R_b1",
@@ -34547,14 +34547,14 @@
             ],
             "reach_m": 0.9905,
             "stroke_m": 0.88456,
-            "clearance_m": 0.1189,
+            "clearance_m": 0.17829,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
           },
           {
             "branch_id": "leg1_L",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg1_L_b0",
               "leg1_L_b1",
@@ -34578,14 +34578,14 @@
             ],
             "reach_m": 0.9905,
             "stroke_m": 1.272319,
-            "clearance_m": 0.1189,
+            "clearance_m": 0.17829,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
           },
           {
             "branch_id": "leg1_R",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg1_R_b0",
               "leg1_R_b1",
@@ -34609,14 +34609,14 @@
             ],
             "reach_m": 0.9905,
             "stroke_m": 1.272319,
-            "clearance_m": 0.1189,
+            "clearance_m": 0.17829,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "leg2_L",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg2_L_b0",
               "leg2_L_b1",
@@ -34640,14 +34640,14 @@
             ],
             "reach_m": 0.9905,
             "stroke_m": 0.88456,
-            "clearance_m": 0.1189,
+            "clearance_m": 0.17829,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "leg2_R",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg2_R_b0",
               "leg2_R_b1",
@@ -34671,7 +34671,7 @@
             ],
             "reach_m": 0.9905,
             "stroke_m": 0.88456,
-            "clearance_m": 0.1189,
+            "clearance_m": 0.17829,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -36447,7 +36447,7 @@
         "legs": [
           {
             "branch_id": "leg0_L",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg0_L_b0",
               "leg0_L_b1",
@@ -36471,14 +36471,14 @@
             ],
             "reach_m": 0.9762,
             "stroke_m": 0.963359,
-            "clearance_m": 0.1171,
+            "clearance_m": 0.175716,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "leg0_R",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg0_R_b0",
               "leg0_R_b1",
@@ -36502,14 +36502,14 @@
             ],
             "reach_m": 0.9762,
             "stroke_m": 0.963359,
-            "clearance_m": 0.1171,
+            "clearance_m": 0.175716,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
           },
           {
             "branch_id": "leg1_L",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg1_L_b0",
               "leg1_L_b1",
@@ -36533,14 +36533,14 @@
             ],
             "reach_m": 0.9762,
             "stroke_m": 1.324582,
-            "clearance_m": 0.1171,
+            "clearance_m": 0.175716,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
           },
           {
             "branch_id": "leg1_R",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg1_R_b0",
               "leg1_R_b1",
@@ -36564,14 +36564,14 @@
             ],
             "reach_m": 0.9762,
             "stroke_m": 1.324582,
-            "clearance_m": 0.1171,
+            "clearance_m": 0.175716,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "leg2_L",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg2_L_b0",
               "leg2_L_b1",
@@ -36595,14 +36595,14 @@
             ],
             "reach_m": 0.9762,
             "stroke_m": 0.963359,
-            "clearance_m": 0.1171,
+            "clearance_m": 0.175716,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "leg2_R",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg2_R_b0",
               "leg2_R_b1",
@@ -36626,7 +36626,7 @@
             ],
             "reach_m": 0.9762,
             "stroke_m": 0.963359,
-            "clearance_m": 0.1171,
+            "clearance_m": 0.175716,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -38402,7 +38402,7 @@
         "legs": [
           {
             "branch_id": "leg0_L",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg0_L_b0",
               "leg0_L_b1",
@@ -38426,14 +38426,14 @@
             ],
             "reach_m": 0.9984,
             "stroke_m": 0.807098,
-            "clearance_m": 0.1198,
+            "clearance_m": 0.179712,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "leg0_R",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg0_R_b0",
               "leg0_R_b1",
@@ -38457,14 +38457,14 @@
             ],
             "reach_m": 0.9984,
             "stroke_m": 0.807098,
-            "clearance_m": 0.1198,
+            "clearance_m": 0.179712,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
           },
           {
             "branch_id": "leg1_L",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg1_L_b0",
               "leg1_L_b1",
@@ -38488,14 +38488,14 @@
             ],
             "reach_m": 0.9984,
             "stroke_m": 1.213952,
-            "clearance_m": 0.1198,
+            "clearance_m": 0.179712,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
           },
           {
             "branch_id": "leg1_R",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg1_R_b0",
               "leg1_R_b1",
@@ -38519,14 +38519,14 @@
             ],
             "reach_m": 0.9984,
             "stroke_m": 1.213952,
-            "clearance_m": 0.1198,
+            "clearance_m": 0.179712,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "leg2_L",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg2_L_b0",
               "leg2_L_b1",
@@ -38550,14 +38550,14 @@
             ],
             "reach_m": 0.9984,
             "stroke_m": 0.807098,
-            "clearance_m": 0.1198,
+            "clearance_m": 0.179712,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "leg2_R",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "leg2_R_b0",
               "leg2_R_b1",
@@ -38581,7 +38581,7 @@
             ],
             "reach_m": 0.9984,
             "stroke_m": 0.807098,
-            "clearance_m": 0.1198,
+            "clearance_m": 0.179712,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -39882,7 +39882,7 @@
             ],
             "reach_m": 1.2226,
             "stroke_m": 0.0,
-            "clearance_m": 0.1467,
+            "clearance_m": 0.220068,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -39912,7 +39912,7 @@
             ],
             "reach_m": 1.2226,
             "stroke_m": 0.0,
-            "clearance_m": 0.1467,
+            "clearance_m": 0.220068,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -39942,7 +39942,7 @@
             ],
             "reach_m": 1.2226,
             "stroke_m": 0.0,
-            "clearance_m": 0.1467,
+            "clearance_m": 0.220068,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -39972,7 +39972,7 @@
             ],
             "reach_m": 1.2226,
             "stroke_m": 0.0,
-            "clearance_m": 0.1467,
+            "clearance_m": 0.220068,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -41273,7 +41273,7 @@
             ],
             "reach_m": 0.9898,
             "stroke_m": 0.0,
-            "clearance_m": 0.1188,
+            "clearance_m": 0.178164,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -41303,7 +41303,7 @@
             ],
             "reach_m": 0.9898,
             "stroke_m": 0.0,
-            "clearance_m": 0.1188,
+            "clearance_m": 0.178164,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -41333,7 +41333,7 @@
             ],
             "reach_m": 0.9898,
             "stroke_m": 0.0,
-            "clearance_m": 0.1188,
+            "clearance_m": 0.178164,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -41363,7 +41363,7 @@
             ],
             "reach_m": 0.9898,
             "stroke_m": 0.0,
-            "clearance_m": 0.1188,
+            "clearance_m": 0.178164,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -42664,7 +42664,7 @@
             ],
             "reach_m": 1.4515,
             "stroke_m": 0.0,
-            "clearance_m": 0.1742,
+            "clearance_m": 0.26127,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -42694,7 +42694,7 @@
             ],
             "reach_m": 1.4515,
             "stroke_m": 0.0,
-            "clearance_m": 0.1742,
+            "clearance_m": 0.26127,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -42724,7 +42724,7 @@
             ],
             "reach_m": 1.4515,
             "stroke_m": 0.0,
-            "clearance_m": 0.1742,
+            "clearance_m": 0.26127,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -42754,7 +42754,7 @@
             ],
             "reach_m": 1.4515,
             "stroke_m": 0.0,
-            "clearance_m": 0.1742,
+            "clearance_m": 0.26127,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -44055,7 +44055,7 @@
             ],
             "reach_m": 0.9602,
             "stroke_m": 0.0,
-            "clearance_m": 0.1152,
+            "clearance_m": 0.172836,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -44085,7 +44085,7 @@
             ],
             "reach_m": 0.9602,
             "stroke_m": 0.0,
-            "clearance_m": 0.1152,
+            "clearance_m": 0.172836,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -44115,7 +44115,7 @@
             ],
             "reach_m": 0.9602,
             "stroke_m": 0.0,
-            "clearance_m": 0.1152,
+            "clearance_m": 0.172836,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -44145,7 +44145,7 @@
             ],
             "reach_m": 0.9602,
             "stroke_m": 0.0,
-            "clearance_m": 0.1152,
+            "clearance_m": 0.172836,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -45446,7 +45446,7 @@
             ],
             "reach_m": 0.7774,
             "stroke_m": 0.0,
-            "clearance_m": 0.0933,
+            "clearance_m": 0.139932,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -45476,7 +45476,7 @@
             ],
             "reach_m": 0.7774,
             "stroke_m": 0.0,
-            "clearance_m": 0.0933,
+            "clearance_m": 0.139932,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -45506,7 +45506,7 @@
             ],
             "reach_m": 0.7774,
             "stroke_m": 0.0,
-            "clearance_m": 0.0933,
+            "clearance_m": 0.139932,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -45536,7 +45536,7 @@
             ],
             "reach_m": 0.7774,
             "stroke_m": 0.0,
-            "clearance_m": 0.0933,
+            "clearance_m": 0.139932,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -46837,7 +46837,7 @@
             ],
             "reach_m": 1.140001,
             "stroke_m": 0.0,
-            "clearance_m": 0.1368,
+            "clearance_m": 0.2052,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -46867,7 +46867,7 @@
             ],
             "reach_m": 1.140001,
             "stroke_m": 0.0,
-            "clearance_m": 0.1368,
+            "clearance_m": 0.2052,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -46897,7 +46897,7 @@
             ],
             "reach_m": 1.140001,
             "stroke_m": 0.0,
-            "clearance_m": 0.1368,
+            "clearance_m": 0.2052,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -46927,7 +46927,7 @@
             ],
             "reach_m": 1.140001,
             "stroke_m": 0.0,
-            "clearance_m": 0.1368,
+            "clearance_m": 0.2052,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -58890,7 +58890,7 @@
         "legs": [
           {
             "branch_id": "arm_0",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "arm_0_b0",
               "arm_0_b1",
@@ -58914,14 +58914,14 @@
             ],
             "reach_m": 0.8475,
             "stroke_m": 0.20065,
-            "clearance_m": 0.1017,
+            "clearance_m": 0.15255,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "arm_1",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "arm_1_b0",
               "arm_1_b1",
@@ -58945,14 +58945,14 @@
             ],
             "reach_m": 0.847501,
             "stroke_m": 0.307662,
-            "clearance_m": 0.1017,
+            "clearance_m": 0.15255,
             "walk_phase": 0.166667,
             "run_phase": 0.166667,
             "support": true
           },
           {
             "branch_id": "arm_2",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "arm_2_b0",
               "arm_2_b1",
@@ -58976,14 +58976,14 @@
             ],
             "reach_m": 0.847501,
             "stroke_m": 0.307658,
-            "clearance_m": 0.1017,
+            "clearance_m": 0.15255,
             "walk_phase": 0.333333,
             "run_phase": 0.333333,
             "support": true
           },
           {
             "branch_id": "arm_3",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "arm_3_b0",
               "arm_3_b1",
@@ -59007,14 +59007,14 @@
             ],
             "reach_m": 0.8475,
             "stroke_m": 0.200646,
-            "clearance_m": 0.1017,
+            "clearance_m": 0.15255,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
           },
           {
             "branch_id": "arm_4",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "arm_4_b0",
               "arm_4_b1",
@@ -59038,14 +59038,14 @@
             ],
             "reach_m": 0.847501,
             "stroke_m": 0.307658,
-            "clearance_m": 0.1017,
+            "clearance_m": 0.15255,
             "walk_phase": 0.666667,
             "run_phase": 0.666667,
             "support": true
           },
           {
             "branch_id": "arm_5",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "arm_5_b0",
               "arm_5_b1",
@@ -59069,7 +59069,7 @@
             ],
             "reach_m": 0.847501,
             "stroke_m": 0.307662,
-            "clearance_m": 0.1017,
+            "clearance_m": 0.15255,
             "walk_phase": 0.833333,
             "run_phase": 0.833333,
             "support": true
@@ -60778,7 +60778,7 @@
         "legs": [
           {
             "branch_id": "arm_0",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "arm_0_b0",
               "arm_0_b1",
@@ -60802,14 +60802,14 @@
             ],
             "reach_m": 0.6713,
             "stroke_m": 0.269059,
-            "clearance_m": 0.0806,
+            "clearance_m": 0.120834,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "arm_1",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "arm_1_b0",
               "arm_1_b1",
@@ -60833,14 +60833,14 @@
             ],
             "reach_m": 0.6713,
             "stroke_m": 0.365988,
-            "clearance_m": 0.0806,
+            "clearance_m": 0.120834,
             "walk_phase": 0.166667,
             "run_phase": 0.166667,
             "support": true
           },
           {
             "branch_id": "arm_2",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "arm_2_b0",
               "arm_2_b1",
@@ -60864,14 +60864,14 @@
             ],
             "reach_m": 0.6713,
             "stroke_m": 0.365988,
-            "clearance_m": 0.0806,
+            "clearance_m": 0.120834,
             "walk_phase": 0.333333,
             "run_phase": 0.333333,
             "support": true
           },
           {
             "branch_id": "arm_3",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "arm_3_b0",
               "arm_3_b1",
@@ -60895,14 +60895,14 @@
             ],
             "reach_m": 0.671301,
             "stroke_m": 0.26906,
-            "clearance_m": 0.0806,
+            "clearance_m": 0.120834,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
           },
           {
             "branch_id": "arm_4",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "arm_4_b0",
               "arm_4_b1",
@@ -60926,14 +60926,14 @@
             ],
             "reach_m": 0.6713,
             "stroke_m": 0.365988,
-            "clearance_m": 0.0806,
+            "clearance_m": 0.120834,
             "walk_phase": 0.666667,
             "run_phase": 0.666667,
             "support": true
           },
           {
             "branch_id": "arm_5",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "arm_5_b0",
               "arm_5_b1",
@@ -60957,7 +60957,7 @@
             ],
             "reach_m": 0.6713,
             "stroke_m": 0.365988,
-            "clearance_m": 0.0806,
+            "clearance_m": 0.120834,
             "walk_phase": 0.833333,
             "run_phase": 0.833333,
             "support": true
@@ -62666,7 +62666,7 @@
         "legs": [
           {
             "branch_id": "arm_0",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "arm_0_b0",
               "arm_0_b1",
@@ -62690,14 +62690,14 @@
             ],
             "reach_m": 1.1011,
             "stroke_m": 0.136893,
-            "clearance_m": 0.1321,
+            "clearance_m": 0.198198,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
           {
             "branch_id": "arm_1",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "arm_1_b0",
               "arm_1_b1",
@@ -62721,14 +62721,14 @@
             ],
             "reach_m": 1.1011,
             "stroke_m": 0.233803,
-            "clearance_m": 0.1321,
+            "clearance_m": 0.198198,
             "walk_phase": 0.166667,
             "run_phase": 0.166667,
             "support": true
           },
           {
             "branch_id": "arm_2",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "arm_2_b0",
               "arm_2_b1",
@@ -62752,14 +62752,14 @@
             ],
             "reach_m": 1.101101,
             "stroke_m": 0.233805,
-            "clearance_m": 0.1321,
+            "clearance_m": 0.198198,
             "walk_phase": 0.333333,
             "run_phase": 0.333333,
             "support": true
           },
           {
             "branch_id": "arm_3",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "arm_3_b0",
               "arm_3_b1",
@@ -62783,14 +62783,14 @@
             ],
             "reach_m": 1.101101,
             "stroke_m": 0.136893,
-            "clearance_m": 0.1321,
+            "clearance_m": 0.198198,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
           },
           {
             "branch_id": "arm_4",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "arm_4_b0",
               "arm_4_b1",
@@ -62814,14 +62814,14 @@
             ],
             "reach_m": 1.101101,
             "stroke_m": 0.233805,
-            "clearance_m": 0.1321,
+            "clearance_m": 0.198198,
             "walk_phase": 0.666667,
             "run_phase": 0.666667,
             "support": true
           },
           {
             "branch_id": "arm_5",
-            "solver": "chain",
+            "solver": "hinge4",
             "chain_bones": [
               "arm_5_b0",
               "arm_5_b1",
@@ -62845,7 +62845,7 @@
             ],
             "reach_m": 1.1011,
             "stroke_m": 0.233803,
-            "clearance_m": 0.1321,
+            "clearance_m": 0.198198,
             "walk_phase": 0.833333,
             "run_phase": 0.833333,
             "support": true
@@ -66197,7 +66197,7 @@
             ],
             "reach_m": 0.5003,
             "stroke_m": 0.0,
-            "clearance_m": 0.06,
+            "clearance_m": 0.090054,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -66227,7 +66227,7 @@
             ],
             "reach_m": 0.5003,
             "stroke_m": 0.0,
-            "clearance_m": 0.06,
+            "clearance_m": 0.090054,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -66257,7 +66257,7 @@
             ],
             "reach_m": 0.5003,
             "stroke_m": 0.0,
-            "clearance_m": 0.06,
+            "clearance_m": 0.090054,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -66287,7 +66287,7 @@
             ],
             "reach_m": 0.5003,
             "stroke_m": 0.0,
-            "clearance_m": 0.06,
+            "clearance_m": 0.090054,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -67776,7 +67776,7 @@
             ],
             "reach_m": 0.4051,
             "stroke_m": 0.0,
-            "clearance_m": 0.0486,
+            "clearance_m": 0.072918,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -67806,7 +67806,7 @@
             ],
             "reach_m": 0.4051,
             "stroke_m": 0.0,
-            "clearance_m": 0.0486,
+            "clearance_m": 0.072918,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -67836,7 +67836,7 @@
             ],
             "reach_m": 0.4051,
             "stroke_m": 0.0,
-            "clearance_m": 0.0486,
+            "clearance_m": 0.072918,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -67866,7 +67866,7 @@
             ],
             "reach_m": 0.4051,
             "stroke_m": 0.0,
-            "clearance_m": 0.0486,
+            "clearance_m": 0.072918,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -69355,7 +69355,7 @@
             ],
             "reach_m": 0.594,
             "stroke_m": 0.0,
-            "clearance_m": 0.0713,
+            "clearance_m": 0.10692,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -69385,7 +69385,7 @@
             ],
             "reach_m": 0.594,
             "stroke_m": 0.0,
-            "clearance_m": 0.0713,
+            "clearance_m": 0.10692,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
@@ -69415,7 +69415,7 @@
             ],
             "reach_m": 0.594,
             "stroke_m": 0.0,
-            "clearance_m": 0.0713,
+            "clearance_m": 0.10692,
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
@@ -69445,7 +69445,7 @@
             ],
             "reach_m": 0.594,
             "stroke_m": 0.0,
-            "clearance_m": 0.0713,
+            "clearance_m": 0.10692,
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true

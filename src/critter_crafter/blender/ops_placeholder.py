@@ -64,7 +64,41 @@ def _chain_bones(part: dict[str, Any], template: dict[str, Any]) -> list[tuple[s
     return out
 
 
-def _weights(z: float, bones: list[tuple[str, float, float]], connector: bool, span: list[float]) -> dict[str, float]:
+JOINT_BAND = .12      # blend half-width at a joint, as a fraction of the shorter adjacent segment
+JOINT_PINCH = .30     # radius reduction at a joint for jointed reference limbs
+
+
+def _jointed(part: dict[str, Any], bones: list[tuple[str, float, float]]) -> bool:
+    """Reference limbs with 2-4 segments read as articulated: pinched joints, rigid segments."""
+    reference = part.get("inventory_kind") == "reference" or part.get("source") == "reference"
+    return reference and part.get("category") in ("limb", "appendage", "tail") and 2 <= len(bones) <= 4
+
+
+def _joint_weights(z: float, bones: list[tuple[str, float, float]]) -> dict[str, float]:
+    for (n0, a0, b0), (n1, a1, b1) in zip(bones, bones[1:]):
+        band = JOINT_BAND * min(b0 - a0, b1 - a1)
+        if b0 - band <= z <= b0 + band:
+            u = (z - (b0 - band)) / (2 * band)
+            u = u * u * (3 - 2 * u)
+            return {n0: 1 - u, n1: u}
+    for n, a, b in bones:
+        if a <= z <= b:
+            return {n: 1.0}
+    return {bones[0][0] if z < bones[0][1] else bones[-1][0]: 1.0}
+
+
+def _joint_radius_scale(z: float, bones: list[tuple[str, float, float]]) -> float:
+    scale = 1.0
+    for (_, a0, b0), (_, a1, b1) in zip(bones, bones[1:]):
+        width = .35 * min(b0 - a0, b1 - a1)
+        scale -= JOINT_PINCH * math.exp(-((z - b0) / width) ** 2)
+    return max(.55, scale)
+
+
+def _weights(z: float, bones: list[tuple[str, float, float]], connector: bool, span: list[float],
+             jointed: bool = False) -> dict[str, float]:
+    if jointed and not connector:
+        return _joint_weights(z, bones)
     if connector:
         s0, s1 = span
         u = min(1.0, max(0.0, (z - s0) / (s1 - s0)))
@@ -129,7 +163,8 @@ def build_mesh(part: dict[str, Any], template: dict[str, Any]) -> tuple[list, li
             rx, ry = part["dimensions_m"][0] / 2, part["dimensions_m"][1] / 2
     profile = PROFILES[_profile_for(part)]
     seg = 16 if max(rx, ry) > 0.2 else 12
-    rings = (max(16, 6 * len(bones)) if not connector else min(
+    jointed = _jointed(part, bones)
+    rings = (max(16, (12 if jointed else 6) * len(bones)) if not connector else min(
         10, max(3, part["max_triangles"] // (2 * seg) - 1)
     ))
     seed = zlib.crc32(part["part_id"].encode()) % 1000 / 1000.0 * 2 * math.pi
@@ -145,12 +180,14 @@ def build_mesh(part: dict[str, Any], template: dict[str, Any]) -> tuple[list, li
         # pole. Other placeholders retain a small cap to keep engine imports
         # from dropping zero-area endpoint rings.
         r = wrist_radius / (float(part["girth_m"]) * .5) if wrist_radius is not None else max(0.06, profile(t))
+        if jointed:
+            r *= _joint_radius_scale(z, bones)
         for j in range(seg):
             a = 2 * math.pi * j / seg
             lump = 1 + lump_amount * math.sin(3 * a + 11 * t + seed) * math.sin(5 * math.pi * t + a + seed)
             p = (rx * r * lump * math.cos(a), ry * r * lump * math.sin(a), z)
             verts.append(to_blender(p))
-            weights.append(_weights(z, bones, connector, part.get("connector_span_m", [])))
+            weights.append(_weights(z, bones, connector, part.get("connector_span_m", []), jointed))
     for i in range(rings):
         for j in range(seg):
             a = i * seg + j
@@ -162,7 +199,7 @@ def build_mesh(part: dict[str, Any], template: dict[str, Any]) -> tuple[list, li
     for ring, z, bottom in ((0, z0, True), (rings, z1, False)):
         centre = len(verts)
         verts.append(to_blender((0.0, 0.0, z)))
-        weights.append(_weights(z, bones, connector, part.get("connector_span_m", [])))
+        weights.append(_weights(z, bones, connector, part.get("connector_span_m", []), jointed))
         for j in range(seg):
             a = ring * seg + j
             b = ring * seg + (j + 1) % seg

@@ -21,6 +21,20 @@ namespace CritterCrafter.Locomotion
             public string branchId;
             public Transform target;
             public Transform hip;
+            /// <summary>Two-bone hinge legs: the IK target is the ankle, offset from the foot in the coxa frame.</summary>
+            public bool hinge;
+            public Vector3 ankleOffset;
+            public Quaternion ankleRotation = Quaternion.identity;
+            /// <summary>First chain bone; for insect legs it yaws toward the foot via an aim constraint.</summary>
+            public Transform coxa;
+            public Transform coxaAim;
+            public Transform hint;
+            public float hingeReach;
+            // Neutral vectors in the body frame, measured from the coxa head.
+            public Vector3 homeFromCoxa;
+            public Vector3 femurFromCoxa;
+            public Vector3 hintFromCoxa;
+            public Vector3 coxaDirection;
             public MonoBehaviour constraint;
             public Vector3 homeLocal;
             public float reach;
@@ -135,8 +149,8 @@ namespace CritterCrafter.Locomotion
                 leg.position = leg.plant;
                 leg.planted = true;
                 leg.forced = false;
-                if (leg.target != null) leg.target.position = leg.position;
             }
+            ApplyTargets();
             _lastPosition = transform.position;
             _lastYaw = transform.eulerAngles.y;
             _yawLag = 0f;
@@ -249,18 +263,59 @@ namespace CritterCrafter.Locomotion
             }
 
             UpdateWeights(dt);
+            UpdateBody(dt, speed);
+            ApplyTargets();
+            UpdateAnimator(speed);
+        }
+
+        const float MaxCoxaYawDeg = 45f;
+        const float HingeReachFraction = 0.97f;
+
+        /// <summary>
+        /// Place every IK target for the foot contacts in leg.position, never asking a chain for more than it
+        /// has: an unreachable planted foot drags (a short slide while its group waits to re-step) instead of
+        /// the leg snapping toward an impossible target.
+        /// Hinge legs: the coxa yaws toward the foot about the body's up axis; the ankle keeps its neutral
+        /// offset and orientation relative to that yawed coxa frame; the knee hint yaws with it.
+        /// Chain legs aim the contact directly.
+        /// </summary>
+        void ApplyTargets()
+        {
+            Quaternion bodyRotation = body != null ? body.rotation : transform.rotation;
+            Vector3 up = bodyRotation * Vector3.up;
             foreach (var leg in legs)
             {
-                // Never ask the chain for more than it has: an unreachable planted foot drags toward the
-                // hip (visible as a short slide while its group waits to re-step) instead of the leg
-                // snapping straight toward an impossible target.
-                Vector3 reachable = ClampToReach(leg, leg.position);
-                if (leg.planted && reachable != leg.position) leg.plant = reachable;
-                leg.position = reachable;
-                if (leg.target != null) leg.target.position = leg.position;
+                if (leg.target == null) continue;
+                if (!leg.hinge || leg.coxa == null)
+                {
+                    Vector3 reachable = ClampToReach(leg, leg.position);
+                    if (leg.planted && reachable != leg.position) leg.plant = reachable;
+                    leg.position = reachable;
+                    leg.target.position = leg.position;
+                    continue;
+                }
+                Vector3 coxa = leg.coxa.position;
+                Vector3 neutral = Vector3.ProjectOnPlane(bodyRotation * leg.homeFromCoxa, up);
+                Vector3 now = Vector3.ProjectOnPlane(leg.position - coxa, up);
+                float yaw = neutral.sqrMagnitude > 1e-8f && now.sqrMagnitude > 1e-8f
+                    ? Mathf.Clamp(Vector3.SignedAngle(neutral, now, up), -MaxCoxaYawDeg, MaxCoxaYawDeg) : 0f;
+                if (leg.coxaAim == null) yaw = 0f;
+                Quaternion frame = Quaternion.AngleAxis(yaw, up) * bodyRotation;
+
+                Vector3 femur = coxa + frame * leg.femurFromCoxa;
+                Vector3 ankle = leg.position + frame * leg.ankleOffset;
+                Vector3 reach = ankle - femur;
+                float max = HingeReachFraction * leg.hingeReach;
+                if (reach.sqrMagnitude > max * max)
+                {
+                    ankle = femur + reach.normalized * max;
+                    leg.position = ankle - frame * leg.ankleOffset;
+                    if (leg.planted) leg.plant = leg.position;
+                }
+                leg.target.SetPositionAndRotation(ankle, frame * leg.ankleRotation);
+                if (leg.coxaAim != null) leg.coxaAim.position = coxa + frame * leg.coxaDirection;
+                if (leg.hint != null) leg.hint.position = coxa + frame * leg.hintFromCoxa;
             }
-            UpdateBody(dt, speed);
-            UpdateAnimator(speed);
         }
 
         static LocomotionLeg ToPlanner(Leg leg) => new LocomotionLeg { walk_phase = leg.walkPhase, run_phase = leg.runPhase };

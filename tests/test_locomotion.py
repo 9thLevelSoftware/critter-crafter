@@ -26,7 +26,8 @@ def test_hexapods_have_runtime_legs_with_stroke(catalog):
         block = skeleton["locomotion"]
         assert block["mode"] == "legs"
         assert len(block["legs"]) == 6
-        assert all(leg["solver"] == "chain" for leg in block["legs"])
+        assert all(leg["solver"] == "hinge4" for leg in block["legs"])
+        assert all(leg["clearance_m"] >= .18 * leg["reach_m"] - 1e-6 for leg in block["legs"])
         assert block["usable_stroke_m"] > .5, skeleton["skeleton_id"]
         assert 0 < block["v_walk_mps"] < block["v_run_mps"] < block["v_max_mps"]
         assert block["attack_branch_id"] == "leg2_L"

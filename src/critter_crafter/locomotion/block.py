@@ -22,6 +22,7 @@ FR_RUN = 1.0
 REACH_FRACTION = .95      # never plan targets past 95% of straight chain reach
 STROKE_FRACTION = .9      # stance stroke may use 90% of the usable stroke
 MIN_DUTY_RUN = .45
+STEP_LIFT_FRACTION = .18
 FOUR_LEG_FAMILIES = ("quadruped", "hexapod", "crawler", "radial")
 
 
@@ -86,14 +87,18 @@ def locomotion_block(skeleton: dict[str, Any]) -> dict[str, Any]:
         reach = sum(pose[name]["length"] for name in chain)
         legs.append({
             "branch_id": branch["branch_id"],
-            "solver": "two_bone" if branch.get("template") == "limb3" else "chain",
+            # limb3: two-bone (thigh, shin; foot keeps its angle). insect_leg4: hinge over femur,
+            # tibia, tarsus with the coxa fixed. Longer single-contact chains fall back to chain IK.
+            "solver": {"limb3": "two_bone", "insect_leg4": "hinge4"}.get(branch.get("template", ""), "chain"),
             "chain_bones": chain,
             "tip_local_m": mu.r6v(contact["local_point_m"]),
             "hip_m": mu.r6v(hip),
             "home_m": mu.r6v(home),
             "reach_m": mu.r6(reach),
             "stroke_m": mu.r6(_stroke(hip, home, reach)),
-            "clearance_m": mu.r6(float(branch.get("gait", {}).get("clearance_m", .12 * reach))),
+            # Swing lift must read from an isometric camera: at least 18% of reach.
+            "clearance_m": mu.r6(max(STEP_LIFT_FRACTION * reach,
+                                     float(branch.get("gait", {}).get("clearance_m", 0.0)))),
             "walk_phase": walk_phase,
             "run_phase": run_phase,
             "support": branch["branch_id"] in set(skeleton.get("anatomy", {}).get("support_branches", [])),

@@ -1,10 +1,13 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using CritterCrafter.Editor;
+using CritterCrafter.Review;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace CritterCrafter.Tests
 {
@@ -201,58 +204,49 @@ namespace CritterCrafter.Tests
             Assert.Greater(Quaternion.Angle(rest, leg.localRotation), 1f, "walk clip should swing the leg");
         }
 
-        [Test]
-        public void RuntimeLegsPlantFeetAtGameSpeed()
+        [UnityTest]
+        public IEnumerator RuntimeLegsPlantFeetAtGameSpeed()
         {
-            // A NavMeshAgent-like driver: 2.5 m/s straight over a ground collider for 3 s. Planted feet must
-            // stay put in the world, IK must reach its targets and support must never drop below minimum.
+            // Real Play Mode (Animator + Animation Rigging + skinning exactly as in the game): drive the
+            // creature like an agent at 2.5 m/s over a ground collider for 3 s. Planted feet must stay put in
+            // the world, IK must reach its targets and support must never drop below the minimum.
+            EditorSettings.enterPlayModeOptionsEnabled = true;
+            EditorSettings.enterPlayModeOptions = EnterPlayModeOptions.DisableDomainReload | EnterPlayModeOptions.DisableSceneReload;
+            yield return new EnterPlayMode();
+            Time.captureFramerate = 30;
+            var holder = new GameObject("LocomotionTest");
             var ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            ground.transform.SetParent(holder.transform, false);
             ground.transform.localScale = Vector3.one * 10f;
-            _spawned.Add(ground);
             Physics.SyncTransforms();
-            var c = SpawnSkeleton(RuntimeLegSkeleton);
+            var c = LocomotionCapture.Spawn(Lib, RuntimeLegSkeleton, holder.transform, out var restore);
             var gait = c.GetComponent<CritterCrafter.Locomotion.CreatureGait>();
-            Assert.IsNotNull(gait, "runtime-leg skeletons get a CreatureGait");
-            var builder = c.Animator.GetComponent<UnityEngine.Animations.Rigging.RigBuilder>();
-            Assert.IsNotNull(builder);
-            builder.graph.SetTimeUpdateMode(UnityEngine.Playables.DirectorUpdateMode.Manual);
             var block = c.Skeleton.locomotion;
-            var tips = c.GetComponentsInChildren<Transform>(true).Where(t => t.name.EndsWith("_ik_tip"))
-                .ToDictionary(t => t.name.Substring(0, t.name.Length - "_ik_tip".Length));
-            Assert.AreEqual(block.legs.Length, tips.Count);
-
-            const float dt = 1f / 30f, speed = 2.5f;
-            gait.ResetFeet();
-            var lastPlanted = new Dictionary<string, Vector3>();
-            float maxSlip = 0f, maxResidual = 0f;
-            int minSupport = int.MaxValue;
-            for (int frame = 1; frame <= 90; frame++)
+            LocomotionMetrics metrics = null;
+            bool sawLocomotionState = false;
+            if (gait != null)
             {
-                c.transform.position = new Vector3(0f, 0f, speed * dt * frame - 3f);
-                gait.Step(dt);
-                c.Animator.Update(dt);
-                builder.Evaluate(dt);
-                int planted = 0;
-                var now = new Dictionary<string, Vector3>();
-                foreach (var leg in gait.Legs)
+                var recorder = holder.AddComponent<LocomotionRecorder>();
+                recorder.Begin(gait, ReviewCourse.Straight(2.5f, 3f), new LocomotionMetrics { skeleton_id = RuntimeLegSkeleton });
+                while (!recorder.Done)
                 {
-                    var p = tips[leg.branchId].position;
-                    maxResidual = Mathf.Max(maxResidual, Vector3.Distance(p, leg.target.position));
-                    if (!leg.planted) continue;
-                    if (leg.support) planted++;
-                    now[leg.branchId] = p;
-                    if (frame > 15 && lastPlanted.TryGetValue(leg.branchId, out var last))
-                        maxSlip = Mathf.Max(maxSlip, Vector3.Distance(last, p));
+                    yield return null;
+                    sawLocomotionState |= c.Animator.GetCurrentAnimatorStateInfo(0).IsName("Locomotion");
                 }
-                lastPlanted = now;
-                if (frame > 15) minSupport = Mathf.Min(minSupport, planted);
+                metrics = recorder.Metrics;
             }
-            Assert.Less(maxResidual, 0.01f, "IK residual");
-            Assert.Less(maxSlip, 0.005f, "planted feet slide in the world");
-            Assert.GreaterOrEqual(minSupport, block.min_support, "support");
-            Assert.LessOrEqual(gait.Current.cadenceHz, block.cadence_max_hz + 1e-6);
-            Assert.IsFalse(gait.Current.overspeed);
-            Assert.IsTrue(c.Animator.GetCurrentAnimatorStateInfo(0).IsName("Locomotion"), "moving plays the overlay");
+            Object.Destroy(holder);
+            restore();
+            Time.captureFramerate = 0;
+            yield return new ExitPlayMode();
+
+            Assert.IsNotNull(gait, "runtime-leg skeletons get a CreatureGait");
+            Assert.Less(metrics.max_ik_residual_m, 0.01f, "IK residual");
+            Assert.Less(metrics.max_planted_slip_m, 0.005f, "planted feet slide in the world");
+            Assert.GreaterOrEqual(metrics.min_planted_supports, block.min_support, "support");
+            Assert.LessOrEqual(metrics.cadence_hz, block.cadence_max_hz + 1e-4);
+            Assert.IsFalse(metrics.overspeed);
+            Assert.IsTrue(sawLocomotionState, "moving plays the overlay");
         }
 
         [Test]

@@ -4,7 +4,8 @@
   "references": [
     "CritterCrafter.Runtime",
     "CritterCrafter.Locomotion",
-    "Unity.Animation.Rigging"
+    "Unity.Animation.Rigging",
+    "CritterCrafter.Review"
   ],
   "includePlatforms": [
     "Editor"
