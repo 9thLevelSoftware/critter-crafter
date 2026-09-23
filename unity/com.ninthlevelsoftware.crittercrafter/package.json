@@ -1,6 +1,6 @@
 {
   "name": "com.ninthlevelsoftware.crittercrafter",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "displayName": "Critter Crafter",
   "description": "Imports critter-crafter asset libraries (skeletons, body parts, biomass connectors) and assembles skinned, Animator-driven procedural monsters at runtime from seeded recipes.",
   "unity": "6000.0",

@@ -1,0 +1,293 @@
+{
+  "schema_version": "2.0.0",
+  "skeleton_id": "crawler_v05",
+  "family": "crawler",
+  "locomotion_hint": "crawl",
+  "status": "draft",
+  "symmetry_pct": 40,
+  "provenance": {
+    "generator": "skeleton-vary-1",
+    "family_params": "crawler.json",
+    "seed": 1,
+    "index": 5
+  },
+  "branches": [
+    {
+      "branch_id": "core",
+      "template": "core1",
+      "parent_branch": null,
+      "attach_bone_index": 0,
+      "direction": [
+        0,
+        0.014,
+        1
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.532,
+      "size_class": "L",
+      "side": "C",
+      "required": true,
+      "accepts": {
+        "categories": [
+          "core",
+          "head"
+        ]
+      },
+      "connector_size_class": null,
+      "gait": {
+        "role": "core",
+        "phase_rad": 0.0
+      },
+      "origin_m": [
+        0,
+        0.497,
+        -0.266
+      ]
+    },
+    {
+      "branch_id": "leg_0",
+      "template": "insect_leg4",
+      "parent_branch": "core",
+      "attach_bone_index": 0,
+      "direction": [
+        -0.8143890777734011,
+        -0.635,
+        -0.5803192483481736
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.893,
+      "size_class": "M",
+      "side": "R",
+      "required": true,
+      "accepts": {
+        "categories": [
+          "limb"
+        ]
+      },
+      "connector_size_class": "M",
+      "gait": {
+        "role": "locomotor",
+        "phase_rad": 0.0
+      },
+      "origin_m": [
+        -0.1516,
+        0.457,
+        -0.1081
+      ],
+      "stance_deg": [
+        38.0,
+        -72.0,
+        -16.0,
+        12.0
+      ]
+    },
+    {
+      "branch_id": "leg_1",
+      "template": "insect_leg4",
+      "parent_branch": "core",
+      "attach_bone_index": 0,
+      "direction": [
+        -0.6095918927412883,
+        -0.635,
+        0.7927154119254234
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.893,
+      "size_class": "M",
+      "side": "R",
+      "required": true,
+      "accepts": {
+        "categories": [
+          "limb"
+        ]
+      },
+      "connector_size_class": "M",
+      "gait": {
+        "role": "locomotor",
+        "phase_rad": 1.256637
+      },
+      "origin_m": [
+        -0.1135,
+        0.457,
+        0.1476
+      ],
+      "stance_deg": [
+        38.0,
+        -72.0,
+        -16.0,
+        12.0
+      ]
+    },
+    {
+      "branch_id": "leg_2",
+      "template": "insect_leg4",
+      "parent_branch": "core",
+      "attach_bone_index": 0,
+      "direction": [
+        0.30273586739367314,
+        -0.635,
+        0.9530744958256938
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.893,
+      "size_class": "M",
+      "side": "L",
+      "required": true,
+      "accepts": {
+        "categories": [
+          "limb"
+        ]
+      },
+      "connector_size_class": "M",
+      "gait": {
+        "role": "locomotor",
+        "phase_rad": 2.513274
+      },
+      "origin_m": [
+        0.0564,
+        0.457,
+        0.1775
+      ],
+      "stance_deg": [
+        38.0,
+        -72.0,
+        -16.0,
+        12.0
+      ]
+    },
+    {
+      "branch_id": "leg_3",
+      "template": "insect_leg4",
+      "parent_branch": "core",
+      "attach_bone_index": 0,
+      "direction": [
+        0.9788388261847204,
+        -0.635,
+        -0.20463272551896164
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.893,
+      "size_class": "M",
+      "side": "L",
+      "required": true,
+      "accepts": {
+        "categories": [
+          "limb"
+        ]
+      },
+      "connector_size_class": "M",
+      "gait": {
+        "role": "locomotor",
+        "phase_rad": 3.769911
+      },
+      "origin_m": [
+        0.1823,
+        0.457,
+        -0.0381
+      ],
+      "stance_deg": [
+        38.0,
+        -72.0,
+        -16.0,
+        12.0
+      ]
+    },
+    {
+      "branch_id": "leg_4",
+      "template": "insect_leg4",
+      "parent_branch": "core",
+      "attach_bone_index": 0,
+      "direction": [
+        0.025723315523720584,
+        -0.635,
+        -0.999669100772084
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.893,
+      "size_class": "M",
+      "side": "C",
+      "required": true,
+      "accepts": {
+        "categories": [
+          "limb"
+        ]
+      },
+      "connector_size_class": "M",
+      "gait": {
+        "role": "locomotor",
+        "phase_rad": 5.026548
+      },
+      "origin_m": [
+        0.0048,
+        0.457,
+        -0.1861
+      ],
+      "stance_deg": [
+        38.0,
+        -72.0,
+        -16.0,
+        12.0
+      ]
+    },
+    {
+      "branch_id": "mouth",
+      "template": "appendage1",
+      "parent_branch": "core",
+      "attach_bone_index": 0,
+      "direction": [
+        0,
+        -0.1,
+        1
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.35,
+      "size_class": "S",
+      "side": "C",
+      "required": false,
+      "accepts": {
+        "categories": [
+          "appendage"
+        ]
+      },
+      "connector_size_class": "S",
+      "gait": {
+        "role": "manipulator",
+        "phase_rad": 0.0
+      },
+      "origin_m": [
+        0,
+        0.477,
+        0.266
+      ],
+      "optional_fill_pct": 70
+    }
+  ]
+}

@@ -32,7 +32,9 @@ namespace CritterCrafter.Editor
             mi.optimizeGameObjects = false;
             mi.skinWeights = ModelImporterSkinWeights.Standard;
             mi.importAnimation = IsSkeleton(assetPath);
-            mi.animationCompression = ModelImporterAnimationCompression.KeyframeReduction;
+            // Motion artifacts are the authoritative 30fps samples. Keyframe reduction produced
+            // centimetre-scale contact drift and degree-scale joint drift in Unity, so preserve keys.
+            mi.animationCompression = ModelImporterAnimationCompression.Off;
             mi.isReadable = false;
         }
 

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://9thlevelsoftware.github.io/critter-crafter/schemas/recipe.v3.schema.json",
+  "title": "recipe.v3.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "recipe_id", "library_id", "library_version", "generator", "pool_id", "seed", "skeleton_id", "fills"],
+  "properties": {
+    "schema_version": {"const": "3.0.0"},
+    "recipe_id": {"type": "string"},
+    "library_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+    "library_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "generator": {"const": "cc-gen-3"},
+    "pool_id": {"type": "string"},
+    "seed": {"type": "integer"},
+    "skeleton_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+    "fills": {"type": "array", "maxItems": 16, "items": {
+      "type": "object", "additionalProperties": false,
+      "required": ["branch_id", "part_id", "connector_part_id", "binding_profile_id", "binding_profile_version", "binding_profile_hash", "length_scale", "girth_scale"],
+      "properties": {
+        "branch_id": {"type": "string"},
+        "part_id": {"type": "string"},
+        "connector_part_id": {"type": "string"},
+        "binding_profile_id": {"type": "string"},
+        "binding_profile_version": {"type": "string"},
+        "binding_profile_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "length_scale": {"type": "number", "minimum": 0.8, "maximum": 1.25},
+        "girth_scale": {"type": "number", "minimum": 0.9, "maximum": 1.1}
+      }
+    }}
+  }
+}

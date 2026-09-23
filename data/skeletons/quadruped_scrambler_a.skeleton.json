@@ -6,45 +6,316 @@
   "status": "placeholder",
   "symmetry_pct": 50,
   "branches": [
-    { "branch_id": "core", "template": "spine3", "parent_branch": null, "attach_bone_index": 0,
-      "origin_m": [0, 0.82, -0.45], "direction": [0, 0, 1], "up": [0, -1, 0], "length_m": 0.9,
-      "size_class": "L", "side": "C", "required": true,
-      "accepts": { "categories": ["core"], "templates": ["spine3"] },
-      "connector_size_class": null, "gait": { "role": "core", "phase_rad": 0.0 } },
-    { "branch_id": "leg_FL", "template": "limb3", "parent_branch": "core", "attach_bone_index": 2,
-      "origin_m": [0.2, 0.82, 0.35], "direction": [0.1, -1, 0.05], "up": [0, 0, 1], "length_m": 0.85,
-      "size_class": "M", "side": "L", "required": true,
-      "accepts": { "categories": ["limb"] },
-      "connector_size_class": "M", "gait": { "role": "locomotor", "phase_rad": 0.0 } },
-    { "branch_id": "leg_FR", "template": "limb3", "parent_branch": "core", "attach_bone_index": 2,
-      "origin_m": [-0.2, 0.82, 0.35], "direction": [-0.1, -1, 0.05], "up": [0, 0, 1], "length_m": 0.85,
-      "size_class": "M", "side": "R", "required": true, "mirror_of": "leg_FL",
-      "accepts": { "categories": ["limb"] },
-      "connector_size_class": "M", "gait": { "role": "locomotor", "phase_rad": 3.14159265 } },
-    { "branch_id": "leg_BL", "template": "limb3", "parent_branch": "core", "attach_bone_index": 0,
-      "origin_m": [0.2, 0.82, -0.35], "direction": [0.1, -1, -0.05], "up": [0, 0, 1], "length_m": 0.85,
-      "size_class": "M", "side": "L", "required": true,
-      "accepts": { "categories": ["limb"] },
-      "connector_size_class": "M", "gait": { "role": "locomotor", "phase_rad": 3.14159265 } },
-    { "branch_id": "leg_BR", "template": "limb3", "parent_branch": "core", "attach_bone_index": 0,
-      "origin_m": [-0.2, 0.82, -0.35], "direction": [-0.1, -1, -0.05], "up": [0, 0, 1], "length_m": 0.85,
-      "size_class": "M", "side": "R", "required": true, "mirror_of": "leg_BL",
-      "accepts": { "categories": ["limb"] },
-      "connector_size_class": "M", "gait": { "role": "locomotor", "phase_rad": 0.0 } },
-    { "branch_id": "head", "template": "head1", "parent_branch": "core", "attach_bone_index": 2,
-      "origin_m": [0, 0.9, 0.47], "direction": [0, 0.15, 1], "up": [0, 1, 0], "length_m": 0.5,
-      "size_class": "M", "side": "C", "required": true,
-      "accepts": { "categories": ["head"] },
-      "connector_size_class": "M", "gait": { "role": "head", "phase_rad": 0.0 } },
-    { "branch_id": "tail", "template": "tentacle8", "parent_branch": "core", "attach_bone_index": 0,
-      "origin_m": [0, 0.85, -0.47], "direction": [0, 0.25, -1], "up": [0, 1, 0], "length_m": 1.1,
-      "size_class": "M", "side": "C", "required": false, "optional_fill_pct": 60,
-      "accepts": { "categories": ["limb", "tail"], "templates": ["tentacle8"] },
-      "connector_size_class": "M", "gait": { "role": "sway", "phase_rad": 0.0 } },
-    { "branch_id": "dorsal", "template": "appendage1", "parent_branch": "core", "attach_bone_index": 1,
-      "origin_m": [0, 1.02, 0.0], "direction": [0, 1, -0.2], "up": [0, 0, 1], "length_m": 0.35,
-      "size_class": "S", "side": "C", "required": false, "optional_fill_pct": 35,
-      "accepts": { "categories": ["appendage"] },
-      "connector_size_class": "S", "gait": { "role": "sway", "phase_rad": 1.5708 } }
+    {
+      "branch_id": "core",
+      "template": "spine3",
+      "parent_branch": null,
+      "attach_bone_index": 0,
+      "origin_m": [
+        0,
+        0.82,
+        -0.45
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "up": [
+        0,
+        -1,
+        0
+      ],
+      "length_m": 0.9,
+      "size_class": "L",
+      "side": "C",
+      "required": true,
+      "accepts": {
+        "categories": [
+          "core"
+        ],
+        "templates": [
+          "spine3"
+        ]
+      },
+      "connector_size_class": null,
+      "gait": {
+        "role": "core",
+        "phase_rad": 0.0
+      }
+    },
+    {
+      "branch_id": "leg_FL",
+      "template": "limb3",
+      "parent_branch": "core",
+      "attach_bone_index": 2,
+      "origin_m": [
+        0.2,
+        0.82,
+        0.35
+      ],
+      "direction": [
+        0.1,
+        -1,
+        0.05
+      ],
+      "up": [
+        0,
+        0,
+        1
+      ],
+      "length_m": 0.85,
+      "size_class": "M",
+      "side": "L",
+      "required": true,
+      "accepts": {
+        "categories": [
+          "limb"
+        ]
+      },
+      "connector_size_class": "M",
+      "gait": {
+        "role": "locomotor",
+        "phase_rad": 0.0
+      },
+      "stance_deg": [
+        10.0,
+        -24.0,
+        14.0
+      ]
+    },
+    {
+      "branch_id": "leg_FR",
+      "template": "limb3",
+      "parent_branch": "core",
+      "attach_bone_index": 2,
+      "origin_m": [
+        -0.2,
+        0.82,
+        0.35
+      ],
+      "direction": [
+        -0.1,
+        -1,
+        0.05
+      ],
+      "up": [
+        0,
+        0,
+        1
+      ],
+      "length_m": 0.85,
+      "size_class": "M",
+      "side": "R",
+      "required": true,
+      "mirror_of": "leg_FL",
+      "accepts": {
+        "categories": [
+          "limb"
+        ]
+      },
+      "connector_size_class": "M",
+      "gait": {
+        "role": "locomotor",
+        "phase_rad": 3.14159265
+      },
+      "stance_deg": [
+        10.0,
+        -24.0,
+        14.0
+      ]
+    },
+    {
+      "branch_id": "leg_BL",
+      "template": "limb3",
+      "parent_branch": "core",
+      "attach_bone_index": 0,
+      "origin_m": [
+        0.2,
+        0.82,
+        -0.35
+      ],
+      "direction": [
+        0.1,
+        -1,
+        -0.05
+      ],
+      "up": [
+        0,
+        0,
+        1
+      ],
+      "length_m": 0.85,
+      "size_class": "M",
+      "side": "L",
+      "required": true,
+      "accepts": {
+        "categories": [
+          "limb"
+        ]
+      },
+      "connector_size_class": "M",
+      "gait": {
+        "role": "locomotor",
+        "phase_rad": 3.14159265
+      },
+      "stance_deg": [
+        -12.0,
+        26.0,
+        -14.0
+      ]
+    },
+    {
+      "branch_id": "leg_BR",
+      "template": "limb3",
+      "parent_branch": "core",
+      "attach_bone_index": 0,
+      "origin_m": [
+        -0.2,
+        0.82,
+        -0.35
+      ],
+      "direction": [
+        -0.1,
+        -1,
+        -0.05
+      ],
+      "up": [
+        0,
+        0,
+        1
+      ],
+      "length_m": 0.85,
+      "size_class": "M",
+      "side": "R",
+      "required": true,
+      "mirror_of": "leg_BL",
+      "accepts": {
+        "categories": [
+          "limb"
+        ]
+      },
+      "connector_size_class": "M",
+      "gait": {
+        "role": "locomotor",
+        "phase_rad": 0.0
+      },
+      "stance_deg": [
+        -12.0,
+        26.0,
+        -14.0
+      ]
+    },
+    {
+      "branch_id": "head",
+      "template": "head1",
+      "parent_branch": "core",
+      "attach_bone_index": 2,
+      "origin_m": [
+        0,
+        0.9,
+        0.47
+      ],
+      "direction": [
+        0,
+        0.15,
+        1
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.5,
+      "size_class": "M",
+      "side": "C",
+      "required": true,
+      "accepts": {
+        "categories": [
+          "head"
+        ]
+      },
+      "connector_size_class": "M",
+      "gait": {
+        "role": "head",
+        "phase_rad": 0.0
+      }
+    },
+    {
+      "branch_id": "tail",
+      "template": "tentacle8",
+      "parent_branch": "core",
+      "attach_bone_index": 0,
+      "origin_m": [
+        0,
+        0.85,
+        -0.47
+      ],
+      "direction": [
+        0,
+        0.25,
+        -1
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 1.1,
+      "size_class": "M",
+      "side": "C",
+      "required": false,
+      "optional_fill_pct": 60,
+      "accepts": {
+        "categories": [
+          "limb",
+          "tail"
+        ],
+        "templates": [
+          "tentacle8"
+        ]
+      },
+      "connector_size_class": "M",
+      "gait": {
+        "role": "sway",
+        "phase_rad": 0.0
+      }
+    },
+    {
+      "branch_id": "dorsal",
+      "template": "appendage1",
+      "parent_branch": "core",
+      "attach_bone_index": 1,
+      "origin_m": [
+        0,
+        1.02,
+        0.0
+      ],
+      "direction": [
+        0,
+        1,
+        -0.2
+      ],
+      "up": [
+        0,
+        0,
+        1
+      ],
+      "length_m": 0.35,
+      "size_class": "S",
+      "side": "C",
+      "required": false,
+      "optional_fill_pct": 35,
+      "accepts": {
+        "categories": [
+          "appendage"
+        ]
+      },
+      "connector_size_class": "S",
+      "gait": {
+        "role": "sway",
+        "phase_rad": 1.5708
+      }
+    }
   ]
 }

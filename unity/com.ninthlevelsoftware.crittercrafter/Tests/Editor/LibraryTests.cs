@@ -15,7 +15,9 @@ namespace CritterCrafter.Tests
     public class LibraryTests
     {
         LibraryImporter.Report _report;
-        CritterLibrary Lib => _report.Library;
+        CritterLibrary _approvedLibrary;
+        CritterLibrary Lib => _approvedLibrary;
+        CritterLibrary RawLib => _report.Library;
         readonly List<GameObject> _spawned = new List<GameObject>();
 
         static string FindLibraryDir()
@@ -34,7 +36,11 @@ namespace CritterCrafter.Tests
             var dir = FindLibraryDir();
             if (dir == null) Assert.Ignore("no built critter library (run `critter library build`)");
             _report = LibraryImporter.Import(dir);
+            _approvedLibrary = RawLib.EditorCreateApprovedSkeletonClone();
         }
+
+        [OneTimeTearDown]
+        public void CleanupLibrary() { if (_approvedLibrary != null) Object.DestroyImmediate(_approvedLibrary); }
 
         [TearDown]
         public void Cleanup()
@@ -51,7 +57,19 @@ namespace CritterCrafter.Tests
         }
 
         [Test]
-        public void ImportReportsNoProblems() => CollectionAssert.IsEmpty(_report.Problems);
+        public void ImportReportsNoProblems() =>
+            Assert.That(_report.Problems, Is.Empty, string.Join("\n", _report.Problems));
+
+        [Test]
+        public void AllSkeletonBindAndMotionImportsReportNoProblems()
+        {
+            var skeletonProblems = _report.Problems.Where(p => !p.StartsWith("part without asset:")).ToArray();
+            Assert.That(skeletonProblems, Is.Empty, string.Join("\n", skeletonProblems));
+        }
+
+        [Test]
+        public void DraftCandidateLibraryIsRejectedByRuntimeDefault() =>
+            Assert.Throws<GenerationException>(() => RawLib.Generate("any", 1));
 
         [Test]
         public void FrameProbeSnapsCoincideWithBranchRootBones()
@@ -82,16 +100,17 @@ namespace CritterCrafter.Tests
             foreach (var pool in new[] { "biped", "quadruped", "crawler" })
             {
                 var c = Spawn(pool, 5);
+                c.ApplyBindPose();
                 foreach (var pr in c.Renderers)
                 {
                     var branch = c.Skeleton.FindBranch(pr.branchId);
                     var part = Lib.Catalog.FindPart(pr.partId);
                     var entry = Lib.FindPart(pr.partId);
                     var src = entry.model.GetComponentInChildren<SkinnedMeshRenderer>(true);
-                    float s = pr.connector ? 1f : (float)(branch.length_m / part.length_m);
+                    float lengthScale = pr.connector ? 1f : (float)(branch.length_m / part.length_m);
                     var meshToPart = CreatureAssembler.MeshToPart(entry.model, src);
                     var expected = pr.renderer.transform.worldToLocalMatrix * c.transform.localToWorldMatrix
-                                   * CritterFrame.Snap(branch.snap, s) * meshToPart;
+                                   * CritterFrame.Snap(branch.snap, lengthScale) * meshToPart;
                     var baked = new Mesh();
                     pr.renderer.BakeMesh(baked, true);
                     var srcVerts = src.sharedMesh.vertices;
@@ -109,7 +128,9 @@ namespace CritterCrafter.Tests
         public void ConnectorBendsWithTheChildBranch()
         {
             var c = Spawn("biped", 11);
-            var pr = c.Renderers.First(r => r.connector && r.branchId.StartsWith("leg"));
+            var maybe = c.Renderers.FirstOrDefault(r => r.connector && r.branchId.StartsWith("leg"));
+            if (maybe.renderer == null) Assert.Ignore("catalog has no legacy skinned leg connector");
+            var pr = maybe;
             var before = new Mesh();
             pr.renderer.BakeMesh(before, true);
             var childRoot = pr.renderer.bones.Last();  // connector b1 -> branch root bone
@@ -157,11 +178,85 @@ namespace CritterCrafter.Tests
         {
             var c = Spawn("quadruped", 2);
             Assert.IsNotNull(c.Animator.runtimeAnimatorController);
-            var leg = c.Animator.GetComponentsInChildren<Transform>().First(t => t.name == "leg_FL_b0");
+            var locomotor = c.Skeleton.branches.First(b => b.gait_role == "locomotor");
+            var leg = c.Animator.GetComponentsInChildren<Transform>().First(t => t.name == locomotor.bone_names[0]);
             var rest = leg.localRotation;
             c.Animator.SetFloat(CreatureMotion.SpeedParam, AnimatorBuilder.WalkSpeed);
+            c.Animator.SetFloat(CreatureMotion.PlaybackRateParam, 1f);
             for (int i = 0; i < 5; i++) c.Animator.Update(0.05f);
             Assert.Greater(Quaternion.Angle(rest, leg.localRotation), 1f, "walk clip should swing the leg");
+        }
+
+        [Test]
+        public void AnimatorPlaybackClockMatchesIntermediateMovementSpeeds()
+        {
+            var c = Spawn("biped", 5);
+            foreach (float targetSpeed in new[] { c.WalkSpeed * 0.5f, (c.WalkSpeed + c.RunSpeed) * 0.5f })
+            {
+                var animator = c.Animator;
+                animator.Play("Locomotion", 0, 0f);
+                animator.SetFloat(CreatureMotion.SpeedParam, targetSpeed);
+                animator.SetFloat(CreatureMotion.PlaybackRateParam,
+                    CreatureMotion.PlaybackRateForSpeed(targetSpeed, c.WalkSpeed, c.RunSpeed,
+                        c.IdleDuration, c.WalkDuration, c.RunDuration,
+                        c.MinPlaybackRate, c.MaxPlaybackRate));
+                animator.Update(0f);
+
+                float distancePerCycle = 0f;
+                foreach (var active in animator.GetCurrentAnimatorClipInfo(0))
+                {
+                    string name = CritterModelPostprocessor.ShortClipName(active.clip.name);
+                    if (name == "walk") distancePerCycle += active.weight * c.WalkSpeed * c.WalkDuration;
+                    else if (name == "run") distancePerCycle += active.weight * c.RunSpeed * c.RunDuration;
+                }
+                float start = animator.GetCurrentAnimatorStateInfo(0).normalizedTime;
+                const float dt = 0.2f;
+                animator.Update(dt);
+                float cycles = animator.GetCurrentAnimatorStateInfo(0).normalizedTime - start;
+                float animatedSpeed = cycles * distancePerCycle / dt;
+                Assert.AreEqual(targetSpeed, animatedSpeed, 0.002f,
+                    $"normalized playback clock at {targetSpeed:F5}m/s");
+            }
+        }
+
+        [Test]
+        public void EveryPartAndConnectorKeepsOneRendererAndAtMostTwoMaterials()
+        {
+            var c = Spawn("any", 7);
+            foreach (var part in c.Renderers)
+            {
+                Assert.IsNotNull(part.renderer);
+                Assert.LessOrEqual(part.renderer.sharedMesh.subMeshCount, 2, part.partId);
+                Assert.AreEqual(part.renderer.sharedMesh.subMeshCount, part.renderer.sharedMaterials.Length, part.partId);
+            }
+            Assert.AreEqual(c.Renderers.Count, c.GetComponentsInChildren<SkinnedMeshRenderer>(true)
+                .Count(r => r.name != SkeletonRest.ProxyName));
+        }
+
+        [Test]
+        public void CollisionUsesNeutralPoseAndAnimationBoundsCoverBindAndNeutral()
+        {
+            var c = Spawn("biped", 5);
+            var capsule = c.GetComponent<CapsuleCollider>();
+            Assert.IsNotNull(capsule);
+            Assert.That(Vector3.Distance(capsule.center, c.NeutralBoundsLocal.center), Is.LessThan(1e-5f));
+            Assert.That(capsule.radius, Is.EqualTo(Mathf.Max(0.1f,
+                0.5f * Mathf.Max(c.NeutralBoundsLocal.size.x, c.NeutralBoundsLocal.size.z))).Within(1e-5f));
+            Assert.That(capsule.height, Is.EqualTo(Mathf.Max(c.NeutralBoundsLocal.size.y,
+                capsule.radius * 2f)).Within(1e-5f));
+            AssertBoundsContains(c.AnimationBoundsLocal, c.BindBoundsLocal);
+            AssertBoundsContains(c.AnimationBoundsLocal, c.NeutralBoundsLocal);
+        }
+
+        static void AssertBoundsContains(Bounds outer, Bounds inner)
+        {
+            const float tolerance = 1e-4f;
+            Assert.GreaterOrEqual(inner.min.x, outer.min.x - tolerance);
+            Assert.GreaterOrEqual(inner.min.y, outer.min.y - tolerance);
+            Assert.GreaterOrEqual(inner.min.z, outer.min.z - tolerance);
+            Assert.LessOrEqual(inner.max.x, outer.max.x + tolerance);
+            Assert.LessOrEqual(inner.max.y, outer.max.y + tolerance);
+            Assert.LessOrEqual(inner.max.z, outer.max.z + tolerance);
         }
     }
 }

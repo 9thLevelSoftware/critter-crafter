@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://9thlevelsoftware.github.io/critter-crafter/schemas/library_source.v3.schema.json",
+  "title": "library source v3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "library_id", "version", "frame", "limits", "generator"],
+  "properties": {
+    "schema_version": {"const": "3.0.0"},
+    "library_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+    "version": {"const": "0.2.0"},
+    "frame": {"const": "gltf_rh_yup_zfwd_m"},
+    "limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_triangles", "target_triangles", "max_bones", "max_parts", "max_influences", "min_length_scale_pct", "max_length_scale_pct", "girth_tolerance_pct"],
+      "properties": {
+        "max_triangles": {"const": 30000},
+        "target_triangles": {"type": "integer", "minimum": 1, "maximum": 30000},
+        "max_bones": {"const": 120},
+        "max_parts": {"const": 16},
+        "max_influences": {"const": 4},
+        "min_length_scale_pct": {"const": 80},
+        "max_length_scale_pct": {"const": 125},
+        "girth_tolerance_pct": {"const": 10}
+      }
+    },
+    "generator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "rng"],
+      "properties": {"algorithm": {"const": "cc-gen-3"}, "rng": {"const": "splitmix64"}}
+    }
+  }
+}

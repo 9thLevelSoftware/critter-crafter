@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Text;
 using UnityEngine;
 
 namespace CritterCrafter
@@ -36,6 +38,8 @@ namespace CritterCrafter
     public static class CreatureAssembler
     {
         static readonly Dictionary<string, Mesh> MeshCache = new Dictionary<string, Mesh>();
+        struct BoundsSet { public Bounds bind, neutral, animation; }
+        static readonly Dictionary<string, BoundsSet> BoundsCache = new Dictionary<string, BoundsSet>();
 
         public static void ClearCache()
         {
@@ -46,14 +50,15 @@ namespace CritterCrafter
                     else UnityEngine.Object.DestroyImmediate(m);
                 }
             MeshCache.Clear();
+            BoundsCache.Clear();
         }
 
         public static AssembledCreature Assemble(CritterLibrary library, CritterRecipe recipe, AssemblyOptions options)
         {
             var catalog = library.Catalog ?? throw new AssemblyException("library has no catalog");
             var diags = RecipeValidator.Validate(catalog, recipe);
-            var skelEntry = library.FindSkeleton(recipe.skeleton_id);
-            if (skelEntry == null || skelEntry.model == null) diags.Add("CC_MISSING_ASSET: skeleton " + recipe.skeleton_id);
+            var skelEntry = recipe == null ? null : library.FindSkeleton(recipe.skeleton_id);
+            if (recipe != null && (skelEntry == null || skelEntry.model == null)) diags.Add("CC_MISSING_ASSET: skeleton " + recipe.skeleton_id);
             if (diags.Count > 0)
             {
                 if (!options.fallbackOnInvalid) throw new AssemblyException(string.Join("; ", diags));
@@ -75,21 +80,35 @@ namespace CritterCrafter
             animator.runtimeAnimatorController = skelEntry.controller;
             animator.applyRootMotion = false;
             animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+            animator.SetFloat(CreatureMotion.PlaybackRateParam, 1f);
 
             var creature = root.AddComponent<AssembledCreature>();
-            creature.Init(recipe, animator, skeleton);
+            creature.Init(recipe, animator, skeleton, skelEntry.model);
 
             // The catalog frame is the creature root's space: the skeleton model keeps whatever root rotation
             // the FBX importer gave it, which is part of the asset, not of the catalog (docs/frame.md).
-            // Bind-pose matrices are read now, before the Animator has evaluated a frame.
+            // Bones are reset to their true rest pose (from the BindProxy bindposes) before binding.
             Matrix4x4 catalogToWorld = root.transform.localToWorldMatrix;
+            creature.ApplyBindPose();
+            var proxy = SkeletonRest.FindProxy(skelGo.transform);
+            if (proxy != null) proxy.gameObject.SetActive(false);
+            // Skeleton FBXs may contain a preview renderer used to author and verify the
+            // animation. Runtime geometry comes exclusively from recipe parts, so retaining
+            // the preview would add an untracked renderer and duplicate the creature surface.
+            foreach (var sourceRenderer in skelGo.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+                if (sourceRenderer != proxy)
+                {
+                    sourceRenderer.enabled = false;
+                    if (Application.isPlaying) UnityEngine.Object.Destroy(sourceRenderer);
+                    else UnityEngine.Object.DestroyImmediate(sourceRenderer);
+                }
             int triangles = 0;
             foreach (var fill in recipe.fills)
             {
                 var branch = skeleton.FindBranch(fill.branch_id);
                 var part = catalog.FindPart(fill.part_id);
-                float s = (float)(branch.length_m / part.length_m);
-                triangles += BindPart(library, skeleton, branch, part, s, false, bones, catalogToWorld, root.transform, creature);
+                triangles += BindPart(library, skeleton, branch, part, (float)fill.length_scale,
+                    false, bones, catalogToWorld, root.transform, creature);
                 if (!string.IsNullOrEmpty(fill.connector_part_id))
                 {
                     var conn = catalog.FindPart(fill.connector_part_id);
@@ -98,12 +117,46 @@ namespace CritterCrafter
             }
             creature.Triangles = triangles;
 
+            string boundsKey = BoundsKey(library, recipe);
+            if (!BoundsCache.TryGetValue(boundsKey, out var measured))
+            {
+                measured.bind = MeasureBounds(creature);
+                measured.animation = SampleAnimationBounds(creature, skelGo, measured.bind);
+                creature.ApplyBindPose();
+                creature.ApplyNeutralPose();
+                measured.neutral = MeasureBounds(creature);
+                measured.animation.Encapsulate(measured.neutral);
+                BoundsCache[boundsKey] = measured;
+            }
+            else
+            {
+                creature.ApplyBindPose();
+                creature.ApplyNeutralPose();
+            }
+            SetRendererBounds(creature, measured.animation);
+            creature.SetMeasuredBounds(measured.bind, measured.neutral, measured.animation);
+
             SetLayerRecursive(root, options.layer);
             if (options.collision == CreatureCollision.SingleCapsule) AddCapsule(root, creature, options.collidersAreTriggers);
             return creature;
         }
 
-        static int BindPart(CritterLibrary library, SkeletonData skeleton, BranchData branch, PartData part, float scale,
+        static string BoundsKey(CritterLibrary library, CritterRecipe recipe)
+        {
+            var key = new StringBuilder();
+            key.Append(System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(library));
+            key.Append('|').Append(recipe.skeleton_id);
+            foreach (var fill in recipe.fills)
+            {
+                key.Append('|').Append(fill.branch_id).Append('=').Append(fill.part_id).Append('+')
+                    .Append(fill.connector_part_id).Append('@')
+                    .Append(fill.length_scale.ToString("R", CultureInfo.InvariantCulture));
+            }
+            return key.ToString();
+        }
+
+        static int BindPart(CritterLibrary library, SkeletonData skeleton, BranchData branch, PartData part,
+            float lengthScale,
             bool connector, Dictionary<string, Transform> bones, Matrix4x4 catalogToWorld, Transform parent, AssembledCreature creature)
         {
             var entry = library.FindPart(part.part_id);
@@ -122,7 +175,7 @@ namespace CritterCrafter
             }
 
             Matrix4x4 meshToPart = MeshToPart(entry.model, srcSmr);
-            Matrix4x4 meshToCatalog = CritterFrame.Snap(branch.snap, scale) * meshToPart;
+            Matrix4x4 meshToCatalog = CritterFrame.Snap(branch.snap, lengthScale) * meshToPart;
             Matrix4x4 meshToWorld = catalogToWorld * meshToCatalog;
 
             string key = $"{System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(library)}|{skeleton.skeleton_id}|{branch.branch_id}|{part.part_id}";
@@ -145,7 +198,9 @@ namespace CritterCrafter
             smr.sharedMesh = mesh;
             smr.bones = targets;
             smr.rootBone = targets[0];
-            smr.sharedMaterial = entry.material;
+            if (mesh.subMeshCount > 2 || mesh.subMeshCount > part.max_material_slots)
+                throw new AssemblyException($"part {part.part_id} has {mesh.subMeshCount} material slots");
+            smr.sharedMaterials = MaterialsForPart(entry, mesh);
             smr.updateWhenOffscreen = false;
             smr.localBounds = PaddedBounds(mesh.bounds, targets[0].worldToLocalMatrix * meshToWorld, 0.35f);
             creature.AddRenderer(smr, branch.branch_id, part.part_id, connector);
@@ -170,13 +225,83 @@ namespace CritterCrafter
             return (int)(n / 3);
         }
 
-        /// <summary>Part bone b&lt;i&gt; -> skeleton bone. Chains clamp to the branch length; connectors span attach bone -> branch root.</summary>
+        /// <summary>Part bone b&lt;i&gt; -> skeleton bone. Profile identity guarantees exact chain length.</summary>
         public static string MapBone(string sourceBone, BranchData branch, bool connector)
         {
             int idx = 0;
-            if (sourceBone.Length > 1 && sourceBone[0] == 'b') int.TryParse(sourceBone.Substring(1), out idx);
-            if (connector) return idx == 0 ? branch.attach_bone : branch.bone_names[0];
-            return branch.bone_names[Mathf.Min(idx, branch.bone_names.Length - 1)];
+            if (sourceBone.Length <= 1 || sourceBone[0] != 'b' || !int.TryParse(sourceBone.Substring(1), out idx))
+                throw new AssemblyException("unrecognized part bone " + sourceBone);
+            if (connector)
+            {
+                if (idx == 0) return branch.attach_bone;
+                if (idx == 1) return branch.bone_names[0];
+                throw new AssemblyException("connector bone " + sourceBone + " exceeds two-bone connector profile");
+            }
+            if (idx < 0 || idx >= branch.bone_names.Length)
+                throw new AssemblyException($"part bone {sourceBone} exceeds branch {branch.branch_id} chain");
+            return branch.bone_names[idx];
+        }
+
+        public static Material[] MaterialsForPart(CritterLibrary.PartEntry entry, Mesh mesh)
+        {
+            if (entry.materials != null && entry.materials.Length == mesh.subMeshCount)
+                return (Material[])entry.materials.Clone();
+            var assigned = new Material[mesh.subMeshCount];
+            for (int i = 0; i < assigned.Length; i++) assigned[i] = entry.material;
+            return assigned;
+        }
+
+        static Bounds MeasureBounds(AssembledCreature creature)
+        {
+            Bounds result = default;
+            bool any = false;
+            foreach (var pr in creature.Renderers)
+            {
+                var baked = new Mesh();
+                pr.renderer.BakeMesh(baked, true);
+                Bounds b = TransformBounds(baked.bounds, creature.transform.worldToLocalMatrix * pr.renderer.transform.localToWorldMatrix);
+                if (!any) { result = b; any = true; }
+                else result.Encapsulate(b);
+                if (Application.isPlaying) UnityEngine.Object.Destroy(baked); else UnityEngine.Object.DestroyImmediate(baked);
+            }
+            return any ? result : new Bounds(Vector3.zero, Vector3.zero);
+        }
+
+        static Bounds SampleAnimationBounds(AssembledCreature creature, GameObject skeleton, Bounds initial)
+        {
+            Bounds result = initial;
+            var animator = creature.Animator;
+            if (animator == null || animator.runtimeAnimatorController == null) return result;
+            foreach (var clip in animator.runtimeAnimatorController.animationClips)
+            {
+                if (clip == null) continue;
+                int samples = Mathf.Max(2, Mathf.CeilToInt(clip.length * clip.frameRate));
+                for (int i = 0; i <= samples; i++)
+                {
+                    clip.SampleAnimation(skeleton, clip.length * i / samples);
+                    result.Encapsulate(MeasureBounds(creature));
+                }
+            }
+            return result;
+        }
+
+        static void SetRendererBounds(AssembledCreature creature, Bounds animationBounds)
+        {
+            foreach (var pr in creature.Renderers)
+            {
+                Matrix4x4 creatureToRenderer = pr.renderer.transform.worldToLocalMatrix * creature.transform.localToWorldMatrix;
+                pr.renderer.localBounds = TransformBounds(animationBounds, creatureToRenderer);
+            }
+        }
+
+        static Bounds TransformBounds(Bounds b, Matrix4x4 m)
+        {
+            var result = new Bounds(m.MultiplyPoint3x4(b.center), Vector3.zero);
+            Vector3 e = b.extents;
+            for (int i = 0; i < 8; i++)
+                result.Encapsulate(m.MultiplyPoint3x4(b.center + new Vector3(
+                    (i & 1) == 0 ? -e.x : e.x, (i & 2) == 0 ? -e.y : e.y, (i & 4) == 0 ? -e.z : e.z)));
+            return result;
         }
 
         static Bounds PaddedBounds(Bounds b, Matrix4x4 m, float pad)
@@ -194,12 +319,12 @@ namespace CritterCrafter
 
         static void AddCapsule(GameObject root, AssembledCreature creature, bool trigger)
         {
-            Bounds b = creature.BindBoundsLocal;
+            Bounds b = creature.NeutralBoundsLocal;
             var cap = root.AddComponent<CapsuleCollider>();
             cap.isTrigger = trigger;
             cap.direction = 1;
             cap.center = b.center;
-            cap.radius = Mathf.Max(0.1f, 0.5f * Mathf.Max(b.size.x, b.size.z) * 0.6f);
+            cap.radius = Mathf.Max(0.1f, 0.5f * Mathf.Max(b.size.x, b.size.z));
             cap.height = Mathf.Max(b.size.y, cap.radius * 2f);
         }
 

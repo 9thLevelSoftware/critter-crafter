@@ -1,0 +1,15 @@
+{
+  "schema_version": "3.0.0",
+  "binding_profile_id": "limb3_digitigrade",
+  "binding_profile_version": "1.0.0",
+  "template": "limb3",
+  "joint_order": ["upper", "lower", "end"],
+  "bone_fractions": [0.35, 0.45, 0.2],
+  "girth_ratio": 0.18,
+  "joints": [
+    {"joint_id": "upper", "parent_joint": "", "canonical_position_n": [0, 0, 0], "canonical_rotation_xyzw": [0, 0, 0, 1], "primary_axis": [0, 0, 1], "secondary_axis": [0, 1, 0], "limits_deg": {"swing_x": [-70, 70], "swing_y": [-45, 45], "twist": [-35, 35]}},
+    {"joint_id": "lower", "parent_joint": "upper", "canonical_position_n": [0, 0, 0.35], "canonical_rotation_xyzw": [0, 0, 0, 1], "primary_axis": [0, 0, 1], "secondary_axis": [0, 1, 0], "limits_deg": {"swing_x": [-5, 145], "swing_y": [-20, 20], "twist": [-20, 20]}},
+    {"joint_id": "end", "parent_joint": "lower", "canonical_position_n": [0, 0, 0.8], "canonical_rotation_xyzw": [0, 0, 0, 1], "primary_axis": [0, 0, 1], "secondary_axis": [0, 1, 0], "limits_deg": {"swing_x": [-55, 70], "swing_y": [-25, 25], "twist": [-25, 25]}}
+  ],
+  "landmarks": [{"landmark_id": "toe_tip", "parent_joint": "end", "position_n": [0, 0, 1], "rotation_xyzw": [0, 0, 0, 1]}]
+}

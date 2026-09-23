@@ -1,0 +1,20 @@
+{
+  "schema_version": "3.0.0",
+  "binding_profile_id": "tentacle8_flexible",
+  "binding_profile_version": "1.0.0",
+  "template": "tentacle8",
+  "joint_order": ["seg0", "seg1", "seg2", "seg3", "seg4", "seg5", "seg6", "end"],
+  "bone_fractions": [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
+  "girth_ratio": 0.18,
+  "joints": [
+    {"joint_id": "seg0", "parent_joint": "", "canonical_position_n": [0, 0, 0], "canonical_rotation_xyzw": [0, 0, 0, 1], "primary_axis": [0, 0, 1], "secondary_axis": [0, 1, 0], "limits_deg": {"swing_x": [-28, 28], "swing_y": [-28, 28], "twist": [-35, 35]}},
+    {"joint_id": "seg1", "parent_joint": "seg0", "canonical_position_n": [0, 0, 0.125], "canonical_rotation_xyzw": [0, 0, 0, 1], "primary_axis": [0, 0, 1], "secondary_axis": [0, 1, 0], "limits_deg": {"swing_x": [-28, 28], "swing_y": [-28, 28], "twist": [-35, 35]}},
+    {"joint_id": "seg2", "parent_joint": "seg1", "canonical_position_n": [0, 0, 0.25], "canonical_rotation_xyzw": [0, 0, 0, 1], "primary_axis": [0, 0, 1], "secondary_axis": [0, 1, 0], "limits_deg": {"swing_x": [-28, 28], "swing_y": [-28, 28], "twist": [-35, 35]}},
+    {"joint_id": "seg3", "parent_joint": "seg2", "canonical_position_n": [0, 0, 0.375], "canonical_rotation_xyzw": [0, 0, 0, 1], "primary_axis": [0, 0, 1], "secondary_axis": [0, 1, 0], "limits_deg": {"swing_x": [-28, 28], "swing_y": [-28, 28], "twist": [-35, 35]}},
+    {"joint_id": "seg4", "parent_joint": "seg3", "canonical_position_n": [0, 0, 0.5], "canonical_rotation_xyzw": [0, 0, 0, 1], "primary_axis": [0, 0, 1], "secondary_axis": [0, 1, 0], "limits_deg": {"swing_x": [-28, 28], "swing_y": [-28, 28], "twist": [-35, 35]}},
+    {"joint_id": "seg5", "parent_joint": "seg4", "canonical_position_n": [0, 0, 0.625], "canonical_rotation_xyzw": [0, 0, 0, 1], "primary_axis": [0, 0, 1], "secondary_axis": [0, 1, 0], "limits_deg": {"swing_x": [-28, 28], "swing_y": [-28, 28], "twist": [-35, 35]}},
+    {"joint_id": "seg6", "parent_joint": "seg5", "canonical_position_n": [0, 0, 0.75], "canonical_rotation_xyzw": [0, 0, 0, 1], "primary_axis": [0, 0, 1], "secondary_axis": [0, 1, 0], "limits_deg": {"swing_x": [-28, 28], "swing_y": [-28, 28], "twist": [-35, 35]}},
+    {"joint_id": "end", "parent_joint": "seg6", "canonical_position_n": [0, 0, 0.875], "canonical_rotation_xyzw": [0, 0, 0, 1], "primary_axis": [0, 0, 1], "secondary_axis": [0, 1, 0], "limits_deg": {"swing_x": [-28, 28], "swing_y": [-28, 28], "twist": [-35, 35]}}
+  ],
+  "landmarks": [{"landmark_id": "tip", "parent_joint": "end", "position_n": [0, 0, 1], "rotation_xyzw": [0, 0, 0, 1]}]
+}

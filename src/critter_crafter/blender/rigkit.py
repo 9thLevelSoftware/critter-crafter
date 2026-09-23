@@ -100,8 +100,13 @@ def export_fbx(path: str, objs: Sequence[bpy.types.Object], animated: bool) -> N
         apply_scale_options="FBX_SCALE_ALL",
         add_leaf_bones=False,
         primary_bone_axis="Y",
+        # Blender's FBX bone basis is intentionally left at the exporter
+        # default.  Unity documents and compensates its constant local +Y
+        # half-turn when comparing this FBX basis with the catalog basis.
         secondary_bone_axis="X",
-        use_armature_deform_only=False,
+        # Temporary IK controls are removed before export; retaining only
+        # deformation bones prevents controls/helpers leaking into engine rigs.
+        use_armature_deform_only=True,
         mesh_smooth_type="FACE",
         use_mesh_modifiers=True,
         bake_anim=animated,
@@ -140,8 +145,13 @@ def _export_gltf(path: str, animated: bool) -> None:
         use_selection=True,
         export_yup=True,
         export_skins=True,
+        export_def_bones=True,
         export_animations=animated,
         export_apply=False,
+        # Write bind nodes from the straight edit-bone rest pose even though the
+        # armature also carries baked actions and a separate neutral pose.
+        export_rest_position_armature=True,
+        export_reset_pose_bones=True,
     )
 
 

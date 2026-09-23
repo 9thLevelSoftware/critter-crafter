@@ -1,0 +1,404 @@
+{
+  "schema_version": "2.0.0",
+  "skeleton_id": "serpentine_v01",
+  "family": "serpentine",
+  "locomotion_hint": "slither",
+  "status": "draft",
+  "symmetry_pct": 93,
+  "provenance": {
+    "generator": "skeleton-vary-1",
+    "family_params": "serpentine.json",
+    "seed": 1,
+    "index": 1
+  },
+  "branches": [
+    {
+      "branch_id": "core",
+      "template": "core1",
+      "parent_branch": null,
+      "attach_bone_index": 0,
+      "direction": [
+        0,
+        0.227,
+        1
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.501,
+      "size_class": "L",
+      "side": "C",
+      "required": true,
+      "accepts": {
+        "categories": [
+          "core",
+          "head"
+        ]
+      },
+      "connector_size_class": null,
+      "gait": {
+        "role": "core",
+        "phase_rad": 0.0
+      },
+      "origin_m": [
+        0,
+        0.234,
+        0
+      ]
+    },
+    {
+      "branch_id": "body",
+      "template": "tentacle8",
+      "parent_branch": "core",
+      "attach_bone_index": 0,
+      "direction": [
+        0,
+        -0.11400000000000002,
+        -1.109
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 1.109,
+      "size_class": "M",
+      "side": "C",
+      "required": true,
+      "accepts": {
+        "categories": [
+          "limb",
+          "tail"
+        ],
+        "templates": [
+          "tentacle8"
+        ]
+      },
+      "connector_size_class": "M",
+      "gait": {
+        "role": "locomotor",
+        "phase_rad": 0.0
+      },
+      "origin_m": [
+        0,
+        0.194,
+        0.02
+      ],
+      "stance_deg": [
+        -4.0,
+        2.0,
+        1.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "stance_z_deg": [
+        2.0,
+        -8.0,
+        -7.6,
+        2.8,
+        9.5,
+        3.8,
+        -6.9,
+        -8.5
+      ]
+    },
+    {
+      "branch_id": "jaw",
+      "template": "appendage1",
+      "parent_branch": "core",
+      "attach_bone_index": -1,
+      "direction": [
+        0,
+        -0.3,
+        1
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.35,
+      "size_class": "S",
+      "side": "C",
+      "required": false,
+      "accepts": {
+        "categories": [
+          "appendage"
+        ]
+      },
+      "connector_size_class": "S",
+      "gait": {
+        "role": "manipulator",
+        "phase_rad": 0.0
+      },
+      "optional_fill_pct": 70
+    },
+    {
+      "branch_id": "fin_L",
+      "template": "appendage1",
+      "parent_branch": "core",
+      "attach_bone_index": 0,
+      "direction": [
+        1,
+        0.3,
+        -0.4
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.35,
+      "size_class": "S",
+      "side": "L",
+      "required": false,
+      "accepts": {
+        "categories": [
+          "appendage"
+        ]
+      },
+      "connector_size_class": "S",
+      "gait": {
+        "role": "sway",
+        "phase_rad": 0.0
+      },
+      "origin_m": [
+        0.16,
+        0.234,
+        0.1002
+      ],
+      "optional_fill_pct": 45
+    },
+    {
+      "branch_id": "fin_R",
+      "template": "appendage1",
+      "parent_branch": "core",
+      "attach_bone_index": 0,
+      "direction": [
+        -1,
+        0.3,
+        -0.4
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.35,
+      "size_class": "S",
+      "side": "R",
+      "required": false,
+      "accepts": {
+        "categories": [
+          "appendage"
+        ]
+      },
+      "connector_size_class": "S",
+      "gait": {
+        "role": "sway",
+        "phase_rad": 3.141593
+      },
+      "origin_m": [
+        -0.16,
+        0.234,
+        0.1002
+      ],
+      "optional_fill_pct": 45,
+      "mirror_of": "fin_L"
+    },
+    {
+      "branch_id": "crawl_L2",
+      "template": "appendage1",
+      "parent_branch": "body",
+      "attach_bone_index": 2,
+      "direction": [
+        1,
+        -0.6,
+        0.2
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.35,
+      "size_class": "S",
+      "side": "L",
+      "required": false,
+      "accepts": {
+        "categories": [
+          "appendage"
+        ]
+      },
+      "connector_size_class": "S",
+      "gait": {
+        "role": "sway",
+        "phase_rad": 1.8
+      },
+      "optional_fill_pct": 80
+    },
+    {
+      "branch_id": "crawl_R2",
+      "template": "appendage1",
+      "parent_branch": "body",
+      "attach_bone_index": 2,
+      "direction": [
+        -1,
+        -0.6,
+        0.2
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.35,
+      "size_class": "S",
+      "side": "R",
+      "required": false,
+      "accepts": {
+        "categories": [
+          "appendage"
+        ]
+      },
+      "connector_size_class": "S",
+      "gait": {
+        "role": "sway",
+        "phase_rad": 4.941593
+      },
+      "optional_fill_pct": 80,
+      "mirror_of": "crawl_L2"
+    },
+    {
+      "branch_id": "crawl_L4",
+      "template": "appendage1",
+      "parent_branch": "body",
+      "attach_bone_index": 4,
+      "direction": [
+        1,
+        -0.6,
+        0.2
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.35,
+      "size_class": "S",
+      "side": "L",
+      "required": false,
+      "accepts": {
+        "categories": [
+          "appendage"
+        ]
+      },
+      "connector_size_class": "S",
+      "gait": {
+        "role": "sway",
+        "phase_rad": 3.6
+      },
+      "optional_fill_pct": 80
+    },
+    {
+      "branch_id": "crawl_R4",
+      "template": "appendage1",
+      "parent_branch": "body",
+      "attach_bone_index": 4,
+      "direction": [
+        -1,
+        -0.6,
+        0.2
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.35,
+      "size_class": "S",
+      "side": "R",
+      "required": false,
+      "accepts": {
+        "categories": [
+          "appendage"
+        ]
+      },
+      "connector_size_class": "S",
+      "gait": {
+        "role": "sway",
+        "phase_rad": 6.741593
+      },
+      "optional_fill_pct": 80,
+      "mirror_of": "crawl_L4"
+    },
+    {
+      "branch_id": "crawl_L5",
+      "template": "appendage1",
+      "parent_branch": "body",
+      "attach_bone_index": 5,
+      "direction": [
+        1,
+        -0.6,
+        0.2
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.35,
+      "size_class": "S",
+      "side": "L",
+      "required": false,
+      "accepts": {
+        "categories": [
+          "appendage"
+        ]
+      },
+      "connector_size_class": "S",
+      "gait": {
+        "role": "sway",
+        "phase_rad": 4.5
+      },
+      "optional_fill_pct": 80
+    },
+    {
+      "branch_id": "crawl_R5",
+      "template": "appendage1",
+      "parent_branch": "body",
+      "attach_bone_index": 5,
+      "direction": [
+        -1,
+        -0.6,
+        0.2
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.35,
+      "size_class": "S",
+      "side": "R",
+      "required": false,
+      "accepts": {
+        "categories": [
+          "appendage"
+        ]
+      },
+      "connector_size_class": "S",
+      "gait": {
+        "role": "sway",
+        "phase_rad": 7.641593
+      },
+      "optional_fill_pct": 80,
+      "mirror_of": "crawl_L5"
+    }
+  ]
+}

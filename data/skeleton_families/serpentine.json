@@ -1,0 +1,20 @@
+{
+  "schema_version": "2.0.0",
+  "family": "serpentine",
+  "count": 6,
+  "head_height_m": [
+    0.2,
+    0.32
+  ],
+  "core_length_m": [
+    0.5,
+    0.62
+  ],
+  "body_length_m": [
+    1.0,
+    1.3
+  ],
+  "second_tail_pct": 40,
+  "fin_fill_pct": 45,
+  "centipede_pct": 45
+}

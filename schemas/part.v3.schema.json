@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://9thlevelsoftware.github.io/critter-crafter/schemas/part.v3.schema.json",
+  "title": "part.v3.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "part_id", "category", "template", "binding_profile_id", "binding_profile_version", "side", "girth_m", "species_tags", "roles", "status", "dimensions_m", "length_m", "budget"],
+  "properties": {
+    "schema_version": {"const": "3.0.0"},
+    "part_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*_v[0-9]+$"},
+    "category": {"enum": ["core", "limb", "head", "tail", "appendage", "connector"]},
+    "template": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+    "binding_profile_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+    "binding_profile_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "side": {"enum": ["symmetric", "L", "R", "C"]},
+    "girth_m": {"type": "number", "exclusiveMinimum": 0},
+    "species_tags": {"type": "array", "items": {"type": "string"}},
+    "roles": {"type": "array", "items": {"enum": ["core", "locomotor", "manipulator", "detail", "puller", "slither", "connector"]}},
+    "size_class": {"enum": ["S", "M", "L", null]},
+    "status": {"enum": ["draft", "approved", "rejected"]},
+    "style_profile": {"type": "string"},
+    "dimensions_m": {"$ref": "#/$defs/vec3"},
+    "length_m": {"type": "number", "exclusiveMinimum": 0},
+    "budget": {"type": "object", "additionalProperties": false, "required": ["max_triangles"], "properties": {
+      "max_triangles": {"type": "integer", "minimum": 1, "maximum": 30000},
+      "max_material_slots": {"type": "integer", "minimum": 1, "maximum": 4},
+      "texture_size": {"enum": [256, 512, 1024, 2048]}
+    }},
+    "connector": {"type": "object", "additionalProperties": false, "required": ["radius_m", "span_m", "interface"], "properties": {
+      "radius_m": {"type": "number", "exclusiveMinimum": 0},
+      "span_m": {"type": "array", "prefixItems": [{"type": "number", "exclusiveMaximum": 0}, {"type": "number", "exclusiveMinimum": 0}], "items": false, "minItems": 2, "maxItems": 2},
+      "interface": {
+        "type": "object", "additionalProperties": false,
+        "required": ["interface_id", "interface_version", "bone_groups", "max_influences", "weights_normalized", "position_m", "rotation_xyzw"],
+        "properties": {
+          "interface_id": {"const": "skinned_parent_child"},
+          "interface_version": {"const": "1.0.0"},
+          "bone_groups": {
+            "type": "array", "minItems": 2, "maxItems": 2,
+            "prefixItems": [
+              {"type": "object", "additionalProperties": false, "required": ["group", "role"], "properties": {"group": {"const": "b0"}, "role": {"const": "parent"}}},
+              {"type": "object", "additionalProperties": false, "required": ["group", "role"], "properties": {"group": {"const": "b1"}, "role": {"const": "child"}}}
+            ],
+            "items": false
+          },
+          "max_influences": {"const": 2},
+          "weights_normalized": {"const": true},
+          "position_m": {"const": [0, 0, 0]},
+          "rotation_xyzw": {"const": [0, 0, 0, 1]}
+        }
+      }
+    }},
+    "fallback": {"type": "object", "additionalProperties": false, "properties": {
+      "primitive": {"enum": ["capsule", "sphere", "cone", "cylinder", "box"]},
+      "albedo": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$"}
+    }},
+    "provenance": {"type": "object"}
+  },
+  "allOf": [{
+    "if": {"properties": {"category": {"const": "connector"}}, "required": ["category"]},
+    "then": {"required": ["size_class", "connector"]}
+  }],
+  "$defs": {"vec3": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3}}
+}

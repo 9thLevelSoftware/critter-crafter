@@ -1,0 +1,834 @@
+"""Read GLB skin rest information independently of node animation poses."""
+from __future__ import annotations
+import bisect
+import json
+import math
+import struct
+from pathlib import Path
+from typing import Any
+from .. import mathutil as mu
+
+
+REQUIRED_CLIPS = {"idle", "walk", "run", "stun", "telegraph", "attack", "hit", "death"}
+_COMPONENTS = {"SCALAR": 1, "VEC2": 2, "VEC3": 3, "VEC4": 4, "MAT2": 4, "MAT3": 9, "MAT4": 16}
+_COMPONENT_FORMAT = {5120: ("b", 1), 5121: ("B", 1), 5122: ("h", 2),
+                     5123: ("H", 2), 5125: ("I", 4), 5126: ("f", 4)}
+
+
+def matrix_multiply(a, b):
+    return [[sum(a[i][k]*b[k][j] for k in range(4)) for j in range(4)] for i in range(4)]
+
+
+def matrix_inverse(matrix):
+    rows = [list(row) + [float(i == j) for j in range(4)] for i, row in enumerate(matrix)]
+    for col in range(4):
+        pivot = max(range(col, 4), key=lambda row: abs(rows[row][col]))
+        rows[col], rows[pivot] = rows[pivot], rows[col]
+        divisor = rows[col][col]
+        if abs(divisor) < 1e-12:
+            raise ValueError("CC_EXPORT_SINGULAR_BIND")
+        rows[col] = [v / divisor for v in rows[col]]
+        for row in range(4):
+            if row != col:
+                factor = rows[row][col]
+                rows[row] = [a-factor*b for a,b in zip(rows[row], rows[col])]
+    return [r[4:] for r in rows]
+
+
+def transform_error(a, b):
+    distance = math.sqrt(sum((a[i][3]-b[i][3])**2 for i in range(3)))
+    columns_a = [mu.normalize([a[i][j] for i in range(3)]) for j in range(3)]
+    columns_b = [mu.normalize([b[i][j] for i in range(3)]) for j in range(3)]
+    trace = sum(mu.dot(x,y) for x,y in zip(columns_a, columns_b))
+    angle = math.degrees(math.acos(max(-1., min(1., (trace-1)/2))))
+    return distance, angle
+
+
+def bone_matrix(bone):
+    y = mu.normalize(mu.sub(bone["tail_m"], bone["head_m"]))
+    z = mu.normalize(mu.sub(bone["up_m"], mu.scale(y, mu.dot(y, bone["up_m"]))))
+    x = mu.cross(y, z)
+    return [[x[i], y[i], z[i], bone["head_m"][i]] for i in range(3)] + [[0,0,0,1]]
+
+
+def _node_matrix(node):
+    if "matrix" in node:
+        result = [[node["matrix"][j*4+i] for j in range(4)] for i in range(4)]
+    else:
+        q = node.get("rotation", [0,0,0,1]); s = node.get("scale", [1,1,1]); t = node.get("translation", [0,0,0])
+        columns = [mu.quat_rotate(q, [s[j] if i == j else 0 for i in range(3)]) for j in range(3)]
+        result = [[columns[j][i] for j in range(3)] + [t[i]] for i in range(3)] + [[0,0,0,1]]
+    if any(not math.isfinite(float(value)) for row in result for value in row):
+        raise ValueError(f"CC_GLB_NODE_NONFINITE: {node.get('name', '<unnamed>')}")
+    return result
+
+
+def _rotation_matrix(matrix):
+    columns = [mu.normalize([matrix[i][j] for i in range(3)]) for j in range(3)]
+    return [[columns[j][i] for j in range(3)] + [0.] for i in range(3)] + [[0., 0., 0., 1.]]
+
+
+def _quat_matrix(q):
+    columns = [mu.quat_rotate(q, [1. if i == j else 0. for i in range(3)]) for j in range(3)]
+    return [[columns[j][i] for j in range(3)] + [0.] for i in range(3)] + [[0., 0., 0., 1.]]
+
+
+def _transform_point(matrix, point):
+    return [sum(matrix[i][j] * point[j] for j in range(3)) + matrix[i][3] for i in range(3)]
+
+
+def _distance(a, b):
+    return math.sqrt(sum((float(a[i]) - float(b[i])) ** 2 for i in range(3)))
+
+
+def _normalized_component(value: int | float, component_type: int, normalized: bool) -> float | int:
+    if not normalized or component_type == 5126:
+        return value
+    if component_type == 5120:
+        return max(float(value) / 127., -1.)
+    if component_type == 5121:
+        return float(value) / 255.
+    if component_type == 5122:
+        return max(float(value) / 32767., -1.)
+    if component_type == 5123:
+        return float(value) / 65535.
+    return value
+
+
+def _read_elements(document: dict[str, Any], binary: bytes, *, view_index: int, byte_offset: int,
+                   component_type: int, components: int, count: int, stride: int | None = None,
+                   normalized: bool = False) -> list[list[float | int]]:
+    view = document["bufferViews"][view_index]
+    if view.get("buffer", 0) != 0:
+        raise ValueError("CC_GLB_EXTERNAL_BUFFER")
+    try:
+        code, size = _COMPONENT_FORMAT[component_type]
+    except KeyError as exc:
+        raise ValueError(f"CC_GLB_ACCESSOR_COMPONENT: {component_type}") from exc
+    packed = components * size
+    step = stride if stride is not None else view.get("byteStride", packed)
+    if step < packed:
+        raise ValueError("CC_GLB_ACCESSOR_STRIDE")
+    start = int(view.get("byteOffset", 0)) + int(byte_offset)
+    view_end = int(view.get("byteOffset", 0)) + int(view["byteLength"])
+    result = []
+    for index in range(count):
+        position = start + index * step
+        if position < 0 or position + packed > view_end or position + packed > len(binary):
+            raise ValueError("CC_GLB_ACCESSOR_RANGE")
+        raw = struct.unpack_from("<" + code * components, binary, position)
+        result.append([_normalized_component(value, component_type, normalized) for value in raw])
+    return result
+
+
+def _read_accessor(document: dict[str, Any], binary: bytes, accessor_index: int) -> list[list[float | int]]:
+    try:
+        accessor = document["accessors"][accessor_index]
+        components = _COMPONENTS[accessor["type"]]
+        component_type = int(accessor["componentType"])
+        count = int(accessor["count"])
+    except (KeyError, IndexError, TypeError, ValueError) as exc:
+        raise ValueError(f"CC_GLB_ACCESSOR: {accessor_index}") from exc
+    if "bufferView" in accessor:
+        values = _read_elements(document, binary, view_index=int(accessor["bufferView"]),
+                                byte_offset=int(accessor.get("byteOffset", 0)),
+                                component_type=component_type, components=components, count=count,
+                                normalized=bool(accessor.get("normalized", False)))
+    else:
+        values = [[0.] * components for _ in range(count)]
+    sparse = accessor.get("sparse")
+    if sparse:
+        sparse_count = int(sparse["count"])
+        indices_spec = sparse["indices"]
+        indices = _read_elements(document, binary, view_index=int(indices_spec["bufferView"]),
+                                 byte_offset=int(indices_spec.get("byteOffset", 0)),
+                                 component_type=int(indices_spec["componentType"]), components=1,
+                                 count=sparse_count)
+        values_spec = sparse["values"]
+        replacements = _read_elements(document, binary, view_index=int(values_spec["bufferView"]),
+                                      byte_offset=int(values_spec.get("byteOffset", 0)),
+                                      component_type=component_type, components=components,
+                                      count=sparse_count, normalized=bool(accessor.get("normalized", False)))
+        previous = -1
+        for index_value, replacement in zip(indices, replacements, strict=True):
+            index = int(index_value[0])
+            if not previous < index < count:
+                raise ValueError("CC_GLB_ACCESSOR_SPARSE_INDEX")
+            values[index] = replacement
+            previous = index
+    return values
+
+
+def _normalize_quaternion(q):
+    length = math.sqrt(sum(float(value) ** 2 for value in q))
+    if length < 1e-12:
+        raise ValueError("CC_GLB_ZERO_QUATERNION")
+    return [float(value) / length for value in q]
+
+
+def _slerp(a, b, alpha):
+    qa, qb = _normalize_quaternion(a), _normalize_quaternion(b)
+    dot = sum(x * y for x, y in zip(qa, qb, strict=True))
+    if dot < 0.:
+        qb, dot = [-value for value in qb], -dot
+    dot = max(-1., min(1., dot))
+    if dot > .9995:
+        return _normalize_quaternion([(1 - alpha) * x + alpha * y for x, y in zip(qa, qb, strict=True)])
+    angle = math.acos(dot)
+    scale = math.sin(angle)
+    return [(math.sin((1 - alpha) * angle) * x + math.sin(alpha * angle) * y) / scale
+            for x, y in zip(qa, qb, strict=True)]
+
+
+def _sample_sampler(times, outputs, interpolation: str, time_s: float, path: str):
+    if not times:
+        raise ValueError("CC_GLB_ANIMATION_KEYS_EMPTY")
+    scalar_times = [float(value[0]) for value in times]
+    if any(right <= left for left, right in zip(scalar_times, scalar_times[1:])):
+        raise ValueError("CC_GLB_ANIMATION_KEYS_ORDER")
+    if time_s <= scalar_times[0]:
+        index = 1 if interpolation == "CUBICSPLINE" else 0
+        return list(outputs[index])
+    if time_s >= scalar_times[-1]:
+        index = 3 * (len(scalar_times) - 1) + 1 if interpolation == "CUBICSPLINE" else len(scalar_times) - 1
+        return list(outputs[index])
+    upper = bisect.bisect_right(scalar_times, time_s)
+    lower = upper - 1
+    duration = scalar_times[upper] - scalar_times[lower]
+    alpha = (time_s - scalar_times[lower]) / duration
+    if interpolation == "STEP":
+        return list(outputs[lower])
+    if interpolation == "LINEAR":
+        if path == "rotation":
+            return _slerp(outputs[lower], outputs[upper], alpha)
+        return [(1 - alpha) * float(a) + alpha * float(b)
+                for a, b in zip(outputs[lower], outputs[upper], strict=True)]
+    if interpolation == "CUBICSPLINE":
+        previous, following = outputs[3 * lower + 1], outputs[3 * upper + 1]
+        outgoing, incoming = outputs[3 * lower + 2], outputs[3 * upper]
+        a2, a3 = alpha * alpha, alpha * alpha * alpha
+        result = [((2 * a3 - 3 * a2 + 1) * float(previous[i]) +
+                   duration * (a3 - 2 * a2 + alpha) * float(outgoing[i]) +
+                   (-2 * a3 + 3 * a2) * float(following[i]) +
+                   duration * (a3 - a2) * float(incoming[i]))
+                  for i in range(len(previous))]
+        return _normalize_quaternion(result) if path == "rotation" else result
+    raise ValueError(f"CC_GLB_ANIMATION_INTERPOLATION: {interpolation}")
+
+
+def read_glb(path: Path):
+    data = path.read_bytes()
+    magic, version, size = struct.unpack_from("<III", data)
+    if magic != 0x46546C67 or version != 2 or size != len(data):
+        raise ValueError(f"CC_GLB_HEADER: {path}")
+    offset, document, binary = 12, None, b""
+    while offset < len(data):
+        length, kind = struct.unpack_from("<II", data, offset); offset += 8
+        chunk = data[offset:offset+length]; offset += length
+        if kind == 0x4E4F534A:
+            document = json.loads(chunk)
+        elif kind == 0x004E4942:
+            binary = chunk
+    if document is None:
+        raise ValueError("CC_GLB_JSON_MISSING")
+    return document, binary
+
+
+def validate_glb_rest(path: Path, skeleton: dict) -> dict:
+    document, binary = read_glb(path)
+    nodes = document["nodes"]
+    parents = {child: parent for parent, node in enumerate(nodes) for child in node.get("children", [])}
+    global_matrices = {}
+    def world(index):
+        if index not in global_matrices:
+            local = _node_matrix(nodes[index])
+            global_matrices[index] = matrix_multiply(world(parents[index]), local) if index in parents else local
+        return global_matrices[index]
+    expected = {b["name"]: bone_matrix(b) for b in skeleton["bones"]}
+    actual, diagnostics = {}, []
+    for node_index, node in enumerate(nodes):
+        if "skin" not in node:
+            continue
+        skin = document["skins"][node["skin"]]
+        if "inverseBindMatrices" not in skin:
+            diagnostics.append("CC_GLB_BIND_MISSING")
+            continue
+        accessor = document["accessors"][skin["inverseBindMatrices"]]
+        if accessor["componentType"] != 5126 or accessor["type"] != "MAT4" or accessor["count"] != len(skin["joints"]):
+            diagnostics.append("CC_GLB_BIND_FORMAT")
+            continue
+        view = document["bufferViews"][accessor["bufferView"]]
+        start = view.get("byteOffset", 0) + accessor.get("byteOffset", 0)
+        stride = view.get("byteStride", 64)
+        for i, joint in enumerate(skin["joints"]):
+            values = struct.unpack_from("<16f", binary, start + stride*i)
+            inverse_bind = [[values[col*4+row] for col in range(4)] for row in range(4)]
+            # glTF skinning ignores the skinned mesh node transform. Our exporter
+            # writes geometry in the catalog bind frame (identity bind shape).
+            actual[nodes[joint]["name"]] = matrix_inverse(inverse_bind)
+    max_position = max_angle = 0.
+    for name, expected_matrix in expected.items():
+        if name not in actual:
+            diagnostics.append(f"CC_GLB_BONE_MISSING: {name}")
+            continue
+        position, angle = transform_error(expected_matrix, actual[name])
+        max_position, max_angle = max(max_position, position), max(max_angle, angle)
+        if position > .0001 or angle > .1:
+            diagnostics.append(f"CC_GLB_REST: {name}: {position:.7f} m, {angle:.6f} degrees")
+    clips = [a.get("name", "") for a in document.get("animations", [])]
+    if set(clips) != REQUIRED_CLIPS:
+        diagnostics.append(f"CC_GLB_CLIPS: {clips}")
+    return {"passed": not diagnostics, "bones_checked": len(expected), "clips": clips,
+            "max_position_error_m": max_position, "max_angle_error_deg": max_angle, "diagnostics": diagnostics}
+
+
+def _node_parents(nodes: list[dict[str, Any]]) -> dict[int, int]:
+    parents: dict[int, int] = {}
+    for parent, node in enumerate(nodes):
+        for child_value in node.get("children", []):
+            child = int(child_value)
+            if child in parents:
+                raise ValueError(f"CC_GLB_NODE_MULTIPLE_PARENTS: {child}")
+            parents[child] = parent
+    return parents
+
+
+def _world_matrices(local_matrices, parents):
+    result = {}
+    active: set[int] = set()
+
+    def world(index):
+        if index in result:
+            return result[index]
+        if index in active:
+            raise ValueError("CC_GLB_NODE_CYCLE")
+        active.add(index)
+        local = local_matrices[index]
+        result[index] = matrix_multiply(world(parents[index]), local) if index in parents else local
+        active.remove(index)
+        return result[index]
+
+    for node_index in range(len(local_matrices)):
+        world(node_index)
+    return result
+
+
+def _prepare_animation(document, binary, animation, duration_s, bone_names, diagnostics):
+    nodes = document.get("nodes", [])
+    cache = {}
+    channels = []
+    targets = set()
+    for channel in animation.get("channels", []):
+        target = channel.get("target", {})
+        node_index = target.get("node")
+        path = target.get("path")
+        if not isinstance(node_index, int) or not 0 <= node_index < len(nodes) or path not in {"translation", "rotation", "scale"}:
+            diagnostics.append(f"CC_GLB_MOTION_TARGET: {animation.get('name', '')}: {target}")
+            continue
+        node_name = nodes[node_index].get("name", "")
+        if node_name not in bone_names:
+            diagnostics.append(f"CC_GLB_MOTION_TARGET_EXTRA: {animation.get('name', '')}: {node_name or node_index}")
+            continue
+        target_key = (node_index, path)
+        if target_key in targets:
+            diagnostics.append(f"CC_GLB_MOTION_TARGET_DUPLICATE: {animation.get('name', '')}: {node_name}.{path}")
+            continue
+        targets.add(target_key)
+        try:
+            sampler_index = int(channel["sampler"])
+            sampler = animation["samplers"][sampler_index]
+            if sampler_index not in cache:
+                input_accessor = document["accessors"][int(sampler["input"])]
+                if input_accessor.get("type") != "SCALAR" or input_accessor.get("componentType") != 5126:
+                    raise ValueError("CC_GLB_ANIMATION_INPUT_TYPE")
+                times = _read_accessor(document, binary, int(sampler["input"]))
+                outputs = _read_accessor(document, binary, int(sampler["output"]))
+                if (any(not math.isfinite(float(value)) for item in times for value in item) or
+                        any(not math.isfinite(float(value)) for item in outputs for value in item)):
+                    raise ValueError("CC_GLB_ANIMATION_NONFINITE")
+                interpolation = sampler.get("interpolation", "LINEAR")
+                multiplier = 3 if interpolation == "CUBICSPLINE" else 1
+                if interpolation not in {"LINEAR", "STEP", "CUBICSPLINE"}:
+                    raise ValueError(f"CC_GLB_ANIMATION_INTERPOLATION: {interpolation}")
+                if len(outputs) != len(times) * multiplier:
+                    raise ValueError("CC_GLB_ANIMATION_OUTPUT_COUNT")
+                scalar_times = [float(item[0]) for item in times]
+                if any(right <= left for left, right in zip(scalar_times, scalar_times[1:])):
+                    raise ValueError("CC_GLB_ANIMATION_KEYS_ORDER")
+                declared_min, declared_max = input_accessor.get("min"), input_accessor.get("max")
+                if (not isinstance(declared_min, list) or len(declared_min) != 1 or
+                        not isinstance(declared_max, list) or len(declared_max) != 1 or
+                        not math.isclose(float(declared_min[0]), min(scalar_times), abs_tol=1e-7) or
+                        not math.isclose(float(declared_max[0]), max(scalar_times), abs_tol=1e-7)):
+                    raise ValueError("CC_GLB_ANIMATION_INPUT_BOUNDS")
+                if (not scalar_times or abs(scalar_times[0]) > 1e-6 or
+                        abs(scalar_times[-1] - duration_s) > 1e-5):
+                    diagnostics.append(
+                        f"CC_GLB_MOTION_RANGE: {animation.get('name', '')}: "
+                        f"{scalar_times[0] if scalar_times else 'empty'}..{scalar_times[-1] if scalar_times else 'empty'} "
+                        f"expected 0..{duration_s}"
+                    )
+                cache[sampler_index] = (times, outputs, interpolation)
+            times, outputs, interpolation = cache[sampler_index]
+            expected_components = 4 if path == "rotation" else 3
+            if outputs and len(outputs[0]) != expected_components:
+                raise ValueError(f"CC_GLB_ANIMATION_OUTPUT_TYPE: {node_name}.{path}")
+            channels.append((node_index, path, times, outputs, interpolation))
+        except (KeyError, IndexError, TypeError, ValueError) as exc:
+            diagnostics.append(f"CC_GLB_MOTION_CHANNEL: {animation.get('name', '')}: {exc}")
+    return channels
+
+
+def _sample_node_matrices(nodes, channels, time_s):
+    overrides: dict[int, dict[str, list[float]]] = {}
+    for node_index, path, times, outputs, interpolation in channels:
+        overrides.setdefault(node_index, {})[path] = _sample_sampler(times, outputs, interpolation, time_s, path)
+    result = []
+    for node_index, node in enumerate(nodes):
+        values = overrides.get(node_index)
+        if not values:
+            result.append(_node_matrix(node))
+            continue
+        if "matrix" in node:
+            raise ValueError(f"CC_GLB_ANIMATED_MATRIX_NODE: {node.get('name', node_index)}")
+        animated = {
+            "translation": values.get("translation", node.get("translation", [0., 0., 0.])),
+            "rotation": values.get("rotation", node.get("rotation", [0., 0., 0., 1.])),
+            "scale": values.get("scale", node.get("scale", [1., 1., 1.])),
+        }
+        result.append(_node_matrix(animated))
+    return result
+
+
+def _expected_world_rotations(nodes, parents, node_names, sample_bones):
+    deltas = {bone["name"]: _normalize_quaternion(bone["rotation_xyzw"]) for bone in sample_bones}
+    local = []
+    for node in nodes:
+        rest = _rotation_matrix(_node_matrix(node))
+        name = node.get("name", "")
+        local.append(matrix_multiply(rest, _quat_matrix(deltas[name])) if name in node_names and name in deltas else rest)
+    return _world_matrices(local, parents)
+
+
+def validate_glb_motion(path: Path, skeleton: dict, motion: dict) -> dict:
+    """Compare every 30 FPS evaluated Blender bone sample with its exported GLB clip."""
+    diagnostics: list[str] = []
+    document, binary = read_glb(path)
+    nodes = document.get("nodes", [])
+    try:
+        parents = _node_parents(nodes)
+    except ValueError as exc:
+        parents = {}
+        diagnostics.append(str(exc))
+
+    skeleton_id = str(skeleton.get("skeleton_id", ""))
+    if motion.get("skeleton_id") != skeleton_id:
+        diagnostics.append(f"CC_GLB_MOTION_SKELETON: {motion.get('skeleton_id')} != {skeleton_id}")
+    if motion.get("sample_source") != "evaluated_blender":
+        diagnostics.append(f"CC_GLB_MOTION_SOURCE: {motion.get('sample_source')}")
+    if motion.get("fps") != 30:
+        diagnostics.append(f"CC_GLB_MOTION_FPS: {motion.get('fps')}")
+
+    bones = skeleton.get("bones", [])
+    bone_names = [str(bone.get("name", "")) for bone in bones]
+    bone_set = set(bone_names)
+    if len(bone_set) != len(bone_names) or list(motion.get("bone_names", [])) != bone_names:
+        diagnostics.append(f"CC_GLB_MOTION_BONES: expected {bone_names}, got {motion.get('bone_names', [])}")
+    named_nodes: dict[str, list[int]] = {}
+    for node_index, node in enumerate(nodes):
+        if node.get("name") in bone_set:
+            named_nodes.setdefault(node["name"], []).append(node_index)
+    for name in bone_names:
+        matches = named_nodes.get(name, [])
+        if len(matches) != 1:
+            diagnostics.append(f"CC_GLB_MOTION_NODE: {name}: count={len(matches)}")
+    node_by_name = {name: matches[0] for name, matches in named_nodes.items() if len(matches) == 1}
+    referenced_skins = {node.get("skin") for node in nodes if isinstance(node.get("skin"), int)}
+    expected_joint_nodes = set(node_by_name.values())
+    skin_matches = False
+    for skin_index in referenced_skins:
+        if not 0 <= skin_index < len(document.get("skins", [])):
+            continue
+        joints = document["skins"][skin_index].get("joints", [])
+        if len(joints) == len(expected_joint_nodes) and set(joints) == expected_joint_nodes:
+            skin_matches = True
+            break
+    if not skin_matches:
+        diagnostics.append(f"CC_GLB_MOTION_SKIN: expected joints {sorted(expected_joint_nodes)}")
+
+    animation_list = document.get("animations", [])
+    animation_names = [str(animation.get("name", "")) for animation in animation_list]
+    motion_clip_list = motion.get("clips", [])
+    motion_names = [str(clip.get("name", "")) for clip in motion_clip_list]
+    if set(animation_names) != REQUIRED_CLIPS or len(animation_names) != len(REQUIRED_CLIPS):
+        diagnostics.append(f"CC_GLB_MOTION_CLIPS: GLB={animation_names}")
+    if set(motion_names) != REQUIRED_CLIPS or len(motion_names) != len(REQUIRED_CLIPS):
+        diagnostics.append(f"CC_GLB_MOTION_CLIPS: motion={motion_names}")
+    animations = {animation.get("name"): animation for animation in animation_list}
+    motion_clips = {clip.get("name"): clip for clip in motion_clip_list}
+
+    socket_bones = {branch["bone_names"][0] for branch in skeleton.get("branches", []) if branch.get("bone_names")}
+    lengths = {bone["name"]: _distance(bone["head_m"], bone["tail_m"]) for bone in bones}
+    max_position = max_head = max_tail = max_angle = max_socket = 0.
+    worst_position = worst_angle = worst_socket = None
+    samples_checked = bone_samples_checked = clips_checked = 0
+
+    for clip_name in sorted(REQUIRED_CLIPS):
+        animation = animations.get(clip_name)
+        clip = motion_clips.get(clip_name)
+        if animation is None or clip is None:
+            continue
+        clips_checked += 1
+        frames = clip.get("frames")
+        fps = clip.get("fps")
+        samples = clip.get("samples", [])
+        if not isinstance(frames, int) or frames < 0 or fps != 30:
+            diagnostics.append(f"CC_GLB_MOTION_RANGE: {clip_name}: frames={frames}, fps={fps}")
+            continue
+        duration_s = frames / 30.
+        if abs(float(clip.get("duration_s", -1.)) - duration_s) > 1e-6:
+            diagnostics.append(f"CC_GLB_MOTION_RANGE: {clip_name}: duration={clip.get('duration_s')} expected={duration_s}")
+        sample_frames = [sample.get("frame") for sample in samples]
+        if sample_frames != list(range(frames + 1)):
+            diagnostics.append(f"CC_GLB_MOTION_RANGE: {clip_name}: frames={sample_frames}")
+        channels = _prepare_animation(document, binary, animation, duration_s, bone_set, diagnostics)
+        for sample in samples:
+            frame = sample.get("frame")
+            if not isinstance(frame, int) or not 0 <= frame <= frames:
+                continue
+            samples_checked += 1
+            try:
+                local = _sample_node_matrices(nodes, channels, frame / 30.)
+                actual_world = _world_matrices(local, parents)
+            except ValueError as exc:
+                diagnostics.append(f"CC_GLB_MOTION_SAMPLE: {clip_name}@{frame}: {exc}")
+                continue
+            sample_bones = sample.get("bones", [])
+            sample_names = [bone.get("name") for bone in sample_bones]
+            if set(sample_names) != bone_set or len(sample_names) != len(bone_names):
+                diagnostics.append(f"CC_GLB_MOTION_SAMPLE_BONES: {clip_name}@{frame}: {sample_names}")
+                continue
+            try:
+                expected_rotations = _expected_world_rotations(nodes, parents, bone_set, sample_bones)
+            except (KeyError, TypeError, ValueError) as exc:
+                diagnostics.append(f"CC_GLB_MOTION_ROTATION_DATA: {clip_name}@{frame}: {exc}")
+                continue
+            for expected_bone in sample_bones:
+                name = expected_bone["name"]
+                node_index = node_by_name.get(name)
+                if node_index is None:
+                    continue
+                bone_samples_checked += 1
+                actual_matrix = actual_world[node_index]
+                head_error = _distance([actual_matrix[i][3] for i in range(3)], expected_bone["head_m"])
+                actual_tail = _transform_point(actual_matrix, [0., lengths[name], 0.])
+                tail_error = _distance(actual_tail, expected_bone["tail_m"])
+                _, angle_error = transform_error(_rotation_matrix(actual_matrix), expected_rotations[node_index])
+                max_head, max_tail, max_angle = max(max_head, head_error), max(max_tail, tail_error), max(max_angle, angle_error)
+                point_error = max(head_error, tail_error)
+                if point_error > max_position:
+                    max_position = point_error
+                    worst_position = {"clip": clip_name, "frame": frame, "bone": name,
+                                      "point": "head" if head_error >= tail_error else "tail",
+                                      "error_m": point_error}
+                if angle_error >= max_angle:
+                    worst_angle = {"clip": clip_name, "frame": frame, "bone": name,
+                                   "error_deg": angle_error}
+                if name in socket_bones and head_error > max_socket:
+                    max_socket = head_error
+                    worst_socket = {"clip": clip_name, "frame": frame, "bone": name, "error_m": head_error}
+
+    if max_position > .0001:
+        diagnostics.append(f"CC_GLB_MOTION_POSITION: {worst_position}")
+    if max_angle > .1:
+        diagnostics.append(f"CC_GLB_MOTION_ROTATION: {worst_angle}")
+    return {
+        "passed": not diagnostics,
+        "position_tolerance_m": .0001,
+        "angle_tolerance_deg": .1,
+        "clips": animation_names,
+        "clips_checked": clips_checked,
+        "samples_checked": samples_checked,
+        "bones_checked": len(bone_names),
+        "bone_samples_checked": bone_samples_checked,
+        "max_position_error_m": max_position,
+        "max_head_error_m": max_head,
+        "max_tail_error_m": max_tail,
+        "max_angle_error_deg": max_angle,
+        "max_socket_position_error_m": max_socket,
+        "worst_position": worst_position,
+        "worst_angle": worst_angle,
+        "worst_socket": worst_socket,
+        "diagnostics": diagnostics,
+    }
+
+
+def _mat4_accessor_value(values: list[float | int]) -> list[list[float]]:
+    if len(values) != 16:
+        raise ValueError("CC_GLB_SURFACE_BIND_FORMAT")
+    return [[float(values[column * 4 + row]) for column in range(4)] for row in range(4)]
+
+
+def _prepare_surface_vertices(document: dict[str, Any], binary: bytes, diagnostics: list[str]):
+    """Precompute inverse-bind vertex terms for fast animated Y evaluation."""
+    nodes = document.get("nodes", [])
+    meshes = document.get("meshes", [])
+    skins = document.get("skins", [])
+    prepared: list[tuple[dict[str, int], list[tuple[int, float, float, float, float]]]] = []
+    material_slots: set[int] = set()
+    max_influences = 0
+
+    def report_once(code: str, detail: str) -> None:
+        prefix = code + ":"
+        if not any(item == code or item.startswith(prefix) for item in diagnostics):
+            diagnostics.append(f"{code}: {detail}")
+
+    for node_index, node in enumerate(nodes):
+        if "mesh" not in node or "skin" not in node:
+            continue
+        try:
+            mesh_index, skin_index = int(node["mesh"]), int(node["skin"])
+            mesh, skin = meshes[mesh_index], skins[skin_index]
+            joints = [int(value) for value in skin["joints"]]
+            if not joints or any(not 0 <= joint < len(nodes) for joint in joints):
+                raise ValueError("CC_GLB_SURFACE_JOINTS")
+            bind_accessor_index = int(skin["inverseBindMatrices"])
+            bind_accessor = document["accessors"][bind_accessor_index]
+            if (bind_accessor.get("componentType") != 5126 or bind_accessor.get("type") != "MAT4" or
+                    int(bind_accessor.get("count", -1)) != len(joints)):
+                raise ValueError("CC_GLB_SURFACE_BIND_FORMAT")
+            inverse_binds = [_mat4_accessor_value(value)
+                             for value in _read_accessor(document, binary, bind_accessor_index)]
+            if any(not math.isfinite(value) for matrix in inverse_binds for row in matrix for value in row):
+                raise ValueError("CC_GLB_SURFACE_BIND_NONFINITE")
+        except (KeyError, IndexError, TypeError, ValueError) as exc:
+            diagnostics.append(f"CC_GLB_SURFACE_SKIN: node {node_index}: {exc}")
+            continue
+
+        for primitive_index, primitive in enumerate(mesh.get("primitives", [])):
+            label = f"node {node_index} primitive {primitive_index}"
+            attributes = primitive.get("attributes", {})
+            try:
+                position_index = int(attributes["POSITION"])
+                position_accessor = document["accessors"][position_index]
+                if position_accessor.get("type") != "VEC3" or position_accessor.get("componentType") != 5126:
+                    raise ValueError("CC_GLB_SURFACE_POSITION_FORMAT")
+                positions = _read_accessor(document, binary, position_index)
+                if not positions:
+                    raise ValueError("CC_GLB_SURFACE_POSITION_EMPTY")
+                if any(not math.isfinite(float(value)) for position in positions for value in position):
+                    raise ValueError("CC_GLB_SURFACE_POSITION_NONFINITE")
+                used_indices: list[int]
+                if "indices" in primitive:
+                    index_accessor_index = int(primitive["indices"])
+                    index_accessor = document["accessors"][index_accessor_index]
+                    if (index_accessor.get("type") != "SCALAR" or
+                            index_accessor.get("componentType") not in {5121, 5123, 5125}):
+                        raise ValueError("CC_GLB_SURFACE_INDEX_FORMAT")
+                    used_indices = sorted({int(value[0]) for value in _read_accessor(
+                        document, binary, index_accessor_index
+                    )})
+                else:
+                    used_indices = list(range(len(positions)))
+                if any(not 0 <= index < len(positions) for index in used_indices):
+                    raise ValueError("CC_GLB_SURFACE_INDEX_RANGE")
+            except (KeyError, IndexError, TypeError, ValueError) as exc:
+                diagnostics.append(f"CC_GLB_SURFACE_PRIMITIVE: {label}: {exc}")
+                continue
+
+            influence_sets = []
+            for set_index in (0, 1):
+                joints_key, weights_key = f"JOINTS_{set_index}", f"WEIGHTS_{set_index}"
+                if joints_key not in attributes and weights_key not in attributes:
+                    continue
+                if joints_key not in attributes or weights_key not in attributes:
+                    diagnostics.append(f"CC_GLB_SURFACE_ATTRIBUTES: {label}: {joints_key}/{weights_key}")
+                    influence_sets = []
+                    break
+                try:
+                    joints_index, weights_index = int(attributes[joints_key]), int(attributes[weights_key])
+                    joints_accessor, weights_accessor = (
+                        document["accessors"][joints_index], document["accessors"][weights_index]
+                    )
+                    if (joints_accessor.get("type") != "VEC4" or
+                            joints_accessor.get("componentType") not in {5121, 5123} or
+                            joints_accessor.get("normalized", False)):
+                        raise ValueError("CC_GLB_SURFACE_JOINT_FORMAT")
+                    if (weights_accessor.get("type") != "VEC4" or
+                            weights_accessor.get("componentType") not in {5121, 5123, 5126} or
+                            (weights_accessor.get("componentType") != 5126 and
+                             not weights_accessor.get("normalized", False))):
+                        raise ValueError("CC_GLB_SURFACE_WEIGHT_FORMAT")
+                    joint_values = _read_accessor(document, binary, joints_index)
+                    weight_values = _read_accessor(document, binary, weights_index)
+                    if len(joint_values) != len(positions) or len(weight_values) != len(positions):
+                        raise ValueError("CC_GLB_SURFACE_ATTRIBUTE_COUNT")
+                    influence_sets.append((joint_values, weight_values))
+                except (KeyError, IndexError, TypeError, ValueError) as exc:
+                    diagnostics.append(f"CC_GLB_SURFACE_ATTRIBUTES: {label}: {exc}")
+                    influence_sets = []
+                    break
+            if not influence_sets:
+                report_once("CC_GLB_SURFACE_ATTRIBUTES", f"{label}: missing skin influences")
+                continue
+            if isinstance(primitive.get("material"), int):
+                material_slots.add(int(primitive["material"]))
+
+            for vertex_index in used_indices:
+                influences: list[tuple[int, float, float, float, float]] = []
+                weight_sum = 0.0
+                for joint_values, weight_values in influence_sets:
+                    for joint_value, weight_value in zip(joint_values[vertex_index], weight_values[vertex_index], strict=True):
+                        weight = float(weight_value)
+                        if not math.isfinite(weight) or weight < 0:
+                            report_once("CC_GLB_SURFACE_WEIGHTS", f"{label}: invalid vertex weight")
+                            continue
+                        if weight <= 1e-8:
+                            continue
+                        joint_slot = int(joint_value)
+                        if not 0 <= joint_slot < len(joints):
+                            report_once("CC_GLB_SURFACE_JOINT_INDEX", f"{label}: {joint_slot}")
+                            continue
+                        bind_point = _transform_point(inverse_binds[joint_slot], positions[vertex_index])
+                        if any(not math.isfinite(float(value)) for value in bind_point):
+                            report_once("CC_GLB_SURFACE_BIND_NONFINITE", label)
+                            continue
+                        influences.append((joints[joint_slot], weight, *bind_point))
+                        weight_sum += weight
+                if abs(weight_sum - 1.0) > 1e-4:
+                    report_once("CC_GLB_SURFACE_WEIGHTS", f"{label}: sum={weight_sum:.7f}")
+                if len(influences) > 4:
+                    report_once("CC_GLB_SURFACE_INFLUENCES", f"{label}: {len(influences)} > 4")
+                max_influences = max(max_influences, len(influences))
+                if influences:
+                    prepared.append(({
+                        "node": node_index,
+                        "mesh": mesh_index,
+                        "primitive": primitive_index,
+                        "vertex": vertex_index,
+                    }, influences))
+    if not prepared:
+        diagnostics.append("CC_GLB_SURFACE_MISSING: no skinned vertices")
+    return prepared, max_influences, len(material_slots)
+
+
+def validate_glb_surface(path: Path, skeleton: dict, motion: dict) -> dict:
+    """Evaluate actual skinned GLB vertices at every authored 30 FPS frame."""
+    diagnostics: list[str] = []
+    document, binary = read_glb(path)
+    nodes = document.get("nodes", [])
+    try:
+        parents = _node_parents(nodes)
+    except ValueError as exc:
+        parents = {}
+        diagnostics.append(str(exc))
+
+    skeleton_id = str(skeleton.get("skeleton_id", ""))
+    if motion.get("skeleton_id") != skeleton_id:
+        diagnostics.append(f"CC_GLB_SURFACE_SKELETON: {motion.get('skeleton_id')} != {skeleton_id}")
+    if motion.get("fps") != 30:
+        diagnostics.append(f"CC_GLB_SURFACE_FPS: {motion.get('fps')}")
+    vertices, max_influences, material_count = _prepare_surface_vertices(document, binary, diagnostics)
+
+    animation_list = document.get("animations", [])
+    animation_names = [str(animation.get("name", "")) for animation in animation_list]
+    clip_list = motion.get("clips", [])
+    clip_names = [str(clip.get("name", "")) for clip in clip_list]
+    if set(animation_names) != REQUIRED_CLIPS or len(animation_names) != len(REQUIRED_CLIPS):
+        diagnostics.append(f"CC_GLB_SURFACE_CLIPS: GLB={animation_names}")
+    if set(clip_names) != REQUIRED_CLIPS or len(clip_names) != len(REQUIRED_CLIPS):
+        diagnostics.append(f"CC_GLB_SURFACE_CLIPS: motion={clip_names}")
+    animations = {animation.get("name"): animation for animation in animation_list}
+    clips = {clip.get("name"): clip for clip in clip_list}
+    bone_names = {str(bone.get("name", "")) for bone in skeleton.get("bones", [])}
+
+    minimum_y = math.inf
+    worst_surface = None
+    per_clip_bounds: dict[str, dict[str, Any]] = {}
+    clips_checked = frames_checked = vertex_samples_checked = 0
+    for clip_name in sorted(REQUIRED_CLIPS):
+        animation, clip = animations.get(clip_name), clips.get(clip_name)
+        if animation is None or clip is None:
+            continue
+        frames, fps = clip.get("frames"), clip.get("fps")
+        if not isinstance(frames, int) or frames < 0 or fps != 30:
+            diagnostics.append(f"CC_GLB_SURFACE_RANGE: {clip_name}: frames={frames}, fps={fps}")
+            continue
+        clips_checked += 1
+        duration_s = frames / 30.0
+        channels = _prepare_animation(document, binary, animation, duration_s, bone_names, diagnostics)
+        clip_minimum = math.inf
+        clip_worst_frame = None
+        for frame in range(frames + 1):
+            frames_checked += 1
+            try:
+                local = _sample_node_matrices(nodes, channels, frame / 30.0)
+                world = _world_matrices(local, parents)
+            except (KeyError, IndexError, TypeError, ValueError) as exc:
+                diagnostics.append(f"CC_GLB_SURFACE_SAMPLE: {clip_name}@{frame}: {exc}")
+                continue
+            frame_minimum = math.inf
+            for provenance, influences in vertices:
+                y = 0.0
+                for joint_node, weight, bind_x, bind_y, bind_z in influences:
+                    matrix = world[joint_node]
+                    y += weight * (
+                        matrix[1][0] * bind_x + matrix[1][1] * bind_y +
+                        matrix[1][2] * bind_z + matrix[1][3]
+                    )
+                if not math.isfinite(y):
+                    if not any(item.startswith("CC_GLB_SURFACE_COMPUTED_NONFINITE") for item in diagnostics):
+                        diagnostics.append(
+                            f"CC_GLB_SURFACE_COMPUTED_NONFINITE: {clip_name}@{frame}: {provenance}"
+                        )
+                    continue
+                frame_minimum = min(frame_minimum, y)
+                if y < minimum_y:
+                    minimum_y = y
+                    worst_surface = {
+                        "clip": clip_name,
+                        "frame": frame,
+                        "min_y_m": y,
+                        **provenance,
+                    }
+            vertex_samples_checked += len(vertices)
+            if frame_minimum < clip_minimum:
+                clip_minimum, clip_worst_frame = frame_minimum, frame
+        if clip_minimum < math.inf:
+            per_clip_bounds[clip_name] = {
+                "min_y_m": clip_minimum,
+                "max_below_ground_m": max(0.0, -clip_minimum),
+                "worst_frame": clip_worst_frame,
+                "frames_checked": frames + 1,
+            }
+
+    if minimum_y == math.inf:
+        minimum_y = 0.0
+    penetration = max(0.0, -minimum_y)
+    if penetration > .005 + 1e-9:
+        diagnostics.append(f"CC_GLB_SURFACE_GROUND: {worst_surface}: penetration={penetration:.7f}m")
+    return {
+        "passed": not diagnostics,
+        "ground_tolerance_m": .005,
+        "clips": animation_names,
+        "clips_checked": clips_checked,
+        "frames_checked": frames_checked,
+        "vertices_checked": len(vertices),
+        "vertex_samples_checked": vertex_samples_checked,
+        "max_influences": max_influences,
+        "material_count": material_count,
+        "min_surface_y_m": minimum_y,
+        "max_below_ground_m": penetration,
+        "worst_surface": worst_surface,
+        "per_clip_bounds": per_clip_bounds,
+        "diagnostics": diagnostics,
+    }
+
+
+def validate_glb_export(path: Path, skeleton: dict, motion: dict | None = None) -> dict:
+    """Return the rest report and, when supplied, the evaluated motion report."""
+    rest = validate_glb_rest(path, skeleton)
+    if motion is None:
+        return {"passed": rest["passed"], "rest": rest}
+    animation = validate_glb_motion(path, skeleton, motion)
+    return {"passed": rest["passed"] and animation["passed"], "rest": rest, "motion": animation}
