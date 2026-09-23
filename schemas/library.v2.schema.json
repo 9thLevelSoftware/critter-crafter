@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://9thlevelsoftware.github.io/critter-crafter/schemas/library.v2.schema.json",
+  "title": "library.v2.schema.json",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "document_kind",
+    "library_id",
+    "version",
+    "frame",
+    "limits",
+    "skeletons",
+    "parts",
+    "pools",
+    "branch_templates",
+    "gait_profiles"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "2.0.0"
+    },
+    "document_kind": {
+      "const": "critter_library"
+    },
+    "library_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "frame": {
+      "const": "gltf_rh_yup_zfwd_m"
+    },
+    "limits": {
+      "type": "object",
+      "required": [
+        "max_triangles",
+        "max_bones",
+        "max_parts",
+        "max_influences"
+      ]
+    },
+    "skeletons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "skeleton_id",
+          "bones",
+          "branches",
+          "asset"
+        ]
+      }
+    },
+    "parts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "part_id",
+          "category",
+          "length_mm",
+          "max_triangles",
+          "asset"
+        ]
+      }
+    },
+    "pools": {
+      "type": "array"
+    },
+    "branch_templates": {
+      "type": "array"
+    },
+    "gait_profiles": {
+      "type": "array"
+    }
+  }
+}

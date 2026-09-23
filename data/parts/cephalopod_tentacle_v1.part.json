@@ -1,0 +1,35 @@
+{
+  "schema_version": "2.0.0",
+  "part_id": "cephalopod_tentacle_v1",
+  "category": "limb",
+  "template": "tentacle8",
+  "species_tags": [
+    "cephalopodic"
+  ],
+  "roles": [
+    "locomotor",
+    "slither",
+    "puller"
+  ],
+  "size_class": null,
+  "status": "placeholder",
+  "style_profile": "flesh_stylized_v1",
+  "dimensions_m": [
+    0.32,
+    0.32,
+    1.2
+  ],
+  "length_m": 1.2,
+  "budget": {
+    "max_triangles": 2500,
+    "max_material_slots": 2,
+    "texture_size": 1024
+  },
+  "fallback": {
+    "primitive": "cone",
+    "albedo": "#c08a9a"
+  },
+  "provenance": {
+    "source": "placeholder"
+  }
+}

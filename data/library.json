@@ -1,0 +1,16 @@
+{
+  "schema_version": "2.0.0",
+  "library_id": "biomass_core",
+  "version": "0.1.0",
+  "frame": "gltf_rh_yup_zfwd_m",
+  "limits": {
+    "max_triangles": 30000,
+    "target_triangles": 24000,
+    "max_bones": 120,
+    "max_parts": 16,
+    "max_influences": 4,
+    "min_length_scale_pct": 80,
+    "max_length_scale_pct": 125
+  },
+  "generator": { "algorithm": "cc-gen-2", "rng": "splitmix64" }
+}

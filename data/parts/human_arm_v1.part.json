@@ -1,0 +1,35 @@
+{
+  "schema_version": "2.0.0",
+  "part_id": "human_arm_v1",
+  "category": "limb",
+  "template": "limb3",
+  "species_tags": [
+    "human"
+  ],
+  "roles": [
+    "locomotor",
+    "manipulator",
+    "puller"
+  ],
+  "size_class": null,
+  "status": "placeholder",
+  "style_profile": "flesh_stylized_v1",
+  "dimensions_m": [
+    0.28,
+    0.28,
+    1.0
+  ],
+  "length_m": 1.0,
+  "budget": {
+    "max_triangles": 2500,
+    "max_material_slots": 2,
+    "texture_size": 1024
+  },
+  "fallback": {
+    "primitive": "capsule",
+    "albedo": "#b98f94"
+  },
+  "provenance": {
+    "source": "placeholder"
+  }
+}

@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+*.egg-info/
+# Build output
+/work/
+/library/
+/dist/
+critter.toml
+# Blender
+*.blend1
+# Unity TestProject
+unity/TestProject/[Ll]ibrary/
+unity/TestProject/[Tt]emp/
+unity/TestProject/[Oo]bj/
+unity/TestProject/[Ll]ogs/
+unity/TestProject/[Uu]ser[Ss]ettings/
+unity/TestProject/Assets/CritterLibraries/
+unity/TestProject/Assets/CritterLibraries.meta
+unity/TestProject/*.csproj
+unity/TestProject/*.sln
+# Local Claude settings
+.claude/settings.local.json
+*.slnx
+unity/TestProject/.vscode/

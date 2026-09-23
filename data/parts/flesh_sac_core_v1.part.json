@@ -1,0 +1,33 @@
+{
+  "schema_version": "2.0.0",
+  "part_id": "flesh_sac_core_v1",
+  "category": "core",
+  "template": "core1",
+  "species_tags": [
+    "biomass"
+  ],
+  "roles": [
+    "core"
+  ],
+  "size_class": null,
+  "status": "placeholder",
+  "style_profile": "flesh_stylized_v1",
+  "dimensions_m": [
+    0.5,
+    0.45,
+    0.55
+  ],
+  "length_m": 0.55,
+  "budget": {
+    "max_triangles": 4000,
+    "max_material_slots": 2,
+    "texture_size": 1024
+  },
+  "fallback": {
+    "primitive": "sphere",
+    "albedo": "#a8707a"
+  },
+  "provenance": {
+    "source": "placeholder"
+  }
+}

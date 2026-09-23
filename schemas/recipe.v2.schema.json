@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://9thlevelsoftware.github.io/critter-crafter/schemas/recipe.v2.schema.json",
+  "title": "recipe.v2.schema.json",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "recipe_id",
+    "library_id",
+    "library_version",
+    "skeleton_id",
+    "fills"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "2.0.0"
+    },
+    "recipe_id": {
+      "type": "string"
+    },
+    "library_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "library_version": {
+      "type": "string"
+    },
+    "generator": {
+      "type": "string"
+    },
+    "pool_id": {
+      "type": "string"
+    },
+    "seed": {
+      "type": "integer"
+    },
+    "skeleton_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "fills": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "branch_id",
+          "part_id",
+          "connector_part_id"
+        ],
+        "properties": {
+          "branch_id": {
+            "type": "string",
+            "pattern": "^[a-z][A-Za-z0-9_]*$"
+          },
+          "part_id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "connector_part_id": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

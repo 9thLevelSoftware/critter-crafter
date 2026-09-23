@@ -1,0 +1,40 @@
+{
+  "schema_version": "2.0.0",
+  "part_id": "gunk_collar_s_v1",
+  "category": "connector",
+  "template": "connector2",
+  "species_tags": [
+    "biomass"
+  ],
+  "roles": [
+    "connector"
+  ],
+  "size_class": "S",
+  "status": "placeholder",
+  "style_profile": "flesh_stylized_v1",
+  "dimensions_m": [
+    0.18,
+    0.18,
+    0.2
+  ],
+  "length_m": 0.2,
+  "budget": {
+    "max_triangles": 500,
+    "max_material_slots": 2,
+    "texture_size": 1024
+  },
+  "fallback": {
+    "primitive": "cylinder",
+    "albedo": "#6e4a4f"
+  },
+  "provenance": {
+    "source": "placeholder"
+  },
+  "connector": {
+    "radius_m": 0.09,
+    "span_m": [
+      -0.06,
+      0.14
+    ]
+  }
+}

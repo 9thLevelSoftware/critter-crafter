@@ -1,0 +1,11 @@
+{
+  "name": "CritterCrafter.Tests.Editor",
+  "rootNamespace": "CritterCrafter.Tests",
+  "references": ["CritterCrafter.Runtime", "CritterCrafter.Editor", "UnityEngine.TestRunner", "UnityEditor.TestRunner"],
+  "includePlatforms": ["Editor"],
+  "excludePlatforms": [],
+  "overrideReferences": true,
+  "precompiledReferences": ["nunit.framework.dll"],
+  "autoReferenced": false,
+  "defineConstraints": ["UNITY_INCLUDE_TESTS"]
+}

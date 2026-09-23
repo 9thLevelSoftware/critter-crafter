@@ -1,0 +1,33 @@
+{
+  "schema_version": "2.0.0",
+  "part_id": "animal_skull_v1",
+  "category": "head",
+  "template": "head1",
+  "species_tags": [
+    "animal"
+  ],
+  "roles": [
+    "detail"
+  ],
+  "size_class": null,
+  "status": "placeholder",
+  "style_profile": "flesh_stylized_v1",
+  "dimensions_m": [
+    0.45,
+    0.4,
+    0.6
+  ],
+  "length_m": 0.6,
+  "budget": {
+    "max_triangles": 3500,
+    "max_material_slots": 2,
+    "texture_size": 1024
+  },
+  "fallback": {
+    "primitive": "sphere",
+    "albedo": "#cbb8a4"
+  },
+  "provenance": {
+    "source": "placeholder"
+  }
+}

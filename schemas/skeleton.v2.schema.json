@@ -1,0 +1,213 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://9thlevelsoftware.github.io/critter-crafter/schemas/skeleton.v2.schema.json",
+  "title": "skeleton.v2.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "skeleton_id",
+    "family",
+    "locomotion_hint",
+    "status",
+    "branches"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "2.0.0"
+    },
+    "skeleton_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "family": {
+      "enum": [
+        "biped",
+        "quadruped",
+        "hexapod",
+        "crawler",
+        "serpentine",
+        "radial",
+        "dragger"
+      ]
+    },
+    "locomotion_hint": {
+      "enum": [
+        "biped",
+        "quadruped",
+        "crawl",
+        "drag",
+        "slither"
+      ]
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "placeholder",
+        "approved"
+      ]
+    },
+    "symmetry_pct": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "branches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "branch_id",
+          "template",
+          "parent_branch",
+          "direction",
+          "up",
+          "length_m",
+          "size_class",
+          "required",
+          "accepts",
+          "connector_size_class"
+        ],
+        "properties": {
+          "branch_id": {
+            "type": "string",
+            "pattern": "^[a-z][A-Za-z0-9_]*$"
+          },
+          "template": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "parent_branch": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[a-z][A-Za-z0-9_]*$"
+          },
+          "attach_bone_index": {
+            "type": "integer"
+          },
+          "origin_m": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "direction": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "up": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "length_m": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "size_class": {
+            "enum": [
+              "S",
+              "M",
+              "L"
+            ]
+          },
+          "side": {
+            "enum": [
+              "L",
+              "R",
+              "C"
+            ]
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "optional_fill_pct": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "mirror_of": {
+            "type": "string",
+            "pattern": "^[a-z][A-Za-z0-9_]*$"
+          },
+          "accepts": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "categories"
+            ],
+            "properties": {
+              "categories": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "core",
+                    "limb",
+                    "head",
+                    "tail",
+                    "appendage",
+                    "connector"
+                  ]
+                },
+                "minItems": 1
+              },
+              "templates": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]*$"
+                }
+              },
+              "tags_any": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "connector_size_class": {
+            "enum": [
+              "S",
+              "M",
+              "L",
+              null
+            ]
+          },
+          "gait": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "role": {
+                "enum": [
+                  "core",
+                  "locomotor",
+                  "manipulator",
+                  "head",
+                  "sway",
+                  "none"
+                ]
+              },
+              "phase_rad": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      },
+      "minItems": 1
+    }
+  }
+}

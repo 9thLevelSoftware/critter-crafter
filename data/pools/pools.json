@@ -1,0 +1,57 @@
+{
+  "schema_version": "2.0.0",
+  "pools": [
+    {
+      "pool_id": "any",
+      "families": [
+        "biped",
+        "quadruped",
+        "crawler"
+      ],
+      "skeleton_ids": []
+    },
+    {
+      "pool_id": "biped",
+      "families": [
+        "biped"
+      ],
+      "skeleton_ids": []
+    },
+    {
+      "pool_id": "quadruped",
+      "families": [
+        "quadruped"
+      ],
+      "skeleton_ids": []
+    },
+    {
+      "pool_id": "crawler",
+      "families": [
+        "crawler"
+      ],
+      "skeleton_ids": []
+    },
+    {
+      "pool_id": "puppet_corpse",
+      "families": [
+        "biped"
+      ],
+      "skeleton_ids": []
+    },
+    {
+      "pool_id": "stalker",
+      "families": [
+        "quadruped",
+        "crawler"
+      ],
+      "skeleton_ids": []
+    },
+    {
+      "pool_id": "biomatter_swarm",
+      "families": [
+        "crawler"
+      ],
+      "skeleton_ids": []
+    }
+  ]
+}

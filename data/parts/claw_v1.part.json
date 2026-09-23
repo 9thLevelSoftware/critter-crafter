@@ -1,0 +1,33 @@
+{
+  "schema_version": "2.0.0",
+  "part_id": "claw_v1",
+  "category": "appendage",
+  "template": "appendage1",
+  "species_tags": [
+    "alien"
+  ],
+  "roles": [
+    "manipulator"
+  ],
+  "size_class": null,
+  "status": "placeholder",
+  "style_profile": "flesh_stylized_v1",
+  "dimensions_m": [
+    0.2,
+    0.2,
+    0.35
+  ],
+  "length_m": 0.35,
+  "budget": {
+    "max_triangles": 1500,
+    "max_material_slots": 2,
+    "texture_size": 1024
+  },
+  "fallback": {
+    "primitive": "cone",
+    "albedo": "#7e5a5e"
+  },
+  "provenance": {
+    "source": "placeholder"
+  }
+}

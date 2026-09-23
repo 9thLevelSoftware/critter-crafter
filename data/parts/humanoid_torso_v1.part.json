@@ -1,0 +1,33 @@
+{
+  "schema_version": "2.0.0",
+  "part_id": "humanoid_torso_v1",
+  "category": "core",
+  "template": "spine3",
+  "species_tags": [
+    "human"
+  ],
+  "roles": [
+    "core"
+  ],
+  "size_class": null,
+  "status": "placeholder",
+  "style_profile": "flesh_stylized_v1",
+  "dimensions_m": [
+    0.65,
+    0.4,
+    0.9
+  ],
+  "length_m": 0.9,
+  "budget": {
+    "max_triangles": 5000,
+    "max_material_slots": 2,
+    "texture_size": 1024
+  },
+  "fallback": {
+    "primitive": "capsule",
+    "albedo": "#b89098"
+  },
+  "provenance": {
+    "source": "placeholder"
+  }
+}

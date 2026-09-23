@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://9thlevelsoftware.github.io/critter-crafter/schemas/part.v2.schema.json",
+  "title": "part.v2.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "part_id",
+    "category",
+    "template",
+    "species_tags",
+    "roles",
+    "status",
+    "dimensions_m",
+    "length_m",
+    "budget"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "2.0.0"
+    },
+    "part_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*_v[0-9]+$"
+    },
+    "category": {
+      "enum": [
+        "core",
+        "limb",
+        "head",
+        "tail",
+        "appendage",
+        "connector"
+      ]
+    },
+    "template": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "species_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "roles": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "core",
+          "locomotor",
+          "manipulator",
+          "detail",
+          "puller",
+          "slither",
+          "connector"
+        ]
+      }
+    },
+    "size_class": {
+      "enum": [
+        "S",
+        "M",
+        "L",
+        null
+      ]
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "placeholder",
+        "candidate_selected",
+        "rigged",
+        "approved"
+      ]
+    },
+    "style_profile": {
+      "type": "string"
+    },
+    "dimensions_m": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "length_m": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_triangles"
+      ],
+      "properties": {
+        "max_triangles": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_material_slots": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4
+        },
+        "texture_size": {
+          "enum": [
+            256,
+            512,
+            1024,
+            2048
+          ]
+        }
+      }
+    },
+    "connector": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "radius_m": {
+          "type": "number"
+        },
+        "span_m": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        }
+      }
+    },
+    "fallback": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "primitive": {
+          "enum": [
+            "capsule",
+            "sphere",
+            "cone",
+            "cylinder",
+            "box"
+          ]
+        },
+        "albedo": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        }
+      }
+    },
+    "provenance": {
+      "type": "object"
+    }
+  },
+  "if": {
+    "properties": {
+      "category": {
+        "const": "connector"
+      }
+    }
+  },
+  "then": {
+    "required": [
+      "connector",
+      "size_class"
+    ],
+    "properties": {
+      "size_class": {
+        "enum": [
+          "S",
+          "M",
+          "L"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "profile_id": "flesh_stylized_v1",
+  "prefix": "stylized low-poly game asset, single isolated body part, grotesque biological horror biomass, pale fleshy tones (R175-195 G145-165 B150-170) with darker exposed sinew, matte, readable silhouette, no photorealistic gore",
+  "elongated_suffix": "straight extended, NOT coiled, NOT curled",
+  "negative": "coiled, curled, multiple objects, base, pedestal, ground plane, metal, text",
+  "base_note": "raw severed proximal root at the attachment end",
+  "meshy": { "mode": "text-to-3d", "ai_model": "latest", "topology": "triangle", "should_remesh": true }
+}

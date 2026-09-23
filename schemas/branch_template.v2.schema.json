@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://9thlevelsoftware.github.io/critter-crafter/schemas/branch_template.v2.schema.json",
+  "title": "branch_template.v2.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "template_id",
+    "chain_kind",
+    "nominal_length_m",
+    "bone_fractions"
+  ],
+  "properties": {
+    "template_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "chain_kind": {
+      "enum": [
+        "spine",
+        "core",
+        "neck",
+        "limb",
+        "tentacle",
+        "tail",
+        "appendage",
+        "connector"
+      ]
+    },
+    "nominal_length_m": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "bone_fractions": {
+      "type": "array",
+      "items": {
+        "type": "number",
+        "exclusiveMinimum": 0
+      },
+      "minItems": 1,
+      "maxItems": 16
+    }
+  }
+}

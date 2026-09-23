@@ -1,0 +1,33 @@
+{
+  "schema_version": "2.0.0",
+  "part_id": "insect_leg_v1",
+  "category": "limb",
+  "template": "insect_leg4",
+  "species_tags": [
+    "insectoid"
+  ],
+  "roles": [
+    "locomotor"
+  ],
+  "size_class": null,
+  "status": "placeholder",
+  "style_profile": "flesh_stylized_v1",
+  "dimensions_m": [
+    0.35,
+    0.3,
+    0.9
+  ],
+  "length_m": 0.9,
+  "budget": {
+    "max_triangles": 2500,
+    "max_material_slots": 2,
+    "texture_size": 1024
+  },
+  "fallback": {
+    "primitive": "capsule",
+    "albedo": "#8d6b62"
+  },
+  "provenance": {
+    "source": "placeholder"
+  }
+}

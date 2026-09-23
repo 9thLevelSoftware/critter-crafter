@@ -1,0 +1,2825 @@
+{
+  "schema_version": "2.0.0",
+  "document_kind": "critter_library",
+  "library_id": "biomass_core",
+  "version": "0.1.0",
+  "frame": "gltf_rh_yup_zfwd_m",
+  "limits": {
+    "max_triangles": 30000,
+    "target_triangles": 24000,
+    "max_bones": 120,
+    "max_parts": 16,
+    "max_influences": 4,
+    "min_length_scale_pct": 80,
+    "max_length_scale_pct": 125
+  },
+  "generator": {
+    "algorithm": "cc-gen-2",
+    "rng": "splitmix64"
+  },
+  "gait_profiles": [
+    {
+      "hint": "biped",
+      "frequency_hz": 1.8,
+      "amplitude_deg": 24,
+      "chain_lag_rad": 0.35,
+      "bob_m": 0.03
+    },
+    {
+      "hint": "quadruped",
+      "frequency_hz": 2.2,
+      "amplitude_deg": 20,
+      "chain_lag_rad": 0.35,
+      "bob_m": 0.025
+    },
+    {
+      "hint": "crawl",
+      "frequency_hz": 2.6,
+      "amplitude_deg": 28,
+      "chain_lag_rad": 0.45,
+      "bob_m": 0.02
+    },
+    {
+      "hint": "drag",
+      "frequency_hz": 1.4,
+      "amplitude_deg": 18,
+      "chain_lag_rad": 0.5,
+      "bob_m": 0.015
+    },
+    {
+      "hint": "slither",
+      "frequency_hz": 1.7,
+      "amplitude_deg": 30,
+      "chain_lag_rad": 0.6,
+      "bob_m": 0.01
+    }
+  ],
+  "branch_templates": [
+    {
+      "template_id": "appendage1",
+      "chain_kind": "appendage",
+      "nominal_length_m": 0.35,
+      "bone_fractions": [
+        1.0
+      ]
+    },
+    {
+      "template_id": "connector2",
+      "chain_kind": "connector",
+      "nominal_length_m": 0.2,
+      "bone_fractions": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "template_id": "core1",
+      "chain_kind": "core",
+      "nominal_length_m": 0.55,
+      "bone_fractions": [
+        1.0
+      ]
+    },
+    {
+      "template_id": "head1",
+      "chain_kind": "neck",
+      "nominal_length_m": 0.5,
+      "bone_fractions": [
+        1.0
+      ]
+    },
+    {
+      "template_id": "insect_leg4",
+      "chain_kind": "limb",
+      "nominal_length_m": 0.9,
+      "bone_fractions": [
+        0.2,
+        0.35,
+        0.35,
+        0.1
+      ]
+    },
+    {
+      "template_id": "limb3",
+      "chain_kind": "limb",
+      "nominal_length_m": 1.0,
+      "bone_fractions": [
+        0.45,
+        0.45,
+        0.1
+      ]
+    },
+    {
+      "template_id": "spine3",
+      "chain_kind": "spine",
+      "nominal_length_m": 0.9,
+      "bone_fractions": [
+        0.34,
+        0.33,
+        0.33
+      ]
+    },
+    {
+      "template_id": "tentacle8",
+      "chain_kind": "tentacle",
+      "nominal_length_m": 1.2,
+      "bone_fractions": [
+        0.125,
+        0.125,
+        0.125,
+        0.125,
+        0.125,
+        0.125,
+        0.125,
+        0.125
+      ]
+    }
+  ],
+  "skeletons": [
+    {
+      "skeleton_id": "biped_puppet_a",
+      "family": "biped",
+      "locomotion_hint": "biped",
+      "status": "placeholder",
+      "symmetry_pct": 60,
+      "bones": [
+        {
+          "name": "root",
+          "parent": "",
+          "head_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "tail_m": [
+            0.0,
+            0.1,
+            0.0
+          ],
+          "up_m": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "name": "core_b0",
+          "parent": "root",
+          "head_m": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "tail_m": [
+            0.0,
+            1.272,
+            0.0
+          ],
+          "up_m": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "name": "core_b1",
+          "parent": "core_b0",
+          "head_m": [
+            0.0,
+            1.272,
+            0.0
+          ],
+          "tail_m": [
+            0.0,
+            1.536,
+            0.0
+          ],
+          "up_m": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "name": "core_b2",
+          "parent": "core_b1",
+          "head_m": [
+            0.0,
+            1.536,
+            0.0
+          ],
+          "tail_m": [
+            0.0,
+            1.8,
+            0.0
+          ],
+          "up_m": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "name": "leg_L_b0",
+          "parent": "core_b0",
+          "head_m": [
+            0.17,
+            1.0,
+            0.0
+          ],
+          "tail_m": [
+            0.17,
+            0.55,
+            0.0
+          ],
+          "up_m": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "name": "leg_L_b1",
+          "parent": "leg_L_b0",
+          "head_m": [
+            0.17,
+            0.55,
+            0.0
+          ],
+          "tail_m": [
+            0.17,
+            0.1,
+            0.0
+          ],
+          "up_m": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "name": "leg_L_b2",
+          "parent": "leg_L_b1",
+          "head_m": [
+            0.17,
+            0.1,
+            0.0
+          ],
+          "tail_m": [
+            0.17,
+            0.0,
+            0.0
+          ],
+          "up_m": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "name": "leg_R_b0",
+          "parent": "core_b0",
+          "head_m": [
+            -0.17,
+            1.0,
+            0.0
+          ],
+          "tail_m": [
+            -0.17,
+            0.55,
+            0.0
+          ],
+          "up_m": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "name": "leg_R_b1",
+          "parent": "leg_R_b0",
+          "head_m": [
+            -0.17,
+            0.55,
+            0.0
+          ],
+          "tail_m": [
+            -0.17,
+            0.1,
+            0.0
+          ],
+          "up_m": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "name": "leg_R_b2",
+          "parent": "leg_R_b1",
+          "head_m": [
+            -0.17,
+            0.1,
+            0.0
+          ],
+          "tail_m": [
+            -0.17,
+            0.0,
+            0.0
+          ],
+          "up_m": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "name": "arm_L_b0",
+          "parent": "core_b2",
+          "head_m": [
+            0.3,
+            1.66,
+            0.0
+          ],
+          "tail_m": [
+            0.422841,
+            1.250529,
+            0.0
+          ],
+          "up_m": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "name": "arm_L_b1",
+          "parent": "arm_L_b0",
+          "head_m": [
+            0.422841,
+            1.250529,
+            0.0
+          ],
+          "tail_m": [
+            0.545682,
+            0.841059,
+            0.0
+          ],
+          "up_m": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "name": "arm_L_b2",
+          "parent": "arm_L_b1",
+          "head_m": [
+            0.545682,
+            0.841059,
+            0.0
+          ],
+          "tail_m": [
+            0.57298,
+            0.750065,
+            0.0
+          ],
+          "up_m": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "name": "arm_R_b0",
+          "parent": "core_b2",
+          "head_m": [
+            -0.3,
+            1.66,
+            0.0
+          ],
+          "tail_m": [
+            -0.422841,
+            1.250529,
+            0.0
+          ],
+          "up_m": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "name": "arm_R_b1",
+          "parent": "arm_R_b0",
+          "head_m": [
+            -0.422841,
+            1.250529,
+            0.0
+          ],
+          "tail_m": [
+            -0.545682,
+            0.841059,
+            0.0
+          ],
+          "up_m": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "name": "arm_R_b2",
+          "parent": "arm_R_b1",
+          "head_m": [
+            -0.545682,
+            0.841059,
+            0.0
+          ],
+          "tail_m": [
+            -0.57298,
+            0.750065,
+            0.0
+          ],
+          "up_m": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "name": "head_b0",
+          "parent": "core_b2",
+          "head_m": [
+            0.0,
+            1.82,
+            -0.08
+          ],
+          "tail_m": [
+            0.0,
+            1.985175,
+            0.391929
+          ],
+          "up_m": [
+            0.0,
+            0.943858,
+            -0.33035
+          ]
+        },
+        {
+          "name": "arm_L_tip_b0",
+          "parent": "arm_L_b2",
+          "head_m": [
+            0.57298,
+            0.750065,
+            0.0
+          ],
+          "tail_m": [
+            0.673552,
+            0.414826,
+            0.0
+          ],
+          "up_m": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "name": "arm_R_tip_b0",
+          "parent": "arm_R_b2",
+          "head_m": [
+            -0.57298,
+            0.750065,
+            0.0
+          ],
+          "tail_m": [
+            -0.673552,
+            0.414826,
+            0.0
+          ],
+          "up_m": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        }
+      ],
+      "branches": [
+        {
+          "branch_id": "core",
+          "template": "spine3",
+          "parent_branch": "",
+          "attach_bone": "root",
+          "bone_names": [
+            "core_b0",
+            "core_b1",
+            "core_b2"
+          ],
+          "length_m": 0.8,
+          "length_mm": 800,
+          "size_class": "L",
+          "side": "C",
+          "required": true,
+          "optional_fill_pct": 100,
+          "mirror_of": "",
+          "accepts": {
+            "categories": [
+              "core"
+            ],
+            "templates": [
+              "spine3"
+            ],
+            "tags_any": []
+          },
+          "connector_size_class": "",
+          "gait_role": "core",
+          "gait_phase_rad": 0.0,
+          "snap": {
+            "position_m": [
+              0.0,
+              1.0,
+              0.0
+            ],
+            "rotation_xyzw": [
+              0.0,
+              0.707107,
+              0.707107,
+              0.0
+            ]
+          }
+        },
+        {
+          "branch_id": "leg_L",
+          "template": "limb3",
+          "parent_branch": "core",
+          "attach_bone": "core_b0",
+          "bone_names": [
+            "leg_L_b0",
+            "leg_L_b1",
+            "leg_L_b2"
+          ],
+          "length_m": 1.0,
+          "length_mm": 1000,
+          "size_class": "M",
+          "side": "L",
+          "required": true,
+          "optional_fill_pct": 100,
+          "mirror_of": "",
+          "accepts": {
+            "categories": [
+              "limb"
+            ],
+            "templates": [],
+            "tags_any": []
+          },
+          "connector_size_class": "M",
+          "gait_role": "locomotor",
+          "gait_phase_rad": 0.0,
+          "snap": {
+            "position_m": [
+              0.17,
+              1.0,
+              0.0
+            ],
+            "rotation_xyzw": [
+              0.707107,
+              0.0,
+              0.0,
+              0.707107
+            ]
+          }
+        },
+        {
+          "branch_id": "leg_R",
+          "template": "limb3",
+          "parent_branch": "core",
+          "attach_bone": "core_b0",
+          "bone_names": [
+            "leg_R_b0",
+            "leg_R_b1",
+            "leg_R_b2"
+          ],
+          "length_m": 1.0,
+          "length_mm": 1000,
+          "size_class": "M",
+          "side": "R",
+          "required": true,
+          "optional_fill_pct": 100,
+          "mirror_of": "leg_L",
+          "accepts": {
+            "categories": [
+              "limb"
+            ],
+            "templates": [],
+            "tags_any": []
+          },
+          "connector_size_class": "M",
+          "gait_role": "locomotor",
+          "gait_phase_rad": 3.141593,
+          "snap": {
+            "position_m": [
+              -0.17,
+              1.0,
+              0.0
+            ],
+            "rotation_xyzw": [
+              0.707107,
+              0.0,
+              0.0,
+              0.707107
+            ]
+          }
+        },
+        {
+          "branch_id": "arm_L",
+          "template": "limb3",
+          "parent_branch": "core",
+          "attach_bone": "core_b2",
+          "bone_names": [
+            "arm_L_b0",
+            "arm_L_b1",
+            "arm_L_b2"
+          ],
+          "length_m": 0.95,
+          "length_mm": 950,
+          "size_class": "M",
+          "side": "L",
+          "required": false,
+          "optional_fill_pct": 75,
+          "mirror_of": "",
+          "accepts": {
+            "categories": [
+              "limb"
+            ],
+            "templates": [],
+            "tags_any": []
+          },
+          "connector_size_class": "M",
+          "gait_role": "manipulator",
+          "gait_phase_rad": 3.141593,
+          "snap": {
+            "position_m": [
+              0.3,
+              1.66,
+              0.0
+            ],
+            "rotation_xyzw": [
+              0.699612,
+              0.102681,
+              0.102681,
+              0.699612
+            ]
+          }
+        },
+        {
+          "branch_id": "arm_R",
+          "template": "limb3",
+          "parent_branch": "core",
+          "attach_bone": "core_b2",
+          "bone_names": [
+            "arm_R_b0",
+            "arm_R_b1",
+            "arm_R_b2"
+          ],
+          "length_m": 0.95,
+          "length_mm": 950,
+          "size_class": "M",
+          "side": "R",
+          "required": false,
+          "optional_fill_pct": 75,
+          "mirror_of": "arm_L",
+          "accepts": {
+            "categories": [
+              "limb"
+            ],
+            "templates": [],
+            "tags_any": []
+          },
+          "connector_size_class": "M",
+          "gait_role": "manipulator",
+          "gait_phase_rad": 0.0,
+          "snap": {
+            "position_m": [
+              -0.3,
+              1.66,
+              0.0
+            ],
+            "rotation_xyzw": [
+              0.699612,
+              -0.102681,
+              -0.102681,
+              0.699612
+            ]
+          }
+        },
+        {
+          "branch_id": "head",
+          "template": "head1",
+          "parent_branch": "core",
+          "attach_bone": "core_b2",
+          "bone_names": [
+            "head_b0"
+          ],
+          "length_m": 0.5,
+          "length_mm": 500,
+          "size_class": "M",
+          "side": "C",
+          "required": true,
+          "optional_fill_pct": 100,
+          "mirror_of": "",
+          "accepts": {
+            "categories": [
+              "head"
+            ],
+            "templates": [],
+            "tags_any": []
+          },
+          "connector_size_class": "M",
+          "gait_role": "head",
+          "gait_phase_rad": 0.0,
+          "snap": {
+            "position_m": [
+              0.0,
+              1.82,
+              -0.08
+            ],
+            "rotation_xyzw": [
+              -0.167543,
+              0.0,
+              0.0,
+              0.985865
+            ]
+          }
+        },
+        {
+          "branch_id": "arm_L_tip",
+          "template": "appendage1",
+          "parent_branch": "arm_L",
+          "attach_bone": "arm_L_b2",
+          "bone_names": [
+            "arm_L_tip_b0"
+          ],
+          "length_m": 0.35,
+          "length_mm": 350,
+          "size_class": "S",
+          "side": "L",
+          "required": false,
+          "optional_fill_pct": 40,
+          "mirror_of": "",
+          "accepts": {
+            "categories": [
+              "appendage"
+            ],
+            "templates": [],
+            "tags_any": []
+          },
+          "connector_size_class": "S",
+          "gait_role": "manipulator",
+          "gait_phase_rad": 3.141593,
+          "snap": {
+            "position_m": [
+              0.57298,
+              0.750065,
+              0.0
+            ],
+            "rotation_xyzw": [
+              0.699612,
+              0.102681,
+              0.102681,
+              0.699612
+            ]
+          }
+        },
+        {
+          "branch_id": "arm_R_tip",
+          "template": "appendage1",
+          "parent_branch": "arm_R",
+          "attach_bone": "arm_R_b2",
+          "bone_names": [
+            "arm_R_tip_b0"
+          ],
+          "length_m": 0.35,
+          "length_mm": 350,
+          "size_class": "S",
+          "side": "R",
+          "required": false,
+          "optional_fill_pct": 40,
+          "mirror_of": "arm_L_tip",
+          "accepts": {
+            "categories": [
+              "appendage"
+            ],
+            "templates": [],
+            "tags_any": []
+          },
+          "connector_size_class": "S",
+          "gait_role": "manipulator",
+          "gait_phase_rad": 0.0,
+          "snap": {
+            "position_m": [
+              -0.57298,
+              0.750065,
+              0.0
+            ],
+            "rotation_xyzw": [
+              0.699612,
+              -0.102681,
+              -0.102681,
+              0.699612
+            ]
+          }
+        }
+      ],
+      "asset": {
+        "fbx": "",
+        "glb": "",
+        "clips": []
+      }
+    },
+    {
+      "skeleton_id": "crawler_tripod_a",
+      "family": "crawler",
+      "locomotion_hint": "crawl",
+      "status": "placeholder",
+      "symmetry_pct": 40,
+      "bones": [
+        {
+          "name": "root",
+          "parent": "",
+          "head_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "tail_m": [
+            0.0,
+            0.1,
+            0.0
+          ],
+          "up_m": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "name": "core_b0",
+          "parent": "root",
+          "head_m": [
+            0.0,
+            0.55,
+            -0.25
+          ],
+          "tail_m": [
+            0.0,
+            0.55,
+            0.3
+          ],
+          "up_m": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "name": "leg_F_b0",
+          "parent": "core_b0",
+          "head_m": [
+            0.0,
+            0.5,
+            0.2
+          ],
+          "tail_m": [
+            0.0,
+            0.407391,
+            0.354349
+          ],
+          "up_m": [
+            0.0,
+            0.857493,
+            0.514496
+          ]
+        },
+        {
+          "name": "leg_F_b1",
+          "parent": "leg_F_b0",
+          "head_m": [
+            0.0,
+            0.407391,
+            0.354349
+          ],
+          "tail_m": [
+            0.0,
+            0.245325,
+            0.624459
+          ],
+          "up_m": [
+            0.0,
+            0.857493,
+            0.514496
+          ]
+        },
+        {
+          "name": "leg_F_b2",
+          "parent": "leg_F_b1",
+          "head_m": [
+            0.0,
+            0.245325,
+            0.624459
+          ],
+          "tail_m": [
+            0.0,
+            0.083258,
+            0.894569
+          ],
+          "up_m": [
+            0.0,
+            0.857493,
+            0.514496
+          ]
+        },
+        {
+          "name": "leg_F_b3",
+          "parent": "leg_F_b2",
+          "head_m": [
+            0.0,
+            0.083258,
+            0.894569
+          ],
+          "tail_m": [
+            0.0,
+            0.036954,
+            0.971744
+          ],
+          "up_m": [
+            0.0,
+            0.857493,
+            0.514496
+          ]
+        },
+        {
+          "name": "leg_BL_b0",
+          "parent": "core_b0",
+          "head_m": [
+            0.17,
+            0.5,
+            -0.12
+          ],
+          "tail_m": [
+            0.303668,
+            0.407389,
+            -0.197176
+          ],
+          "up_m": [
+            0.44557,
+            0.857488,
+            -0.257258
+          ]
+        },
+        {
+          "name": "leg_BL_b1",
+          "parent": "leg_BL_b0",
+          "head_m": [
+            0.303668,
+            0.407389,
+            -0.197176
+          ],
+          "tail_m": [
+            0.537587,
+            0.24532,
+            -0.332233
+          ],
+          "up_m": [
+            0.44557,
+            0.857488,
+            -0.257258
+          ]
+        },
+        {
+          "name": "leg_BL_b2",
+          "parent": "leg_BL_b1",
+          "head_m": [
+            0.537587,
+            0.24532,
+            -0.332233
+          ],
+          "tail_m": [
+            0.771507,
+            0.083252,
+            -0.46729
+          ],
+          "up_m": [
+            0.44557,
+            0.857488,
+            -0.257258
+          ]
+        },
+        {
+          "name": "leg_BL_b3",
+          "parent": "leg_BL_b2",
+          "head_m": [
+            0.771507,
+            0.083252,
+            -0.46729
+          ],
+          "tail_m": [
+            0.838341,
+            0.036946,
+            -0.505878
+          ],
+          "up_m": [
+            0.44557,
+            0.857488,
+            -0.257258
+          ]
+        },
+        {
+          "name": "leg_BR_b0",
+          "parent": "core_b0",
+          "head_m": [
+            -0.17,
+            0.5,
+            -0.12
+          ],
+          "tail_m": [
+            -0.303668,
+            0.407389,
+            -0.197176
+          ],
+          "up_m": [
+            -0.44557,
+            0.857488,
+            -0.257258
+          ]
+        },
+        {
+          "name": "leg_BR_b1",
+          "parent": "leg_BR_b0",
+          "head_m": [
+            -0.303668,
+            0.407389,
+            -0.197176
+          ],
+          "tail_m": [
+            -0.537587,
+            0.24532,
+            -0.332233
+          ],
+          "up_m": [
+            -0.44557,
+            0.857488,
+            -0.257258
+          ]
+        },
+        {
+          "name": "leg_BR_b2",
+          "parent": "leg_BR_b1",
+          "head_m": [
+            -0.537587,
+            0.24532,
+            -0.332233
+          ],
+          "tail_m": [
+            -0.771507,
+            0.083252,
+            -0.46729
+          ],
+          "up_m": [
+            -0.44557,
+            0.857488,
+            -0.257258
+          ]
+        },
+        {
+          "name": "leg_BR_b3",
+          "parent": "leg_BR_b2",
+          "head_m": [
+            -0.771507,
+            0.083252,
+            -0.46729
+          ],
+          "tail_m": [
+            -0.838341,
+            0.036946,
+            -0.505878
+          ],
+          "up_m": [
+            -0.44557,
+            0.857488,
+            -0.257258
+          ]
+        },
+        {
+          "name": "mouth_b0",
+          "parent": "core_b0",
+          "head_m": [
+            0.0,
+            0.52,
+            0.3
+          ],
+          "tail_m": [
+            0.0,
+            0.485174,
+            0.648263
+          ],
+          "up_m": [
+            0.0,
+            0.995037,
+            0.099504
+          ]
+        },
+        {
+          "name": "dorsal_b0",
+          "parent": "core_b0",
+          "head_m": [
+            0.0,
+            0.78,
+            -0.1
+          ],
+          "tail_m": [
+            0.0,
+            0.909781,
+            -0.145423
+          ],
+          "up_m": [
+            0.0,
+            0.33035,
+            0.943858
+          ]
+        },
+        {
+          "name": "dorsal_b1",
+          "parent": "dorsal_b0",
+          "head_m": [
+            0.0,
+            0.909781,
+            -0.145423
+          ],
+          "tail_m": [
+            0.0,
+            1.039561,
+            -0.190846
+          ],
+          "up_m": [
+            0.0,
+            0.33035,
+            0.943858
+          ]
+        },
+        {
+          "name": "dorsal_b2",
+          "parent": "dorsal_b1",
+          "head_m": [
+            0.0,
+            1.039561,
+            -0.190846
+          ],
+          "tail_m": [
+            0.0,
+            1.169342,
+            -0.23627
+          ],
+          "up_m": [
+            0.0,
+            0.33035,
+            0.943858
+          ]
+        },
+        {
+          "name": "dorsal_b3",
+          "parent": "dorsal_b2",
+          "head_m": [
+            0.0,
+            1.169342,
+            -0.23627
+          ],
+          "tail_m": [
+            0.0,
+            1.299122,
+            -0.281693
+          ],
+          "up_m": [
+            0.0,
+            0.33035,
+            0.943858
+          ]
+        },
+        {
+          "name": "dorsal_b4",
+          "parent": "dorsal_b3",
+          "head_m": [
+            0.0,
+            1.299122,
+            -0.281693
+          ],
+          "tail_m": [
+            0.0,
+            1.428903,
+            -0.327116
+          ],
+          "up_m": [
+            0.0,
+            0.33035,
+            0.943858
+          ]
+        },
+        {
+          "name": "dorsal_b5",
+          "parent": "dorsal_b4",
+          "head_m": [
+            0.0,
+            1.428903,
+            -0.327116
+          ],
+          "tail_m": [
+            0.0,
+            1.558683,
+            -0.372539
+          ],
+          "up_m": [
+            0.0,
+            0.33035,
+            0.943858
+          ]
+        },
+        {
+          "name": "dorsal_b6",
+          "parent": "dorsal_b5",
+          "head_m": [
+            0.0,
+            1.558683,
+            -0.372539
+          ],
+          "tail_m": [
+            0.0,
+            1.688464,
+            -0.417962
+          ],
+          "up_m": [
+            0.0,
+            0.33035,
+            0.943858
+          ]
+        },
+        {
+          "name": "dorsal_b7",
+          "parent": "dorsal_b6",
+          "head_m": [
+            0.0,
+            1.688464,
+            -0.417962
+          ],
+          "tail_m": [
+            0.0,
+            1.818244,
+            -0.463385
+          ],
+          "up_m": [
+            0.0,
+            0.33035,
+            0.943858
+          ]
+        }
+      ],
+      "branches": [
+        {
+          "branch_id": "core",
+          "template": "core1",
+          "parent_branch": "",
+          "attach_bone": "root",
+          "bone_names": [
+            "core_b0"
+          ],
+          "length_m": 0.55,
+          "length_mm": 550,
+          "size_class": "L",
+          "side": "C",
+          "required": true,
+          "optional_fill_pct": 100,
+          "mirror_of": "",
+          "accepts": {
+            "categories": [
+              "core",
+              "head"
+            ],
+            "templates": [],
+            "tags_any": []
+          },
+          "connector_size_class": "",
+          "gait_role": "core",
+          "gait_phase_rad": 0.0,
+          "snap": {
+            "position_m": [
+              0.0,
+              0.55,
+              -0.25
+            ],
+            "rotation_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          }
+        },
+        {
+          "branch_id": "leg_F",
+          "template": "insect_leg4",
+          "parent_branch": "core",
+          "attach_bone": "core_b0",
+          "bone_names": [
+            "leg_F_b0",
+            "leg_F_b1",
+            "leg_F_b2",
+            "leg_F_b3"
+          ],
+          "length_m": 0.9,
+          "length_mm": 900,
+          "size_class": "M",
+          "side": "C",
+          "required": true,
+          "optional_fill_pct": 100,
+          "mirror_of": "",
+          "accepts": {
+            "categories": [
+              "limb"
+            ],
+            "templates": [],
+            "tags_any": []
+          },
+          "connector_size_class": "M",
+          "gait_role": "locomotor",
+          "gait_phase_rad": 0.0,
+          "snap": {
+            "position_m": [
+              0.0,
+              0.5,
+              0.2
+            ],
+            "rotation_xyzw": [
+              0.266934,
+              0.0,
+              0.0,
+              0.963715
+            ]
+          }
+        },
+        {
+          "branch_id": "leg_BL",
+          "template": "insect_leg4",
+          "parent_branch": "core",
+          "attach_bone": "core_b0",
+          "bone_names": [
+            "leg_BL_b0",
+            "leg_BL_b1",
+            "leg_BL_b2",
+            "leg_BL_b3"
+          ],
+          "length_m": 0.9,
+          "length_mm": 900,
+          "size_class": "M",
+          "side": "L",
+          "required": true,
+          "optional_fill_pct": 100,
+          "mirror_of": "",
+          "accepts": {
+            "categories": [
+              "limb"
+            ],
+            "templates": [],
+            "tags_any": []
+          },
+          "connector_size_class": "M",
+          "gait_role": "locomotor",
+          "gait_phase_rad": 2.094395,
+          "snap": {
+            "position_m": [
+              0.17,
+              0.5,
+              -0.12
+            ],
+            "rotation_xyzw": [
+              0.133468,
+              0.834604,
+              -0.231176,
+              0.481852
+            ]
+          }
+        },
+        {
+          "branch_id": "leg_BR",
+          "template": "insect_leg4",
+          "parent_branch": "core",
+          "attach_bone": "core_b0",
+          "bone_names": [
+            "leg_BR_b0",
+            "leg_BR_b1",
+            "leg_BR_b2",
+            "leg_BR_b3"
+          ],
+          "length_m": 0.9,
+          "length_mm": 900,
+          "size_class": "M",
+          "side": "R",
+          "required": true,
+          "optional_fill_pct": 100,
+          "mirror_of": "leg_BL",
+          "accepts": {
+            "categories": [
+              "limb"
+            ],
+            "templates": [],
+            "tags_any": []
+          },
+          "connector_size_class": "M",
+          "gait_role": "locomotor",
+          "gait_phase_rad": 4.18879,
+          "snap": {
+            "position_m": [
+              -0.17,
+              0.5,
+              -0.12
+            ],
+            "rotation_xyzw": [
+              0.133468,
+              -0.834604,
+              0.231176,
+              0.481852
+            ]
+          }
+        },
+        {
+          "branch_id": "mouth",
+          "template": "appendage1",
+          "parent_branch": "core",
+          "attach_bone": "core_b0",
+          "bone_names": [
+            "mouth_b0"
+          ],
+          "length_m": 0.35,
+          "length_mm": 350,
+          "size_class": "S",
+          "side": "C",
+          "required": false,
+          "optional_fill_pct": 70,
+          "mirror_of": "",
+          "accepts": {
+            "categories": [
+              "appendage"
+            ],
+            "templates": [],
+            "tags_any": []
+          },
+          "connector_size_class": "S",
+          "gait_role": "manipulator",
+          "gait_phase_rad": 0.0,
+          "snap": {
+            "position_m": [
+              0.0,
+              0.52,
+              0.3
+            ],
+            "rotation_xyzw": [
+              0.049814,
+              0.0,
+              0.0,
+              0.998759
+            ]
+          }
+        },
+        {
+          "branch_id": "dorsal",
+          "template": "tentacle8",
+          "parent_branch": "core",
+          "attach_bone": "core_b0",
+          "bone_names": [
+            "dorsal_b0",
+            "dorsal_b1",
+            "dorsal_b2",
+            "dorsal_b3",
+            "dorsal_b4",
+            "dorsal_b5",
+            "dorsal_b6",
+            "dorsal_b7"
+          ],
+          "length_m": 1.1,
+          "length_mm": 1100,
+          "size_class": "M",
+          "side": "C",
+          "required": false,
+          "optional_fill_pct": 50,
+          "mirror_of": "",
+          "accepts": {
+            "categories": [
+              "limb",
+              "tail"
+            ],
+            "templates": [
+              "tentacle8"
+            ],
+            "tags_any": []
+          },
+          "connector_size_class": "M",
+          "gait_role": "sway",
+          "gait_phase_rad": 0.0,
+          "snap": {
+            "position_m": [
+              0.0,
+              0.78,
+              -0.1
+            ],
+            "rotation_xyzw": [
+              0.0,
+              0.815583,
+              0.57864,
+              0.0
+            ]
+          }
+        }
+      ],
+      "asset": {
+        "fbx": "",
+        "glb": "",
+        "clips": []
+      }
+    },
+    {
+      "skeleton_id": "quadruped_scrambler_a",
+      "family": "quadruped",
+      "locomotion_hint": "quadruped",
+      "status": "placeholder",
+      "symmetry_pct": 50,
+      "bones": [
+        {
+          "name": "root",
+          "parent": "",
+          "head_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "tail_m": [
+            0.0,
+            0.1,
+            0.0
+          ],
+          "up_m": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "name": "core_b0",
+          "parent": "root",
+          "head_m": [
+            0.0,
+            0.82,
+            -0.45
+          ],
+          "tail_m": [
+            0.0,
+            0.82,
+            -0.144
+          ],
+          "up_m": [
+            0.0,
+            -1.0,
+            0.0
+          ]
+        },
+        {
+          "name": "core_b1",
+          "parent": "core_b0",
+          "head_m": [
+            0.0,
+            0.82,
+            -0.144
+          ],
+          "tail_m": [
+            0.0,
+            0.82,
+            0.153
+          ],
+          "up_m": [
+            0.0,
+            -1.0,
+            0.0
+          ]
+        },
+        {
+          "name": "core_b2",
+          "parent": "core_b1",
+          "head_m": [
+            0.0,
+            0.82,
+            0.153
+          ],
+          "tail_m": [
+            0.0,
+            0.82,
+            0.45
+          ],
+          "up_m": [
+            0.0,
+            -1.0,
+            0.0
+          ]
+        },
+        {
+          "name": "leg_FL_b0",
+          "parent": "core_b2",
+          "head_m": [
+            0.2,
+            0.82,
+            0.35
+          ],
+          "tail_m": [
+            0.238013,
+            0.439868,
+            0.369007
+          ],
+          "up_m": [
+            -0.004944,
+            0.049444,
+            0.998765
+          ]
+        },
+        {
+          "name": "leg_FL_b1",
+          "parent": "leg_FL_b0",
+          "head_m": [
+            0.238013,
+            0.439868,
+            0.369007
+          ],
+          "tail_m": [
+            0.276026,
+            0.059737,
+            0.388013
+          ],
+          "up_m": [
+            -0.004944,
+            0.049444,
+            0.998765
+          ]
+        },
+        {
+          "name": "leg_FL_b2",
+          "parent": "leg_FL_b1",
+          "head_m": [
+            0.276026,
+            0.059737,
+            0.388013
+          ],
+          "tail_m": [
+            0.284474,
+            -0.024737,
+            0.392237
+          ],
+          "up_m": [
+            -0.004944,
+            0.049444,
+            0.998765
+          ]
+        },
+        {
+          "name": "leg_FR_b0",
+          "parent": "core_b2",
+          "head_m": [
+            -0.2,
+            0.82,
+            0.35
+          ],
+          "tail_m": [
+            -0.238013,
+            0.439868,
+            0.369007
+          ],
+          "up_m": [
+            0.004944,
+            0.049444,
+            0.998765
+          ]
+        },
+        {
+          "name": "leg_FR_b1",
+          "parent": "leg_FR_b0",
+          "head_m": [
+            -0.238013,
+            0.439868,
+            0.369007
+          ],
+          "tail_m": [
+            -0.276026,
+            0.059737,
+            0.388013
+          ],
+          "up_m": [
+            0.004944,
+            0.049444,
+            0.998765
+          ]
+        },
+        {
+          "name": "leg_FR_b2",
+          "parent": "leg_FR_b1",
+          "head_m": [
+            -0.276026,
+            0.059737,
+            0.388013
+          ],
+          "tail_m": [
+            -0.284474,
+            -0.024737,
+            0.392237
+          ],
+          "up_m": [
+            0.004944,
+            0.049444,
+            0.998765
+          ]
+        },
+        {
+          "name": "leg_BL_b0",
+          "parent": "core_b0",
+          "head_m": [
+            0.2,
+            0.82,
+            -0.35
+          ],
+          "tail_m": [
+            0.238013,
+            0.439868,
+            -0.369007
+          ],
+          "up_m": [
+            0.004944,
+            -0.049444,
+            0.998765
+          ]
+        },
+        {
+          "name": "leg_BL_b1",
+          "parent": "leg_BL_b0",
+          "head_m": [
+            0.238013,
+            0.439868,
+            -0.369007
+          ],
+          "tail_m": [
+            0.276026,
+            0.059737,
+            -0.388013
+          ],
+          "up_m": [
+            0.004944,
+            -0.049444,
+            0.998765
+          ]
+        },
+        {
+          "name": "leg_BL_b2",
+          "parent": "leg_BL_b1",
+          "head_m": [
+            0.276026,
+            0.059737,
+            -0.388013
+          ],
+          "tail_m": [
+            0.284474,
+            -0.024737,
+            -0.392237
+          ],
+          "up_m": [
+            0.004944,
+            -0.049444,
+            0.998765
+          ]
+        },
+        {
+          "name": "leg_BR_b0",
+          "parent": "core_b0",
+          "head_m": [
+            -0.2,
+            0.82,
+            -0.35
+          ],
+          "tail_m": [
+            -0.238013,
+            0.439868,
+            -0.369007
+          ],
+          "up_m": [
+            -0.004944,
+            -0.049444,
+            0.998765
+          ]
+        },
+        {
+          "name": "leg_BR_b1",
+          "parent": "leg_BR_b0",
+          "head_m": [
+            -0.238013,
+            0.439868,
+            -0.369007
+          ],
+          "tail_m": [
+            -0.276026,
+            0.059737,
+            -0.388013
+          ],
+          "up_m": [
+            -0.004944,
+            -0.049444,
+            0.998765
+          ]
+        },
+        {
+          "name": "leg_BR_b2",
+          "parent": "leg_BR_b1",
+          "head_m": [
+            -0.276026,
+            0.059737,
+            -0.388013
+          ],
+          "tail_m": [
+            -0.284474,
+            -0.024737,
+            -0.392237
+          ],
+          "up_m": [
+            -0.004944,
+            -0.049444,
+            0.998765
+          ]
+        },
+        {
+          "name": "head_b0",
+          "parent": "core_b2",
+          "head_m": [
+            0.0,
+            0.9,
+            0.47
+          ],
+          "tail_m": [
+            0.0,
+            0.97417,
+            0.964468
+          ],
+          "up_m": [
+            0.0,
+            0.988936,
+            -0.14834
+          ]
+        },
+        {
+          "name": "tail_b0",
+          "parent": "core_b0",
+          "head_m": [
+            0.0,
+            0.85,
+            -0.47
+          ],
+          "tail_m": [
+            0.0,
+            0.883349,
+            -0.603395
+          ],
+          "up_m": [
+            0.0,
+            0.970143,
+            0.242536
+          ]
+        },
+        {
+          "name": "tail_b1",
+          "parent": "tail_b0",
+          "head_m": [
+            0.0,
+            0.883349,
+            -0.603395
+          ],
+          "tail_m": [
+            0.0,
+            0.916697,
+            -0.736789
+          ],
+          "up_m": [
+            0.0,
+            0.970143,
+            0.242536
+          ]
+        },
+        {
+          "name": "tail_b2",
+          "parent": "tail_b1",
+          "head_m": [
+            0.0,
+            0.916697,
+            -0.736789
+          ],
+          "tail_m": [
+            0.0,
+            0.950046,
+            -0.870184
+          ],
+          "up_m": [
+            0.0,
+            0.970143,
+            0.242536
+          ]
+        },
+        {
+          "name": "tail_b3",
+          "parent": "tail_b2",
+          "head_m": [
+            0.0,
+            0.950046,
+            -0.870184
+          ],
+          "tail_m": [
+            0.0,
+            0.983395,
+            -1.003578
+          ],
+          "up_m": [
+            0.0,
+            0.970143,
+            0.242536
+          ]
+        },
+        {
+          "name": "tail_b4",
+          "parent": "tail_b3",
+          "head_m": [
+            0.0,
+            0.983395,
+            -1.003578
+          ],
+          "tail_m": [
+            0.0,
+            1.016743,
+            -1.136973
+          ],
+          "up_m": [
+            0.0,
+            0.970143,
+            0.242536
+          ]
+        },
+        {
+          "name": "tail_b5",
+          "parent": "tail_b4",
+          "head_m": [
+            0.0,
+            1.016743,
+            -1.136973
+          ],
+          "tail_m": [
+            0.0,
+            1.050092,
+            -1.270368
+          ],
+          "up_m": [
+            0.0,
+            0.970143,
+            0.242536
+          ]
+        },
+        {
+          "name": "tail_b6",
+          "parent": "tail_b5",
+          "head_m": [
+            0.0,
+            1.050092,
+            -1.270368
+          ],
+          "tail_m": [
+            0.0,
+            1.083441,
+            -1.403762
+          ],
+          "up_m": [
+            0.0,
+            0.970143,
+            0.242536
+          ]
+        },
+        {
+          "name": "tail_b7",
+          "parent": "tail_b6",
+          "head_m": [
+            0.0,
+            1.083441,
+            -1.403762
+          ],
+          "tail_m": [
+            0.0,
+            1.116789,
+            -1.537157
+          ],
+          "up_m": [
+            0.0,
+            0.970143,
+            0.242536
+          ]
+        },
+        {
+          "name": "dorsal_b0",
+          "parent": "core_b1",
+          "head_m": [
+            0.0,
+            1.02,
+            0.0
+          ],
+          "tail_m": [
+            0.0,
+            1.363203,
+            -0.068641
+          ],
+          "up_m": [
+            0.0,
+            0.196116,
+            0.980581
+          ]
+        }
+      ],
+      "branches": [
+        {
+          "branch_id": "core",
+          "template": "spine3",
+          "parent_branch": "",
+          "attach_bone": "root",
+          "bone_names": [
+            "core_b0",
+            "core_b1",
+            "core_b2"
+          ],
+          "length_m": 0.9,
+          "length_mm": 900,
+          "size_class": "L",
+          "side": "C",
+          "required": true,
+          "optional_fill_pct": 100,
+          "mirror_of": "",
+          "accepts": {
+            "categories": [
+              "core"
+            ],
+            "templates": [
+              "spine3"
+            ],
+            "tags_any": []
+          },
+          "connector_size_class": "",
+          "gait_role": "core",
+          "gait_phase_rad": 0.0,
+          "snap": {
+            "position_m": [
+              0.0,
+              0.82,
+              -0.45
+            ],
+            "rotation_xyzw": [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          }
+        },
+        {
+          "branch_id": "leg_FL",
+          "template": "limb3",
+          "parent_branch": "core",
+          "attach_bone": "core_b2",
+          "bone_names": [
+            "leg_FL_b0",
+            "leg_FL_b1",
+            "leg_FL_b2"
+          ],
+          "length_m": 0.85,
+          "length_mm": 850,
+          "size_class": "M",
+          "side": "L",
+          "required": true,
+          "optional_fill_pct": 100,
+          "mirror_of": "",
+          "accepts": {
+            "categories": [
+              "limb"
+            ],
+            "templates": [],
+            "tags_any": []
+          },
+          "connector_size_class": "M",
+          "gait_role": "locomotor",
+          "gait_phase_rad": 0.0,
+          "snap": {
+            "position_m": [
+              0.2,
+              0.82,
+              0.35
+            ],
+            "rotation_xyzw": [
+              0.688459,
+              0.034337,
+              0.036088,
+              0.723563
+            ]
+          }
+        },
+        {
+          "branch_id": "leg_FR",
+          "template": "limb3",
+          "parent_branch": "core",
+          "attach_bone": "core_b2",
+          "bone_names": [
+            "leg_FR_b0",
+            "leg_FR_b1",
+            "leg_FR_b2"
+          ],
+          "length_m": 0.85,
+          "length_mm": 850,
+          "size_class": "M",
+          "side": "R",
+          "required": true,
+          "optional_fill_pct": 100,
+          "mirror_of": "leg_FL",
+          "accepts": {
+            "categories": [
+              "limb"
+            ],
+            "templates": [],
+            "tags_any": []
+          },
+          "connector_size_class": "M",
+          "gait_role": "locomotor",
+          "gait_phase_rad": 3.141593,
+          "snap": {
+            "position_m": [
+              -0.2,
+              0.82,
+              0.35
+            ],
+            "rotation_xyzw": [
+              0.688459,
+              -0.034337,
+              -0.036088,
+              0.723563
+            ]
+          }
+        },
+        {
+          "branch_id": "leg_BL",
+          "template": "limb3",
+          "parent_branch": "core",
+          "attach_bone": "core_b0",
+          "bone_names": [
+            "leg_BL_b0",
+            "leg_BL_b1",
+            "leg_BL_b2"
+          ],
+          "length_m": 0.85,
+          "length_mm": 850,
+          "size_class": "M",
+          "side": "L",
+          "required": true,
+          "optional_fill_pct": 100,
+          "mirror_of": "",
+          "accepts": {
+            "categories": [
+              "limb"
+            ],
+            "templates": [],
+            "tags_any": []
+          },
+          "connector_size_class": "M",
+          "gait_role": "locomotor",
+          "gait_phase_rad": 3.141593,
+          "snap": {
+            "position_m": [
+              0.2,
+              0.82,
+              -0.35
+            ],
+            "rotation_xyzw": [
+              0.723563,
+              0.036088,
+              0.034337,
+              0.688459
+            ]
+          }
+        },
+        {
+          "branch_id": "leg_BR",
+          "template": "limb3",
+          "parent_branch": "core",
+          "attach_bone": "core_b0",
+          "bone_names": [
+            "leg_BR_b0",
+            "leg_BR_b1",
+            "leg_BR_b2"
+          ],
+          "length_m": 0.85,
+          "length_mm": 850,
+          "size_class": "M",
+          "side": "R",
+          "required": true,
+          "optional_fill_pct": 100,
+          "mirror_of": "leg_BL",
+          "accepts": {
+            "categories": [
+              "limb"
+            ],
+            "templates": [],
+            "tags_any": []
+          },
+          "connector_size_class": "M",
+          "gait_role": "locomotor",
+          "gait_phase_rad": 0.0,
+          "snap": {
+            "position_m": [
+              -0.2,
+              0.82,
+              -0.35
+            ],
+            "rotation_xyzw": [
+              0.723563,
+              -0.036088,
+              -0.034337,
+              0.688459
+            ]
+          }
+        },
+        {
+          "branch_id": "head",
+          "template": "head1",
+          "parent_branch": "core",
+          "attach_bone": "core_b2",
+          "bone_names": [
+            "head_b0"
+          ],
+          "length_m": 0.5,
+          "length_mm": 500,
+          "size_class": "M",
+          "side": "C",
+          "required": true,
+          "optional_fill_pct": 100,
+          "mirror_of": "",
+          "accepts": {
+            "categories": [
+              "head"
+            ],
+            "templates": [],
+            "tags_any": []
+          },
+          "connector_size_class": "M",
+          "gait_role": "head",
+          "gait_phase_rad": 0.0,
+          "snap": {
+            "position_m": [
+              0.0,
+              0.9,
+              0.47
+            ],
+            "rotation_xyzw": [
+              -0.074376,
+              0.0,
+              0.0,
+              0.99723
+            ]
+          }
+        },
+        {
+          "branch_id": "tail",
+          "template": "tentacle8",
+          "parent_branch": "core",
+          "attach_bone": "core_b0",
+          "bone_names": [
+            "tail_b0",
+            "tail_b1",
+            "tail_b2",
+            "tail_b3",
+            "tail_b4",
+            "tail_b5",
+            "tail_b6",
+            "tail_b7"
+          ],
+          "length_m": 1.1,
+          "length_mm": 1100,
+          "size_class": "M",
+          "side": "C",
+          "required": false,
+          "optional_fill_pct": 60,
+          "mirror_of": "",
+          "accepts": {
+            "categories": [
+              "limb",
+              "tail"
+            ],
+            "templates": [
+              "tentacle8"
+            ],
+            "tags_any": []
+          },
+          "connector_size_class": "M",
+          "gait_role": "sway",
+          "gait_phase_rad": 0.0,
+          "snap": {
+            "position_m": [
+              0.0,
+              0.85,
+              -0.47
+            ],
+            "rotation_xyzw": [
+              0.0,
+              0.992508,
+              0.122183,
+              0.0
+            ]
+          }
+        },
+        {
+          "branch_id": "dorsal",
+          "template": "appendage1",
+          "parent_branch": "core",
+          "attach_bone": "core_b1",
+          "bone_names": [
+            "dorsal_b0"
+          ],
+          "length_m": 0.35,
+          "length_mm": 350,
+          "size_class": "S",
+          "side": "C",
+          "required": false,
+          "optional_fill_pct": 35,
+          "mirror_of": "",
+          "accepts": {
+            "categories": [
+              "appendage"
+            ],
+            "templates": [],
+            "tags_any": []
+          },
+          "connector_size_class": "S",
+          "gait_role": "sway",
+          "gait_phase_rad": 1.5708,
+          "snap": {
+            "position_m": [
+              0.0,
+              1.02,
+              0.0
+            ],
+            "rotation_xyzw": [
+              0.0,
+              0.773342,
+              0.633989,
+              0.0
+            ]
+          }
+        }
+      ],
+      "asset": {
+        "fbx": "",
+        "glb": "",
+        "clips": []
+      }
+    }
+  ],
+  "parts": [
+    {
+      "part_id": "animal_skull_v1",
+      "category": "head",
+      "template": "head1",
+      "species_tags": [
+        "animal"
+      ],
+      "roles": [
+        "detail"
+      ],
+      "size_class": "",
+      "status": "placeholder",
+      "style_profile": "flesh_stylized_v1",
+      "dimensions_m": [
+        0.45,
+        0.4,
+        0.6
+      ],
+      "length_m": 0.6,
+      "length_mm": 600,
+      "max_triangles": 3500,
+      "max_material_slots": 2,
+      "connector_radius_m": 0.0,
+      "connector_span_m": [],
+      "fallback_primitive": "sphere",
+      "albedo": "#cbb8a4",
+      "source": "placeholder",
+      "asset": {
+        "fbx": "",
+        "glb": "",
+        "triangles": 0
+      }
+    },
+    {
+      "part_id": "cephalopod_tentacle_v1",
+      "category": "limb",
+      "template": "tentacle8",
+      "species_tags": [
+        "cephalopodic"
+      ],
+      "roles": [
+        "locomotor",
+        "puller",
+        "slither"
+      ],
+      "size_class": "",
+      "status": "placeholder",
+      "style_profile": "flesh_stylized_v1",
+      "dimensions_m": [
+        0.32,
+        0.32,
+        1.2
+      ],
+      "length_m": 1.2,
+      "length_mm": 1200,
+      "max_triangles": 2500,
+      "max_material_slots": 2,
+      "connector_radius_m": 0.0,
+      "connector_span_m": [],
+      "fallback_primitive": "cone",
+      "albedo": "#c08a9a",
+      "source": "placeholder",
+      "asset": {
+        "fbx": "",
+        "glb": "",
+        "triangles": 0
+      }
+    },
+    {
+      "part_id": "claw_v1",
+      "category": "appendage",
+      "template": "appendage1",
+      "species_tags": [
+        "alien"
+      ],
+      "roles": [
+        "manipulator"
+      ],
+      "size_class": "",
+      "status": "placeholder",
+      "style_profile": "flesh_stylized_v1",
+      "dimensions_m": [
+        0.2,
+        0.2,
+        0.35
+      ],
+      "length_m": 0.35,
+      "length_mm": 350,
+      "max_triangles": 1500,
+      "max_material_slots": 2,
+      "connector_radius_m": 0.0,
+      "connector_span_m": [],
+      "fallback_primitive": "cone",
+      "albedo": "#7e5a5e",
+      "source": "placeholder",
+      "asset": {
+        "fbx": "",
+        "glb": "",
+        "triangles": 0
+      }
+    },
+    {
+      "part_id": "flesh_sac_core_v1",
+      "category": "core",
+      "template": "core1",
+      "species_tags": [
+        "biomass"
+      ],
+      "roles": [
+        "core"
+      ],
+      "size_class": "",
+      "status": "placeholder",
+      "style_profile": "flesh_stylized_v1",
+      "dimensions_m": [
+        0.5,
+        0.45,
+        0.55
+      ],
+      "length_m": 0.55,
+      "length_mm": 550,
+      "max_triangles": 4000,
+      "max_material_slots": 2,
+      "connector_radius_m": 0.0,
+      "connector_span_m": [],
+      "fallback_primitive": "sphere",
+      "albedo": "#a8707a",
+      "source": "placeholder",
+      "asset": {
+        "fbx": "",
+        "glb": "",
+        "triangles": 0
+      }
+    },
+    {
+      "part_id": "gunk_collar_l_v1",
+      "category": "connector",
+      "template": "connector2",
+      "species_tags": [
+        "biomass"
+      ],
+      "roles": [
+        "connector"
+      ],
+      "size_class": "L",
+      "status": "placeholder",
+      "style_profile": "flesh_stylized_v1",
+      "dimensions_m": [
+        0.36,
+        0.36,
+        0.2
+      ],
+      "length_m": 0.2,
+      "length_mm": 200,
+      "max_triangles": 500,
+      "max_material_slots": 2,
+      "connector_radius_m": 0.18,
+      "connector_span_m": [
+        -0.06,
+        0.14
+      ],
+      "fallback_primitive": "cylinder",
+      "albedo": "#6e4a4f",
+      "source": "placeholder",
+      "asset": {
+        "fbx": "",
+        "glb": "",
+        "triangles": 0
+      }
+    },
+    {
+      "part_id": "gunk_collar_m_v1",
+      "category": "connector",
+      "template": "connector2",
+      "species_tags": [
+        "biomass"
+      ],
+      "roles": [
+        "connector"
+      ],
+      "size_class": "M",
+      "status": "placeholder",
+      "style_profile": "flesh_stylized_v1",
+      "dimensions_m": [
+        0.26,
+        0.26,
+        0.2
+      ],
+      "length_m": 0.2,
+      "length_mm": 200,
+      "max_triangles": 500,
+      "max_material_slots": 2,
+      "connector_radius_m": 0.13,
+      "connector_span_m": [
+        -0.06,
+        0.14
+      ],
+      "fallback_primitive": "cylinder",
+      "albedo": "#6e4a4f",
+      "source": "placeholder",
+      "asset": {
+        "fbx": "",
+        "glb": "",
+        "triangles": 0
+      }
+    },
+    {
+      "part_id": "gunk_collar_s_v1",
+      "category": "connector",
+      "template": "connector2",
+      "species_tags": [
+        "biomass"
+      ],
+      "roles": [
+        "connector"
+      ],
+      "size_class": "S",
+      "status": "placeholder",
+      "style_profile": "flesh_stylized_v1",
+      "dimensions_m": [
+        0.18,
+        0.18,
+        0.2
+      ],
+      "length_m": 0.2,
+      "length_mm": 200,
+      "max_triangles": 500,
+      "max_material_slots": 2,
+      "connector_radius_m": 0.09,
+      "connector_span_m": [
+        -0.06,
+        0.14
+      ],
+      "fallback_primitive": "cylinder",
+      "albedo": "#6e4a4f",
+      "source": "placeholder",
+      "asset": {
+        "fbx": "",
+        "glb": "",
+        "triangles": 0
+      }
+    },
+    {
+      "part_id": "human_arm_v1",
+      "category": "limb",
+      "template": "limb3",
+      "species_tags": [
+        "human"
+      ],
+      "roles": [
+        "locomotor",
+        "manipulator",
+        "puller"
+      ],
+      "size_class": "",
+      "status": "placeholder",
+      "style_profile": "flesh_stylized_v1",
+      "dimensions_m": [
+        0.28,
+        0.28,
+        1.0
+      ],
+      "length_m": 1.0,
+      "length_mm": 1000,
+      "max_triangles": 2500,
+      "max_material_slots": 2,
+      "connector_radius_m": 0.0,
+      "connector_span_m": [],
+      "fallback_primitive": "capsule",
+      "albedo": "#b98f94",
+      "source": "placeholder",
+      "asset": {
+        "fbx": "",
+        "glb": "",
+        "triangles": 0
+      }
+    },
+    {
+      "part_id": "humanoid_torso_v1",
+      "category": "core",
+      "template": "spine3",
+      "species_tags": [
+        "human"
+      ],
+      "roles": [
+        "core"
+      ],
+      "size_class": "",
+      "status": "placeholder",
+      "style_profile": "flesh_stylized_v1",
+      "dimensions_m": [
+        0.65,
+        0.4,
+        0.9
+      ],
+      "length_m": 0.9,
+      "length_mm": 900,
+      "max_triangles": 5000,
+      "max_material_slots": 2,
+      "connector_radius_m": 0.0,
+      "connector_span_m": [],
+      "fallback_primitive": "capsule",
+      "albedo": "#b89098",
+      "source": "placeholder",
+      "asset": {
+        "fbx": "",
+        "glb": "",
+        "triangles": 0
+      }
+    },
+    {
+      "part_id": "insect_leg_v1",
+      "category": "limb",
+      "template": "insect_leg4",
+      "species_tags": [
+        "insectoid"
+      ],
+      "roles": [
+        "locomotor"
+      ],
+      "size_class": "",
+      "status": "placeholder",
+      "style_profile": "flesh_stylized_v1",
+      "dimensions_m": [
+        0.35,
+        0.3,
+        0.9
+      ],
+      "length_m": 0.9,
+      "length_mm": 900,
+      "max_triangles": 2500,
+      "max_material_slots": 2,
+      "connector_radius_m": 0.0,
+      "connector_span_m": [],
+      "fallback_primitive": "capsule",
+      "albedo": "#8d6b62",
+      "source": "placeholder",
+      "asset": {
+        "fbx": "",
+        "glb": "",
+        "triangles": 0
+      }
+    },
+    {
+      "part_id": "maw_v1",
+      "category": "appendage",
+      "template": "appendage1",
+      "species_tags": [
+        "alien"
+      ],
+      "roles": [
+        "detail",
+        "manipulator"
+      ],
+      "size_class": "",
+      "status": "placeholder",
+      "style_profile": "flesh_stylized_v1",
+      "dimensions_m": [
+        0.4,
+        0.3,
+        0.35
+      ],
+      "length_m": 0.35,
+      "length_mm": 350,
+      "max_triangles": 1500,
+      "max_material_slots": 2,
+      "connector_radius_m": 0.0,
+      "connector_span_m": [],
+      "fallback_primitive": "sphere",
+      "albedo": "#9c5f6a",
+      "source": "placeholder",
+      "asset": {
+        "fbx": "",
+        "glb": "",
+        "triangles": 0
+      }
+    }
+  ],
+  "pools": [
+    {
+      "pool_id": "any",
+      "families": [
+        "biped",
+        "crawler",
+        "quadruped"
+      ],
+      "skeleton_ids": []
+    },
+    {
+      "pool_id": "biomatter_swarm",
+      "families": [
+        "crawler"
+      ],
+      "skeleton_ids": []
+    },
+    {
+      "pool_id": "biped",
+      "families": [
+        "biped"
+      ],
+      "skeleton_ids": []
+    },
+    {
+      "pool_id": "crawler",
+      "families": [
+        "crawler"
+      ],
+      "skeleton_ids": []
+    },
+    {
+      "pool_id": "puppet_corpse",
+      "families": [
+        "biped"
+      ],
+      "skeleton_ids": []
+    },
+    {
+      "pool_id": "quadruped",
+      "families": [
+        "quadruped"
+      ],
+      "skeleton_ids": []
+    },
+    {
+      "pool_id": "stalker",
+      "families": [
+        "crawler",
+        "quadruped"
+      ],
+      "skeleton_ids": []
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "name": "CritterCrafter.Editor",
+  "rootNamespace": "CritterCrafter.Editor",
+  "references": ["CritterCrafter.Runtime"],
+  "includePlatforms": ["Editor"],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "autoReferenced": true
+}
