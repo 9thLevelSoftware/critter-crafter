@@ -32,7 +32,6 @@ ARCHETYPES: dict[str, dict[str, Any]] = {
     "crawler_alien_tripod": {"family": "crawler", "plan": "crawler", "variant": "tripod", "height": 0.68, "length": 1.12, "width": 1.22},
     "hexapod_compact_insect": {"family": "hexapod", "plan": "hexapod", "variant": "compact", "height": 0.48, "length": 1.02, "width": 1.08},
     "hexapod_elongated_insect": {"family": "hexapod", "plan": "hexapod", "variant": "elongated", "height": 0.58, "length": 1.86, "width": 1.30},
-    "radial_low_tentacle_crawler": {"family": "radial", "plan": "radial", "variant": "low", "height": 0.42, "length": 1.25, "width": 1.25},
     "radial_raised_articulated_walker": {"family": "radial", "plan": "radial", "variant": "raised", "height": 1.02, "length": 1.42, "width": 1.42},
     "serpentine_limbless_articulated": {"family": "serpentine", "plan": "serpentine", "variant": "limbless", "height": 0.55, "length": 2.75, "width": 0.52},
     "serpentine_segmented_paired_legs": {"family": "serpentine", "plan": "serpentine", "variant": "paired", "height": 0.66, "length": 2.45, "width": 1.08},
@@ -395,8 +394,17 @@ def _dragger(a: dict[str, Any], h: float, length: float, width: float) -> tuple[
     branches = [_core(h, length * .65, width)]
     for arm in _paired_legs(branches, prefix="arm", parent="core", positions=[(width * .38, h, length * .24)], length=length * .54 * a["limb_scale"], template="limb3", contact="hand", attach=2):
         # Pulling forelimbs: elbows point back, crouched so the hands have room to reach and pull.
-        _mammal_leg(arm, fore=True, fit_hip=False)
-    branches.append(_branch("belly", "tentacle8", "core", origin=_v(0, h * .55, -length * .2), direction=[0, 0, -1], up=[0, 1, 0], length=length * .42, role="locomotor", support=.9, contact="body", parent_joint="upper"))
+        _mammal_leg(arm, fore=True)
+    # The puller's spine pitches up from a low rear, where the dragged belly attaches along the ground,
+    # to shoulders carried high on its arms (a flat body at arm height leaves the belly floating).
+    core = branches[0]
+    core_length = core["length_m"]
+    rear_y = h * .32
+    rise = min(h - rear_y, core_length * .7)
+    core["origin_m"] = _v(0, rear_y, -length * .65 / 2)
+    core["direction"] = [0, rise, math.sqrt(core_length ** 2 - rise ** 2)]
+    core["up"] = [0, 1, 0]
+    branches.append(_branch("belly", "tentacle8", "core", origin=_v(0, rear_y, -length * .65 / 2), direction=[0, 0, -1], up=[0, 1, 0], length=length * .42, role="locomotor", support=.9, contact="body", parent_joint="upper"))
     support = ["arm_L", "arm_R", "belly"]
     return branches, support, ["arm_L", "arm_R", "belly"], "bilateral"
 

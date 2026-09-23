@@ -120,7 +120,7 @@ namespace CritterCrafter.Tests
             Assert.IsTrue(doc.fixture_only_approval);
             Assert.AreEqual(RecipeGenerator.Algorithm, doc.generator);
             Assert.GreaterOrEqual(doc.rows.Length, 700);
-            Assert.AreEqual(42, catalog.skeletons.Length);
+            Assert.AreEqual(39, catalog.skeletons.Length);
             Assert.IsTrue(Array.TrueForAll(catalog.skeletons, s => s.status == "draft"));
             foreach (var skeleton in catalog.skeletons) skeleton.status = "approved";
             foreach (var row in doc.rows)

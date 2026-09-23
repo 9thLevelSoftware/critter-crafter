@@ -94,7 +94,7 @@ def test_every_skeleton_publishes_a_runtime_mode(catalog):
     for family in ("biped", "quadruped", "crawler", "hexapod", "dragger"):
         assert modes[family] == {"legs"}, family
     assert modes["serpentine"] == {"legs", "slide"}
-    assert modes["radial"] == {"legs", "slide"}
+    assert modes["radial"] == {"legs"}
 
 
 def test_legged_bands_are_consistent_and_most_reach_game_speed(catalog):

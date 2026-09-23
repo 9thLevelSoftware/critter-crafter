@@ -648,7 +648,7 @@ def test_all_curated_compiled_clips_and_contact_schedules_match_library_schema()
     schema = json.loads((ROOT / "schemas" / "library.v3.schema.json").read_text(encoding="utf-8"))
     errors = list(Draft202012Validator(schema).iter_errors(catalog))
     assert errors == []
-    assert sum(len(skeleton["asset"]["clips"]) for skeleton in catalog["skeletons"]) == 336
+    assert sum(len(skeleton["asset"]["clips"]) for skeleton in catalog["skeletons"]) == 312
 
 
 @pytest.mark.parametrize(

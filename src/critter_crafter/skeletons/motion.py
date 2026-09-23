@@ -35,7 +35,6 @@ ARCHETYPE_PROFILES: dict[str, dict[str, float | str]] = {
     "crawler_alien_tripod":             {"family": "crawler",    "stride": .25, "support": .72, "clearance": .06, "cadence": 1.05},
     "crawler_bilateral_eight_legged":   {"family": "crawler",    "stride": .36, "support": .66, "clearance": .10, "cadence": 1.18},
     "radial_raised_articulated_walker": {"family": "radial",     "stride": .19, "support": .76, "clearance": .05, "cadence": .88},
-    "radial_low_tentacle_crawler":      {"family": "radial",     "stride": .15, "support": .70, "clearance": .07, "cadence": .72},
     "serpentine_limbless_articulated":  {"family": "serpentine", "stride": .31, "support": .82, "clearance": .025,"cadence": .92},
     "serpentine_segmented_paired_legs": {"family": "serpentine", "stride": .23, "support": .86, "clearance": .018,"cadence": .74},
     "dragger_forelimb_puller":           {"family": "dragger",    "stride": .43, "support": .73, "clearance": .075,"cadence": .82},

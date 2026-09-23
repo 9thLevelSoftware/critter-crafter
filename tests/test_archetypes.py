@@ -33,11 +33,11 @@ def test_biped_candidate_has_grounded_symmetric_support_and_motion_metadata() ->
 def test_all_curated_candidates_are_reproducible_distinct_and_within_budget() -> None:
     candidates = generate_all(seed=9)
 
-    assert len(ARCHETYPES) == 14
+    assert len(ARCHETYPES) == 13
     assert PRESETS == ("compact", "balanced", "elongated")
-    assert len(candidates) == 42
+    assert len(candidates) == 39
     assert candidates == generate_all(seed=9)
-    assert len({candidate["skeleton_id"] for candidate in candidates}) == 42
+    assert len({candidate["skeleton_id"] for candidate in candidates}) == 39
     silhouettes = {
         (round(candidate["anatomy"]["silhouette"]["width_m"], 3),
          round(candidate["anatomy"]["silhouette"]["height_m"], 3),
@@ -303,7 +303,7 @@ def test_presets_change_correlated_proportions_and_neutral_stance() -> None:
 
 
 def test_radial_footprints_remain_circular_in_every_preset() -> None:
-    for archetype in ("radial_low_tentacle_crawler", "radial_raised_articulated_walker"):
+    for archetype in ("radial_raised_articulated_walker",):
         for preset in PRESETS:
             candidate = build_candidate(archetype, preset, seed=7)
             silhouette = candidate["anatomy"]["silhouette"]

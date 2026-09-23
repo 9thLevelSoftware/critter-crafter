@@ -37,8 +37,8 @@ def _contact_ids(skeleton: dict) -> set[str]:
 
 def test_profiles_cover_all_fourteen_archetypes_with_declared_semantics() -> None:
     assert set(ATTACK_PROFILES) == set(ARCHETYPES)
-    assert len(ATTACK_PROFILES) == 14
-    assert len({profile.attack_id for profile in ATTACK_PROFILES.values()}) == 14
+    assert len(ATTACK_PROFILES) == 13
+    assert len({profile.attack_id for profile in ATTACK_PROFILES.values()}) == 13
     assert all(profile.branch_id and profile.bone_index >= 0 for profile in ATTACK_PROFILES.values())
 
 
@@ -94,7 +94,6 @@ def test_declared_effectors_match_the_intended_anatomical_attacks() -> None:
         "crawler_alien_tripod": ("leg_2", "tripod_hook"),
         "hexapod_compact_insect": ("leg2_L", "foreleg_jab"),
         "hexapod_elongated_insect": ("leg2_L", "foreleg_lance"),
-        "radial_low_tentacle_crawler": ("arm_0", "tentacle_lash"),
         "radial_raised_articulated_walker": ("arm_0", "radial_stab"),
         "serpentine_limbless_articulated": ("body", "tail_whip"),
         "serpentine_segmented_paired_legs": ("body", "segmented_tail_sweep"),
@@ -187,10 +186,6 @@ def test_one_bone_bites_follow_the_exact_reach_sphere_for_the_full_cycle() -> No
 
 def test_grounded_windups_lift_and_tail_whips_retract() -> None:
     skeletons = {item["anatomy"]["archetype_id"]: item for item in _skeletons() if "balanced" in item["skeleton_id"]}
-    radial = resolve_attack(skeletons["radial_low_tentacle_crawler"])
-    radial_branch = next(item for item in skeletons["radial_low_tentacle_crawler"]["branches"] if item["branch_id"] == "arm_0")
-    assert radial["trajectory"]["windup_offset_m"][1] >= radial_branch["length_m"] * .22 - 1e-6
-
     for archetype_id in ("serpentine_limbless_articulated", "serpentine_segmented_paired_legs"):
         skeleton = skeletons[archetype_id]
         branch = next(item for item in skeleton["branches"] if item["branch_id"] == "body")

@@ -23,11 +23,12 @@ def _skeleton():
                 "contacts": [{"kind": "foot", "bone_index": 1, "local_point_m": [0, .4, 0]}]}]}
 
 
-def test_fourteen_motion_archetypes_cover_every_family_twice():
-    assert len(ARCHETYPE_PROFILES) == 14
+def test_motion_archetypes_cover_every_family():
+    assert len(ARCHETYPE_PROFILES) == 13
     families = [p["family"] for p in ARCHETYPE_PROFILES.values()]
     assert set(families) == {"biped", "quadruped", "hexapod", "crawler", "radial", "serpentine", "dragger"}
-    assert all(families.count(family) == 2 for family in set(families))
+    # The tentacle radial was retired; the radial family keeps its articulated walker.
+    assert all(families.count(family) == (1 if family == "radial" else 2) for family in set(families))
 
 
 def test_contact_cycle_has_position_and_velocity_continuity():

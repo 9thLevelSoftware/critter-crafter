@@ -61,7 +61,7 @@ def test_all_skeleton_glbs_keep_the_compiled_rest_bind(built):
 
 def test_all_baked_motion_and_skinned_surfaces_pass_complete_qa(built):
     catalog, out, _ = built
-    assert len(catalog["skeletons"]) == 42
+    assert len(catalog["skeletons"]) == 39
     profiles = catalog.get("binding_profiles", [])
     for skeleton in catalog["skeletons"]:
         motion = json.loads((out / skeleton["asset"]["motion"]).read_text(encoding="utf-8"))

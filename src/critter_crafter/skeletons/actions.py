@@ -125,11 +125,6 @@ ATTACK_PROFILES: Mapping[str, AttackProfile] = MappingProxyType({
         (-.03, .04, -.10), (.025, .07, .19), (.29, .52, .64, 1.0),
         release=(0,), minimum_preserved=5, max_reach_n=.24, minimum_displacement_n=.12,
     ),
-    "radial_low_tentacle_crawler": _profile(
-        "tentacle_lash", "temporary_ik", "arm_0", 7,
-        (0.0, .22, -.02), (.12, .19, -.03), (.30, .53, .66, 1.0),
-        release=(0, 1, 2), minimum_preserved=21, max_reach_n=.23, minimum_displacement_n=.12,
-    ),
     "radial_raised_articulated_walker": _profile(
         "radial_stab", "temporary_ik", "arm_0", 3,
         (.04, .03, -.08), (-.04, .08, .18), (.27, .49, .60, 1.0),
