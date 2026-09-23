@@ -1,0 +1,22 @@
+{
+  "schema_version": "2.0.0",
+  "family": "crawler",
+  "count": 6,
+  "body_height_m": [
+    0.45,
+    0.62
+  ],
+  "core_length_m": [
+    0.5,
+    0.62
+  ],
+  "leg_count": [
+    3,
+    5
+  ],
+  "leg_length_m": [
+    0.8,
+    1.0
+  ],
+  "dorsal_tentacle_pct": 45
+}

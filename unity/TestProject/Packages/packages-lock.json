@@ -4,6 +4,24 @@
       "version": "file:../../com.ninthlevelsoftware.crittercrafter",
       "depth": 0,
       "source": "local",
+      "dependencies": {
+        "com.unity.animation.rigging": "1.3.0"
+      }
+    },
+    "com.unity.animation.rigging": {
+      "version": "6.6.0",
+      "depth": 1,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.burst": "1.4.1",
+        "com.unity.test-framework": "1.1.24",
+        "com.unity.modules.animation": "1.0.0"
+      }
+    },
+    "com.unity.burst": {
+      "version": "2.0.0",
+      "depth": 2,
+      "source": "builtin",
       "dependencies": {}
     },
     "com.unity.ext.nunit": {

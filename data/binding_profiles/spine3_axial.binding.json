@@ -1,0 +1,15 @@
+{
+  "schema_version": "3.0.0",
+  "binding_profile_id": "spine3_axial",
+  "binding_profile_version": "1.0.0",
+  "template": "spine3",
+  "joint_order": ["pelvis", "lower", "end"],
+  "bone_fractions": [0.34, 0.33, 0.33],
+  "girth_ratio": 0.3,
+  "joints": [
+    {"joint_id": "pelvis", "parent_joint": "", "canonical_position_n": [0, 0, 0], "canonical_rotation_xyzw": [0, 0, 0, 1], "primary_axis": [0, 0, 1], "secondary_axis": [0, 1, 0], "limits_deg": {"swing_x": [-20, 20], "swing_y": [-20, 20], "twist": [-20, 20]}},
+    {"joint_id": "lower", "parent_joint": "pelvis", "canonical_position_n": [0, 0, 0.34], "canonical_rotation_xyzw": [0, 0, 0, 1], "primary_axis": [0, 0, 1], "secondary_axis": [0, 1, 0], "limits_deg": {"swing_x": [-20, 20], "swing_y": [-20, 20], "twist": [-20, 20]}},
+    {"joint_id": "end", "parent_joint": "lower", "canonical_position_n": [0, 0, 0.67], "canonical_rotation_xyzw": [0, 0, 0, 1], "primary_axis": [0, 0, 1], "secondary_axis": [0, 1, 0], "limits_deg": {"swing_x": [-20, 20], "swing_y": [-20, 20], "twist": [-20, 20]}}
+  ],
+  "landmarks": [{"landmark_id": "tip", "parent_joint": "end", "position_n": [0, 0, 1], "rotation_xyzw": [0, 0, 0, 1]}]
+}

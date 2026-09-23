@@ -1,0 +1,16 @@
+{
+  "schema_version": "3.0.0",
+  "binding_profile_id": "insect_leg4_articulated",
+  "binding_profile_version": "1.0.0",
+  "template": "insect_leg4",
+  "joint_order": ["upper", "femur", "tibia", "end"],
+  "bone_fractions": [0.2, 0.35, 0.35, 0.1],
+  "girth_ratio": 0.15,
+  "joints": [
+    {"joint_id": "upper", "parent_joint": "", "canonical_position_n": [0, 0, 0], "canonical_rotation_xyzw": [0, 0, 0, 1], "primary_axis": [0, 0, 1], "secondary_axis": [0, 1, 0], "limits_deg": {"swing_x": [-80, 80], "swing_y": [-65, 65], "twist": [-45, 45]}},
+    {"joint_id": "femur", "parent_joint": "upper", "canonical_position_n": [0, 0, 0.2], "canonical_rotation_xyzw": [0, 0, 0, 1], "primary_axis": [0, 0, 1], "secondary_axis": [0, 1, 0], "limits_deg": {"swing_x": [-5, 145], "swing_y": [-35, 35], "twist": [-30, 30]}},
+    {"joint_id": "tibia", "parent_joint": "femur", "canonical_position_n": [0, 0, 0.55], "canonical_rotation_xyzw": [0, 0, 0, 1], "primary_axis": [0, 0, 1], "secondary_axis": [0, 1, 0], "limits_deg": {"swing_x": [-5, 155], "swing_y": [-30, 30], "twist": [-25, 25]}},
+    {"joint_id": "end", "parent_joint": "tibia", "canonical_position_n": [0, 0, 0.9], "canonical_rotation_xyzw": [0, 0, 0, 1], "primary_axis": [0, 0, 1], "secondary_axis": [0, 1, 0], "limits_deg": {"swing_x": [-45, 55], "swing_y": [-25, 25], "twist": [-25, 25]}}
+  ],
+  "landmarks": [{"landmark_id": "tip", "parent_joint": "end", "position_n": [0, 0, 1], "rotation_xyzw": [0, 0, 0, 1]}]
+}

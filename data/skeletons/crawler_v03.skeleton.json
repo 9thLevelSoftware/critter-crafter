@@ -1,0 +1,251 @@
+{
+  "schema_version": "2.0.0",
+  "skeleton_id": "crawler_v03",
+  "family": "crawler",
+  "locomotion_hint": "crawl",
+  "status": "draft",
+  "symmetry_pct": 30,
+  "provenance": {
+    "generator": "skeleton-vary-1",
+    "family_params": "crawler.json",
+    "seed": 1,
+    "index": 3
+  },
+  "branches": [
+    {
+      "branch_id": "core",
+      "template": "core1",
+      "parent_branch": null,
+      "attach_bone_index": 0,
+      "direction": [
+        0,
+        -0.004,
+        1
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.555,
+      "size_class": "L",
+      "side": "C",
+      "required": true,
+      "accepts": {
+        "categories": [
+          "core",
+          "head"
+        ]
+      },
+      "connector_size_class": null,
+      "gait": {
+        "role": "core",
+        "phase_rad": 0.0
+      },
+      "origin_m": [
+        0,
+        0.593,
+        -0.2775
+      ]
+    },
+    {
+      "branch_id": "leg_0",
+      "template": "insect_leg4",
+      "parent_branch": "core",
+      "attach_bone_index": 0,
+      "direction": [
+        -0.9462548318960259,
+        -0.739,
+        0.32342200468339166
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.836,
+      "size_class": "M",
+      "side": "R",
+      "required": true,
+      "accepts": {
+        "categories": [
+          "limb"
+        ]
+      },
+      "connector_size_class": "M",
+      "gait": {
+        "role": "locomotor",
+        "phase_rad": 0.0
+      },
+      "origin_m": [
+        -0.1838,
+        0.553,
+        0.0628
+      ],
+      "stance_deg": [
+        38.0,
+        -72.0,
+        -16.0,
+        12.0
+      ]
+    },
+    {
+      "branch_id": "leg_1",
+      "template": "insect_leg4",
+      "parent_branch": "core",
+      "attach_bone_index": 0,
+      "direction": [
+        0.6885824248005765,
+        -0.739,
+        0.7251580822522482
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.836,
+      "size_class": "M",
+      "side": "L",
+      "required": true,
+      "accepts": {
+        "categories": [
+          "limb"
+        ]
+      },
+      "connector_size_class": "M",
+      "gait": {
+        "role": "locomotor",
+        "phase_rad": 2.094395
+      },
+      "origin_m": [
+        0.1338,
+        0.553,
+        0.1409
+      ],
+      "stance_deg": [
+        38.0,
+        -72.0,
+        -16.0,
+        12.0
+      ]
+    },
+    {
+      "branch_id": "leg_2",
+      "template": "insect_leg4",
+      "parent_branch": "core",
+      "attach_bone_index": 0,
+      "direction": [
+        0.010768473355214858,
+        -0.739,
+        -0.9999420183098608
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.836,
+      "size_class": "M",
+      "side": "C",
+      "required": true,
+      "accepts": {
+        "categories": [
+          "limb"
+        ]
+      },
+      "connector_size_class": "M",
+      "gait": {
+        "role": "locomotor",
+        "phase_rad": 4.18879
+      },
+      "origin_m": [
+        0.0021,
+        0.553,
+        -0.1942
+      ],
+      "stance_deg": [
+        38.0,
+        -72.0,
+        -16.0,
+        12.0
+      ]
+    },
+    {
+      "branch_id": "mouth",
+      "template": "appendage1",
+      "parent_branch": "core",
+      "attach_bone_index": 0,
+      "direction": [
+        0,
+        -0.1,
+        1
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.35,
+      "size_class": "S",
+      "side": "C",
+      "required": false,
+      "accepts": {
+        "categories": [
+          "appendage"
+        ]
+      },
+      "connector_size_class": "S",
+      "gait": {
+        "role": "manipulator",
+        "phase_rad": 0.0
+      },
+      "origin_m": [
+        0,
+        0.573,
+        0.2775
+      ],
+      "optional_fill_pct": 70
+    },
+    {
+      "branch_id": "dorsal",
+      "template": "tentacle8",
+      "parent_branch": "core",
+      "attach_bone_index": 0,
+      "direction": [
+        -0.148,
+        1,
+        -0.35
+      ],
+      "up": [
+        0,
+        0,
+        1
+      ],
+      "length_m": 1.07,
+      "size_class": "M",
+      "side": "C",
+      "required": false,
+      "accepts": {
+        "categories": [
+          "limb",
+          "tail"
+        ],
+        "templates": [
+          "tentacle8"
+        ]
+      },
+      "connector_size_class": "M",
+      "gait": {
+        "role": "sway",
+        "phase_rad": 0.0
+      },
+      "origin_m": [
+        0,
+        0.815,
+        0
+      ],
+      "optional_fill_pct": 65
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "schema_version": "3.0.0",
+  "binding_profile_id": "head1_neck",
+  "binding_profile_version": "1.0.0",
+  "template": "head1",
+  "joint_order": ["upper"],
+  "bone_fractions": [1.0],
+  "girth_ratio": 0.28,
+  "joints": [{"joint_id": "upper", "parent_joint": "", "canonical_position_n": [0, 0, 0], "canonical_rotation_xyzw": [0, 0, 0, 1], "primary_axis": [0, 0, 1], "secondary_axis": [0, 1, 0], "limits_deg": {"swing_x": [-45, 45], "swing_y": [-55, 55], "twist": [-30, 30]}}],
+  "landmarks": [{"landmark_id": "tip", "parent_joint": "upper", "position_n": [0, 0, 1], "rotation_xyzw": [0, 0, 0, 1]}]
+}

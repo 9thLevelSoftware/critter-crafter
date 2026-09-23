@@ -25,6 +25,7 @@ namespace CritterCrafter
             public string partId;
             public GameObject model;
             public Material material;
+            public Material[] materials = Array.Empty<Material>();
         }
 
         [SerializeField] TextAsset catalogJson;
@@ -57,6 +58,18 @@ namespace CritterCrafter
             skeletons = skeletonEntries;
             parts = partEntries;
             _catalog = null;
+        }
+
+        /// <summary>Test/review helper. Approval is applied only to a cloned in-memory catalog.</summary>
+        public CritterLibrary EditorCreateApprovedSkeletonClone()
+        {
+            var cloneCatalog = JsonUtility.FromJson<CatalogData>(catalogJson.text);
+            foreach (var skeleton in cloneCatalog.skeletons) skeleton.status = "approved";
+            var clone = CreateInstance<CritterLibrary>();
+            clone.catalogJson = new TextAsset(JsonUtility.ToJson(cloneCatalog));
+            clone.skeletons = skeletons;
+            clone.parts = parts;
+            return clone;
         }
 #endif
     }

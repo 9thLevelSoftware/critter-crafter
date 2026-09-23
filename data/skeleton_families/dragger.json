@@ -1,0 +1,23 @@
+{
+  "schema_version": "2.0.0",
+  "family": "dragger",
+  "count": 6,
+  "chest_height_m": [
+    0.35,
+    0.5
+  ],
+  "torso_length_m": [
+    0.78,
+    0.95
+  ],
+  "torso_tilt": [
+    0.15,
+    0.45
+  ],
+  "arm_length_m": [
+    0.85,
+    1.05
+  ],
+  "trail_fill_pct": 75,
+  "stump_legs_pct": 40
+}

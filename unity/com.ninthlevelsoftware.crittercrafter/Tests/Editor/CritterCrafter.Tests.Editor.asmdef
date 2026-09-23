@@ -1,11 +1,25 @@
 {
   "name": "CritterCrafter.Tests.Editor",
   "rootNamespace": "CritterCrafter.Tests",
-  "references": ["CritterCrafter.Runtime", "CritterCrafter.Editor", "UnityEngine.TestRunner", "UnityEditor.TestRunner"],
-  "includePlatforms": ["Editor"],
+  "references": [
+    "CritterCrafter.Runtime",
+    "CritterCrafter.Editor",
+    "UnityEngine.TestRunner",
+    "UnityEditor.TestRunner",
+    "CritterCrafter.Locomotion",
+    "Unity.Animation.Rigging",
+    "CritterCrafter.Review"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
   "excludePlatforms": [],
   "overrideReferences": true,
-  "precompiledReferences": ["nunit.framework.dll"],
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ],
   "autoReferenced": false,
-  "defineConstraints": ["UNITY_INCLUDE_TESTS"]
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ]
 }

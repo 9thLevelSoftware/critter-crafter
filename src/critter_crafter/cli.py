@@ -80,13 +80,13 @@ def schema_validate() -> None:
 
 @main.group()
 def catalog() -> None:
-    """Compiled catalog (library.v2)."""
+    """Compiled catalog (library.v3)."""
 
 
 @catalog.command("compile")
 @click.option("--out", type=click.Path(path_type=Path), default=None, help="Output file (default: stdout)")
 def catalog_compile(out: Path | None) -> None:
-    """Compile data/ into a mesh-less library.v2 catalog."""
+    """Compile data/ into a mesh-less library.v3 catalog."""
     text = dumps(_compiled_catalog())
     if out:
         out.parent.mkdir(parents=True, exist_ok=True)
@@ -117,9 +117,14 @@ def recipe_generate(pool_id: str, seed: int) -> None:
 @recipe.command("sweep")
 @click.option("--pool", "pool_ids", multiple=True, help="Pool(s); default: all pools")
 @click.option("--seeds", default="1..100", show_default=True)
-def recipe_sweep(pool_ids: tuple[str, ...], seeds: str) -> None:
+@click.option("--review-drafts", is_flag=True, help="Test drafts using an in-memory approved copy")
+def recipe_sweep(pool_ids: tuple[str, ...], seeds: str, review_drafts: bool) -> None:
     """Generate across a seed range; report validity and distinct creature count."""
     cat = _compiled_catalog()
+    if review_drafts:
+        for skeleton in cat["skeletons"]:
+            if skeleton["status"] == "draft":
+                skeleton["status"] = "approved"
     pools = pool_ids or tuple(p["pool_id"] for p in cat["pools"])
     bad = 0
     for pid in pools:
@@ -145,19 +150,28 @@ def recipe_sweep(pool_ids: tuple[str, ...], seeds: str) -> None:
 
 @recipe.command("golden")
 @click.option("--seeds", default="1..100", show_default=True)
-def recipe_golden(seeds: str) -> None:
-    """Rewrite tests/golden (catalog + canonical recipes) consumed by Python and C# tests."""
+@click.option("--out", type=click.Path(path_type=Path), default=None)
+def recipe_golden(seeds: str, out: Path | None) -> None:
+    """Write v3 parity fixtures from an in-memory approved copy; preserve v2 fixtures."""
     cat = _compiled_catalog()
-    gdir = paths().root / "tests" / "golden"
+    gdir = out or paths().root / "tests" / "golden_v3"
+    if gdir.resolve() == (paths().root / "tests" / "golden").resolve():
+        raise click.ClickException("legacy golden fixtures are frozen; choose a v3 output directory")
     gdir.mkdir(parents=True, exist_ok=True)
     (gdir / "catalog.json").write_text(dumps(cat), encoding="utf-8", newline="\n")
+    for skeleton in cat["skeletons"]:
+        if skeleton["status"] == "draft":
+            skeleton["status"] = "approved"
     rows = []
     for p in cat["pools"]:
         for s in _parse_range(seeds):
             rows.append({"pool_id": p["pool_id"], "seed": s, "canonical": canonical(generate(cat, p["pool_id"], s))})
-    doc = {"generator": "cc-gen-2", "rows": rows}
+    doc = {"generator": "cc-gen-3", "fixture_only_approval": True, "rows": rows}
     (gdir / "recipes.json").write_text(json.dumps(doc, indent=1) + "\n", encoding="utf-8", newline="\n")
-    click.echo(f"wrote {len(rows)} golden rows to {gdir}")
+    from .locomotion.qa import golden_rows
+    locomotion = {"planner": "stepper-1", "rows": golden_rows(cat)}
+    (gdir / "locomotion.json").write_text(json.dumps(locomotion, indent=1) + "\n", encoding="utf-8", newline="\n")
+    click.echo(f"wrote {len(rows)} golden rows and {len(locomotion['rows'])} locomotion rows to {gdir}")
 
 
 from .library import commands as _library_commands  # noqa: E402
@@ -165,6 +179,10 @@ from .library import commands as _library_commands  # noqa: E402
 main.add_command(_library_commands.library)
 main.add_command(_library_commands.blender)
 main.add_command(_library_commands.assemble)
+
+from .skeletons import commands as _skeleton_commands  # noqa: E402
+
+main.add_command(_skeleton_commands.skeleton)
 
 
 if __name__ == "__main__":

@@ -204,10 +204,31 @@
                 "type": "number"
               }
             }
+          },
+          "stance_deg": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "minimum": -120,
+              "maximum": 120
+            },
+            "maxItems": 16
+          },
+          "stance_z_deg": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "minimum": -120,
+              "maximum": 120
+            },
+            "maxItems": 16
           }
         }
       },
       "minItems": 1
+    },
+    "provenance": {
+      "type": "object"
     }
   }
 }

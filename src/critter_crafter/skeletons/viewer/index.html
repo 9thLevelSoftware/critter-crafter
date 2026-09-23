@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Critter skeleton review</title>
+<link rel="stylesheet" href="viewer.css">
+<body>
+<header><div><strong>Critter skeleton review</strong><span id="library"></span></div><small>Serve this folder with <code>python -m http.server</code>; browser modules cannot load reliably from a file URL.</small></header>
+<main>
+  <aside>
+    <label>Skeleton <select id="skeleton"></select></label>
+    <label>Mode <select id="mode"><option value="bones">Bones + contacts</option><option value="mannequin">Neutral mannequin</option><option value="assembled">Compatible assembled parts</option></select></label>
+    <label>Animation <select id="clip"></select></label>
+    <div class="buttons"><button id="play">Play</button><button id="pause">Pause</button><button id="neutral">Neutral</button><button id="bind">Bind</button></div>
+    <div class="timeline" aria-label="Animation timeline">
+      <input id="scrub" type="range" min="0" max="1" value="0" step="0.0333333333" aria-label="Clip time">
+      <output id="time">Frame 0 · 0.00s</output>
+      <div class="buttons timeline-buttons"><button id="previous" title="Previous frame">◀ Frame</button><button id="next" title="Next frame">Frame ▶</button><button id="restart">Restart</button></div>
+      <label>Rate <select id="rate"><option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="1" selected>1×</option></select></label>
+    </div>
+    <label><input id="travel" type="checkbox" checked> Show forward travel at baked speed</label>
+    <label>Camera <select id="camera"><option value="threeQuarter">Three-quarter</option><option value="front">Front</option><option value="side">Side</option><option value="top">Top</option></select></label>
+    <p id="availability" class="note"></p>
+    <section><h2>Clip</h2><dl id="clipInfo"></dl></section>
+    <section><h2>Provenance</h2><dl id="provenance"></dl></section>
+  </aside>
+  <section id="stage"><canvas id="canvas"></canvas><div id="loading">Loading review assets…</div></section>
+</main>
+<script type="module" src="viewer.js"></script>
+</body>
+</html>

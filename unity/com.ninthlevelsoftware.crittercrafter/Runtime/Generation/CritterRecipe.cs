@@ -4,13 +4,13 @@ using System.Text;
 namespace CritterCrafter
 {
     /// <summary>
-    /// A creature recipe (schemas/recipe.v2.schema.json). Once saved it is authoritative: persist it
+    /// A creature recipe (schema v3). Once saved it is authoritative: persist it
     /// (JsonUtility.ToJson) and never regenerate it from the seed on load.
     /// </summary>
     [Serializable]
     public class CritterRecipe
     {
-        public string schema_version = "2.0.0";
+        public string schema_version = "3.0.0";
         public string recipe_id;
         public string library_id;
         public string library_version;
@@ -41,5 +41,10 @@ namespace CritterCrafter
         public string branch_id;
         public string part_id;
         public string connector_part_id;
+        public string binding_profile_id;
+        public string binding_profile_version;
+        public string binding_profile_hash;
+        public double length_scale;
+        public double girth_scale;
     }
 }

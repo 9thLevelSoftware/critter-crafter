@@ -1,8 +1,15 @@
 {
   "name": "CritterCrafter.Editor",
   "rootNamespace": "CritterCrafter.Editor",
-  "references": ["CritterCrafter.Runtime"],
-  "includePlatforms": ["Editor"],
+  "references": [
+    "CritterCrafter.Runtime",
+    "CritterCrafter.Locomotion",
+    "Unity.Animation.Rigging",
+    "CritterCrafter.Review"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
   "excludePlatforms": [],
   "allowUnsafeCode": false,
   "autoReferenced": true

@@ -1,0 +1,45 @@
+{
+  "schema_version": "3.0.0",
+  "profiles": [
+    {
+      "binding_profile_id": "appendage1_terminal",
+      "binding_profile_version": "1.0.0",
+      "binding_profile_hash": "a1bc98c5e53f7238fd1c4b6e5cb1ffa5f2acd2d27b67b1a55a848b398c8541d1"
+    },
+    {
+      "binding_profile_id": "core1_body",
+      "binding_profile_version": "1.0.0",
+      "binding_profile_hash": "538e50215be731bc703f1eef994ead8ed4fa52a52516ca8c6042a62f56914a5f"
+    },
+    {
+      "binding_profile_id": "head1_neck",
+      "binding_profile_version": "1.0.0",
+      "binding_profile_hash": "411d00a73578d55ec2c8df021ddc45dcf3760dd1de14392f90e31386c1f3c0ad"
+    },
+    {
+      "binding_profile_id": "insect_leg4_articulated",
+      "binding_profile_version": "1.0.0",
+      "binding_profile_hash": "e088e7673adc66d2bce1d37b45a1231bcd22608e189e3843f6c3fa8177da397b"
+    },
+    {
+      "binding_profile_id": "limb3_digitigrade",
+      "binding_profile_version": "1.0.0",
+      "binding_profile_hash": "fc7038b0f4753861ea313250016d87cb31f708d048351b4d6d45c8b7c0d63db7"
+    },
+    {
+      "binding_profile_id": "limb3_plantigrade",
+      "binding_profile_version": "1.0.0",
+      "binding_profile_hash": "2ed865aaab228d8f38804f4222b8a7b13c01d195d0f2548891c069b69f231938"
+    },
+    {
+      "binding_profile_id": "spine3_axial",
+      "binding_profile_version": "1.0.0",
+      "binding_profile_hash": "76b97cff2312313f187b7c17380c31ef7f228707dfe2c8d983da5fac3f16bfc9"
+    },
+    {
+      "binding_profile_id": "tentacle8_flexible",
+      "binding_profile_version": "1.0.0",
+      "binding_profile_hash": "8493287eeca1b911cf341ce10c8a76a89abbd26a5f2630ce5beec711473a1fb4"
+    }
+  ]
+}
