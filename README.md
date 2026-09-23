@@ -11,7 +11,7 @@ The v2 source documents and `tests/golden/` fixtures remain frozen historical co
 ```text
 data/                                      v2 and v3 authoring sources
 data/binding_profiles/                     immutable v3 chain profiles and registry
-data/skeletons/*_v3.skeleton.json          14 archetypes x 3 presets = 42 candidates
+data/skeletons/*_v3.skeleton.json          13 archetypes x 3 presets = 39 candidates
 schemas/                                   v2 and v3 JSON Schema 2020-12 documents
 src/critter_crafter/                       CLI, compiler, generator, Blender and review code
 tests/golden/                              frozen v2 parity fixtures
@@ -35,11 +35,11 @@ uv run pytest
 The skeleton workflow keeps candidates as drafts until a human reviews built output:
 
 ```powershell
-uv run critter skeleton vary                  # write all 42 drafts; reviewed candidates are preserved
+uv run critter skeleton vary                  # write all 39 drafts; reviewed candidates are preserved
 uv run critter skeleton status                 # counts draft/approved/rejected by family
 uv run critter schema validate                 # validate v3 sources and cross-record rules
 uv run critter library build                   # build the catalog and actual Blender assets
-uv run critter skeleton qa                     # inspect all 8 built clips per selected skeleton
+uv run critter skeleton qa                     # inspect all 8 built clips and the locomotion block per skeleton
 uv run critter skeleton review                 # 3 modes x 4 views, actual built clips, fresh receipts
 python -m http.server 8765 --directory work/review/foundation-v3
 uv run critter skeleton approve --family biped # human approval after reviewing the local site
@@ -61,6 +61,10 @@ Final verification artifacts:
 
 Serve the final review bundle with `python -m http.server 8765 --directory work/review/foundation-v3`, then open `http://127.0.0.1:8765/`. Automated HTTP and Node viewer checks pass; browser UI automation was unavailable, and the 42 candidates remain drafts pending human visual approval.
 
+## Runtime locomotion
+
+Creatures walk with runtime foot placement: the game moves the creature and the Unity package steps its feet with Animation Rigging IK, so feet stay planted at any speed and on slopes. Each skeleton publishes its natural walk, run and maximum speeds in its catalog `locomotion` block for the game to use. Draggers crawl by hauling a grounded torso with their arms; limbless serpentines undulate in step with their travel. See [docs/locomotion.md](docs/locomotion.md) for the model, the Unity components, the review capture tool and the verification.
+
 ## Existing v2 workflow
 
 The frozen v2 assets are archival compatibility evidence. Their original recipe, assembly, and packaging commands require the archived v2 package/library version; the active v3 `cc-gen-3` source dispatcher rejects v2 inputs. The v2 workflow is therefore not a way to build the current v0.2.0 package.
@@ -71,4 +75,6 @@ When an archived v2 package is available, it is dependency-free at runtime and i
 
 ## Status
 
-The v3 foundation implementation and its 42 draft candidates are in review. Automated schema, generator, motion, export, Unity, freshness, and package verification passed; independent visual approval remains open. Candidate visual quality requires human approval, and the acceptance matrix in `work/rebuild-foundation/acceptance.md` remains the source of delivery status.
+The v3 foundation with runtime locomotion covers 13 archetypes (39 draft candidates). Locomotion for every family has been reviewed visually in Unity captures; the tentacle radial archetype was retired. The delivery notes below predate that work.
+
+The v3 foundation implementation and its draft candidates are in review. Automated schema, generator, motion, export, Unity, freshness, and package verification passed; independent visual approval remains open. Candidate visual quality requires human approval, and the acceptance matrix in `work/rebuild-foundation/acceptance.md` remains the source of delivery status.

@@ -39,6 +39,10 @@ Recipe matching uses one uniform length scale in the inclusive 0.8–1.25 range 
 
 `tests/golden_v3/` is a parity fixture, not candidate approval. `critter recipe golden` uses an in-memory approved copy so deterministic recipe coverage can be tested without changing candidate status. The old `tests/golden/` files remain untouched.
 
+## Runtime locomotion (supersedes baked walk/run travel)
+
+Walk and run are no longer baked travel clips. Every compiled skeleton carries a `locomotion` block and the Unity package places feet at runtime; walk/run bake as one-cycle overlays driven by the gait clock. See [locomotion.md](locomotion.md). The tentacle radial archetype was retired, leaving 13 archetypes and 39 candidates; statements below about 14 archetypes, 42 candidates and 336 clips describe the earlier delivery.
+
 ## Motion, QA, review, and approval
 
 The motion plan emits the eight clips `idle`, `walk`, `run`, `stun`, `telegraph`, `attack`, `hit`, and `death` at 30 FPS, with local bone rotations, contacts, root samples, and loop metadata. `skeleton qa` validates every frame of actual built `motion.json` clips and writes diagnostics. `skeleton review` requires those built assets, then creates a local review bundle with three modes—bones, mannequin, assembled—and four views—front, side, top, three-quarter. Start it with:
