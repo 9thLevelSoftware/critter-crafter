@@ -121,9 +121,12 @@ namespace CritterCrafter.Editor
         {
             var stun = sm.AddState("Stun");
             stun.motion = Clip("stun");
-            var toStun = locomotion.AddTransition(stun);
+            // Any State so Stun is reachable from Idle and Locomotion (phase-driven skeletons
+            // keep those as separate states) as well as from the clip-driven blend tree.
+            var toStun = sm.AddAnyStateTransition(stun);
             toStun.hasExitTime = false;
             toStun.duration = 0.1f;
+            toStun.canTransitionToSelf = false;
             toStun.AddCondition(AnimatorConditionMode.If, 0, "Stunned");
             var fromStun = stun.AddTransition(locomotion);
             fromStun.hasExitTime = false;

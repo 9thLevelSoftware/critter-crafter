@@ -240,21 +240,31 @@ def test_assembly_cache_tracks_baked_base_content_and_polish(tmp_path, monkeypat
         "source_fingerprint": "stable-source-hash", "revision": "externally-updated-baked-motion"}))
     changed_bake = runner.invoke(library_commands.library, ["build", "--out", str(tmp_path), "--no-clean"])
     assert changed_bake.exit_code == 0, changed_bake.output
-    assert calls == {"skeleton": 1, "part": 2, "assemble": 3}
+    # Corrupted base bytes must rebuild the skeleton, not be re-fingerprinted in place.
+    assert calls == {"skeleton": 2, "part": 2, "assemble": 2}
 
     unchanged_again = runner.invoke(library_commands.library, ["build", "--out", str(tmp_path), "--no-clean"])
     assert unchanged_again.exit_code == 0, unchanged_again.output
-    assert calls == {"skeleton": 1, "part": 2, "assemble": 3}
+    assert calls == {"skeleton": 2, "part": 2, "assemble": 2}
+
+    (out / "skeletons" / sid / "assembled.glb").write_bytes(b"tampered-assembled-glb")
+    changed_assembly = runner.invoke(library_commands.library, ["build", "--out", str(tmp_path), "--no-clean"])
+    assert changed_assembly.exit_code == 0, changed_assembly.output
+    assert calls == {"skeleton": 2, "part": 2, "assemble": 3}
+
+    unchanged_assembly = runner.invoke(library_commands.library, ["build", "--out", str(tmp_path), "--no-clean"])
+    assert unchanged_assembly.exit_code == 0, unchanged_assembly.output
+    assert calls == {"skeleton": 2, "part": 2, "assemble": 3}
 
     polish["hash"] = "polish-v2"
     baked_revision["value"] = "bake-v2"
     changed_polish = runner.invoke(library_commands.library, ["build", "--out", str(tmp_path), "--no-clean"])
     assert changed_polish.exit_code == 0, changed_polish.output
-    assert calls == {"skeleton": 2, "part": 2, "assemble": 4}
+    assert calls == {"skeleton": 3, "part": 2, "assemble": 4}
 
     polished_unchanged = runner.invoke(library_commands.library, ["build", "--out", str(tmp_path), "--no-clean"])
     assert polished_unchanged.exit_code == 0, polished_unchanged.output
-    assert calls == {"skeleton": 2, "part": 2, "assemble": 4}
+    assert calls == {"skeleton": 3, "part": 2, "assemble": 4}
 
     built_catalog = json.loads((out / "catalog.json").read_text())
     built_skeleton = built_catalog["skeletons"][0]

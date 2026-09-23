@@ -1,7 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using CritterCrafter.Editor;
 using NUnit.Framework;
+using UnityEditor;
+using UnityEditor.Animations;
 using UnityEngine;
 
 namespace CritterCrafter.Tests
@@ -144,6 +148,65 @@ namespace CritterCrafter.Tests
             var legacy = JsonUtility.FromJson<CatalogData>(File.ReadAllText(Path.GetFullPath(GoldenDir + "/catalog.json")));
             var ex = Assert.Throws<GenerationException>(() => RecipeGenerator.Generate(legacy, "any", 1));
             Assert.AreEqual("CC_GEN_UNSUPPORTED_CATALOG", ex.Code);
+        }
+
+        [Test]
+        public void PhaseDrivenStunIsReachableFromAnyState()
+        {
+            const string dir = "Assets/TempAnimatorBuilderTest";
+            Directory.CreateDirectory(dir);
+            string path = dir + "/phase_driven.controller";
+            try
+            {
+                var clips = new Dictionary<string, AnimationClip>();
+                foreach (var name in new[] { "idle", "walk", "run", "stun", "telegraph", "attack", "hit", "death" })
+                    clips[name] = new AnimationClip { name = name };
+                var skeleton = new SkeletonData
+                {
+                    locomotion = new LocomotionData { mode = "slide", travel_per_cycle_m = 1.0 },
+                };
+                var ctrl = AnimatorBuilder.Build(path, clips, skeleton);
+                var sm = ctrl.layers[0].stateMachine;
+                Assert.IsTrue(sm.anyStateTransitions.Any(t => t.destinationState != null && t.destinationState.name == "Stun"),
+                    "Stunned must be reachable from Locomotion as well as Idle");
+                var stun = sm.states.First(s => s.state.name == "Stun").state;
+                Assert.IsTrue(stun.transitions.Any(t => t.destinationState != null && t.destinationState.name == "Idle"));
+            }
+            finally
+            {
+                AssetDatabase.DeleteAsset(dir);
+            }
+        }
+
+        [Test]
+        public void RejectsUnknownPoolAndSkeletonOutsideThePool()
+        {
+            var catalog = Catalog();
+            var recipe = RecipeGenerator.Generate(catalog, "any", 7);
+            recipe.pool_id = "does_not_exist";
+            Assert.That(RecipeValidator.Validate(catalog, recipe), Has.Member("CC_UNKNOWN_POOL: does_not_exist"));
+
+            recipe.pool_id = "any";
+            catalog.skeletons[0].family = "hexapod";
+            Assert.That(RecipeValidator.Validate(catalog, recipe),
+                Has.Member("CC_POOL_SKELETON: any=approved_skeleton"));
+
+            catalog.pools[0].skeleton_ids = new[] { "approved_skeleton" };
+            CollectionAssert.IsEmpty(RecipeValidator.Validate(catalog, recipe));
+        }
+
+        [Test]
+        public void ReviewPoolSkipsCatalogPoolCheckOnlyWhenAllowReview()
+        {
+            var catalog = Catalog();
+            catalog.skeletons[0].status = "draft";
+            var recipe = RecipeGenerator.Generate(
+                Catalog(), "any", 7);
+            recipe.pool_id = "review_approved_skeleton";
+            recipe.skeleton_id = "approved_skeleton";
+            Assert.That(RecipeValidator.Validate(catalog, recipe), Has.Member("CC_UNKNOWN_POOL: review_approved_skeleton"));
+            Assert.That(RecipeValidator.Validate(catalog, recipe), Has.Member("CC_SKELETON_NOT_APPROVED: approved_skeleton"));
+            CollectionAssert.IsEmpty(RecipeValidator.Validate(catalog, recipe, allowReview: true));
         }
 
         [Test]

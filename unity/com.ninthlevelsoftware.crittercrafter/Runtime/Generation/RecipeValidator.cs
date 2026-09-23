@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace CritterCrafter
@@ -5,7 +6,7 @@ namespace CritterCrafter
     /// <summary>Recipe validation; same CC_* codes as recipes/validate.py.</summary>
     public static class RecipeValidator
     {
-        public static List<string> Validate(CatalogData catalog, CritterRecipe recipe)
+        public static List<string> Validate(CatalogData catalog, CritterRecipe recipe, bool allowReview = false)
         {
             var diags = new List<string>();
             if (catalog == null) { diags.Add("CC_UNSUPPORTED_CATALOG: null"); return diags; }
@@ -40,7 +41,17 @@ namespace CritterCrafter
                 diags.Add("CC_UNKNOWN_SKELETON: " + recipe.skeleton_id);
                 return diags;
             }
-            if (!RecipeGenerator.Usable(skel)) diags.Add("CC_SKELETON_NOT_APPROVED: " + skel.skeleton_id);
+            bool reviewMode = allowReview && recipe.pool_id == "review_" + skel.skeleton_id;
+            if (skel.status == "rejected" || (!reviewMode && !RecipeGenerator.Usable(skel)))
+                diags.Add("CC_SKELETON_NOT_APPROVED: " + skel.skeleton_id);
+            if (!reviewMode)
+            {
+                var pool = catalog.FindPool(recipe.pool_id);
+                if (pool == null)
+                    diags.Add("CC_UNKNOWN_POOL: " + recipe.pool_id);
+                else if (!PoolAccepts(pool, skel))
+                    diags.Add($"CC_POOL_SKELETON: {recipe.pool_id}={skel.skeleton_id}");
+            }
             var order = new Dictionary<string, int>();
             for (int i = 0; i < skel.branches.Length; i++) order[skel.branches[i].branch_id] = i;
             var filled = new HashSet<string>();
@@ -97,6 +108,14 @@ namespace CritterCrafter
             if (partCount > maxParts) diags.Add($"CC_BUDGET_PARTS: {partCount}>{maxParts}");
             diags.Sort(string.CompareOrdinal);
             return diags;
+        }
+
+        static bool PoolAccepts(PoolData pool, SkeletonData skeleton)
+        {
+            var families = pool.families ?? Array.Empty<string>();
+            var skeletonIds = pool.skeleton_ids ?? Array.Empty<string>();
+            return Array.IndexOf(families, skeleton.family) >= 0
+                || Array.IndexOf(skeletonIds, skeleton.skeleton_id) >= 0;
         }
     }
 }

@@ -183,6 +183,30 @@ def skeleton_content_hash(catalog: dict, skeleton: dict, out: Path) -> str:
                                settings, required)
 
 
+def _base_asset(asset: dict[str, Any]) -> dict[str, Any]:
+    return {key: value for key, value in asset.items() if key != "assembled_glb"}
+
+
+def _cached_base_fingerprint(old: dict[str, Any], state: dict[str, Any]) -> str | None:
+    """Last published fingerprint of a skeleton's base artifacts, without assembled.glb."""
+    asset = old.get("asset")
+    if not isinstance(asset, dict):
+        return None
+    if asset.get("assembled_glb"):
+        return (state.get("assemblies") or {}).get(old.get("skeleton_id"), {}).get("skeleton")
+    return old.get("content_fingerprint") or None
+
+
+def _current_base_fingerprint(
+    catalog: dict[str, Any], skeleton: dict[str, Any], asset: dict[str, Any], out: Path
+) -> str | None:
+    probe = {**skeleton, "asset": _base_asset(asset)}
+    try:
+        return skeleton_content_hash(catalog, probe, out)
+    except ReviewError:
+        return None
+
+
 def build_jobs(catalog: dict[str, Any], out: Path, only: set[str] | None = None) -> list[dict[str, Any]]:
     templates = {t["template_id"]: t for t in catalog["branch_templates"]}
     masters = paths().work / "masters"
@@ -298,8 +322,8 @@ def library_build(out_root: Path | None, clean: bool) -> None:
         return all(isinstance(asset.get(name), str) and (out / asset[name]).is_file() for name in names)
 
     fresh: set[str] = set()
+    old_skeletons = {item["skeleton_id"]: item for item in previous.get("skeletons", [])}
     if not clean:
-        old_skeletons = {item["skeleton_id"]: item for item in previous.get("skeletons", [])}
         for skeleton in catalog["skeletons"]:
             old = old_skeletons.get(skeleton["skeleton_id"], {})
             asset = old.get("asset")
@@ -307,6 +331,12 @@ def library_build(out_root: Path | None, clean: bool) -> None:
             if (isinstance(asset, dict) and old.get("source_fingerprint") == source
                     and asset.get("polish_fingerprint", "") == skeleton_polish_hash(catalog, skeleton)
                     and files_exist(asset, ("fbx", "glb", "blend", "motion"))):
+                expected = _cached_base_fingerprint(old, state)
+                current = _current_base_fingerprint(catalog, skeleton, asset, out)
+                if expected is None or current is None or current != expected:
+                    # Source is unchanged, but the cached bytes are not the last
+                    # published build. Rebuild instead of blessing the disk copy.
+                    continue
                 skeleton["asset"] = asset
                 if asset.get("assembled_glb") and not (out / asset["assembled_glb"]).is_file():
                     skeleton["asset"].pop("assembled_glb")
@@ -369,7 +399,13 @@ def library_build(out_root: Path | None, clean: bool) -> None:
         if (not clean and not used.intersection(rebuilt_parts) and assembled.is_file()
                 and state.get("assemblies", {}).get(sid) == assembly_state):
             skeleton.setdefault("asset", {})["assembled_glb"] = assembled.relative_to(out).as_posix()
-            continue
+            try:
+                actual = skeleton_content_hash(catalog, skeleton, out)
+            except ReviewError:
+                actual = None
+            if actual == old_skeletons.get(sid, {}).get("content_fingerprint"):
+                continue
+            skeleton["asset"].pop("assembled_glb", None)
         assembly_jobs.append({"op": "assemble", "args": {
             "skeleton": skeleton,
             "parts": {part["part_id"]: part for part in catalog["parts"] if part["part_id"] in used},

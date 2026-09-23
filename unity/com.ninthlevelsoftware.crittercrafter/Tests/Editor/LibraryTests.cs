@@ -60,7 +60,7 @@ namespace CritterCrafter.Tests
         {
             var skeleton = Lib.Catalog.FindSkeleton(skeletonId);
             Assert.IsNotNull(skeleton, skeletonId);
-            var c = CreatureAssembler.Assemble(Lib, LocomotionCapture.ReferenceRecipe(Lib.Catalog, skeleton), AssemblyOptions.Default);
+            var c = CreatureAssembler.Assemble(Lib, LocomotionCapture.ReferenceRecipe(Lib.Catalog, skeleton), AssemblyOptions.Review);
             _spawned.Add(c.gameObject);
             return c;
         }

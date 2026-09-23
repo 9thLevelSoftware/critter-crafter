@@ -138,7 +138,7 @@ namespace CritterCrafter.Editor
                 skeleton.status = originalStatus;
                 foreach (var (part, status) in parts) part.status = status;
             };
-            var options = AssemblyOptions.Default;
+            var options = AssemblyOptions.Review;
             options.parent = parent;
             return CreatureAssembler.Assemble(library, recipe, options);
         }
@@ -169,7 +169,8 @@ namespace CritterCrafter.Editor
             return new CritterRecipe
             {
                 recipe_id = "review_" + skeleton.skeleton_id, library_id = catalog.library_id,
-                library_version = catalog.version, generator = RecipeGenerator.Algorithm, pool_id = "review",
+                library_version = catalog.version, generator = RecipeGenerator.Algorithm,
+                pool_id = "review_" + skeleton.skeleton_id,
                 seed = 0, skeleton_id = skeleton.skeleton_id, fills = fills.ToArray(),
             };
         }

@@ -19,12 +19,26 @@ namespace CritterCrafter
         public bool fallbackOnInvalid;
         /// <summary>Layers raycast by runtime foot placement to find the ground.</summary>
         public LayerMask groundMask;
+        /// <summary>
+        /// Accept a review recipe whose pool_id is review_{skeleton_id}. Game loads must leave this false.
+        /// </summary>
+        public bool allowReview;
 
         public static AssemblyOptions Default => new AssemblyOptions
         {
             layer = 0, collision = CreatureCollision.SingleCapsule, collidersAreTriggers = true, fallbackOnInvalid = true,
             groundMask = ~0,
         };
+
+        public static AssemblyOptions Review
+        {
+            get
+            {
+                var options = Default;
+                options.allowReview = true;
+                return options;
+            }
+        }
     }
 
     /// <summary>
@@ -76,7 +90,7 @@ namespace CritterCrafter
         public static AssembledCreature Assemble(CritterLibrary library, CritterRecipe recipe, AssemblyOptions options)
         {
             var catalog = library.Catalog ?? throw new AssemblyException("library has no catalog");
-            var diags = RecipeValidator.Validate(catalog, recipe);
+            var diags = RecipeValidator.Validate(catalog, recipe, options.allowReview);
             var skelEntry = recipe == null ? null : library.FindSkeleton(recipe.skeleton_id);
             if (recipe != null && (skelEntry == null || skelEntry.model == null)) diags.Add("CC_MISSING_ASSET: skeleton " + recipe.skeleton_id);
             if (diags.Count > 0)
