@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from .. import mathutil as mu
+from ..locomotion.block import locomotion_block
 from ..binding.profiles import (
     CONNECTOR_INTERFACE_ID,
     CONNECTOR_INTERFACE_VERSION,
@@ -290,7 +291,7 @@ def compile_skeleton(
     for branch in branches_out:
         if branch["mirror_of"] and branch["mirror_of"] not in by_id:
             raise CatalogError("CC_MIRROR", f"{sid}.{branch['branch_id']}: mirror_of {branch['mirror_of']} unknown")
-    return {
+    compiled = {
         "skeleton_id": sid,
         "family": src["family"],
         "locomotion_hint": src["locomotion_hint"],
@@ -302,6 +303,8 @@ def compile_skeleton(
         "branches": branches_out,
         "asset": {"fbx": "", "glb": "", "clips": []},
     }
+    compiled["locomotion"] = locomotion_block(compiled)
+    return compiled
 
 
 def _compile_connector_interface(part_id: str, connector: dict[str, Any]) -> dict[str, Any]:

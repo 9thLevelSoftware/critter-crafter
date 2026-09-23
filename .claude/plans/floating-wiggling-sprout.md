@@ -1,365 +1,159 @@
-# critter-crafter: Procedural Monster Asset Tool (greenfield plan)
+# Option B: runtime procedural locomotion with Unity Animation Rigging
 
 ## Context
-The first attempt at procedural monsters was built inside the Synaptic Sea game, on the Godot branch `feature/procedural-biomass-threat-assembly` of `the-synaptic-sea`. That branch was never merged and never ported to `synaptic-sea-unity`. It proved the concept with primitive placeholders: a part catalog, an attachment-graph recipe, a seeded generator, rigid socket gaits, and 30 approved placeholder renders.
+The review of the v3 foundation (checkpoint `7b48908`) found that the baked walk and run clips are far too slow for the game.
 
-It never shipped a real part, for three reasons:
-- A heavy governance/journal layer stalled art production.
-- The prompt profile was wrong: it used the "derelict alloy" style meant for ship hardware, not flesh.
-- The code was GDScript tied to Godot, with macOS-only paths.
+**The mismatch**
+- The clips move at **0.03–0.26 m/s**.
+- Synaptic Sea threats move at **2.5–2.8 m/s**.
+- `PlaybackRate` is clamped to 1.5×, so feet slide 10–50× relative to the ground.
 
-Goal: a **standalone, engine-portable tool**, `9thLevelSoftware/critter-crafter`, living in `D:\critter-creator`. It produces **three libraries** and assembles **skinned, rigged, Animator-driven** monsters in any Unity game that installs the package and a library release.
+**Three causes**
+1. `_clip_frames` floors every walk cycle at 48–60 frames.
+2. `_fit_motion_to_reach` caps stride at 0.12 × leg length.
+3. Legs are about 1.6× hip height, so the foot has almost no reach at the ground.
 
-**The three libraries:**
-1. **Skeleton library.** Rigged body plans (biped, quadruped, hexapod, serpentine, radial and others), in many variants. Each skeleton has named **branches**, and each branch ends in **snap points**. A snap point declares which part types it accepts.
-2. **Body-part library.** Human and non-human limbs, heads, torsos, tails and appendages. Each part is skinned to a standard **branch bone template**, so it can bind to any compatible branch on any skeleton.
-3. **Biomass connector library.** Collars, frayed stumps, tendrils and gunk. These are skinned across a snap point's two bones, so they bend at the joint.
+**Related problems**
+- Quadrupeds pace instead of walking.
+- Fore and hind legs bend the same way.
 
-**Settled decisions:**
-- Form: a Python CLI with headless Blender, plus a Unity UPM package.
-- Shared assets: the libraries this tool generates.
-- Animation: skinned rigs with **skeleton-first** assembly. This was the user's proposal, and it replaces the prototype's part-tree approach.
-- Tools: Meshy, Blender and Unity MCPs are all available for interactive work.
+**Your decisions**
+- **Option B:** runtime foot placement.
+- **IK through Unity Animation Rigging.**
+- **Speed comes from the catalog.** Each skeleton publishes its natural walk, run and max speed, and the game's M5 adapter uses that as the threat's `move_speed`. Small creatures may step faster, with a step-rate limit scaled to leg size.
 
-## Architecture
-```
-Authoring side (Windows, Python 3.12 + uv, Blender 5.x headless)
-  skeleton families (templates + procedural variation) ─► skeleton rigs + baked clip sets per skeleton
-  Meshy REST/MCP ─► part candidates ─► [GATE 1 select] ─► clean ─► fit to branch template ─► weight ─► QA
-  procedural bmesh ─► placeholders, stumps, collars, tendrils (2-bone skinned)          [GATE 2 approve]
-                                                   ▼
-                        export FBX (+GLB) + catalog fragments ─► `critter library build`
-                        ─► library/<id>-v<semver>/ (catalog.json, skeletons/, parts/, connectors/, clips/, manifest) ─► release zip
-Unity side (any 6000.x game): UPM package
-  Editor LibraryImporter ─► ScriptableObjects, skeleton prefabs (Animator + controller), part prefabs
-  Runtime: RecipeGenerator / RecipeValidator / CreatureAssembler (bind parts to skeleton bones) / CreatureMotion
-  Game-owned adapter implements ICreatureVisualFactory
-```
-The authoring side and Unity side share exactly one contract: the library folder or zip, validated against the v2 JSON Schemas.
+**What stays and what changes**
+- Baked clips stay for idle, stun, telegraph, attack, hit and death.
+- Walk and run become upper-body overlay clips, phase-locked to the runtime gait clock.
 
-## Core model: skeleton-first assembly
-- **Branch templates** are the standard bone chains everything binds to. They define bone names, bone count and nominal proportions. Starter set:
-  - `limb3` and `limb4` (arm or leg)
-  - `insect_leg4`
-  - `tentacle8` and `tail8`
-  - `neck_head` (neck bones plus head plus jaw)
-  - `spine_torso`
-  - `appendage1` (claw, maw, eye cluster)
-- **A skeleton** is a full Unity-ready rig made of a root, a spine or core, and branches. Each branch instance records:
-  - `branch_id` and its `template`
-  - its `attach_bone` on the skeleton
-  - `length_m`, `size_class` and `side` (L/R/C)
-  - its **snap points**
-- **Snap points** are named, like `snap_limb_L0` or `snap_head_0`. Each one declares:
-  - `accepts` (categories, template, and optional species/role tags)
-  - `required` (true/false). Optional snaps stay empty, which lets a skeleton cover several visual variants.
-  - `connector_size_class`
-  - `span_bones [parentBone, branchRootBone]`, the two bones the connector is weighted between.
-- **Parts** are authored on their branch template's bind pose at nominal length. They bind to a skeleton branch like this:
-  1. Match bones by template bone name.
-  2. Uniformly scale the part so its nominal length matches the branch's `length_m`, clamped to 0.8–1.25×. Outside that range the fill is invalid, so the generator only picks parts whose size class fits.
-  3. Recompute bindposes from the skeleton's bind pose. There is **one cached mesh per (part, skeleton branch)**, so no imported asset is ever changed.
-- **Nesting** (a claw on an arm, a maw on a tentacle tip) comes from the snap points on each branch's distal end. This keeps the prototype's "maw on a tentacle" depth without a free-form graph.
-- **Head-less and torso-less bodies** are allowed. The skeleton's core can be a skull, a sac or a ribcage.
-- **The single-skeleton payoff:** every creature has **one skeleton**, and so:
-  - It gets a Unity **Generic Animator** with clips.
-  - IK and Animation Rigging can be added on top if a game wants them.
-  - `CreatureBaker` can merge it into one SkinnedMeshRenderer with one draw call.
+**Delivery strategy: one vertical slice first.**
+- Deliver the hexapod family end-to-end first: data, planner, Animation Rigging IK, and a TestProject demo at speed, with a GIF for you to review.
+- Then roll it out to the other families, and only then build the wider verification.
+- This answers "does runtime stepping look right under the iso camera?" before we invest in infrastructure around it.
 
-## Animation (what you get)
-- **Clips per skeleton.** Blender bakes a clip set for every skeleton: `idle`, `locomote` (walk plus a run blend), `telegraph`, `attack`, `hit`, `stun` and `death`.
-  - A procedural **clip generator** drives the branch chains and exports the clips in the skeleton's FBX. It is a port of the prototype's gait table, adapted from rigid part swings to bone chains:
+## Design
 
-    | Gait | Frequency | Swing |
-    |---|---|---|
-    | biped | 1.8 Hz | 24° |
-    | quadruped | 2.2 Hz | 20° |
-    | crawl | 2.6 Hz | 28° |
-    | drag | 1.4 Hz | 18° |
-    | slither | 1.7 Hz | 30° |
+### IK: Unity Animation Rigging
+- **Packaging:**
+  - New asmdef `CritterCrafter.Locomotion` (under `Runtime/Locomotion/`) references `Unity.Animation.Rigging`.
+  - `package.json` adds `com.unity.animation.rigging`. It's a core package in 6.x, and 1.4.x also works on 6000.0.
+  - `CritterCrafter.Runtime` stays reference-free.
+- **Rig build at assembly time**, in a new `LocomotionRigBuilder`, called from the assembler through a small `ICreatureRigHook` so Runtime doesn't reference Locomotion:
+  - Add a `RigBuilder` on the Animator GameObject, and one `Rig` child named `LocomotionRig`.
+  - `limb3` legs get a `TwoBoneIKConstraint`: root = b0, mid = b1, tip = b2, a target, and a hint placed from `gait.bend_pole_m`. Target rotation weight is partial, so feet follow the ground normal.
+  - `insect_leg4` legs and single-contact `tentacle8` legs get a `ChainIKConstraint`, root b0 to the contact bone.
+    - ChainIK has no pole and no joint limits. Its FABRIK solve starts from the animated pose, which is the neutral bent stance, and that seeds the correct bend side.
+    - A `JointLimitClamp` then runs in `LateUpdate` and clamps each bone to the binding-profile `limits_deg`, reusing `SkeletonPose.CanonicalBoneBasis` in `Runtime/Assembly/AssembledCreature.cs`. The planner keeps targets within reach, so the clamp should rarely activate. The PlayMode tests track how often it does.
+  - Call `animator.Rebind()` and then `rigBuilder.Build()` after the constraints are added.
+  - `body`/`sliding` contacts get no IK. They only follow the ground for root height.
+- **Weights:**
+  - Each constraint's weight is driven by the gait component, per state (see below).
+  - The rig weight drops to 0 for the LOD/off-screen toggle.
 
-    Phase lags run down each chain. Tentacles and tails use travelling waves. Drag pullers use a sawtooth (slow pull, fast reach).
-  - Clips can be hand-polished later in Blender, live through the MCP, on a per-skeleton basis.
-- **Animator setup.** Skeletons in the same family share an **AnimatorController template** with a Speed float, AI-state triggers and a Death state. Each skeleton gets an `AnimatorOverrideController` that maps in its own clips.
-- **No root motion.** `applyRootMotion=false`, and clips never move the root bone horizontally. The NavMeshAgent or the game owns position.
-- **Optional runtime layer.** `CreatureMotion` adds idle noise and speed-scaled amplitude. `FootPlantingIK` is off by default, because the orthographic isometric camera hides foot sliding.
+### Gait model (a shared spec; the C# port is the runtime, Python is the reference)
+- **Speeds come from the catalog, per skeleton:**
+  - `v_walk` at Froude number ≈ 0.25, and `v_run` at Froude ≈ 1.0, from hip height.
+  - `v_max` bounded by reach and by a step-rate cap scaled to leg size: `cadence_max = clamp(2.2 / sqrt(L), 2.5, 6.0)` Hz.
+  - My estimate: with crouched legs (hip about 0.88 L), running at 2.5 m/s takes about 1–2.6 steps per second. Splayed insect legs and short serpentine legs may need 4–6. The catalog publishes the real values once the anatomy is fixed.
+- **Gait clock and stride:**
+  - Stride `λ = h·2.3·(v²/gh)^0.3`, clamped so the stance stroke `λ·duty` is at most 0.9 × usable reach. Past that clamp, cadence rises up to `cadence_max`.
+  - The duty factor blends from the walk support value to about 0.45 between `v_walk` and `v_run`.
+  - Per-leg phase offsets blend from a walk pattern to a run pattern:
+    - quadruped: lateral-sequence walk, then trot;
+    - hexapod: tripod;
+    - octopod: alternating tetrapod;
+    - biped: 0/0.5;
+    - radial: wave.
+- **Scheduled stepping:**
+  - Stance: the foot is locked at its world plant point.
+  - Swing start: land at the predicted home position at touchdown plus `v·duty·T/2`. A downward raycast (`AssemblyOptions.groundMask`) gives height and normal.
+  - Swing path: smoothstep in the plane plus a `clearance·sin²` lift.
+- **Turning.** The game agent uses `acceleration = 999` and `angularSpeed = 999`, so heading changes happen instantly.
+  - The main turn mechanism is a **reach-overrun re-step**: any planted foot outside its reach disc, or whose strain from home exceeds a threshold, is queued for an early step.
+  - At most half the supports may be in swing at once, and support-group order is kept.
+  - Idle turn-in-place uses the same rule.
+  - Teleport (more than 2 m per frame) snaps all feet to home.
+- **Body:** a root height offset from the planted-foot height error, plus pitch and roll from a plane fit to the planted feet. Both are clamped and smoothed.
+- **Per-state behaviour:**
+  - Telegraph, attack, hit and stun keep the support legs planted at weight 1.
+  - The attack effector branch (from `attack_plan`) goes to weight 0 so the baked strike plays.
+  - Death fades all weights to 0 over the first 25% of the clip.
 
-## Key design decisions
-1. **Sockets and snap points are catalog data.** They are not nodes in the exported mesh files. Each one names a bone plus a bind-pose offset.
-2. **Coordinate frame.** The canonical frame is glTF: right-handed, +Y up, +Z forward, meters.
-   - Catalog data is converted to Unity exactly once, in the Editor importer (`CritterFrame`).
-   - Starting assumption: positions become `(−x, y, z)`, quaternions become `(x, −y, −z, w)`, and axes follow the quaternion rule.
-   - This rule is **locked by a chirality probe test in M0** (an asymmetric L-shaped part), not by the docs. The FBX export flags are pinned the same way.
-3. **Unity import format is FBX**, which works with no packages and carries the clips. GLB is exported alongside for Blender, MCP and previews. glTFast is supported as an optional `versionDefines` path.
-4. **The Runtime asmdef has no references.** Catalogs are array-based JSON so the built-in `JsonUtility` can read them (no Newtonsoft needed).
-5. **The generator is deterministic and shared by Python and C#.** It is called `cc-gen-2`, uses SplitMix64, integer-only logic and ordinal sorts, and hard-codes no ids.
-   - Steps: pick a skeleton (by pool, hint and tags), fill required snaps, roll optional snaps, pick connectors by size class, then fill nested distal snaps. Everything is bounded by the budgets.
-   - Golden files cover seeds 1–100 × each hint. Both test suites must produce byte-identical output.
-6. **Connectors are always procedural** (bmesh), never Meshy. Each one is skinned to two bones with a ramp across its span.
-7. **Meshy is used only for body parts.** Rules:
-   - Text-to-3d, not image-to-3d.
-   - One prompt profile, `flesh_stylized_v1`: flesh R175–195 G145–165 B150–170, stylized low-poly, "straight extended, NOT coiled" for elongated parts.
-   - Always render a low-angle base view.
-8. **Weighting Meshy parts.** Voxel-remesh a proxy copy, weight the proxy to the branch template, then data-transfer the weights to the real mesh. This survives non-manifold output. Then limit to 4 influences, normalize and clean.
-9. **Lightweight process.**
-   - Two human gates only: select a candidate, then approve the part.
-   - Paid Meshy calls follow `plan`, then `--cap`, then a y/N prompt, then logging to `ledger.jsonl`. Meshy MCP Rule 1 also applies: confirm the cost with the user first.
-   - No governance layer. The manifest just records a sha256 for each file.
-10. **Dropped from the prototype:** `wrapper_scene_path` and the Godot collision fields, the derelict prompt profile, and macOS paths.
-    **Bugs fixed:** the `hard_max`/`max` budget key mismatch, and the triangle count that actually counted polygons.
+### Animator (fixes idle freezing)
+- A **Locomotion** state with a 1-D blend of the walk and run overlays on `Gait` (0–1), with `timeParameterActive = GaitPhase`.
+- A separate **Idle** state plays the baked idle on its own clock.
+- The transition from Idle to Locomotion happens when `Speed > ε`, with about 0.15 s cross-fade in each direction.
+- Action states are unchanged.
+- `CreatureMotion` sets `Speed`, `Gait` and `GaitPhase`. The `PlaybackRateForSpeed` code becomes obsolete shims for one version.
 
-## Data schema v2 (`schemas/`, JSON Schema 2020-12)
-- **`branch_template.v2`:** `template_id`, `bones[{name, parent, head_m, tail_m}]` at nominal length, `nominal_length_m`, `chain_kind` (limb|tentacle|tail|spine|neck|appendage) and `swing_axis`/`bend_axis`.
-- **`skeleton.v2`:**
-  - Identity: `skeleton_id`, `family` (biped|quadruped|hexapod|crawler|serpentine|radial|dragger), `locomotion_hint`, `status`.
-  - `bones[]`: the full bind pose.
-  - `core{bone, category_hint}`.
-  - `branches[{branch_id, template, attach_bone, length_m, size_class, side, gait_group, phase_rad}]`.
-  - `snap_points[{name, branch_id, accepts{categories, templates, tags_any}, required, connector_size_class, span_bones, bone, position_m, rotation_xyzw}]`.
-  - `clips{idle, locomote_walk, locomote_run, telegraph, attack, hit, stun, death}` (clip names inside the FBX).
-  - `collision_shapes[{..., bone}]`, `budget{max_bones}`, `mesh{fbx, glb}`, `provenance`.
-- **`part.v2`:**
-  - Identity: `part_id`, `category` (core|limb|head|torso|tail|appendage|connector), `template`, `species_tags`, `roles`, `size_class`, `status`, `style_profile`.
-  - Geometry: `dimensions_m`, `budget{max_triangles, max_material_slots, texture_size}`, `mesh{fbx, glb, triangles, bounds}`.
-  - Rig: `bone_map` (the template bone names used), `max_influences: 4`.
-  - Optional `distal_snaps[]`: nested snap points on the part's own template bones.
-  - Also `collision_shapes`, `fallback` and `provenance`.
-  - Connectors add `connector{size_class, span_m}`.
-- **`library.v2`:**
-  - `frame: "gltf_rh_yup_zfwd_m"`.
-  - `limits`: max_bones 120, max_parts 12, max_triangles 30000 (target 24000), max_influences 4.
-  - Contents: `branch_templates[]`, `skeletons[]`, `parts[]`, `pools[]` and `generator{algorithm, rng, fill rules}`.
-- **`recipe.v2`:**
-  - Identity: `recipe_id`, `library_id`, `library_version`, `seed`, `generator`, `skeleton_id`.
-  - `fills[{snap, part_id, connector_part_id, nested[{snap, part_id, connector_part_id}]}]`.
-  - Validation rules:
-    - All required snaps are filled.
-    - Each part's category, template and tags satisfy `accepts`.
-    - Connector size classes match.
-    - Length scale stays within the clamp.
-    - Budgets hold.
-  - Once saved, a recipe plus its seed is authoritative and is **never regenerated on load**.
-- The prototype's socket-name regex, placement formula (`child = parent_socket * inverse(child_socket)`, used for nested distal parts) and triangle budgets all carry forward:
+### Data and catalog (Python)
+- **Anatomy fixes in `skeletons/archetypes.py`:**
+  - Keep the hip heights and shorten the legs to `hip / 0.88`, so the recorded `silhouette.height_m` becomes accurate.
+  - Flip the fore-limb bend (quadrupeds, draggers, serpentine legs).
+  - Give `_paired_legs` per-pair phase offsets (lateral-sequence walk).
+  - Fan out the crawler legs.
+  - Topology variety stays a separate follow-up.
+- **A `locomotion` block per skeleton**, compiled in `library/catalog.py`:
+  - `leg_length_m`, `hip_height_m` and `usable_reach_m`, from neutral-pose forward kinematics. The FK comes from the `_contact_height` code in `archetypes.py`, moved into a shared `skeletons/kinematics.py`.
+  - `v_walk`, `v_run`, `v_max` and `cadence_max`.
+  - Per-branch walk and run phases, and duty factors.
+  - `travel_per_cycle_m` for serpentine waves.
+  - Mirrored in `CatalogData.cs`, the schemas and `LibraryImporter` validation.
+- **New `src/critter_crafter/locomotion/stepper.py`:** the reference planner. It's pure and deterministic, and the C# `StepPlanner` is written in `double`/`System.Math` to match it.
+- **Overlay clips in `skeletons/motion.py` and `blender/ops_skeleton.py`:**
+  - Walk and run become one normalized cycle each (30 frames), with locomotor chains at neutral and no leg IK.
+  - Body bob, sway, arm swing and tail are phased to the walk pattern. Serpentine waves are baked with `travel_per_cycle_m`.
+  - Remove the 0.12·L stride cap and the 48/60-frame floor.
+  - The idle and action clips, and their QA, are unchanged.
 
-  | Part type | Max triangles |
-  |---|---|
-  | core | 5000 |
-  | limb | 2500 |
-  | head | 3500 |
-  | connector | 500 |
-  | appendage | 1500 |
+### Unity files
+- **New in `Runtime/Locomotion/`:**
+  - `CritterCrafter.Locomotion.asmdef`
+  - `CreatureGait.cs`: the MonoBehaviour that owns the clock, planner, targets, weights and body adjustment
+  - `StepPlanner.cs` and `GaitClock.cs`: pure C#
+  - `LocomotionRigBuilder.cs`
+  - `JointLimitClamp.cs`
+- **Modified:**
+  - `Runtime/Assembly/CreatureAssembler.cs`: rig hook, `groundMask`
+  - `Runtime/Animation/CreatureMotion.cs`
+  - `Runtime/Data/CatalogData.cs`
+  - `Editor/AnimatorBuilder.cs`: Idle and Locomotion states, `GaitPhase`
+  - `Editor/LibraryImporter.cs`
+  - `package.json`
 
-## Repo layout (`D:\critter-creator`)
-**Repo setup:** the folder already contains `.claude/`, so don't clone into it. Run `git init`, then `git remote add origin https://github.com/9thLevelSoftware/critter-crafter.git`, then fetch.
-```
-docs/ frame.md, rng.md, generator.md, mcp-workflows.md, adr/
-schemas/ branch_template|skeleton|part|library|recipe|manifest .v2.schema.json
-data/ branch_templates/*.json  skeleton_families/*.json (param ranges)  skeletons/*.skeleton.json
-      parts/*.part.json  prompt_profiles/flesh_stylized_v1.json  gait_profiles.json  pools/  meshy_batches/
-assets/masters/{skeletons,parts,connectors}/<id>/master.blend   (Git LFS)
-src/critter_crafter/ cli.py config.py schema/ recipes/{rng,generator,validate,budgets}.py
-      meshy/{client,prompts,credits,download}.py  library/{build,pack,manifest}.py  review/sheet.py
-      blender/ _entry.py ops_{skeleton,clips,placeholder,stump,connector,clean,fit,weight,qa,render,export,assemble}.py frame.py rigkit.py
-tests/ (pytest; `blender` marker auto-skips when Blender is missing)  fixtures/  golden/
-unity/com.ninthlevelsoftware.crittercrafter/  Runtime/ Editor/ Tests/ Samples~/{PlaceholderLibrary,NavMeshCreatureDriver}
-unity/TestProject/  (Unity 6000.6.0f1, URP; references the package via file:)
-work/ library/      (gitignored; libraries are published as GitHub release zips)
-```
-The package installs from the UPM git URL `...critter-crafter.git?path=/unity/com.ninthlevelsoftware.crittercrafter#vX`.
+## Order of work
+1. **S1, hexapod slice:**
+   - Anatomy fixes for hexapods and the locomotion block for all skeletons.
+   - `stepper.py`.
+   - Overlay walk/run bake.
+   - `StepPlanner`, `CreatureGait`, `LocomotionRigBuilder`, and the Animator changes.
+   - A TestProject demo: NavMeshAgent at the catalog's `v_run` and at 2.5 m/s, on flat ground plus a 20° ramp, with the iso camera (offset 16,18,16, size 22).
+   - Capture a GIF with `ReviewCapture` for your review. **Visual gate.**
+2. **S2, all families:**
+   - Anatomy fixes for the rest.
+   - Quadruped, biped and radial patterns.
+   - Draggers with hand contacts plus the belly slide.
+   - Serpentines with wave overlay and paired legs.
+   - A GIF per family. **Visual gate.**
+3. **S3, verification:**
+   - Planner golden tests on continuous quantities (stride, cadence, duty, phases and home positions for a given velocity and yaw rate) and on per-step landing targets for an exact input phase. No long simulated traces, because step events amplify floating-point drift.
+   - Stepper QA in `skeletons/qa.py`: reach, support, and cadence ≤ `cadence_max`.
+   - Unity PlayMode locomotion tests.
+   - Blender review driven by the stepper.
+4. **S4:** docs (`docs/locomotion.md`, `foundation-v3.md`), with a commit per stage.
 
-## CLI (`critter`: click, jsonschema, httpx, Pillow)
-**Setup and validation**
-- `doctor`
-- `schema validate`
+## Verification
+- **Python:** `uv run pytest`, the full suite including the Blender tests.
+- **Unity EditMode:**
+  - `StepPlanner` matches the Python golden values (continuous quantities and per-step targets) within 1e-6.
+  - Rig builder: correct constraint type and bones per branch template.
+  - Clamp keeps every bone within limits.
+- **Unity PlayMode:** for each skeleton, assemble it and drive it at `v_walk`, `v_run` and 2.5 m/s on straight, circle and instant 90°-turn paths for 10 s. Check:
+  - planted-foot world slip < 2 cm;
+  - IK residual < 1 cm;
+  - no foot more than 5 mm below the ground collider;
+  - support ≥ the minimum;
+  - the joint-clamp activation rate is reported.
 
-**Skeletons**
-- `skeleton new --family quadruped`
-- `skeleton vary --family quadruped --count 20 --seed N`: procedural variants within the family's parameter ranges. Ranges cover branch count and placement, lengths, spine segment count and optional snaps. This keeps the skeleton library large without hand-authoring each one.
-- `skeleton clips <id>`
-- `skeleton review`
-
-**Parts and connectors**
-- `part new|approve`
-- `placeholder build`
-- `stump build`: a port of `biomass_frayed_stump_generator.py`.
-- `connector build`
-
-**Meshy**
-- `meshy plan|generate --cap N|fetch|status|import-task`
-- `candidates review|select`
-
-**Blender part pipeline**
-- `blender clean|fit|weight|qa|render|export`
-- `blender snippet <op>`: prints code for the Blender MCP `execute_blender_code` tool. It calls the same pure `(args)->result` op functions on the live scene.
-
-**Library, recipes and assembly**
-- `library build [--include-placeholders]|pack`
-- `recipe generate|sweep`
-- `assemble preview <recipe> [--export]`: a Blender bake to a single rigged FBX/GLB with clips.
-- `archive import`: pulls in the scout candidates from `synaptic-sea-asset-archive`.
-
-**Headless runs:** `blender -b --factory-startup -P _entry.py -- <op> <args.json>`. Arguments go through a JSON file to avoid Windows quoting problems. The Blender executable is found via `CRITTER_BLENDER`, then `critter.toml`, then `C:\Program Files\Blender Foundation\Blender 5.*`, then `PATH`.
-
-## Pipelines
-- **Skeleton pipeline.**
-  1. Take a family template plus parameters.
-  2. Build the armature: spine/core plus branch instances, each built from its branch template and scaled to `length_m`.
-  3. Write the snap points.
-  4. Run the clip generator (gait and state clips).
-  5. QA: bone count, naming, a no-root-horizontal-motion check, and snap-point sanity.
-  6. Render a review sheet: the rig with a placeholder-filled preview and a clip turntable GIF.
-  7. Export FBX with clips (no mesh, or a tiny proxy mesh) plus the catalog fragment.
-- **Part pipeline.**
-  1. Ingest (detect the file type from its first bytes, since Meshy downloads have no extension).
-  2. Orient the main axis to the template axis.
-  3. Clean: loose geometry, merge by distance, scale to nominal template length, origin at the template root.
-  4. Decimate to the **triangle** budget, then triangulate.
-  5. Limit to ≤2 materials and 1024 px textures.
-  6. **Fit** the template armature. Optionally snap bones to the centroid of the mesh's cross-section.
-  7. Proxy-transfer the weights.
-  8. QA:
-     - every vertex is weighted, with ≤4 influences;
-     - every bone covers some vertices;
-     - stress poses at ±30° and ±60°: edge stretch ≤1.6 and volume change ≤15%;
-     - the part plays the family's `locomote` clip on a test skeleton without obvious artifacts.
-  9. Render a review sheet: front, side, 3/4, **low-angle base**, stress poses.
-  10. Export FBX and GLB, `master.blend` and the catalog fragment.
-- **Connector pipeline.** Procedural bmesh at S/M/L sizes with seeded variants, weighted with a two-bone ramp across the span.
-
-## Unity package
-- **Runtime** (`CritterCrafter.Runtime`, no references):
-  - Library data: `CritterLibrary`, `SkeletonDefinition` and `PartDefinition` ScriptableObjects.
-  - Recipes: `CritterRecipe` is `[Serializable]`, so it round-trips into save files. `CritterRng`, `RecipeGenerator` and `RecipeValidator` (with stable `CC_*` diagnostic codes) sit alongside it.
-  - Assembly: `CreatureAssembler.Assemble(library, recipe, options{parent, layer, collision None|SingleCapsule|PerBone, triggers, fallback})` returns an `AssembledCreature`. It:
-    1. instantiates the skeleton prefab, which has an Animator and an override controller;
-    2. for each fill, instantiates the part's SkinnedMeshRenderer, remaps `bones[]` to the skeleton's branch bones by template name, and applies the cached rebased mesh at the branch's length scale;
-    3. adds a connector across `span_bones`;
-    4. handles nested distal parts;
-    5. checks the budgets.
-  - Motion: `CreatureMotion` exposes `SetVelocity`, `SetState`, `PlayAttack` and `PlayHit`, and drives the Animator's parameters.
-  - Helpers: `FootPlantingIK` and `CreatureFacing`, both optional.
-  - Game seam: `ICreatureVisualFactory` plus `RecipePool` (archetype → skeleton pool, tags and curated recipes).
-- **Editor:**
-  - `Tools/Critter Crafter/Import Library…` takes a zip or folder and copies it to `Assets/CritterLibraries/<id>/<ver>/`.
-  - An `AssetPostprocessor` sets Generic rig, no avatar, `skinWeights=4`, `optimizeGameObjects=false`, clip import on skeleton FBXs, and clip loop flags from the catalog.
-  - Materials use the active pipeline's default lit shader (URP, HDRP or Built-in).
-  - The importer builds the skeleton prefabs (Animator plus override controller) and part prefabs, and checks that every bone name and triangle count matches the catalog.
-  - `CreaturePreviewWindow`: pick a skeleton and seed, scrub speed and state.
-  - A 100-seed sweep tool.
-  - `CreatureBaker`: merges all renderers into one SkinnedMeshRenderer, with an optional texture atlas.
-- **Tests** (Unity Test Framework):
-  - RNG golden values; C# generator output byte-identical to the Python golden files.
-  - Validator cases.
-  - Chirality probe.
-  - Bone-remap correctness: part vertices follow the skeleton's bones within tolerance.
-  - **No root motion** after 10 simulated seconds of locomote.
-  - Budget limits.
-  - The baked creature matches the runtime-assembled one.
-
-## Milestones & acceptance
-- **M0: Scaffold, schemas, placeholders, first Unity assembly.**
-  - Work:
-    - Repo init; uv, LFS and `.gitattributes`.
-    - v2 schemas and the validator.
-    - rng and generator, with golden files.
-    - 8 branch templates.
-    - **3 hand-specified skeletons** (biped, quadruped, crawler) with placeholder clips.
-    - Procedural rigged placeholder parts for the prototype's 8 pilot parts: human_arm, insect_leg, cephalopod_tentacle, animal_skull, humanoid_torso, claw and maw, using the prototype's dimensions, plus S/M/L collars.
-    - UPM package: importer, assembler and C# generator.
-    - Chirality probe.
-  - Accept when:
-    - pytest passes, including headless Blender.
-    - `schema validate` reports 0 diagnostics.
-    - EditMode tests pass: 100 seeds × 3 skeletons are all valid, C# matches Python golden byte-for-byte, and the probe is within 1e-4.
-    - A TestProject screenshot shows the assembled placeholder creatures playing their idle clip in an Animator.
-- **M1: Skeleton library and clip generator.**
-  - Work:
-    - Family parameter files for biped, quadruped, hexapod, crawler, serpentine, radial and dragger.
-    - `skeleton vary`, the procedural clip generator (gait table plus state clips), and skeleton review sheets.
-  - Accept when:
-    - At least 40 skeletons across the 7 families pass QA.
-    - Every skeleton's clips play in Unity without root motion.
-    - The user approves the per-family review GIFs.
-- **M2: Real parts from existing scouts, no credits.**
-  - Work:
-    - `archive import` of the arm, insect leg, tentacle, skull and stump candidates.
-    - Clean, fit, weight, QA, render and export.
-    - Port the stump generator.
-    - Regression tests for the budget-key and triangle-count bugs.
-  - Accept when:
-    - At least 3 parts pass QA, including the clip-deformation check, and are **approved by the user**.
-    - A mixed real-plus-placeholder library imports and animates in Unity.
-- **M3: First paid Meshy batch.**
-  - Work: torso, claw and maw, plus re-runs of rejected scouts. Text-to-3d then refine, 2–3 candidates per part, `--cap 250` credits, with the **user confirming the cost before each call**.
-  - Accept when:
-    - The ledger total is within the cap.
-    - All 8 pilot parts are approved.
-    - A cross-part style sheet shows they look consistent.
-    - `assemble preview` renders exist for at least 10 generated creatures.
-    - Library v0.3.0 is published.
-- **M4: Expansion and bake.**
-  - Work:
-    - At least 9 connector variants.
-    - New parts: spider leg, crab claw, vertebral tail, eye cluster, mandible, ribcage core and flesh-sac core, for at least 24 parts in total.
-    - At least 80 skeletons.
-    - Species and tag affinity in the generator.
-    - `CreatureBaker`.
-  - Accept when:
-    - Each family yields at least 80 distinct creatures per 100 seeds.
-    - A baked creature takes at most 2 draw calls.
-    - Baked and runtime creatures produce matching screenshots.
-- **M5: synaptic-sea-unity integration.** The adapter lives in the game repo.
-  - Work:
-    - `BiomassThreatVisualFactory : ICreatureVisualFactory` keeps the game's existing contract: a root named `Threat_<id>` on the Threat layer, a `"Mesh"` child with a trigger CapsuleCollider sized from the creature's bounds, and room for a NavMeshAgent. It plugs in at `ThreatPlaceholderFactory.Build(...)`.
-    - Event mapping:
-      - `PlaceholderMoved` → velocity
-      - `ThreatAttacked` → attack
-      - AI state → `SetState`
-      - `ThreatKilled` → death
-    - The recipe and seed are saved with the game.
-    - Fall back to the old placeholder if assembly fails. `drone_swarm` stays mechanical.
-  - Accept when:
-    - The game's tests stay green.
-    - A PlayMode test spawns all 6 archetypes.
-    - A save/load round trip restores an identical recipe.
-    - Screenshots from the orthographic isometric camera pass review.
-
-## Sources to port and reuse
-From the prototype branch `feature/procedural-biomass-threat-assembly` of `the-synaptic-sea`:
-
-| Source | Use |
-|---|---|
-| `scripts/systems/biomass_recipe_generator.gd` | seeded fill logic, becomes `cc-gen-2` |
-| `scripts/threats/biomass_gait_controller.gd` | gait table, feeds the clip generator |
-| `scripts/threats/biomass_assembler.gd` | placement math for nested distal parts |
-| `data/combat/biomass_{part,recipe}_catalog.json`, `data/combat/schemas/*_v1.schema.json` | 8 pilot parts, 5 recipes, which become the first skeletons |
-| `tools/biomass_catalog_validate.py`, `tools/meshy_blender_master.py` | logic to mine |
-| `tools/biomass_texture_cleanup.py`, `tools/biomass_frayed_stump_generator.py` | logic to mine; fix the bugs listed above |
-
-From other repos:
-- `hermes-skills`: `biomass-asset-generation/references/biomass-design-rules.md` for the style and prompt rules.
-- `synaptic-sea-asset-archive`: `procedural-biomass-assembly/artifacts/{meshy_mcp_scout,biomass_frayed_stumps}` supplies the M2 input meshes.
-
-## Verification (end-to-end)
-1. **Python and Blender:** `uv run pytest` (unit plus headless Blender), `critter schema validate`, and `critter recipe sweep --seeds 1..100` for every family.
-2. **Unity:**
-   - Open `unity/TestProject` and run EditMode and PlayMode tests, via the Unity MCP / `com.unity.pipeline` or `Unity.exe -batchmode -runTests`.
-   - Import the built library.
-   - Assemble 20 seeds per family in the preview window and scrub the Animator states.
-3. **Visual review:**
-   - Use the Blender MCP to inspect skeletons, clips and weights live in `master.blend`.
-   - Check the review sheets and assemble-preview turntables.
-   - Take Unity screenshots and GIFs with an orthographic isometric camera that matches the game's (offset 16,18,16, size 22).
-4. **Meshy spend:** compare the totals in `work/meshy/ledger.jsonl` against each batch's `--cap`.
-
-## Top risks
-| Risk | Mitigation |
-|---|---|
-| Skeleton variety still feels repetitive | Procedural `skeleton vary` within families, optional snaps, nested distal snaps, part × connector combinations, species affinity |
-| Parts deform badly on branches of other lengths | Uniform length scale clamped to 0.8–1.25×; size classes; QA plays the family clip on a test skeleton |
-| Meshy topology breaks weighting | Proxy weight transfer; stress-pose QA gate; claws and maws on 1-bone `appendage1` |
-| Style clash between Meshy tasks | Single prompt profile; cross-part style sheet gate; optional `meshy_retexture` |
-| Handedness bugs | The chirality probe locks conversion and export flags; bone axes are computed from the bind pose at runtime |
-| Draw calls or bone counts too high | Validator limits; `CreatureBaker` |
-| Python and C# generators drift apart | Integer-only algorithm; golden files checked in both test suites |
-| Process creep | Two human gates only; no governance layer |
+  Repeat on the ramp and a step.
+- **Visual:** a per-family GIF from the TestProject at game speed under the iso camera, approved by you.

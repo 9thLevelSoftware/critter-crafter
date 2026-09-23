@@ -17,11 +17,23 @@ namespace CritterCrafter
         public bool collidersAreTriggers;
         /// <summary>Build a primitive stand-in instead of throwing when the recipe is invalid.</summary>
         public bool fallbackOnInvalid;
+        /// <summary>Layers raycast by runtime foot placement to find the ground.</summary>
+        public LayerMask groundMask;
 
         public static AssemblyOptions Default => new AssemblyOptions
         {
             layer = 0, collision = CreatureCollision.SingleCapsule, collidersAreTriggers = true, fallbackOnInvalid = true,
+            groundMask = ~0,
         };
+    }
+
+    /// <summary>
+    /// Post-assembly extension point. Optional assemblies (e.g. CritterCrafter.Locomotion, which needs
+    /// Animation Rigging) register here so the reference-free Runtime assembly can stay dependency-free.
+    /// </summary>
+    public interface ICreatureRigHook
+    {
+        void OnAssembled(AssembledCreature creature, AssemblyOptions options);
     }
 
     public class AssemblyException : Exception
@@ -37,6 +49,14 @@ namespace CritterCrafter
     /// </summary>
     public static class CreatureAssembler
     {
+        static readonly List<ICreatureRigHook> RigHooks = new List<ICreatureRigHook>();
+
+        /// <summary>Register a hook run after every successful assembly (idempotent).</summary>
+        public static void RegisterRigHook(ICreatureRigHook hook)
+        {
+            if (hook != null && !RigHooks.Exists(h => h.GetType() == hook.GetType())) RigHooks.Add(hook);
+        }
+
         static readonly Dictionary<string, Mesh> MeshCache = new Dictionary<string, Mesh>();
         struct BoundsSet { public Bounds bind, neutral, animation; }
         static readonly Dictionary<string, BoundsSet> BoundsCache = new Dictionary<string, BoundsSet>();
@@ -138,6 +158,7 @@ namespace CritterCrafter
 
             SetLayerRecursive(root, options.layer);
             if (options.collision == CreatureCollision.SingleCapsule) AddCapsule(root, creature, options.collidersAreTriggers);
+            foreach (var hook in RigHooks) hook.OnAssembled(creature, options);
             return creature;
         }
 

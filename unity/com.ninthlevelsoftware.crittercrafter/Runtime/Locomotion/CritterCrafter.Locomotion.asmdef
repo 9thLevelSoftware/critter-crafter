@@ -1,0 +1,10 @@
+{
+  "name": "CritterCrafter.Locomotion",
+  "rootNamespace": "CritterCrafter.Locomotion",
+  "references": ["CritterCrafter.Runtime", "Unity.Animation.Rigging"],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "autoReferenced": true,
+  "noEngineReferences": false
+}

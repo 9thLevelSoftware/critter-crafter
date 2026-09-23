@@ -34,6 +34,8 @@ namespace CritterCrafter
 
         public CreatureState State => _state;
 
+        bool RuntimeLegs => _creature != null && _creature.Skeleton?.locomotion != null && _creature.Skeleton.locomotion.HasLegs;
+
         void Awake()
         {
             _creature = GetComponent<AssembledCreature>();
@@ -111,11 +113,16 @@ namespace CritterCrafter
             if (_animator == null) return;
             Vector3 planar = new Vector3(_velocity.x, 0f, _velocity.z);
             float speed = _state == CreatureState.Dead ? 0f : planar.magnitude;
-            _animator.SetFloat(SpeedParam, speed, speedDamp, Time.deltaTime);
-            _animator.SetFloat(PlaybackRateParam,
-                PlaybackRateForSpeed(speed, _creature.WalkSpeed, _creature.RunSpeed,
-                    _creature.IdleDuration, _creature.WalkDuration, _creature.RunDuration,
-                    _creature.MinPlaybackRate, _creature.MaxPlaybackRate));
+            // Runtime-leg skeletons: CreatureGait (CritterCrafter.Locomotion) measures the real velocity
+            // and owns Speed/Gait/GaitPhase; walk/run are phase-locked overlays with no playback rate.
+            if (!RuntimeLegs)
+            {
+                _animator.SetFloat(SpeedParam, speed, speedDamp, Time.deltaTime);
+                _animator.SetFloat(PlaybackRateParam,
+                    PlaybackRateForSpeed(speed, _creature.WalkSpeed, _creature.RunSpeed,
+                        _creature.IdleDuration, _creature.WalkDuration, _creature.RunDuration,
+                        _creature.MinPlaybackRate, _creature.MaxPlaybackRate));
+            }
             if (faceVelocity && speed > MovementEpsilon && _state != CreatureState.Dead)
             {
                 var target = Quaternion.LookRotation(planar.normalized, Vector3.up);

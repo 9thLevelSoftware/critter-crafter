@@ -19,6 +19,9 @@ from ..recipes.rng import SplitMix64
 PRESETS = ("compact", "balanced", "elongated")
 FAMILIES = ("biped", "quadruped", "crawler", "hexapod", "radial", "serpentine", "dragger")
 _GROUND_CLEARANCE_M = .0075
+# Neutral hip-to-foot distance as a fraction of chain reach (stepping margin).
+_INSECT_EXTENSION = .70
+_LIMB_EXTENSION = .84
 
 ARCHETYPES: dict[str, dict[str, Any]] = {
     "biped_plantigrade_humanoid": {"family": "biped", "plan": "biped", "variant": "plantigrade", "height": 1.72, "length": 0.66, "width": 0.46},
@@ -135,15 +138,53 @@ def _core(height: float, length: float, width: float, *, upright: bool = False) 
 
 def _paired_legs(branches: list[dict[str, Any]], *, prefix: str, parent: str, positions: list[tuple[float, float, float]],
                  length: float, template: str, contact: str = "foot", attach: int = 0,
-                 phases: tuple[float, float] = (0.0, math.pi), profile_id: str | None = None) -> None:
+                 phases: tuple[float, float] = (0.0, math.pi), profile_id: str | None = None,
+                 direction: Any = None, up: list[float] | None = None) -> list[dict[str, Any]]:
+    """Append mirrored leg pairs.  ``direction`` may be a callable ``(sx, index) -> vec``."""
+    added: list[dict[str, Any]] = []
     for index, (_, y, z) in enumerate(positions):
         for side, sx, phase in (("L", 1, phases[0]), ("R", -1, phases[1])):
             bid = f"{prefix}_{side}{index}" if len(positions) > 1 else f"{prefix}_{side}"
-            branches.append(_branch(bid, template, parent, origin=_v(sx * positions[index][0], y, z),
-                                    direction=[sx * 0.25, -1, 0.08], up=[0, 0, 1], length=length, side=side,
-                                    attach=attach, mirror_of=f"{prefix}_L{index}" if side == "R" and len(positions) > 1 else (f"{prefix}_L" if side == "R" else ""),
-                                    role="locomotor", phase=phase, support=0.58, contact=contact,
-                                    parent_joint="lower" if attach == 1 else "upper", profile_id=profile_id))
+            leg_direction = (direction(sx, index) if callable(direction) else
+                             direction if direction is not None else [sx * 0.25, -1, 0.08])
+            record = _branch(bid, template, parent, origin=_v(sx * positions[index][0], y, z),
+                             direction=leg_direction, up=list(up or [0, 0, 1]), length=length, side=side,
+                             attach=attach, mirror_of=f"{prefix}_L{index}" if side == "R" and len(positions) > 1 else (f"{prefix}_L" if side == "R" else ""),
+                             role="locomotor", phase=phase, support=0.58, contact=contact,
+                             parent_joint="lower" if attach == 1 else "upper", profile_id=profile_id)
+            branches.append(record)
+            added.append(record)
+    return added
+
+
+def _extension(branch: dict[str, Any], angles: list[float]) -> float:
+    """Hip-to-contact distance over chain reach for a candidate stance."""
+    fractions = _PROFILE_FRACTIONS[branch["binding_profile_id"]]
+    contact = branch["contacts"][0]
+    reach = branch["length_m"] * sum(fractions[:int(contact["bone_index"]) + 1])
+    point = _contact_point_world(branch, angles, contact, branch["stance_z_deg"])
+    return mu.length(mu.sub(point, branch["origin_m"])) / reach
+
+
+def _tune_extension(branch: dict[str, Any], target: float) -> None:
+    """Scale the authored stance so the neutral contact sits at ``target`` of full reach.
+
+    A nearly straight neutral leg (extension ~0.95) leaves no stroke for stepping;
+    runtime foot placement needs compression and extension margin around home.
+    """
+    base = list(branch["stance_deg"])
+    # Never scale any joint past 150 degrees: extension is not monotonic beyond that.
+    lo, hi = 0.0, min(4.0, 150.0 / max(1e-6, max(abs(a) for a in base)))
+    if _extension(branch, [a * hi for a in base]) > target:
+        branch["stance_deg"] = [round(a * hi, 3) for a in base]
+        return
+    for _ in range(40):
+        mid = (lo + hi) / 2
+        if _extension(branch, [a * mid for a in base]) > target:
+            lo = mid
+        else:
+            hi = mid
+    branch["stance_deg"] = [round(a * (lo + hi) / 2, 3) for a in base]
 
 
 def _biped(a: dict[str, Any], h: float, length: float, width: float) -> tuple[list[dict[str, Any]], list[str], list[str], str]:
@@ -201,7 +242,17 @@ def _hexapod(a: dict[str, Any], h: float, length: float, width: float) -> tuple[
     branches = [_core(h, length * .72, width)]
     supports: list[str] = []
     for i, z in enumerate((-.22, 0, .22)):
-        _paired_legs(branches, prefix=f"leg{i}", parent="core", positions=[(width * .28, h, z * length)], length=width * .62 * a["limb_scale"], template="insect_leg4", attach=1, phases=(0 if i % 2 == 0 else math.pi, math.pi if i % 2 == 0 else 0))
+        fan = (-.45, 0.0, .45)[i]
+        legs = _paired_legs(branches, prefix=f"leg{i}", parent="core", positions=[(width * .14, h, z * length)],
+                            length=width * .75 * a["limb_scale"], template="insect_leg4", attach=1,
+                            phases=(0 if i % 2 == 0 else math.pi, math.pi if i % 2 == 0 else 0),
+                            direction=lambda sx, _i, fan=fan: [sx * 1.0, 0.0, fan], up=[0, 1, 0])
+        for leg in legs:
+            # Sprawled insect leg bending in its vertical plane: the coxa rises,
+            # femur and tibia flex downward (profile flexion is bone -X), so the
+            # knee sits above the body and the tarsus meets the ground steeply.
+            leg["stance_deg"] = [45.0, -60.0, -70.0, 10.0]
+            leg["_extension_target"] = _INSECT_EXTENSION
         supports.extend((f"leg{i}_L", f"leg{i}_R"))
     return branches, supports, supports, "bilateral"
 
@@ -306,6 +357,11 @@ def _socketize(branches: list[dict[str, Any]]) -> None:
 
 def _contact_height(branch: dict[str, Any], angles: list[float], contact: dict[str, Any] | None = None,
                     z_angles: list[float] | None = None) -> float:
+    return _contact_point_world(branch, angles, contact, z_angles)[1]
+
+
+def _contact_point_world(branch: dict[str, Any], angles: list[float], contact: dict[str, Any] | None = None,
+                         z_angles: list[float] | None = None) -> tuple[float, float, float]:
     """FK one bone-local contact using Blender +Y as the bone length axis."""
     fractions = _PROFILE_FRACTIONS[branch["binding_profile_id"]]
     if len(angles) != len(fractions):
@@ -330,7 +386,7 @@ def _contact_height(branch: dict[str, Any], angles: list[float], contact: dict[s
                         (math.sin(x_half), 0.0, 0.0, math.cos(x_half)))
         world_q = _qmul(world_q, local_q)
         if index == target:
-            return mu.add(point, mu.quat_rotate(world_q, contact["local_point_m"]))[1]
+            return mu.add(point, mu.quat_rotate(world_q, contact["local_point_m"]))
         point = mu.add(point, mu.quat_rotate(world_q, (0.0, branch["length_m"] * fraction, 0.0)))
     raise AssertionError("unreachable contact")
 
@@ -433,6 +489,11 @@ def build_candidate(archetype: str, preset: str, seed: int = 1, style: str = "an
     _scale_stance(branches, shape["stance"])
     if style == "horror":
         _apply_horror_modifier(branches)
+    for branch in branches:
+        target = branch.pop("_extension_target", None)
+        if target is not None:
+            # Compact presets crouch lower, elongated ones stand taller.
+            _tune_extension(branch, target - (shape["stance"] - 1.0) * .25)
     _align_distributed_supports(branches, supports)
     _socketize(branches)
     bone_count = 1 + sum(_FRACTIONS[b["template"]] for b in branches)

@@ -125,9 +125,52 @@ namespace CritterCrafter
         public BranchData[] branches;
         public NeutralPoseData neutral_pose;
         public AnatomyData anatomy;
+        public LocomotionData locomotion;
         public SkeletonAssetInfo asset;
 
         public BranchData FindBranch(string id) => Array.Find(branches, b => b.branch_id == id);
+    }
+
+    /// <summary>Runtime foot-placement data (catalog frame, metres); see docs/locomotion.md.</summary>
+    [Serializable]
+    public class LocomotionData
+    {
+        public string version;
+        /// <summary>"legs" when the runtime step planner owns locomotion, otherwise "none".</summary>
+        public string mode;
+        /// <summary>Branch whose baked strike plays during telegraph/attack (IK released).</summary>
+        public string attack_branch_id;
+        public double hip_height_m;
+        public double leg_length_m;
+        public double usable_stroke_m;
+        public int min_support;
+        public double duty_walk;
+        public double duty_run;
+        public double cadence_max_hz;
+        public double v_walk_mps;
+        public double v_run_mps;
+        public double v_max_mps;
+        public LocomotionLeg[] legs;
+
+        public bool HasLegs => mode == "legs" && legs != null && legs.Length > 0;
+    }
+
+    [Serializable]
+    public class LocomotionLeg
+    {
+        public string branch_id;
+        /// <summary>"two_bone" (limb3) or "chain" (insect_leg4, tentacle8).</summary>
+        public string solver;
+        public string[] chain_bones;
+        public double[] tip_local_m;
+        public double[] hip_m;
+        public double[] home_m;
+        public double reach_m;
+        public double stroke_m;
+        public double clearance_m;
+        public double walk_phase;
+        public double run_phase;
+        public bool support;
     }
 
     [Serializable]

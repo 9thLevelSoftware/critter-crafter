@@ -285,7 +285,7 @@ def _fit_motion_to_reach(plan: dict[str, Any], controls: dict[str, dict[str, Any
     if not controls:
         return
     for clip in plan["clips"]:
-        if clip["name"] not in ("walk", "run"):
+        if clip["name"] not in ("walk", "run") or clip.get("phase_driven"):
             continue
         requested = [float(c["stride_m"]) for s in clip["samples"] for c in s["contacts"] if c["branch_id"] in controls]
         if not requested:

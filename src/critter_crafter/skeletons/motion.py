@@ -299,8 +299,26 @@ def _contact_kind(branch: dict[str, Any], skeleton: dict[str, Any]) -> str:
     return "foot"
 
 
+def runtime_legs(skeleton: dict[str, Any]) -> bool:
+    """True when legged locomotion is placed at runtime (walk/run are overlays).
+
+    Skeletons whose locomotion includes sliding or body contacts still bake their
+    travel until the runtime slide model lands.
+    """
+    if skeleton.get("locomotion", {}).get("mode") != "legs":
+        return False
+    return not any(branch_role(b) == "locomotor" and c.get("kind") in ("body", "sliding")
+                   for b in skeleton["branches"] for c in b.get("contacts") or [])
+
+
 def build_motion(skeleton: dict[str, Any], gait: dict[str, Any]) -> dict[str, Any]:
-    """Create all eight clip plans in a JSON-serializable form."""
+    """Create all eight clip plans in a JSON-serializable form.
+
+    With runtime legs, walk/run are one-cycle overlays: locomotor chains hold the
+    neutral stance (the runtime planner and IK own them), the body carries no bob
+    (the runtime adds it), and non-locomotor chains keep their phased gestures.
+    """
+    overlay = runtime_legs(skeleton)
     profile_id, profile = select_profile(skeleton)
     attack_plan = resolve_attack(skeleton) if skeleton.get("anatomy", {}).get("archetype_id") else None
     annotated = [float(b.get("gait", {}).get("cadence_hz", 0.0)) for b in skeleton["branches"]]
@@ -328,9 +346,11 @@ def build_motion(skeleton: dict[str, Any], gait: dict[str, Any]) -> dict[str, An
     core_height = max((float(b["head_m"][1]) for b in skeleton["bones"]), default=1.0)
     clips = []
     for name in CLIP_ORDER:
-        frames = _clip_frames(name, cadence, skeleton.get("family") in ("crawler", "radial"))
+        phase_driven = overlay and name in ("walk", "run")
+        frames = (FPS if phase_driven
+                  else _clip_frames(name, cadence, skeleton.get("family") in ("crawler", "radial")))
         cycle_hz = (FPS / frames) if name in ("walk", "run") else 0.0
-        speed = (float(profile["stride"]) * cycle_hz if name in ("walk", "run") else 0.0)
+        speed = (float(profile["stride"]) * cycle_hz if name in ("walk", "run") and not phase_driven else 0.0)
         samples = []
         for frame in range(frames + 1):
             u = frame / frames
@@ -368,8 +388,9 @@ def build_motion(skeleton: dict[str, Any], gait: dict[str, Any]) -> dict[str, An
                             support = min(support, .53)
                     support = max(support, min(.92, stable_minimum / max(1, locomotor_count) + .02))
                     seam_offset = (.265 if skeleton.get("family") == "radial" else .25)
-                    phase = (u + phase_rad / TAU + (seam_offset if name in ("walk", "run") else 0.0)) % 1.0
-                    if name in ("walk", "run"):
+                    phase = ((u + phase_rad / TAU + (seam_offset if name in ("walk", "run") else 0.0)) % 1.0
+                             if not phase_driven else u)
+                    if name in ("walk", "run") and not phase_driven:
                         if kind in ("body", "sliding"):
                             path = {"forward_m":0.0, "height_m":0.0, "forward_dphase":0.0,
                                     "height_dphase":0.0, "support":True}
@@ -382,7 +403,7 @@ def build_motion(skeleton: dict[str, Any], gait: dict[str, Any]) -> dict[str, An
                     contacts.append({
                         "branch_id": br["branch_id"], "kind": kind,
                         "bone_name": br["bone_names"][-1], "phase": phase,
-                        "drive_ik": name in ("walk", "run"),
+                        "drive_ik": name in ("walk", "run") and not phase_driven,
                         "support_fraction": support, "stride_m": stride, "clearance_m": clearance, **path,
                     })
                 elif br.get("contacts"):
@@ -397,7 +418,7 @@ def build_motion(skeleton: dict[str, Any], gait: dict[str, Any]) -> dict[str, An
                                      "height_dphase":0.0, "support":False})
             samples.append({
                 "frame": frame, "phase": u, "root_position_m": [root_offset[0],
-                    root_offset[1] + (0.0 if grounded_body else _root_vertical(
+                    root_offset[1] + (0.0 if grounded_body or phase_driven else _root_vertical(
                         name, u, bob, .55*max(.1, core_height))), root_offset[2]],
                 "simulated_forward_m": speed * (frame / FPS),
                 "rotations_xyzw": {k: [round(v, 8) for v in q] for k, q in rotations.items()},
@@ -414,7 +435,7 @@ def build_motion(skeleton: dict[str, Any], gait: dict[str, Any]) -> dict[str, An
             kind = _contact_kind(br, skeleton)
             phase_offset = ((branch_phase(br) / TAU + seam_offset) % 1.0
                             if name in ("walk", "run") else 0.0)
-            if branch_role(br) == "locomotor" and name in ("walk", "run"):
+            if branch_role(br) == "locomotor" and name in ("walk", "run") and not phase_driven:
                 stance = support_fraction(br, float(profile["support"]))
                 if name == "run":
                     stance = max(.51, stance - .10)
@@ -423,6 +444,8 @@ def build_motion(skeleton: dict[str, Any], gait: dict[str, Any]) -> dict[str, An
                 stance = max(stance, min(.92, stable_minimum / max(1, locomotor_count) + .02))
             elif branch_role(br) == "locomotor":
                 stance = .25 if name == "death" else 1.0
+                if phase_driven:
+                    phase_offset = 0.0
             else:
                 stance = 0.0
             for contact_index, contact in enumerate(br.get("contacts", [])):
@@ -432,7 +455,7 @@ def build_motion(skeleton: dict[str, Any], gait: dict[str, Any]) -> dict[str, An
                     "stance_fraction":round(stance, 7),
                     "support":br["branch_id"] in set(skeleton.get("anatomy", {}).get("support_branches", []))})
         clips.append({
-            "name": name, "loop": name in LOOP_CLIPS, "frames": frames, "fps": FPS,
+            "name": name, "loop": name in LOOP_CLIPS, "phase_driven": phase_driven, "frames": frames, "fps": FPS,
             "duration_s": frames / FPS, "cadence_hz": cycle_hz if name in ("walk", "run") else 0.0,
             "speed_mps": speed, "stride_m": float(profile["stride"]) * (1.25 if name == "run" else 1.0),
             "playback": {"wrap": "loop" if name in LOOP_CLIPS else "once", "phase_range": [0.0, 1.0],

@@ -50,6 +50,14 @@ namespace CritterCrafter.Editor
                 return value > 0.0 ? (float)value : fallback;
             }
 
+            if (skeleton?.locomotion != null && skeleton.locomotion.HasLegs)
+            {
+                BuildRuntimeLegStates(ctrl, sm, Clip, out var idleState);
+                AddActionStates(ctrl, sm, idleState, Clip, skeleton);
+                EditorUtility.SetDirty(ctrl);
+                return ctrl;
+            }
+
             var locomotion = ctrl.CreateBlendTreeInController("Locomotion", out var tree, 0);
             tree.blendType = BlendTreeType.Simple1D;
             tree.blendParameter = "Speed";
@@ -71,6 +79,46 @@ namespace CritterCrafter.Editor
             locomotion.speedParameter = "PlaybackRate";
             sm.defaultState = locomotion;
 
+            AddActionStates(ctrl, sm, locomotion, Clip, skeleton);
+            EditorUtility.SetDirty(ctrl);
+            return ctrl;
+        }
+
+        /// <summary>
+        /// Runtime-leg skeletons: Idle plays on its own clock; Locomotion blends the walk/run overlays on
+        /// Gait (0 walk .. 1 run) with normalized time driven by GaitPhase from CreatureGait.
+        /// </summary>
+        static void BuildRuntimeLegStates(AnimatorController ctrl, AnimatorStateMachine sm,
+            System.Func<string, AnimationClip> clip, out AnimatorState idle)
+        {
+            ctrl.AddParameter("Gait", AnimatorControllerParameterType.Float);
+            ctrl.AddParameter("GaitPhase", AnimatorControllerParameterType.Float);
+            idle = sm.AddState("Idle");
+            idle.motion = clip("idle");
+            sm.defaultState = idle;
+            var locomotion = ctrl.CreateBlendTreeInController("Locomotion", out var tree, 0);
+            tree.blendType = BlendTreeType.Simple1D;
+            tree.blendParameter = "Gait";
+            tree.useAutomaticThresholds = false;
+            tree.AddChild(clip("walk"), 0f);
+            tree.AddChild(clip("run"), 1f);
+            locomotion.timeParameterActive = true;
+            locomotion.timeParameter = "GaitPhase";
+            var start = idle.AddTransition(locomotion);
+            start.hasExitTime = false;
+            start.duration = 0.15f;
+            start.AddCondition(AnimatorConditionMode.Greater, MovingThreshold, "Speed");
+            var stop = locomotion.AddTransition(idle);
+            stop.hasExitTime = false;
+            stop.duration = 0.2f;
+            stop.AddCondition(AnimatorConditionMode.Less, MovingThreshold, "Speed");
+        }
+
+        public const float MovingThreshold = 0.05f;
+
+        static void AddActionStates(AnimatorController ctrl, AnimatorStateMachine sm, AnimatorState locomotion,
+            System.Func<string, AnimationClip> Clip, SkeletonData skeleton)
+        {
             var stun = sm.AddState("Stun");
             stun.motion = Clip("stun");
             var toStun = locomotion.AddTransition(stun);
@@ -117,8 +165,6 @@ namespace CritterCrafter.Editor
             die.canTransitionToSelf = false;
             die.AddCondition(AnimatorConditionMode.If, 0, "Die");
 
-            EditorUtility.SetDirty(ctrl);
-            return ctrl;
         }
     }
 }
