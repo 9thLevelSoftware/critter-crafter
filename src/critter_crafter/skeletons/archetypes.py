@@ -360,53 +360,47 @@ def _serpentine(a: dict[str, Any], h: float, length: float, width: float) -> tup
 
 
 def _dragger(a: dict[str, Any], h: float, length: float, width: float) -> tuple[list[dict[str, Any]], list[str], list[str], str]:
-    if a["variant"] == "belly":
-        # A belly hauler carries its axial mass close to a long ventral support
-        # and reaches forward with short, splayed arms.  Keeping this separate
-        # from the tall puller stance makes the two dragger silhouettes and
-        # support strategies legible even with the neutral review mannequin.
-        branches = [_core(h, length * .72, width)]
-        arm_length = length * .42 * a["limb_scale"]
-        for side, sx, phase in (("L", 1, 0.0), ("R", -1, math.pi)):
-            arm = _branch(
-                f"arm_{side}", "limb3", "core",
-                origin=_v(sx * width * .46, h, length * .22),
-                direction=[sx * .55, -.35, .75], up=[0, 0, 1],
-                length=arm_length, side=side, attach=2,
-                mirror_of="arm_L" if side == "R" else "", role="locomotor",
-                phase=phase, support=.58, contact="hand", parent_joint="end",
-            )
-            # Retracting the terminal joint keeps the broad middle segment on
-            # a convex arc above the planted hand.  This preserves full arm
-            # reach without letting its rounded volume dip through the floor.
-            arm["stance_deg"] = [10.0, -50.0, -10.0]
-            arm["_extension_target"] = _LIMB_EXTENSION
-            branches.append(arm)
-        branches.append(_branch(
-            "belly", "tentacle8", "core",
-            origin=_v(0, h * .52, -length * .25), direction=[0, 0, -1], up=[0, 1, 0],
-            length=length * .56, role="locomotor", support=.92, contact="body",
-            parent_joint="upper",
-        ))
-        support = ["arm_L", "arm_R", "belly"]
-        return branches, support, support, "bilateral"
-
-    branches = [_core(h, length * .65, width)]
-    for arm in _paired_legs(branches, prefix="arm", parent="core", positions=[(width * .38, h, length * .24)], length=length * .54 * a["limb_scale"], template="limb3", contact="hand", attach=2):
-        # Pulling forelimbs: elbows point back, crouched so the hands have room to reach and pull.
-        _mammal_leg(arm, fore=True)
-    # The puller's spine pitches up from a low rear, where the dragged belly attaches along the ground,
-    # to shoulders carried high on its arms (a flat body at arm height leaves the belly floating).
-    core = branches[0]
-    core_length = core["length_m"]
-    rear_y = h * .32
-    rise = min(h - rear_y, core_length * .7)
-    core["origin_m"] = _v(0, rear_y, -length * .65 / 2)
-    core["direction"] = [0, rise, math.sqrt(core_length ** 2 - rise ** 2)]
-    core["up"] = [0, 1, 0]
-    branches.append(_branch("belly", "tentacle8", "core", origin=_v(0, rear_y, -length * .65 / 2), direction=[0, 0, -1], up=[0, 1, 0], length=length * .42, role="locomotor", support=.9, contact="body", parent_joint="upper"))
+    """Draggers rest their torso on the ground and haul it with their arms: each hand reaches far
+    ahead, plants, and pulls the sliding body up to it (runtime "drag" gait). The dragged tail lies
+    flat behind the torso. The puller has long reaching arms and a slightly raised chest; the belly
+    hauler is flatter, broader and shorter-armed."""
+    pull = a["variant"] == "pull"
+    body_length = length * (.62 if pull else .72)
+    radius = body_length * _PROFILE_GIRTH["spine3_axial"] * .5
+    pitch = math.radians(8.0 if pull else 0.0)
+    rear_z = -body_length * .5
+    core = _branch("core", "spine3", None, origin=_v(0, radius + _GROUND_CLEARANCE_M, rear_z),
+                   direction=[0, math.sin(pitch), math.cos(pitch)], up=[0, 1, 0], length=body_length, role="core")
+    branches = [core]
+    # Shoulders sit at the spine's "end" joint (two thirds along), on the flanks of the torso.
+    along = body_length * (_PROFILE_FRACTIONS["spine3_axial"][0] + _PROFILE_FRACTIONS["spine3_axial"][1])
+    shoulder_y = core["origin_m"][1] + along * math.sin(pitch) + radius * .35
+    shoulder_z = rear_z + along * math.cos(pitch)
+    arm_length = length * (.62 if pull else .45) * a["limb_scale"]
+    spread = .45 if pull else .8
+    for side, sx, phase in (("L", 1, 0.0), ("R", -1, math.pi)):
+        arm = _branch(
+            f"arm_{side}", "limb3", "core",
+            origin=_v(sx * radius * (.9 if pull else 1.1), shoulder_y, shoulder_z),
+            direction=[sx * spread, -.35, 1.0], up=[0, 1, 0],
+            length=arm_length, side=side, attach=2,
+            mirror_of="arm_L" if side == "R" else "", role="locomotor",
+            phase=phase, support=.72, contact="hand", parent_joint="end",
+        )
+        # Reaching arm, elbow up like a crawling climber: the upper arm rises toward ``up``, the forearm
+        # flexes down (profile flexion is bone -X) and the hand settles flat.
+        arm["stance_deg"] = [25.0, -60.0, 20.0]
+        arm["_extension_target"] = .80
+        arm["_hip_height"] = arm["origin_m"][1]
+        branches.append(arm)
+    branches.append(_branch(
+        "belly", "tentacle8", "core",
+        origin=_v(0, core["origin_m"][1], rear_z), direction=[0, 0, -1], up=[0, 1, 0],
+        length=length * (.42 if pull else .56), role="locomotor", support=.92, contact="body",
+        parent_joint="pelvis",
+    ))
     support = ["arm_L", "arm_R", "belly"]
-    return branches, support, ["arm_L", "arm_R", "belly"], "bilateral"
+    return branches, support, support, "bilateral"
 
 
 _BUILDERS = {"biped": _biped, "quadruped": _quadruped, "crawler": _crawler, "hexapod": _hexapod, "radial": _radial, "serpentine": _serpentine, "dragger": _dragger}
@@ -587,7 +581,9 @@ def build_candidate(archetype: str, preset: str, seed: int = 1, style: str = "an
             _tune_extension(branch, target - (shape["stance"] - 1.0) * .25)
         if hip is not None:
             # Presets keep their limb proportion: longer-limbed presets stand taller on the same torso.
-            _fit_leg_to_hip(branch, hip * shape["limb"])
+            # Grounded torsos (draggers) never rise: their arms only reach further.
+            grounded = a["plan"] == "dragger"
+            _fit_leg_to_hip(branch, hip if grounded else hip * shape["limb"])
     _align_distributed_supports(branches, supports)
     _socketize(branches)
     bone_count = 1 + sum(_FRACTIONS[b["template"]] for b in branches)

@@ -6,7 +6,7 @@ import math
 import json
 from pathlib import Path
 
-from critter_crafter.skeletons.archetypes import ARCHETYPES, PRESETS, _contact_height, build_candidate, generate_all, write_profiles
+from critter_crafter.skeletons.archetypes import _contact_point_world, ARCHETYPES, PRESETS, _contact_height, build_candidate, generate_all, write_profiles
 from critter_crafter import mathutil as mu
 
 
@@ -241,32 +241,24 @@ def test_dragger_mixed_supports_keep_belly_on_ground_and_hands_above_it() -> Non
                     assert math.isclose(height, expected, abs_tol=1e-4)
 
 
-def test_belly_hauler_has_a_low_broad_variant_specific_support_stance() -> None:
+def test_draggers_rest_their_torso_on_the_ground_and_reach_forward() -> None:
     for preset in PRESETS:
         hauler = build_candidate("dragger_belly_hauler", preset, seed=1)
         puller = build_candidate("dragger_forelimb_puller", preset, seed=1)
-        hauler_length = hauler["anatomy"]["silhouette"]["length_m"]
-        puller_length = puller["anatomy"]["silhouette"]["length_m"]
-        hauler_width = hauler["anatomy"]["silhouette"]["width_m"]
-        puller_width = puller["anatomy"]["silhouette"]["width_m"]
-        hauler_arm, puller_arm = _branch(hauler, "arm_L"), _branch(puller, "arm_L")
-        hauler_belly, puller_belly = _branch(hauler, "belly"), _branch(puller, "belly")
-        hauler_shoulder_y = hauler_arm["origin_m"][1] + hauler["neutral_pose"]["root_offset_m"][1]
-        puller_shoulder_y = puller_arm["origin_m"][1] + puller["neutral_pose"]["root_offset_m"][1]
-
-        assert .14 <= hauler_shoulder_y / hauler_length <= .20
-        assert hauler_shoulder_y / hauler_length < puller_shoulder_y / puller_length * .5
-        assert math.isclose(hauler_arm["length_m"] / hauler_length, .42 * {
-            "compact": .88, "balanced": 1.0, "elongated": 1.12,
-        }[preset], abs_tol=2e-4)
-        assert hauler_arm["length_m"] / hauler_length < puller_arm["length_m"] / puller_length
-        assert abs(hauler_arm["direction"][1]) < abs(puller_arm["direction"][1]) * .5
-        assert hauler_arm["origin_m"][0] / hauler_width > puller_arm["origin_m"][0] / puller_width
-        assert hauler_arm["stance_deg"] != puller_arm["stance_deg"]
-        assert math.isclose(hauler_belly["length_m"] / hauler_length, .56, abs_tol=2e-4)
-        assert math.isclose(puller_belly["length_m"] / puller_length, .42, abs_tol=2e-4)
-        assert hauler["anatomy"]["support_branches"] == ["arm_L", "arm_R", "belly"]
-        assert [contact["bone_index"] for contact in hauler_belly["contacts"]] == [1, 4, 7]
+        for doc in (hauler, puller):
+            core, arm, belly = _branch(doc, "core"), _branch(doc, "arm_L"), _branch(doc, "belly")
+            root_y = doc["neutral_pose"]["root_offset_m"][1]
+            # Torso underside on the ground (within a centimetre), shoulders low on its flanks.
+            underside = core["origin_m"][1] + root_y - core["girth_m"] * .5
+            assert abs(underside) < .01, (doc["skeleton_id"], underside)
+            assert arm["origin_m"][1] + root_y < core["girth_m"] * 1.2
+            # The hand plants ahead of the shoulder.
+            hand = _contact_point_world(arm, arm["stance_deg"], arm["contacts"][0], arm["stance_z_deg"])
+            assert hand[2] > arm["origin_m"][2] + .1 * arm["length_m"]
+            assert doc["anatomy"]["support_branches"] == ["arm_L", "arm_R", "belly"]
+            assert [contact["bone_index"] for contact in belly["contacts"]] == [1, 4, 7]
+        assert _branch(puller, "arm_L")["length_m"] / puller["anatomy"]["silhouette"]["length_m"] > \
+            _branch(hauler, "arm_L")["length_m"] / hauler["anatomy"]["silhouette"]["length_m"]
 
 
 def test_branch_semantics_and_girth_match_the_exact_binding_profile() -> None:

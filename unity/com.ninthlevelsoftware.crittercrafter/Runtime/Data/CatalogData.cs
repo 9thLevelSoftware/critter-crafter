@@ -138,6 +138,10 @@ namespace CritterCrafter
         public string version;
         /// <summary>"legs" when the runtime step planner owns locomotion, otherwise "none".</summary>
         public string mode;
+        /// <summary>"drag" for grounded torsos hauled by the arms; otherwise walking gaits.</summary>
+        public string gait;
+        /// <summary>The torso rests on the ground: no bob, no body height or tilt from the feet.</summary>
+        public bool body_on_ground;
         /// <summary>Branch whose baked strike plays during telegraph/attack (IK released).</summary>
         public string attack_branch_id;
         public double hip_height_m;
@@ -173,6 +177,8 @@ namespace CritterCrafter
         public double reach_m;
         public double stroke_m;
         public double clearance_m;
+        /// <summary>Drag gaits: forward shift (m) of the stance centre from the neutral contact.</summary>
+        public double stance_shift_m;
         public double walk_phase;
         public double run_phase;
         public bool support;

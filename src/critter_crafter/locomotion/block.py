@@ -96,6 +96,54 @@ def _slide_block(skeleton: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+DRAG_DUTY_WALK = .72     # long, slow pull; quick reach
+DRAG_DUTY_RUN = .62
+DRAG_CADENCE_WALK = 1.0
+DRAG_CADENCE_RUN = 1.8
+DRAG_LIFT_FRACTION = .25
+
+
+def _drag_block(skeleton: dict[str, Any], legs: list[dict[str, Any]], legs_src: list[dict[str, Any]]) -> dict[str, Any]:
+    """Grounded torso hauled by the arms: every pull uses the full stroke, the torso carries the weight
+    (no minimum hand support), and the body stays on the ground."""
+    pose = neutral_pose_world(skeleton)
+    by_id = {b["branch_id"]: b for b in legs_src}
+    for leg in legs:
+        leg["clearance_m"] = mu.r6(max(leg["clearance_m"], DRAG_LIFT_FRACTION * leg["reach_m"]))
+        # A pull is lopsided: from as far ahead as the arm reaches back to the shoulder plane. Use that
+        # whole chord (through the wrist, which the hinge must keep in reach) and centre the stance on it.
+        chain = by_id[leg["branch_id"]]["bone_names"]
+        hip = pose[chain[0]]["head"]
+        wrist = pose[chain[2]]["head"]
+        radius2 = (REACH_FRACTION * (pose[chain[0]]["length"] + pose[chain[1]]["length"])) ** 2 - (hip[1] - wrist[1]) ** 2
+        disc = radius2 - (wrist[0] - hip[0]) ** 2
+        ahead = wrist[2] - hip[2]
+        if disc > 0.0:
+            root = math.sqrt(disc)
+            forward, backward = -ahead + root, min(ahead + root, ahead)
+            leg["stroke_m"] = mu.r6(max(0.0, forward + backward))
+            leg["stance_shift_m"] = mu.r6((forward - backward) * .5)
+    stroke = min(l["stroke_m"] for l in legs)
+    stride_walk = STROKE_FRACTION * stroke / DRAG_DUTY_WALK
+    stride_run = STROKE_FRACTION * stroke / DRAG_DUTY_RUN
+    leg_length = sum(l["reach_m"] for l in legs) / len(legs)
+    cadence_max = cadence_max_hz(leg_length)
+    attack_branch = ""
+    try:
+        attack_branch = resolve_attack(skeleton)["effector"]["branch_id"]
+    except (AttackPlanError, KeyError):
+        pass
+    return {
+        "version": LOCOMOTION_VERSION, "mode": "legs", "gait": "drag", "body_on_ground": True,
+        "attack_branch_id": attack_branch,
+        "hip_height_m": mu.r6(sum(l["hip_m"][1] - l["home_m"][1] for l in legs) / len(legs)),
+        "leg_length_m": mu.r6(leg_length), "usable_stroke_m": mu.r6(stroke), "min_support": 0,
+        "duty_walk": DRAG_DUTY_WALK, "duty_run": DRAG_DUTY_RUN, "cadence_max_hz": cadence_max,
+        "v_walk_mps": mu.r6(stride_walk * DRAG_CADENCE_WALK), "v_run_mps": mu.r6(stride_run * DRAG_CADENCE_RUN),
+        "v_max_mps": mu.r6(stride_run * cadence_max), "legs": legs,
+    }
+
+
 def locomotion_block(skeleton: dict[str, Any]) -> dict[str, Any]:
     pose = neutral_pose_world(skeleton)
     legs_src = [b for b in skeleton["branches"]
@@ -145,6 +193,8 @@ def locomotion_block(skeleton: dict[str, Any]) -> dict[str, Any]:
     leg_length = sum(l["reach_m"] for l in legs) / len(legs)
     stroke = min(l["stroke_m"] for l in legs)
     supports = [l for l in legs if l["support"]] or legs
+    if family == "dragger":
+        return _drag_block(skeleton, legs, legs_src)
     walk_support = sum(float(next(b for b in legs_src if b["branch_id"] == l["branch_id"])
                              .get("gait", {}).get("support_phase", .6)) for l in legs) / len(legs)
     duty_walk = _min_duty([l["walk_phase"] for l in supports], max(.55, min(.85, walk_support)), minimum)

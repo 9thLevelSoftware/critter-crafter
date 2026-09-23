@@ -47,10 +47,13 @@ def gait_params(block: dict[str, Any], speed: float) -> dict[str, Any]:
     if h <= 0.0 or float(block["usable_stroke_m"]) <= 0.0:
         return {"weight": w, "duty": duty, "stride_m": 0.0, "cadence_hz": 0.0, "run": run,
                 "overspeed": True}
-    froude = speed * speed / (G * h)
-    stride = h * 2.3 * froude ** .3
     stride_max = STROKE_FRACTION * float(block["usable_stroke_m"]) / duty
-    stride = min(stride, stride_max)
+    if block.get("gait") == "drag":
+        # Hauling: every pull uses the whole reach; speed changes the pull rate, not its length.
+        stride = stride_max
+    else:
+        froude = speed * speed / (G * h)
+        stride = min(h * 2.3 * froude ** .3, stride_max)
     cadence = speed / stride if stride > 0.0 else float(block["cadence_max_hz"])
     overspeed = cadence > float(block["cadence_max_hz"])
     if overspeed:
@@ -96,7 +99,7 @@ def landing_target_local(leg: dict[str, Any], speed: float, cadence: float, duty
     """Landing point in the creature's local (catalog) frame at touchdown, flat ground."""
     home = leg["home_m"]
     lead = landing_lead(speed, cadence, duty)
-    return [home[0], home[1], home[2] + lead]
+    return [home[0], home[1], home[2] + float(leg.get("stance_shift_m", 0.0)) + lead]
 
 
 def swing_point(start: Sequence[float], end: Sequence[float], u: float, clearance: float) -> list[float]:

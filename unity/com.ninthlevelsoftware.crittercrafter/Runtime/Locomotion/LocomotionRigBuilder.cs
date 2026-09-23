@@ -174,6 +174,7 @@ namespace CritterCrafter.Locomotion
                 built.hip = chain[0];
                 built.constraint = constraint;
                 built.homeLocal = CritterFrame.Position(leg.home_m);
+                built.stanceLocal = built.homeLocal + Vector3.forward * (float)leg.stance_shift_m;
                 built.reach = (float)leg.reach_m;
                 built.stroke = (float)leg.stroke_m;
                 built.clearance = (float)leg.clearance_m;

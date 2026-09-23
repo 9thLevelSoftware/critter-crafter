@@ -37,6 +37,8 @@ namespace CritterCrafter.Locomotion
             public Vector3 coxaDirection;
             public MonoBehaviour constraint;
             public Vector3 homeLocal;
+            /// <summary>Centre of the stance stroke (homeLocal unless the gait's stroke is lopsided).</summary>
+            public Vector3 stanceLocal;
             public float reach;
             public float stroke;
             public float clearance;
@@ -230,7 +232,7 @@ namespace CritterCrafter.Locomotion
             // cadence, walk/run pattern) never reclassify a foot in the air as planted.
             foreach (var leg in legs)
             {
-                leg.home = Ground(transform.TransformPoint(lag * leg.homeLocal), leg.homeLocal.y);
+                leg.home = Ground(transform.TransformPoint(lag * leg.stanceLocal), leg.homeLocal.y);
                 if (leg.planted) continue;
                 leg.swingT += dt;
                 float u = Mathf.Clamp01(leg.swingT / leg.swingDuration);
@@ -443,9 +445,28 @@ namespace CritterCrafter.Locomotion
             if (rig != null) rig.weight = ikWeight;
         }
 
+        [Tooltip("Shoulder roll toward the pulling arm for grounded (dragging) bodies (degrees).")]
+        public float dragRollDeg = 6f;
+
         void UpdateBody(float dt, float speed)
         {
             if (body == null) return;
+            if (_block.body_on_ground)
+            {
+                // The torso slides on the ground: no bob and no height from the hands. The shoulders roll
+                // toward the arm that is pulling so the effort reads.
+                int left = 0, right = 0;
+                foreach (var leg in legs)
+                    if (leg.planted && !leg.forced) { if (leg.homeLocal.x < 0f) left++; else right++; }
+                float dragRoll = speed > 0.05f && left + right > 0 ? dragRollDeg * (right - left) / (float)(left + right) : 0f;
+                float kg = 1f - Mathf.Exp(-dt / 0.15f);
+                _bodyHeight = Mathf.Lerp(_bodyHeight, 0f, kg);
+                _bodyPitch = Mathf.Lerp(_bodyPitch, 0f, kg);
+                _bodyRoll = Mathf.Lerp(_bodyRoll, dragRoll, kg);
+                body.localPosition = bodyBaseLocalPosition + Vector3.up * _bodyHeight;
+                body.localRotation = BodyRotation();
+                return;
+            }
             // Least-squares plane y = a + b x + c z through planted-foot height errors (root-local x, z).
             double n = 0, sx = 0, sz = 0, sy = 0, sxx = 0, szz = 0, sxz = 0, sxy = 0, szy = 0;
             foreach (var leg in legs)

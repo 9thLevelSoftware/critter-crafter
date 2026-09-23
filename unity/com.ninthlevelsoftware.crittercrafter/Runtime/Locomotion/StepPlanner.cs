@@ -59,10 +59,18 @@ namespace CritterCrafter.Locomotion
                 p.overspeed = true;
                 return p;
             }
-            double froude = speed * speed / (G * h);
-            double stride = h * 2.3 * Math.Pow(froude, 0.3);
             double strideMax = StrokeFraction * block.usable_stroke_m / p.duty;
-            stride = Math.Min(stride, strideMax);
+            double stride;
+            if (block.gait == "drag")
+            {
+                // Hauling: every pull uses the whole reach; speed changes the pull rate, not its length.
+                stride = strideMax;
+            }
+            else
+            {
+                double froude = speed * speed / (G * h);
+                stride = Math.Min(h * 2.3 * Math.Pow(froude, 0.3), strideMax);
+            }
             double cadence = stride > 0.0 ? speed / stride : block.cadence_max_hz;
             p.overspeed = cadence > block.cadence_max_hz;
             if (p.overspeed) cadence = block.cadence_max_hz;
@@ -109,7 +117,7 @@ namespace CritterCrafter.Locomotion
         public static double[] LandingTargetLocal(LocomotionLeg leg, double speed, double cadence, double duty)
         {
             double lead = LandingLead(speed, cadence, duty);
-            return new[] { leg.home_m[0], leg.home_m[1], leg.home_m[2] + lead };
+            return new[] { leg.home_m[0], leg.home_m[1], leg.home_m[2] + leg.stance_shift_m + lead };
         }
 
         /// <summary>Swing trajectory: smoothstep interpolation plus a sin^2 lift of <paramref name="clearance"/>.</summary>
