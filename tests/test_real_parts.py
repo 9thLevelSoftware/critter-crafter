@@ -428,3 +428,32 @@ def test_build_refuses_approved_parts_whose_pipeline_changed_since_approval(monk
     assert library_commands.stale_approvals(catalog) == []
     monkeypatch.setattr(library_commands, "realpart_pipeline_fingerprint", lambda: "d" * 64)
     assert library_commands.stale_approvals(catalog) == [compiled["part_id"]]
+
+
+def test_build_rejects_part_pipeline_code_edited_while_blender_runs(monkeypatch):
+    import click
+    from pathlib import Path
+
+    library_commands.realpart_pipeline_fingerprint()  # pinned, as library build does
+    library_commands.require_part_pipelines_unchanged()
+    original = Path.read_bytes
+
+    def saved_mid_build(self):
+        data = original(self)
+        return data + b"\n# edited\n" if self.as_posix().endswith("blender/ops_realpart.py") else data
+
+    monkeypatch.setattr(Path, "read_bytes", saved_mid_build)
+    with pytest.raises(click.ClickException, match="CC_BUILD_STALE"):
+        library_commands.require_part_pipelines_unchanged()
+
+
+@pytest.mark.parametrize("path, ok", [
+    ("parts/meshy_x_v1/meshy_x_v1_albedo.png", True), ("../outside.png", False), ("/etc/outside.png", False),
+    ("parts/../../outside.png", False), ("parts\\x.png", False), ("C:/x.png", False),
+])
+def test_library_schema_confines_part_texture_paths(path, ok):
+    import re
+
+    schema = json.loads((paths().schemas / "library.v3.schema.json").read_text(encoding="utf-8"))
+    pattern = schema["$defs"]["asset"]["properties"]["albedo_png"]["pattern"]
+    assert bool(re.match(pattern, path)) == ok

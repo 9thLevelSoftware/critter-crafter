@@ -60,7 +60,7 @@
     }},
     "asset": {"type": "object", "additionalProperties": false, "required": ["fbx", "glb"], "properties": {
       "fbx": {"type": "string"}, "glb": {"type": "string"}, "blend": {"type": "string"}, "motion": {"type": "string"},
-      "assembled_glb": {"type": "string"}, "polish_fingerprint": {"type": "string"}, "albedo_png": {"type": "string"},
+      "assembled_glb": {"type": "string"}, "polish_fingerprint": {"type": "string"}, "albedo_png": {"type": "string", "pattern": "^(?![/.])(?!.*(^|/)\\.\\.(/|$))[^\\\\:]+$"},
       "clips": {"type": "array", "items": {"$ref": "#/$defs/clip"}}, "triangles": {"type": "integer", "minimum": 0}
     }},
     "joint": {"type": "object", "additionalProperties": false, "required": ["joint_id", "parent_joint", "canonical_position_n", "canonical_rotation_xyzw", "primary_axis", "secondary_axis", "limits_deg"], "properties": {

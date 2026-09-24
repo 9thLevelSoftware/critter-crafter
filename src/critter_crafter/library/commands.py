@@ -73,6 +73,19 @@ def realpart_pipeline_fingerprint() -> str:
     return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
 
 
+def require_part_pipelines_unchanged() -> None:
+    """Fail when part pipeline code changed after the build pinned its fingerprints.
+
+    Blender imports the op modules only once it starts, so an edit saved between pinning and that
+    import would put new code's artifacts under the old fingerprint. Recompute uncached and compare.
+    """
+    for fingerprint in (part_pipeline_fingerprint, realpart_pipeline_fingerprint):
+        fresh = getattr(fingerprint, "__wrapped__", fingerprint)()
+        if fresh != fingerprint():
+            raise click.ClickException("CC_BUILD_STALE: part pipeline code changed while Blender was "
+                                       "building; nothing was recorded, rebuild")
+
+
 def part_pipeline_for(part: dict[str, Any]) -> str:
     return realpart_pipeline_fingerprint() if part.get("real") else part_pipeline_fingerprint()
 
@@ -482,6 +495,7 @@ def library_build(out_root: Path | None, clean: bool) -> None:
         result = run_op("batch", {"jobs": pending}) if pending else {"results": []}
     except BlenderError as e:
         raise click.ClickException(str(e))
+    require_part_pipelines_unchanged()
     problems = apply_results(catalog, out, result["results"])
     if problems:
         for problem in problems:
