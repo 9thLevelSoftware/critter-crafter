@@ -316,3 +316,34 @@ def test_a_review_goes_stale_when_any_reviewed_input_changes(tmp_path, monkeypat
     monkeypatch.setattr(part_commands, "qa_pipeline_fingerprint", lambda: "changed judge")
     current = part_commands.review_inputs(catalog, tmp_path, part, 3, plans)
     assert "qa_pipeline" in part_commands.stale_review_inputs(recorded, current)
+
+
+def test_default_length_uses_only_branches_of_the_exact_profile_version():
+    catalog = _catalog()
+    old = next(p for p in catalog["binding_profiles"] if p["binding_profile_id"] == "insect_leg4_articulated")
+    before = part_commands.default_length(catalog, old)
+    newer = dict(copy.deepcopy(old), binding_profile_version="9.0.0", binding_profile_hash="f" * 64)
+    catalog["binding_profiles"].append(newer)
+    moved = 0
+    for skeleton in catalog["skeletons"]:
+        for branch in skeleton["branches"]:
+            if branch["binding_profile_id"] == old["binding_profile_id"] and moved < 60:
+                branch.update(binding_profile_version="9.0.0", binding_profile_hash="f" * 64, length_m=4.0)
+                moved += 1
+    assert part_commands.default_length(catalog, newer) == 4.0
+    remaining = part_commands.default_length(catalog, old)
+    assert remaining != 4.0 and abs(remaining - before) < 0.3
+
+
+def test_qa_fingerprint_covers_the_whole_verdict_module(monkeypatch):
+    from pathlib import Path
+
+    before = part_commands.qa_pipeline_fingerprint()
+    original = Path.read_bytes
+
+    def edited(self):
+        data = original(self)
+        return data + b"\n# verdict logic changed\n" if self.as_posix().endswith("parts/commands.py") else data
+
+    monkeypatch.setattr(Path, "read_bytes", edited)
+    assert part_commands.qa_pipeline_fingerprint() != before

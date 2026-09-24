@@ -73,9 +73,11 @@ def _profile(catalog: dict[str, Any], profile_id: str, version: str | None = Non
 
 
 def default_length(catalog: dict[str, Any], profile: dict[str, Any]) -> float:
-    """Median branch length for the profile, so one part covers the most branches (0.8-1.25x)."""
+    """Median branch length for the exact profile (id, version and hash, as acceptance requires), so
+    one part covers the most branches (0.8-1.25x)."""
+    identity = (profile["binding_profile_id"], profile["binding_profile_version"], profile["binding_profile_hash"])
     lengths = [b["length_m"] for s in catalog["skeletons"] for b in s["branches"]
-               if b["binding_profile_id"] == profile["binding_profile_id"]]
+               if (b["binding_profile_id"], b["binding_profile_version"], b["binding_profile_hash"]) == identity]
     if not lengths:
         raise click.ClickException(f"no skeleton branch uses {profile['binding_profile_id']}")
     return round(round(statistics.median(lengths) / 0.05) * 0.05, 2)
@@ -356,15 +358,13 @@ def judge(real: dict[str, Any], reference: dict[str, Any]) -> list[str]:
 
 
 def qa_pipeline_fingerprint() -> str:
-    """Code and thresholds that produce a QA verdict: assembly, deformation metrics, judge, shots."""
-    import inspect
-
+    """Code that produces a QA verdict: assembly and deformation metrics in Blender, and this whole
+    module (review planning, reference aggregation, judge, thresholds, pass/fail). Any edit here
+    retires existing reviews; that is deliberate, a verdict must never outlive its logic."""
     package = Path(__file__).resolve().parents[1]
-    names = ("blender/ops_partqa.py", "blender/ops_assemble.py", "blender/rigkit.py", "blender/frame.py")
+    names = ("blender/ops_partqa.py", "blender/ops_assemble.py", "blender/rigkit.py", "blender/frame.py",
+             "parts/commands.py")
     payload: dict[str, Any] = {name: hashlib.sha256((package / name).read_bytes()).hexdigest() for name in names}
-    payload["judge"] = hashlib.sha256(inspect.getsource(judge).encode()).hexdigest()
-    payload["limits"] = [STRAIN_P99_LIMIT, STRAIN_P01_LIMIT, FLIPPED_LIMIT]
-    payload["clips"] = [list(c) for c in REVIEW_CLIPS]
     payload["contract"] = "partqa-v1: all clips every 2nd frame + IK stride poses"
     return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
 
