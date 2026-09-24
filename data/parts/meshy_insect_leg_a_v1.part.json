@@ -1,0 +1,63 @@
+{
+  "schema_version": "3.0.0",
+  "part_id": "meshy_insect_leg_a_v1",
+  "category": "limb",
+  "template": "insect_leg4",
+  "binding_profile_id": "insect_leg4_articulated",
+  "binding_profile_version": "1.0.0",
+  "side": "symmetric",
+  "girth_m": 0.135,
+  "species_tags": [
+    "insectoid"
+  ],
+  "roles": [
+    "locomotor"
+  ],
+  "size_class": null,
+  "status": "draft",
+  "style_profile": "flesh_stylized_v1",
+  "dimensions_m": [
+    0.151019,
+    0.206053,
+    0.946455
+  ],
+  "length_m": 0.9,
+  "budget": {
+    "max_triangles": 2500,
+    "max_material_slots": 1,
+    "texture_size": 1024
+  },
+  "fallback": {
+    "primitive": "capsule",
+    "albedo": "#5b4648"
+  },
+  "provenance": {
+    "source": "meshy",
+    "meshy_task_id": "01a0c114-0370-7365-a89c-30082aacfb18",
+    "license": "meshy-output: may be paid-private; never publish mesh, texture or render bytes"
+  },
+  "real": {
+    "archive_path": "procedural-biomass-assembly/artifacts/meshy_mcp_scout/biomass_insect_leg_v1/01a0c114-0370-7365-a89c-30082aacfb18",
+    "sha256": "d057bffb94c25c20c35114ee1d31cf7cbf7a9f64075ba72c8bdd944208516f48",
+    "fit": {
+      "axis": "+x"
+    },
+    "measured": {
+      "dimensions_m": [
+        0.151019,
+        0.206053,
+        0.946455
+      ],
+      "uniform_scale": 0.38501,
+      "radial_scale": 0.792962,
+      "radial_scale_wanted": 0.792962,
+      "nominal_girth_m": 0.170248,
+      "up_source": "bend",
+      "end_to_end_bend_deg": 110.481,
+      "strain_p99": 1.4128,
+      "strain_max": 1.7193,
+      "islands": 1,
+      "triangles": 1939
+    }
+  }
+}

@@ -184,6 +184,10 @@ from .skeletons import commands as _skeleton_commands  # noqa: E402
 
 main.add_command(_skeleton_commands.skeleton)
 
+from .parts import commands as _part_commands  # noqa: E402
+
+main.add_command(_part_commands.part)
+
 
 if __name__ == "__main__":
     main()

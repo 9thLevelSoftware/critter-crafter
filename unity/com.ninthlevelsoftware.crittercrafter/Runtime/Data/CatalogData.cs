@@ -447,6 +447,8 @@ namespace CritterCrafter
         public string fbx;
         public string glb;
         public int triangles;
+        /// <summary>Base-colour map of a real (sourced) part, relative to the library root; empty for placeholders.</summary>
+        public string albedo_png;
     }
 
     [Serializable]

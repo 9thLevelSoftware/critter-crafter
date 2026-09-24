@@ -7,7 +7,7 @@ import pytest
 from critter_crafter.blender.runner import run_op
 from critter_crafter.config import find_blender, paths
 from critter_crafter.library.catalog import compile_catalog, load_sources
-from critter_crafter.library.commands import apply_results, build_jobs
+from critter_crafter.library.commands import apply_results, build_jobs, real_part_source
 from critter_crafter.library.export_validation import validate_glb_motion, validate_glb_rest, validate_glb_surface
 from critter_crafter.skeletons.action_qa import evaluate_actions
 from critter_crafter.skeletons.qa import evaluate_motion
@@ -21,6 +21,8 @@ if not find_blender():
 def built(tmp_path_factory):
     out = tmp_path_factory.mktemp("lib")
     catalog = compile_catalog(load_sources(paths().data))
+    # Real parts need the private asset archive; without it the rest of the library is still built.
+    catalog["parts"] = [p for p in catalog["parts"] if not p.get("real") or real_part_source(p)]
     jobs = build_jobs(catalog, out)
     result = run_op("batch", {"jobs": jobs})
     problems = apply_results(catalog, out, result["results"])

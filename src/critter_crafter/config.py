@@ -94,3 +94,23 @@ def find_unity() -> str | None:
         if hits:
             return hits[-1]
     return None
+
+
+ARCHIVE_NAME = "synaptic-sea-asset-archive"
+
+
+def find_asset_archive() -> Path | None:
+    """Root of the private binary asset archive that real parts are fitted from.
+
+    CRITTER_ASSET_ARCHIVE env -> critter.toml [paths].asset_archive -> a sibling clone named
+    ``synaptic-sea-asset-archive`` next to this repository. Meshy outputs there may be paid-private
+    licensed, so they are read in place and never copied into this (public) repository.
+    """
+    env = os.environ.get("CRITTER_ASSET_ARCHIVE")
+    if env and Path(env).is_dir():
+        return Path(env)
+    cfg = _toml().get("paths", {}).get("asset_archive")
+    if cfg and Path(cfg).is_dir():
+        return Path(cfg)
+    sibling = repo_root().parent / ARCHIVE_NAME
+    return sibling if sibling.is_dir() else None

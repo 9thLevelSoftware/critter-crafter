@@ -25,3 +25,10 @@ unity/TestProject/*.sln
 .claude/settings.local.json
 *.slnx
 unity/TestProject/.vscode/
+# Real-part sources live in the private asset archive (Meshy output may be paid-private);
+# never commit mesh or texture bytes next to their source records.
+/data/**/*.glb
+/data/**/*.gltf
+/data/**/*.fbx
+/data/**/*.blend
+/data/**/*.png

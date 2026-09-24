@@ -1,0 +1,64 @@
+{
+  "schema_version": "3.0.0",
+  "part_id": "meshy_animal_skull_a_v1",
+  "category": "head",
+  "template": "head1",
+  "binding_profile_id": "head1_neck",
+  "binding_profile_version": "1.0.0",
+  "side": "symmetric",
+  "girth_m": 0.084,
+  "species_tags": [
+    "animal"
+  ],
+  "roles": [
+    "detail"
+  ],
+  "size_class": null,
+  "status": "draft",
+  "style_profile": "flesh_stylized_v1",
+  "dimensions_m": [
+    0.195416,
+    0.256852,
+    0.306512
+  ],
+  "length_m": 0.3,
+  "budget": {
+    "max_triangles": 3500,
+    "max_material_slots": 1,
+    "texture_size": 1024
+  },
+  "fallback": {
+    "primitive": "capsule",
+    "albedo": "#c9c0ad"
+  },
+  "provenance": {
+    "source": "meshy",
+    "meshy_task_id": "01a0c171-7cb8-7058-860e-243cbf38ade0",
+    "license": "meshy-output: may be paid-private; never publish mesh, texture or render bytes"
+  },
+  "real": {
+    "archive_path": "procedural-biomass-assembly/artifacts/meshy_mcp_scout/biomass_animal_skull_v1/01a0c171-7cb8-7058-860e-243cbf38ade0",
+    "sha256": "671d3d1285e7e6209627cae1385ff9e6e3a14c2d6e2ce51e4dd741ee98af1f60",
+    "fit": {
+      "axis": "+z",
+      "up": "+y"
+    },
+    "measured": {
+      "dimensions_m": [
+        0.195416,
+        0.256852,
+        0.306512
+      ],
+      "uniform_scale": 0.161137,
+      "radial_scale": 1.0,
+      "radial_scale_wanted": 1.0,
+      "nominal_girth_m": 0.210972,
+      "up_source": "authored",
+      "end_to_end_bend_deg": 0.0,
+      "strain_p99": 1.0,
+      "strain_max": 1.0,
+      "islands": null,
+      "triangles": 1460
+    }
+  }
+}
