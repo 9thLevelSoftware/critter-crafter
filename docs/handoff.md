@@ -49,9 +49,9 @@ Copy-Item tests/golden_v3/*.json unity/com.ninthlevelsoftware.crittercrafter/Tes
 uv run critter library build                    # ~5 min: Blender bakes every skeleton/part -> library/
 uv run critter skeleton qa                      # motion + export + locomotion QA for all skeletons
 uv run critter part list                        # real parts: status, archive source, last QA verdict
-uv run critter part refit --all                 # after changing parts/fit.py or ops_realpart.py (keeps status)
+uv run critter part refit --all                 # after changing parts/fit.py or ops_realpart.py (approved -> draft)
 uv run critter part review <part_id>            # ~5 min: every clip + IK stride poses on 3 accepting skeletons
-uv run critter part approve <part_id>           # owner only, after looking at work/review/parts/<id>/sheet.png
+uv run critter part approve <part_id>           # owner only, after the sheet; pins the reviewed pipeline
 ```
 
 Unity, headless (close any open editor on the TestProject first):

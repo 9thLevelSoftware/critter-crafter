@@ -41,6 +41,16 @@ branch and all eight clips, for a look in Unity or any viewer before approval.
 Approving a part makes it generatable, which changes the golden recipes. Afterwards run `critter recipe
 golden`, copy the goldens into the Unity package and rebuild the library.
 
+An approval is bound to what was reviewed:
+
+- `approve` refuses a review whose inputs have changed since it ran. The inputs are:
+  - the part build and the reviewed skeletons' built clips;
+  - every part in the compared recipes;
+  - the QA code and thresholds.
+- `approve` records the part pipeline fingerprint in `real.approved_pipeline`. After a fitter change,
+  `library build` stops with `CC_APPROVAL_STALE` rather than put unreviewed geometry into generation.
+- `refit` returns an approved part to `draft`. Build, review and approve it again.
+
 ## Pipeline
 
 `blender/ops_realpart.py` runs these steps, and each one is deterministic for the same source bytes:
