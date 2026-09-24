@@ -1,8 +1,8 @@
-# Handoff: critter-crafter (2026-09-23)
+# Handoff: critter-crafter (2026-09-24)
 
 ## Current state (one paragraph)
 
-The v3 skeleton foundation and **runtime foot-placement locomotion** are complete, tested and reviewed visually in Unity by the owner. They are on branch `feature/runtime-locomotion`, open as [PR #1](https://github.com/9thLevelSoftware/critter-crafter/pull/1) against `main` (10 commits, `7b48908`..`3084c72`); `main` is still at M0 (`6379277`). The library has **13 archetypes × 3 presets = 39 draft skeletons**, all passing QA. Every skeleton publishes walk, run and max speeds, and all 39 reach the game's 2.5 m/s. **Next milestone: M2** (real parts from the existing Meshy scout meshes, no credits). **After that: M5** (Synaptic Sea integration).
+The v3 skeleton foundation and **runtime foot-placement locomotion** are merged to `main` ([PR #1](https://github.com/9thLevelSoftware/critter-crafter/pull/1)). The library has **13 archetypes × 3 presets = 39 draft skeletons**, all passing QA, and all 39 reach the game's 2.5 m/s. **M2 (real parts) is implemented and waiting on the owner.** Four Meshy scout meshes are fitted into production parts: an insect leg, a frayed arm, an animal skull and a tentacle. All four are built into the library with their textures and pass deformation QA through every clip against the placeholders they replace (see [M2 status](#m2-status-real-parts)). They stay `draft` until the owner reviews the sheets and runs `critter part approve`. The Unity texture binding is written but has **not been run in Unity** yet. **Next:** owner review of M2, a Unity import and EditMode run, then **M5** (Synaptic Sea integration).
 
 ## What the project is
 
@@ -34,18 +34,24 @@ critter-crafter is a standalone tool that builds procedural monsters from three 
 | Unity | `F:\Unity\6000.6.0f1\Editor\Unity.exe`; test project `unity/TestProject` |
 | Animation Rigging | Resolves to the built-in 6.6.0. The package declares `1.3.0`. |
 | Enter Play Mode Options | The TestProject has them enabled (no domain or scene reload), set by the Play Mode test and capture. This is intentional. |
-| Gitignored build output | `work/` (reviews, logs), `library/` (built library), `dist/` |
+| Asset archive | `9thLevelSoftware/synaptic-sea-asset-archive` (private) cloned **next to** this repo, or `CRITTER_ASSET_ARCHIVE` / `[paths].asset_archive` in `critter.toml`. Needed only to build real parts. |
+| Gitignored build output | `work/` (reviews, logs, part previews), `library/` (built library), `dist/` |
+| Linux / cloud sessions | Blender 5.2.2 for Linux (`CRITTER_BLENDER`) runs the whole suite. Workbench/EEVEE renders need Mesa EGL (`apt-get install libegl1 libegl-mesa0 libgl1-mesa-dri`). There is no Unity there. |
 
 ## Everyday commands
 
 ```powershell
-uv run pytest                                   # 254 tests, ~5 min with Blender (-m "not blender": ~15 s)
+uv run pytest                                   # 279 tests, ~4 min with Blender (-m "not blender": ~15 s)
 uv run critter skeleton vary --force            # regenerate the 39 draft skeletons from archetypes.py
 uv run critter schema validate
 uv run critter recipe golden                    # writes tests/golden_v3/{catalog,recipes,locomotion}.json
 Copy-Item tests/golden_v3/*.json unity/com.ninthlevelsoftware.crittercrafter/Tests/Editor/GoldenV3/
 uv run critter library build                    # ~5 min: Blender bakes every skeleton/part -> library/
 uv run critter skeleton qa                      # motion + export + locomotion QA for all skeletons
+uv run critter part list                        # real parts: status, archive source, last QA verdict
+uv run critter part refit --all                 # after changing parts/fit.py or ops_realpart.py (keeps status)
+uv run critter part review <part_id>            # ~5 min: every clip + IK stride poses on 3 accepting skeletons
+uv run critter part approve <part_id>           # owner only, after looking at work/review/parts/<id>/sheet.png
 ```
 
 Unity, headless (close any open editor on the TestProject first):
@@ -87,7 +93,9 @@ The golden, Unity-test and QA steps fail loudly if skipped.
 | Unity review | `Runtime/Review/` (`ReviewCourse`, `LocomotionRecorder`), `Editor/LocomotionCapture.cs` |
 | Animator | `Editor/AnimatorBuilder.cs`: an Idle state plus a Locomotion blend on `Gait`, with Motion Time set to `GaitPhase` |
 | Tests | `tests/test_locomotion.py`; Unity `Tests/Editor/StepPlannerGoldenTests.cs` and `LibraryTests.RuntimeLegsPlantFeetAtGameSpeed` |
-| Docs | `docs/locomotion.md` (model and integration), `docs/foundation-v3.md`, `docs/frame.md` |
+| Real parts | `parts/fit.py` (pure-Python centerline, straightening, joint remap, envelope, weights), `parts/commands.py` (`critter part ...`, QA judge), `blender/ops_realpart.py` (import, clean, loops, texture, export), `blender/ops_partqa.py` (clip deformation metrics and review renders), `data/parts/meshy_*.part.json` (source records) |
+| Tests | also `tests/test_real_parts.py` (no Blender) and `tests/test_real_parts_blender.py` (needs Blender and the archive) |
+| Docs | `docs/locomotion.md` (model and integration), `docs/parts.md` (real parts), `docs/foundation-v3.md`, `docs/frame.md` |
 
 ## Hard-won lessons (read before touching locomotion)
 
@@ -107,6 +115,28 @@ The golden, Unity-test and QA steps fail loudly if skipped.
 8. **The body bob only dips.** Raising the hips costs a trailing foot its reach.
 9. **Grounded (dragger) bodies heave about the rear of the torso** (`body_pivot_m`). Pivoting at the creature origin sank the dragged tail through the floor.
 
+## Hard-won lessons (real parts)
+
+1. **Meshy low-poly GLBs arrive shredded.** The glTF importer splits every UV seam, so a 1,450-triangle
+   arm imports as 600+ islands. Merge by distance (1e-5 of the diagonal) before any topology work.
+2. **Don't parameterize a bent mesh by closest-point projection.** On tight bends and bulky root blobs
+   it jumps between branches of the centerline and tears the straightened mesh (edge strain 13–30×).
+   The level sets of `geodesic_from_root − geodesic_from_tip` are continuous everywhere, and a spike
+   keeps its base's value. Map them to arc length and add the offset's tangent component. That took
+   straightening strain to about 1.4–1.6×, which is the physical minimum for these bends.
+3. **Area-weighted face centroids, not vertex averages.** Low-poly vertex density follows detail
+   (fingers, spikes), not shape.
+4. **Thick low-poly joints collapse under narrow rigid bands.** The scout insect leg's inner knee hit
+   p01 0.49 in the hexapod crouch. Rubber-hose blending plus edge loops at the weight breakpoints fixed
+   it. Loops without widening the band made it worse, because the bend just concentrated.
+5. **Baked walk/run clips don't bend legs** (the runtime IK does), so clip-only QA misses the stepping
+   knee range. `critter part review` adds IK stride poses (front and back of the stroke, swing apex).
+6. **The QA judge is relative to the placeholder on the same branch.** Absolute strain limits either
+   fail every crouched insect leg or pass everything; the placeholders already survived anatomy review.
+7. **Never commit Meshy bytes.** This repository is public and the archive is paid-private. Records keep
+   only the path, SHA-256, fit and measured envelope; meshes, textures, previews and review sheets stay
+   in `library/` and `work/`.
+
 ## Open issues and follow-ups
 
 - **Turns and slopes:**
@@ -114,29 +144,59 @@ The golden, Unity-test and QA steps fail loudly if skipped.
   - a few centimetres of downhill foot slide on the 20° ramp;
   - the first stride from standing can drag a foot (tests exclude the first second);
   - see `docs/locomotion.md` → Known limitations.
-- **Dragger refinement.** The owner said "refine later". Placeholder parts make the hands read as feet and the head small; real parts will help. Possible tuning: `dragSurge`, `dragHeaveDeg`, `dragRollDeg` on `CreatureGait`, and the arm stance in `_dragger`.
+- **Dragger refinement.** The owner said "refine later". Placeholder parts make the hands read as feet and the head small. The real arm and skull fit dragger branches, so approving them should help. Possible tuning: `dragSurge`, `dragHeaveDeg`, `dragRollDeg` on `CreatureGait`, and the arm stance in `_dragger`.
+- **Arms fit leg branches.** A `limb3_plantigrade` part matches arm and leg branches alike (no
+  `tags_any` on any branch), so the real arm also becomes humanoid and quadruped legs, walking on
+  hands. Decide whether that's a feature; if not, tag leg branches and ship leg parts.
 - **Pools** (`data/pools/pools.json`) still list only the biped, quadruped and crawler families. Add the new families when the game needs them; this changes the golden recipes.
 - **All 39 skeletons are still `draft`.** `critter skeleton approve` needs a passing review receipt from `critter skeleton review`. This process predates runtime locomotion and may deserve simplifying, given the owner's no-governance preference.
 - **Variety** is still 13 body plans × 3 presets, well below M4's target of at least 80 skeletons. The earlier review suggested optional branches (tails, dorsal parts, extra arms) and wider seeded proportions.
 
-## Next: M2 (real parts, no credits)
+## M2 status (real parts)
 
-From the plan:
+What was asked (from the plan): import the scout meshes, clean → fit → weight → QA → export. Accept when
+at least 3 parts pass QA including deformation under the family clips, the owner approves them, and a
+mixed real-plus-placeholder library imports and animates in Unity.
 
-- import the scout meshes in `synaptic-sea-asset-archive` (`procedural-biomass-assembly/artifacts/{meshy_mcp_scout,biomass_frayed_stumps}`);
-- then clean → fit → weight → QA → export.
+| Part | Profile | Length | Fit | Deformation QA (worst skeleton, real vs placeholder) |
+|---|---|---|---|---|
+| `meshy_insect_leg_a_v1` | `insect_leg4_articulated` | 0.90 m | modelled with a 110° knee, straightened (strain p99 1.41); radial 0.79; 1,939 tris with edge loops; `smooth` weights | crawler, hexapod, radial: p01 0.62 (0.71), p99 1.40 (1.61), flipped 0.06% (1.33%) |
+| `meshy_frayed_arm_a_v1` | `limb3_plantigrade` | 0.85 m | 9° bend (strain p99 1.64); radial 0.94; frayed shoulder tendrils ride rigidly; 1,904 tris | biped, dragger, quadruped: p01 0.60 (0.41–0.64), p99 1.47 (1.74), flipped 0.54% (0.88%) |
+| `meshy_tentacle_a_v1` | `tentacle8_flexible` | 1.60 m | S-curve straightened (strain p99 1.40); suckers ventral; 1,832 tris | dragger belly, the only accepting skeleton at 1.6 m: p01 0.84 (0.80), p99 1.17 (1.21), 0 flipped |
+| `meshy_animal_skull_a_v1` | `head1_neck` | 0.30 m | rigid, centred on its bounding box, snout on +Z; 1,460 tris | biped, dragger, quadruped: rigid single bone, strain 1.000 |
 
-Recommended tooling from the tools research:
+The QA numbers are the worst over the reviewed skeletons, with the replaced placeholder in brackets; lower
+p99 and higher p01 are better. The review covers all 8 baked clips (every second frame) plus IK stride
+poses.
 
-- **Weighting:** voxel-remesh proxy plus Blender bone-heat weights, then **Robust Skin Weights Transfer** (the Blender port `sentfromspacevr/robust-weight-transfer`, which has 5.2 forks) onto the real Meshy mesh.
-- **Biomass joins and a watertight proxy:** Blender 5 SDF volume-grid nodes, or `manifold3d`.
-- **Checks and LODs:** glTF-Validator and meshoptimizer.
+Status against acceptance:
 
-Accept M2 when:
+- **≥3 parts pass QA:** done. `critter part list` shows the verdicts; the reports are in
+  `work/review/parts/<id>/qa.json`.
+- **Owner approval:** pending. Open `work/review/parts/<id>/sheet.png` (5 clip frames × 3 skeletons)
+  and `work/parts/<id>/preview.png`, then run `critter part approve <id>`. Approval makes a part
+  generatable, which changes the golden recipes: re-run `recipe golden` and copy the goldens into the
+  Unity package.
+- **Unity import and animation:** pending. A built library now carries `asset.albedo_png` per real part.
+  `LibraryImporter` copies the PNG and binds it to `_BaseMap`/`_MainTex`. That C# is unverified: run the
+  EditMode tests and import `library/biomass_core-v0.2.0` once. Until a part is approved, draft-review
+  assemblies still use the placeholders. To look at a real part in Unity before approval, use the
+  mixed creature `critter part review` exports (`work/review/parts/<id>/<skeleton>_mixed.fbx|.glb`):
+  the first reviewed skeleton, with the real part on every accepting branch and all eight clips. The
+  FBX has no texture path, so assign `<id>_albedo.png` from the built library.
 
-- at least 3 parts pass QA, including deformation under the family clips;
-- the owner approves them;
-- a mixed real-plus-placeholder library imports and animates in Unity.
+Not done in M2, by design or for lack of time:
+
+- **Connectors from the frayed stumps and shoulders.** Connectors are two-bone skinned joins with a
+  different fit; this is the next real-part job.
+- **The high-poly scout meshes** (250k–830k triangles). The decimation path exists, but none was
+  reviewed. Two of the high-poly tentacles look straighter than `01a0c123` and are worth a try.
+- **The coiled tentacle `01a0c11e`.** Reject or regenerate it; a loop can't be straightened.
+- **Size coverage.** One length per part covers 0.8–1.25× of it. The tentacle profile spans 0.55–3.26 m,
+  so import length variants (`--length`) of the same source for more coverage.
+- **Weighting upgrade.** Voxel proxy + bone heat + Robust Skin Weights Transfer (from the tools
+  research) remains the upgrade if review shows pinching. Axial weights plus loops passed QA, so it
+  wasn't needed yet.
 
 ## M5 notes (Synaptic Sea)
 
