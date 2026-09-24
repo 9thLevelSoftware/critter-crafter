@@ -347,3 +347,43 @@ def test_qa_fingerprint_covers_the_whole_verdict_module(monkeypatch):
 
     monkeypatch.setattr(Path, "read_bytes", edited)
     assert part_commands.qa_pipeline_fingerprint() != before
+
+
+def test_cached_real_part_is_stale_once_its_archive_source_is_replaced(tmp_path, monkeypatch):
+    import hashlib
+
+    archive = tmp_path / "archive"
+    source = archive / "meshes" / "leg"
+    source.parent.mkdir(parents=True)
+    source.write_bytes(b"glTF original")
+    part = {"part_id": "x_v1", "real": {"archive_path": "meshes/leg",
+                                        "sha256": hashlib.sha256(b"glTF original").hexdigest()}}
+    monkeypatch.setattr(library_commands, "find_asset_archive", lambda: archive)
+    assert library_commands.real_source_unchanged(part)
+    source.write_bytes(b"glTF replaced in place")
+    assert not library_commands.real_source_unchanged(part)
+    monkeypatch.setattr(library_commands, "find_asset_archive", lambda: None)
+    assert library_commands.real_source_unchanged(part)  # no archive: keep the recorded build
+
+
+def test_review_writes_no_report_when_inputs_change_while_blender_runs(tmp_path, monkeypatch):
+    from click.testing import CliRunner
+
+    catalog = _catalog()
+    for skeleton in catalog["skeletons"]:
+        skeleton["content_fingerprint"] = "built"
+    part = next(p for p in real_parts(catalog) if p["binding_profile_id"] == "insect_leg4_articulated")
+    part["asset"] = {"fbx": "parts/x.fbx", "glb": "parts/x.glb", "triangles": 1}
+    monkeypatch.setattr(library_commands, "_built_catalog", lambda *a, **k: (catalog, tmp_path))
+    monkeypatch.setattr(library_commands, "part_build_state", lambda p, out, **_: {"part": p["part_id"]})
+    monkeypatch.setattr(part_commands, "_qa_path", lambda pid: tmp_path / "qa.json")
+
+    def blender_batch_during_which_the_judge_is_edited(op, args):
+        monkeypatch.setattr(part_commands, "qa_pipeline_fingerprint", lambda: "edited mid-review")
+        return {"results": []}
+
+    monkeypatch.setattr(part_commands, "run_op", blender_batch_during_which_the_judge_is_edited)
+    result = CliRunner().invoke(part_commands.part, ["review", part["part_id"]])
+    assert result.exit_code != 0
+    assert "qa_pipeline changed while the review ran" in result.output
+    assert not (tmp_path / "qa.json").exists()

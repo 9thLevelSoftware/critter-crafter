@@ -442,13 +442,16 @@ def part_review(part_id: str, limit: int, size: int) -> None:
         jobs.append({"op": "partqa", "args": {**common, "recipe": base, "measure": sorted(set(replaced)),
                                               "parts": {p: parts[p] for p in _recipe_parts(base)}}})
         meta.append((skeleton, replaced, shots))
+    # Snapshot what the verdict depends on before Blender loads it, and again afterwards: a library
+    # rebuild or a code edit during the batch must not be stamped onto metrics taken from older inputs.
+    inputs = review_inputs(built, src, part, limit, plans)
     click.echo(f"deforming {part_id} on {len(meta)} skeleton(s) ...")
     try:
         results = run_op("batch", {"jobs": jobs})["results"]
     except BlenderError as e:
         raise click.ClickException(str(e))
-    report: dict[str, Any] = {"part_id": part_id, "inputs": review_inputs(built, src, part, limit, plans),
-                              "skeletons": []}
+    require_unchanged_inputs(part_id, inputs, limit)
+    report: dict[str, Any] = {"part_id": part_id, "inputs": inputs, "skeletons": []}
     pngs, labels = [], []
     passed = True
     for (skeleton, replaced, shots), real_res, ref_res in zip(meta, results[0::2], results[1::2]):
@@ -474,6 +477,20 @@ def part_review(part_id: str, limit: int, size: int) -> None:
         click.echo(f"mixed creature with every clip: {path}")
     if not passed:
         raise SystemExit(1)
+
+
+def require_unchanged_inputs(part_id: str, before: dict[str, Any], limit: int) -> None:
+    """Re-read the built library and fail the review if anything it covers changed while it ran."""
+    from ..library.commands import _built_catalog
+
+    built, src = _built_catalog()
+    part = next((p for p in built["parts"] if p["part_id"] == part_id), None)
+    if part is None:
+        raise click.ClickException(f"{part_id} disappeared from the library during the review; review again")
+    changed = stale_review_inputs(before, review_inputs(built, src, part, limit, plan_review(built, part, limit)))
+    if changed:
+        raise click.ClickException(f"{part_id}: {', '.join(changed)} changed while the review ran; "
+                                   f"no report written, review again")
 
 
 def stale_review_inputs(recorded: dict[str, Any] | None, current: dict[str, Any]) -> list[str]:

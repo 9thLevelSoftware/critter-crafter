@@ -93,6 +93,23 @@ def real_part_source(part: dict[str, Any], archive: Path | None = None) -> Path 
     return path if path.is_file() else None
 
 
+def real_source_unchanged(part: dict[str, Any]) -> bool:
+    """False when a real part's archive source is available but no longer has its recorded hash.
+
+    Cached artifacts are only reusable while they can still be reproduced from the archive; a
+    replaced source forces a rebuild, which then fails with CC_REALPART_SOURCE_CHANGED. Without the
+    archive the recorded build state is the best evidence available and the cache is kept.
+    """
+    source = real_part_source(part)
+    if source is None:
+        return True
+    digest = hashlib.sha256()
+    with source.open("rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            digest.update(chunk)
+    return digest.hexdigest() == part["real"]["sha256"]
+
+
 def assembly_pipeline_fingerprint() -> str:
     """Fingerprint assembly code separately from the baked skeleton and parts."""
     package = Path(__file__).resolve().parents[1]
@@ -424,7 +441,8 @@ def library_build(out_root: Path | None, clean: bool) -> None:
             except ReviewError:
                 expected_part_state = None
             if (expected_part_state is not None
-                    and state.get("parts", {}).get(part["part_id"]) == expected_part_state):
+                    and state.get("parts", {}).get(part["part_id"]) == expected_part_state
+                    and real_source_unchanged(part)):
                 part["asset"] = asset
                 fresh.add(part["part_id"])
     jobs = build_jobs(catalog, out)
