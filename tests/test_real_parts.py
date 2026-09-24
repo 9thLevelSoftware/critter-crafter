@@ -349,7 +349,7 @@ def test_qa_fingerprint_covers_the_whole_verdict_module(monkeypatch):
     assert part_commands.qa_pipeline_fingerprint() != before
 
 
-def test_cached_real_part_is_stale_once_its_archive_source_is_replaced(tmp_path, monkeypatch):
+def test_cached_real_part_is_stale_once_its_archive_source_is_replaced_or_missing(tmp_path, monkeypatch):
     import hashlib
 
     archive = tmp_path / "archive"
@@ -360,10 +360,13 @@ def test_cached_real_part_is_stale_once_its_archive_source_is_replaced(tmp_path,
                                         "sha256": hashlib.sha256(b"glTF original").hexdigest()}}
     monkeypatch.setattr(library_commands, "find_asset_archive", lambda: archive)
     assert library_commands.real_source_unchanged(part)
+    assert library_commands.real_source_unchanged({"part_id": "reference_x_v1"})  # placeholders have no source
     source.write_bytes(b"glTF replaced in place")
     assert not library_commands.real_source_unchanged(part)
+    source.unlink()
+    assert not library_commands.real_source_unchanged(part)  # archive present, file moved or deleted
     monkeypatch.setattr(library_commands, "find_asset_archive", lambda: None)
-    assert library_commands.real_source_unchanged(part)  # no archive: keep the recorded build
+    assert library_commands.real_source_unchanged(part)  # no archive at all: keep the recorded build
 
 
 def test_review_writes_no_report_when_inputs_change_while_blender_runs(tmp_path, monkeypatch):

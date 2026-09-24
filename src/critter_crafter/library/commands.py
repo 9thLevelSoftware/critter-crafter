@@ -94,15 +94,22 @@ def real_part_source(part: dict[str, Any], archive: Path | None = None) -> Path 
 
 
 def real_source_unchanged(part: dict[str, Any]) -> bool:
-    """False when a real part's archive source is available but no longer has its recorded hash.
+    """False when the asset archive is available but a real part's source is missing from it or no
+    longer has its recorded hash.
 
-    Cached artifacts are only reusable while they can still be reproduced from the archive; a
-    replaced source forces a rebuild, which then fails with CC_REALPART_SOURCE_CHANGED. Without the
-    archive the recorded build state is the best evidence available and the cache is kept.
+    Cached artifacts are only reusable while they can still be reproduced from the archive; a missing
+    or replaced source forces a rebuild, which then fails with CC_ARCHIVE_MISSING or
+    CC_REALPART_SOURCE_CHANGED. Without any archive the recorded build state is the best evidence
+    available and the cache is kept.
     """
-    source = real_part_source(part)
-    if source is None:
+    if not part.get("real"):
         return True
+    archive = find_asset_archive()
+    if archive is None:
+        return True
+    source = real_part_source(part, archive)
+    if source is None:
+        return False
     digest = hashlib.sha256()
     with source.open("rb") as f:
         for chunk in iter(lambda: f.read(1 << 20), b""):
@@ -451,10 +458,11 @@ def library_build(out_root: Path | None, clean: bool) -> None:
     missing = [job["args"]["part"]["part_id"] for job in pending
                if job["op"] == "realpart" and not job["args"]["source_path"]]
     if missing:
-        raise click.ClickException(
-            f"CC_ARCHIVE_MISSING: real part source(s) not found for {', '.join(missing)}. Clone "
-            "synaptic-sea-asset-archive next to this repository, or set CRITTER_ASSET_ARCHIVE "
-            "(or [paths].asset_archive in critter.toml) to its root.")
+        archive = find_asset_archive()
+        where = (f"missing from the asset archive at {archive} (moved or deleted?)" if archive else
+                 "unavailable: clone synaptic-sea-asset-archive next to this repository, or set "
+                 "CRITTER_ASSET_ARCHIVE (or [paths].asset_archive in critter.toml) to its root")
+        raise click.ClickException(f"CC_ARCHIVE_MISSING: real part source(s) for {', '.join(missing)} {where}")
     click.echo(f"building {len(pending)} pending / {len(jobs)} assets with Blender -> {out}")
     try:
         result = run_op("batch", {"jobs": pending}) if pending else {"results": []}
