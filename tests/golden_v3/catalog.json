@@ -60255,6 +60255,206 @@
   ],
   "parts": [
     {
+      "part_id": "meshy_animal_skull_a_v1",
+      "category": "head",
+      "template": "head1",
+      "binding_profile_id": "head1_neck",
+      "binding_profile_version": "1.0.0",
+      "binding_profile_hash": "411d00a73578d55ec2c8df021ddc45dcf3760dd1de14392f90e31386c1f3c0ad",
+      "inventory_kind": "production",
+      "species_tags": [
+        "animal"
+      ],
+      "roles": [
+        "detail"
+      ],
+      "size_class": "",
+      "side": "symmetric",
+      "status": "draft",
+      "style_profile": "flesh_stylized_v1",
+      "dimensions_m": [
+        0.195416,
+        0.256852,
+        0.306512
+      ],
+      "length_m": 0.3,
+      "length_mm": 300,
+      "girth_m": 0.084,
+      "girth_mm": 84,
+      "max_triangles": 3500,
+      "max_material_slots": 1,
+      "connector_radius_m": 0.0,
+      "connector_span_m": [],
+      "connector_interface": {},
+      "fallback_primitive": "capsule",
+      "albedo": "#c9c0ad",
+      "source": "meshy",
+      "real": {
+        "archive_path": "procedural-biomass-assembly/artifacts/meshy_mcp_scout/biomass_animal_skull_v1/01a0c171-7cb8-7058-860e-243cbf38ade0",
+        "sha256": "671d3d1285e7e6209627cae1385ff9e6e3a14c2d6e2ce51e4dd741ee98af1f60",
+        "fit": {
+          "axis": "+z",
+          "up": "+y"
+        },
+        "texture_size": 1024
+      },
+      "asset": {
+        "fbx": "",
+        "glb": "",
+        "triangles": 0
+      }
+    },
+    {
+      "part_id": "meshy_frayed_arm_a_v1",
+      "category": "limb",
+      "template": "limb3",
+      "binding_profile_id": "limb3_plantigrade",
+      "binding_profile_version": "1.0.0",
+      "binding_profile_hash": "2ed865aaab228d8f38804f4222b8a7b13c01d195d0f2548891c069b69f231938",
+      "inventory_kind": "production",
+      "species_tags": [
+        "human"
+      ],
+      "roles": [
+        "locomotor",
+        "manipulator",
+        "puller"
+      ],
+      "size_class": "",
+      "side": "symmetric",
+      "status": "draft",
+      "style_profile": "flesh_stylized_v1",
+      "dimensions_m": [
+        0.303342,
+        0.199285,
+        0.876612
+      ],
+      "length_m": 0.85,
+      "length_mm": 850,
+      "girth_m": 0.187,
+      "girth_mm": 187,
+      "max_triangles": 2500,
+      "max_material_slots": 1,
+      "connector_radius_m": 0.0,
+      "connector_span_m": [],
+      "connector_interface": {},
+      "fallback_primitive": "capsule",
+      "albedo": "#6e3b44",
+      "source": "meshy",
+      "real": {
+        "archive_path": "procedural-biomass-assembly/artifacts/meshy_mcp_scout/biomass_human_arm_v1/01a0c10e-3431-73f9-8249-a9106e3f1f13",
+        "sha256": "bca3c15456a76ec2619878b353f2df295d50e604472fa3a887665cec603955ea",
+        "fit": {
+          "axis": "-y"
+        },
+        "texture_size": 1024
+      },
+      "asset": {
+        "fbx": "",
+        "glb": "",
+        "triangles": 0
+      }
+    },
+    {
+      "part_id": "meshy_insect_leg_a_v1",
+      "category": "limb",
+      "template": "insect_leg4",
+      "binding_profile_id": "insect_leg4_articulated",
+      "binding_profile_version": "1.0.0",
+      "binding_profile_hash": "e088e7673adc66d2bce1d37b45a1231bcd22608e189e3843f6c3fa8177da397b",
+      "inventory_kind": "production",
+      "species_tags": [
+        "insectoid"
+      ],
+      "roles": [
+        "locomotor"
+      ],
+      "size_class": "",
+      "side": "symmetric",
+      "status": "draft",
+      "style_profile": "flesh_stylized_v1",
+      "dimensions_m": [
+        0.151019,
+        0.206053,
+        0.946455
+      ],
+      "length_m": 0.9,
+      "length_mm": 900,
+      "girth_m": 0.135,
+      "girth_mm": 135,
+      "max_triangles": 2500,
+      "max_material_slots": 1,
+      "connector_radius_m": 0.0,
+      "connector_span_m": [],
+      "connector_interface": {},
+      "fallback_primitive": "capsule",
+      "albedo": "#5b4648",
+      "source": "meshy",
+      "real": {
+        "archive_path": "procedural-biomass-assembly/artifacts/meshy_mcp_scout/biomass_insect_leg_v1/01a0c114-0370-7365-a89c-30082aacfb18",
+        "sha256": "d057bffb94c25c20c35114ee1d31cf7cbf7a9f64075ba72c8bdd944208516f48",
+        "fit": {
+          "axis": "+x"
+        },
+        "texture_size": 1024
+      },
+      "asset": {
+        "fbx": "",
+        "glb": "",
+        "triangles": 0
+      }
+    },
+    {
+      "part_id": "meshy_tentacle_a_v1",
+      "category": "appendage",
+      "template": "tentacle8",
+      "binding_profile_id": "tentacle8_flexible",
+      "binding_profile_version": "1.0.0",
+      "binding_profile_hash": "8493287eeca1b911cf341ce10c8a76a89abbd26a5f2630ce5beec711473a1fb4",
+      "inventory_kind": "production",
+      "species_tags": [
+        "cephalopod"
+      ],
+      "roles": [
+        "locomotor",
+        "slither"
+      ],
+      "size_class": "",
+      "side": "symmetric",
+      "status": "draft",
+      "style_profile": "flesh_stylized_v1",
+      "dimensions_m": [
+        0.326232,
+        0.349937,
+        1.639705
+      ],
+      "length_m": 1.6,
+      "length_mm": 1600,
+      "girth_m": 0.288,
+      "girth_mm": 288,
+      "max_triangles": 2500,
+      "max_material_slots": 1,
+      "connector_radius_m": 0.0,
+      "connector_span_m": [],
+      "connector_interface": {},
+      "fallback_primitive": "capsule",
+      "albedo": "#a8675e",
+      "source": "meshy",
+      "real": {
+        "archive_path": "procedural-biomass-assembly/artifacts/meshy_mcp_scout/biomass_cephalopod_tentacle_v1/01a0c123-407b-77a5-b778-5e2ee086765e",
+        "sha256": "2002d6e529e7c93f62619ebfa76cbdfaf102f2801dae99242788a88ccc3ba3ff",
+        "fit": {
+          "axis": "-x"
+        },
+        "texture_size": 1024
+      },
+      "asset": {
+        "fbx": "",
+        "glb": "",
+        "triangles": 0
+      }
+    },
+    {
       "part_id": "reference_biped_digitigrade_creature_balanced_v3_arm_l_v1",
       "category": "limb",
       "template": "limb3",

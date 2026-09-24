@@ -378,8 +378,25 @@ def compile_part(
         "fallback_primitive": src.get("fallback", {}).get("primitive", "capsule"),
         "albedo": src.get("fallback", {}).get("albedo", "#a07a80"),
         "source": src.get("provenance", {}).get("source", "production"),
+        **_compile_real(src),
         "asset": {"fbx": "", "glb": "", "triangles": 0},
     }
+
+
+def _compile_real(src: dict[str, Any]) -> dict[str, Any]:
+    """Build inputs of a part fitted from a sourced mesh: archive-relative path, hash and fit only."""
+    real = src.get("real")
+    if not real:
+        return {}
+    compiled = {
+        "archive_path": real["archive_path"],
+        "sha256": real["sha256"],
+        "fit": dict(sorted(real["fit"].items())),
+        "texture_size": int(src["budget"].get("texture_size", 1024)),
+    }
+    if real.get("approved_pipeline"):
+        compiled["approved_pipeline"] = real["approved_pipeline"]
+    return {"real": compiled}
 
 
 def reference_part_id(skeleton_id: str, branch_id: str, *, connector: bool = False) -> str:

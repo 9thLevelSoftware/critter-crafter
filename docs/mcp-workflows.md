@@ -27,5 +27,6 @@ hand-tuning. Everything the CLI does in Blender is a pure `run(args) -> result` 
 * **Always confirm the credit cost with the user before calling any paid tool.**
 * Use text-to-3d, not image-to-3d, for organic shapes. Prompts come from
   `data/prompt_profiles/flesh_stylized_v1.json`. Elongated parts get "straight extended, NOT coiled".
-* Downloads have no file extension; `critter meshy import-task` (M2) detects the type from the
-  file's first bytes and registers the task against a part.
+* Downloads have no file extension. Store them in `synaptic-sea-asset-archive` (never in this public
+  repository), then fit one onto a profile with `critter part import <archive path> --part-id ...
+  --profile ... --axis ...`. It detects glTF from the file's first bytes. See [parts.md](parts.md).

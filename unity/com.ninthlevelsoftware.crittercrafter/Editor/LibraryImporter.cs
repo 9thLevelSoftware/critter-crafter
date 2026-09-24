@@ -76,6 +76,19 @@ namespace CritterCrafter.Editor
                 Directory.CreateDirectory(Path.GetDirectoryName(dst));
                 File.Copy(file, dst);
             }
+            // Real parts carry a base-colour map next to their FBX (FBX exports strip texture paths).
+            foreach (var p in catalog.parts)
+            {
+                if (string.IsNullOrEmpty(p.asset?.albedo_png)) continue;
+                var src = Path.GetFullPath(Path.Combine(sourceDir, p.asset.albedo_png));
+                var dst = Path.GetFullPath(Path.Combine(abs, p.asset.albedo_png));
+                // A tampered catalog must not read or overwrite files outside the library folders.
+                if (!IsUnder(sourceDir, src) || !IsUnder(abs, dst))
+                { report.Problems.Add($"part texture path escapes the library {p.part_id}: {p.asset.albedo_png}"); continue; }
+                if (!File.Exists(src)) { report.Problems.Add($"part texture missing {p.part_id}: {p.asset.albedo_png}"); continue; }
+                Directory.CreateDirectory(Path.GetDirectoryName(dst));
+                File.Copy(src, dst, true);
+            }
             Directory.CreateDirectory(Path.Combine(abs, "Materials"));
             Directory.CreateDirectory(Path.Combine(abs, "Controllers"));
             AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
@@ -92,6 +105,18 @@ namespace CritterCrafter.Editor
                 {
                     if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", col);
                     if (mat.HasProperty("_Color")) mat.SetColor("_Color", col);
+                }
+                if (!string.IsNullOrEmpty(p.asset.albedo_png))
+                {
+                    var albedo = AssetDatabase.LoadAssetAtPath<Texture2D>(folder + "/" + p.asset.albedo_png);
+                    if (albedo == null) report.Problems.Add($"part texture failed to import {p.part_id}: {p.asset.albedo_png}");
+                    else
+                    {
+                        if (mat.HasProperty("_BaseMap")) mat.SetTexture("_BaseMap", albedo);
+                        if (mat.HasProperty("_MainTex")) mat.SetTexture("_MainTex", albedo);
+                        if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", Color.white);
+                        if (mat.HasProperty("_Color")) mat.SetColor("_Color", Color.white);
+                    }
                 }
                 if (mat.HasProperty("_Smoothness")) mat.SetFloat("_Smoothness", 0.25f);
                 if (mat.HasProperty("_Glossiness")) mat.SetFloat("_Glossiness", 0.25f);
@@ -150,6 +175,14 @@ namespace CritterCrafter.Editor
             AssetDatabase.SaveAssets();
             report.Library = lib;
             return report;
+        }
+
+        static bool IsUnder(string root, string fullPath)
+        {
+            var prefix = Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                         + Path.DirectorySeparatorChar;
+            var comparison = Path.DirectorySeparatorChar == '\\' ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+            return fullPath.StartsWith(prefix, comparison);
         }
 
         public static Shader DefaultLitShader()

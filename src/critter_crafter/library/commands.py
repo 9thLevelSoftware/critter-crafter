@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import functools
 import hashlib
 import json
 import shutil
@@ -13,7 +14,7 @@ from typing import Any
 import click
 
 from ..blender.runner import BlenderError, run_op, snippet
-from ..config import paths
+from ..config import find_asset_archive, paths
 from ..schema.validate import validate_sources
 from ..recipes.generator import generate_for_skeleton
 from .catalog import dumps
@@ -52,6 +53,7 @@ def build_pipeline_fingerprint() -> str:
     return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
 
 
+@functools.lru_cache(maxsize=None)
 def part_pipeline_fingerprint() -> str:
     """Fingerprint only code that produces placeholder/reference part assets."""
     package = Path(__file__).resolve().parents[1]
@@ -59,6 +61,81 @@ def part_pipeline_fingerprint() -> str:
     payload = {name: hashlib.sha256((package / name).read_bytes()).hexdigest() for name in names}
     payload["contract"] = "cc-gen-3/blender-5.2/placeholder-fbx-secondary-X-v1"
     return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
+
+
+@functools.lru_cache(maxsize=None)
+def realpart_pipeline_fingerprint() -> str:
+    """Fingerprint the code that cleans, fits, weights and exports real (sourced) parts."""
+    package = Path(__file__).resolve().parents[1]
+    names = ("blender/ops_realpart.py", "parts/fit.py", "blender/rigkit.py", "blender/frame.py", "mathutil.py")
+    payload = {name: hashlib.sha256((package / name).read_bytes()).hexdigest() for name in names}
+    payload["contract"] = "cc-gen-3/blender-5.2/realpart-fbx-secondary-X-v1"
+    return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
+
+
+def require_part_pipelines_unchanged() -> None:
+    """Fail when part pipeline code changed after the build pinned its fingerprints.
+
+    Blender imports the op modules only once it starts, so an edit saved between pinning and that
+    import would put new code's artifacts under the old fingerprint. Recompute uncached and compare.
+    """
+    for fingerprint in (part_pipeline_fingerprint, realpart_pipeline_fingerprint):
+        fresh = getattr(fingerprint, "__wrapped__", fingerprint)()
+        if fresh != fingerprint():
+            raise click.ClickException("CC_BUILD_STALE: part pipeline code changed while Blender was "
+                                       "building; nothing was recorded, rebuild")
+
+
+def part_pipeline_for(part: dict[str, Any]) -> str:
+    return realpart_pipeline_fingerprint() if part.get("real") else part_pipeline_fingerprint()
+
+
+def real_part_source(part: dict[str, Any], archive: Path | None = None) -> Path | None:
+    """Absolute path of a real part's source mesh in the asset archive, or None when unavailable."""
+    real = part.get("real")
+    if not real:
+        return None
+    root = archive or find_asset_archive()
+    if root is None:
+        return None
+    base = root.resolve()
+    path = (base / real["archive_path"]).resolve()
+    # An absolute or `..` path would read an arbitrary local file instead of the private archive.
+    if not path.is_relative_to(base):
+        raise click.ClickException(f"CC_ARCHIVE_PATH: {part['part_id']}: {real['archive_path']} leaves the asset archive")
+    return path if path.is_file() else None
+
+
+def stale_approvals(catalog: dict[str, Any]) -> list[str]:
+    """Approved real parts whose approval pinned a different part pipeline than the current one."""
+    current = realpart_pipeline_fingerprint()
+    return sorted(p["part_id"] for p in catalog["parts"]
+                  if p.get("real") and p.get("status") == "approved"
+                  and p["real"].get("approved_pipeline") != current)
+
+
+def real_source_unchanged(part: dict[str, Any]) -> bool:
+    """False when the asset archive is available but a real part's source is missing from it or no
+    longer has its recorded hash.
+
+    Cached artifacts are only reusable while they can still be reproduced from the archive; a missing
+    or replaced source forces a rebuild, which then fails with CC_ARCHIVE_MISSING or
+    CC_REALPART_SOURCE_CHANGED. Without any archive the recorded build state is the best evidence
+    available and the cache is kept.
+    """
+    if not part.get("real"):
+        return True
+    archive = find_asset_archive()
+    if archive is None:
+        return True
+    source = real_part_source(part, archive)
+    if source is None:
+        return False
+    digest = hashlib.sha256()
+    with source.open("rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            digest.update(chunk)
+    return digest.hexdigest() == part["real"]["sha256"]
 
 
 def assembly_pipeline_fingerprint() -> str:
@@ -80,7 +157,8 @@ def _part_artifact_fingerprints(part: dict[str, Any], out: Path,
     """Hash the two part transports consumed by assembly and Unity."""
     asset = asset if asset is not None else part.get("asset", {})
     result: dict[str, dict[str, Any]] = {}
-    for name in ("fbx", "glb"):
+    names = ("fbx", "glb", "albedo_png") if isinstance(asset, dict) and asset.get("albedo_png") else ("fbx", "glb")
+    for name in names:
         relative = asset.get(name) if isinstance(asset, dict) else None
         if not isinstance(relative, str) or not relative:
             raise ReviewError(f"CC_PART_ASSET_MISSING: {part['part_id']}: {name}")
@@ -95,7 +173,7 @@ def part_build_state(part: dict[str, Any], out: Path, *, asset: dict[str, Any] |
                      pipeline: str | None = None) -> dict[str, Any]:
     """Current source, producer, and exact built bytes for one part."""
     return {
-        "pipeline": pipeline or part_pipeline_fingerprint(),
+        "pipeline": pipeline or part_pipeline_for(part),
         "source": _part_source_state(part),
         "artifacts": _part_artifact_fingerprints(part, out, asset),
     }
@@ -230,12 +308,23 @@ def build_jobs(catalog: dict[str, Any], out: Path, only: set[str] | None = None)
         pid = p["part_id"]
         if only and pid not in only:
             continue
-        if p["source"] not in ("placeholder", "reference"):
-            continue  # real parts come from the Meshy/clean pipeline (M2+)
         kind = "connectors" if p["category"] == "connector" else "parts"
         profile = next((pr for pr in catalog.get("binding_profiles", [])
                         if pr["binding_profile_id"] == p.get("binding_profile_id")
                         and pr["binding_profile_version"] == p.get("binding_profile_version")), None)
+        if p.get("real"):
+            source = real_part_source(p)
+            jobs.append({"op": "realpart", "args": {
+                "part": p, "template": profile or templates[p["template"]],
+                "source_path": str(source) if source else "",
+                "out_fbx": str(out / kind / pid / f"{pid}.fbx"),
+                "out_glb": str(out / kind / pid / f"{pid}.glb"),
+                "out_albedo_png": str(out / kind / pid / f"{pid}_albedo.png"),
+                "out_blend": str(masters / kind / pid / "master.blend"),
+            }})
+            continue
+        if p["source"] not in ("placeholder", "reference"):
+            continue
         jobs.append({"op": "placeholder", "args": {
             "part": p, "template": profile or templates[p["template"]],
             "out_fbx": str(out / kind / pid / f"{pid}.fbx"),
@@ -277,6 +366,30 @@ def apply_results(catalog: dict[str, Any], out: Path, results: list[dict[str, An
             p["asset"] = {"fbx": f"{kind}/{pid}/{pid}.fbx", "glb": f"{kind}/{pid}/{pid}.glb", "triangles": res["triangles"]}
             if res["triangles"] > p["max_triangles"]:
                 problems.append(f"CC_BUDGET_TRIS: {pid}: {res['triangles']} > {p['max_triangles']}")
+            if r["op"] == "realpart":
+                if res.get("texture"):
+                    p["asset"]["albedo_png"] = f"{kind}/{pid}/{pid}_albedo.png"
+                problems.extend(real_part_problems(p, res))
+    return problems
+
+
+FIT_DRIFT_M = 0.002
+
+
+def real_part_problems(part: dict[str, Any], result: dict[str, Any]) -> list[str]:
+    """A real part must rebuild to the envelope its source record declares."""
+    pid = part["part_id"]
+    problems = []
+    if result.get("source_sha256") != part["real"]["sha256"]:
+        problems.append(f"CC_REALPART_SOURCE_CHANGED: {pid}")
+    measured = result.get("fit", {}).get("dimensions_m", [])
+    declared = part["dimensions_m"]
+    if len(measured) != 3 or any(abs(float(a) - float(b)) > FIT_DRIFT_M for a, b in zip(measured, declared)):
+        problems.append(f"CC_PART_FIT_DRIFT: {pid}: built {measured} != declared {declared}; "
+                        f"run `critter part refit {pid}` to refresh the source record")
+    if result.get("max_influences", 0) > 4 or abs(result.get("min_weight_sum", 0) - 1) > 1e-4 \
+            or abs(result.get("max_weight_sum", 0) - 1) > 1e-4:
+        problems.append(f"CC_PART_WEIGHTS: {pid}")
     return problems
 
 
@@ -305,6 +418,16 @@ def library() -> None:
 def library_build(out_root: Path | None, clean: bool) -> None:
     """Build fresh skeleton, reference, and draft-review assembly artifacts."""
     catalog = _catalog()
+    # Pin the part pipelines to the code as it is now: the fingerprints are cached, so sources edited
+    # while Blender runs cannot be recorded as the code that produced this build.
+    part_pipeline_fingerprint()
+    realpart_pipeline_fingerprint()
+    stale = stale_approvals(catalog)
+    if stale:
+        raise click.ClickException(
+            f"CC_APPROVAL_STALE: {', '.join(stale)} were approved for a different real-part pipeline, so "
+            "their rebuilt geometry is unreviewed. Run `critter part refit <id>` (back to draft), then "
+            "build, `critter part review` and `critter part approve` again.")
     out = library_dir(catalog, out_root)
     if clean and out.exists():
         output_root = (out_root or paths().library_out).resolve()
@@ -316,7 +439,6 @@ def library_build(out_root: Path | None, clean: bool) -> None:
     state_path = out / ".build-state.json"
     previous = json.loads(previous_path.read_text(encoding="utf-8")) if previous_path.is_file() else {}
     state = json.loads(state_path.read_text(encoding="utf-8")) if state_path.is_file() else {}
-    part_pipeline = part_pipeline_fingerprint()
 
     def files_exist(asset: dict[str, Any], names: tuple[str, ...]) -> bool:
         return all(isinstance(asset.get(name), str) and (out / asset[name]).is_file() for name in names)
@@ -348,29 +470,39 @@ def library_build(out_root: Path | None, clean: bool) -> None:
             old = old_parts.get(part["part_id"], {})
             asset = old.get("asset")
             try:
-                expected_part_state = (part_build_state(part, out, asset=asset, pipeline=part_pipeline)
+                expected_part_state = (part_build_state(part, out, asset=asset)
                                        if isinstance(asset, dict) else None)
             except ReviewError:
                 expected_part_state = None
             if (expected_part_state is not None
-                    and state.get("parts", {}).get(part["part_id"]) == expected_part_state):
+                    and state.get("parts", {}).get(part["part_id"]) == expected_part_state
+                    and real_source_unchanged(part)):
                 part["asset"] = asset
                 fresh.add(part["part_id"])
     jobs = build_jobs(catalog, out)
     pending = [job for job in jobs if (job["args"]["skeleton"]["skeleton_id"] if job["op"] == "skeleton"
                                        else job["args"]["part"]["part_id"]) not in fresh]
+    missing = [job["args"]["part"]["part_id"] for job in pending
+               if job["op"] == "realpart" and not job["args"]["source_path"]]
+    if missing:
+        archive = find_asset_archive()
+        where = (f"missing from the asset archive at {archive} (moved or deleted?)" if archive else
+                 "unavailable: clone synaptic-sea-asset-archive next to this repository, or set "
+                 "CRITTER_ASSET_ARCHIVE (or [paths].asset_archive in critter.toml) to its root")
+        raise click.ClickException(f"CC_ARCHIVE_MISSING: real part source(s) for {', '.join(missing)} {where}")
     click.echo(f"building {len(pending)} pending / {len(jobs)} assets with Blender -> {out}")
     try:
         result = run_op("batch", {"jobs": pending}) if pending else {"results": []}
     except BlenderError as e:
         raise click.ClickException(str(e))
+    require_part_pipelines_unchanged()
     problems = apply_results(catalog, out, result["results"])
     if problems:
         for problem in problems:
             click.echo(problem, err=True)
         raise click.ClickException(f"{len(problems)} problem(s)")
     state["parts"] = {
-        part["part_id"]: part_build_state(part, out, pipeline=part_pipeline)
+        part["part_id"]: part_build_state(part, out)
         for part in catalog["parts"]
         if files_exist(part.get("asset", {}), ("fbx", "glb"))
     }
@@ -386,7 +518,7 @@ def library_build(out_root: Path | None, clean: bool) -> None:
     assembly_jobs: list[dict[str, Any]] = []
     part_states = state["parts"]
     rebuilt_parts = {
-        job["args"]["part"]["part_id"] for job in pending if job["op"] == "placeholder"
+        job["args"]["part"]["part_id"] for job in pending if job["op"] in ("placeholder", "realpart")
     }
     for index, skeleton in enumerate(catalog["skeletons"]):
         sid = skeleton["skeleton_id"]
@@ -487,15 +619,12 @@ def _built_catalog(out_root: Path | None = None, *, require_assemblies: bool = F
     built_parts = {part["part_id"]: part for part in built.get("parts", [])}
     if set(current_parts) != set(built_parts) or len(built_parts) != len(built.get("parts", [])):
         raise click.ClickException("CC_BUILD_STALE: part inventory changed; rebuild")
-    part_pipeline = part_pipeline_fingerprint()
     for part_id, current_part in current_parts.items():
         built_part = built_parts[part_id]
         if _part_source_state(built_part) != _part_source_state(current_part):
             raise click.ClickException(f"CC_BUILD_STALE: {part_id}: part source changed; rebuild")
         try:
-            actual = part_build_state(
-                current_part, src, asset=built_part.get("asset"), pipeline=part_pipeline
-            )
+            actual = part_build_state(current_part, src, asset=built_part.get("asset"))
         except ReviewError as exc:
             raise click.ClickException(str(exc)) from exc
         if state.get("parts", {}).get(part_id) != actual:

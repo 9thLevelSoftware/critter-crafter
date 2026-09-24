@@ -54,7 +54,26 @@
       "primitive": {"enum": ["capsule", "sphere", "cone", "cylinder", "box"]},
       "albedo": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$"}
     }},
-    "provenance": {"type": "object"}
+    "provenance": {"type": "object"},
+    "real": {"type": "object", "additionalProperties": false, "required": ["archive_path", "sha256", "fit"], "properties": {
+      "archive_path": {"type": "string", "pattern": "^(?![/.])(?!.*(^|/)\\.\\.(/|$))[^\\\\:]+$", "description": "Path of the source mesh relative to the asset archive root, without a leading slash or '..' segments (never copied into this repository)."},
+      "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+      "fit": {"type": "object", "additionalProperties": false, "required": ["axis"], "properties": {
+        "axis": {"enum": ["+x", "-x", "+y", "-y", "+z", "-z"]},
+        "up": {"enum": ["auto", "+x", "-x", "+y", "-y", "+z", "-z"]},
+        "up_fallback": {"enum": ["+x", "-x", "+y", "-y", "+z", "-z"]},
+        "straighten": {"type": "boolean"},
+        "trim_n": {"type": "array", "items": {"type": "number", "minimum": 0, "maximum": 1}, "minItems": 2, "maxItems": 2},
+        "joints_n": {"type": "array", "items": {"type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1}},
+        "radial_scale": {"anyOf": [{"const": "auto"}, {"type": "number", "minimum": 0.25, "maximum": 4}]},
+        "weights": {"enum": ["smooth", "flesh", "jointed", "single"]},
+        "mirror_x": {"type": "boolean"},
+        "root_center": {"enum": ["slice", "bbox"]},
+        "sharp_angle_deg": {"type": "number", "minimum": 0, "maximum": 180}
+      }},
+      "measured": {"type": "object"},
+      "approved_pipeline": {"type": "string", "pattern": "^[0-9a-f]{64}$", "description": "Real-part pipeline fingerprint of the build the owner approved; set by `critter part approve`."}
+    }}
   },
   "allOf": [{
     "if": {"properties": {"category": {"const": "connector"}}, "required": ["category"]},

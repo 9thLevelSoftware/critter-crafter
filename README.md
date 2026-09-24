@@ -65,6 +65,16 @@ Serve the final review bundle with `python -m http.server 8765 --directory work/
 
 Creatures walk with runtime foot placement: the game moves the creature and the Unity package steps its feet with Animation Rigging IK, so feet stay planted at any speed and on slopes. Each skeleton publishes its natural walk, run and maximum speeds in its catalog `locomotion` block for the game to use. Draggers crawl by hauling a grounded torso with their arms; limbless serpentines undulate in step with their travel. See [docs/locomotion.md](docs/locomotion.md) for the model, the Unity components, the review capture tool and the verification.
 
+## Real parts
+
+Meshy scout meshes from the private `synaptic-sea-asset-archive` become production parts through
+`critter part import`. The command cleans the mesh, straightens it along its geodesic centerline,
+maps its natural joints onto the binding profile, weights it and exports the usual FBX/GLB plus a
+base-colour PNG. Source records keep only the archive path, SHA-256 and fit parameters: Meshy output
+may be paid-private and this repository is public. `critter part review` deforms a part through
+every clip on the skeletons that accept it and compares it with the placeholder it replaces. See
+[docs/parts.md](docs/parts.md).
+
 ## Existing v2 workflow
 
 The frozen v2 assets are archival compatibility evidence. Their original recipe, assembly, and packaging commands require the archived v2 package/library version; the active v3 `cc-gen-3` source dispatcher rejects v2 inputs. The v2 workflow is therefore not a way to build the current v0.2.0 package.

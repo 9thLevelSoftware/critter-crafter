@@ -1,0 +1,65 @@
+{
+  "schema_version": "3.0.0",
+  "part_id": "meshy_frayed_arm_a_v1",
+  "category": "limb",
+  "template": "limb3",
+  "binding_profile_id": "limb3_plantigrade",
+  "binding_profile_version": "1.0.0",
+  "side": "symmetric",
+  "girth_m": 0.187,
+  "species_tags": [
+    "human"
+  ],
+  "roles": [
+    "locomotor",
+    "manipulator",
+    "puller"
+  ],
+  "size_class": null,
+  "status": "draft",
+  "style_profile": "flesh_stylized_v1",
+  "dimensions_m": [
+    0.303342,
+    0.199285,
+    0.876612
+  ],
+  "length_m": 0.85,
+  "budget": {
+    "max_triangles": 2500,
+    "max_material_slots": 1,
+    "texture_size": 1024
+  },
+  "fallback": {
+    "primitive": "capsule",
+    "albedo": "#6e3b44"
+  },
+  "provenance": {
+    "source": "meshy",
+    "meshy_task_id": "01a0c10e-3431-73f9-8249-a9106e3f1f13",
+    "license": "meshy-output: may be paid-private; never publish mesh, texture or render bytes"
+  },
+  "real": {
+    "archive_path": "procedural-biomass-assembly/artifacts/meshy_mcp_scout/biomass_human_arm_v1/01a0c10e-3431-73f9-8249-a9106e3f1f13",
+    "sha256": "bca3c15456a76ec2619878b353f2df295d50e604472fa3a887665cec603955ea",
+    "fit": {
+      "axis": "-y"
+    },
+    "measured": {
+      "dimensions_m": [
+        0.303342,
+        0.199285,
+        0.876612
+      ],
+      "uniform_scale": 0.379925,
+      "radial_scale": 0.942489,
+      "radial_scale_wanted": 0.942489,
+      "nominal_girth_m": 0.198411,
+      "up_source": "bend",
+      "end_to_end_bend_deg": 9.303,
+      "strain_p99": 1.6372,
+      "strain_max": 2.1859,
+      "islands": 1,
+      "triangles": 1904
+    }
+  }
+}

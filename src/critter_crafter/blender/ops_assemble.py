@@ -56,6 +56,23 @@ def _import_part_mesh(path: str) -> bpy.types.Object:
     return mesh
 
 
+def _apply_albedo(mesh: bpy.types.Object, part: dict[str, Any], library_dir: str) -> None:
+    """FBX transports drop texture paths (path_mode STRIP); re-link a real part's base colour map."""
+    albedo = part.get("asset", {}).get("albedo_png")
+    if not albedo:
+        return
+    path = Path(library_dir) / albedo
+    if not path.is_file():
+        raise ValueError(f"CC_PART_TEXTURE_MISSING: {part['part_id']}: {albedo}")
+    mat = rigkit.flesh_material(f"M_{part['part_id']}", part.get("albedo", "#9b6874"))
+    tex = mat.node_tree.nodes.new("ShaderNodeTexImage")
+    tex.image = bpy.data.images.load(str(path), check_existing=True)
+    bsdf = next(n for n in mat.node_tree.nodes if n.type == "BSDF_PRINCIPLED")
+    mat.node_tree.links.new(tex.outputs["Color"], bsdf.inputs["Base Color"])
+    for slot in mesh.material_slots:
+        slot.material = mat
+
+
 def _rename_groups(obj: bpy.types.Object, mapping: dict[str, str]) -> None:
     if len(set(mapping.values())) != len(mapping):
         raise ValueError("CC_BIND_TOPOLOGY: non-bijective bone mapping")
@@ -96,6 +113,7 @@ def assemble(skeleton: dict[str, Any], parts: dict[str, dict[str, Any]], library
             raise ValueError(f"CC_PART_REJECTED: {part['part_id']} -> {br['branch_id']}")
         s = br["length_m"] / part["length_m"]
         mesh = _import_part_mesh(f"{library_dir}/{part['asset']['fbx']}")
+        _apply_albedo(mesh, part, library_dir)
         names = br["bone_names"]
         expected = {f"b{i}" for i in range(len(names))}
         if {g.name for g in mesh.vertex_groups} != expected:
