@@ -71,7 +71,8 @@
         "root_center": {"enum": ["slice", "bbox"]},
         "sharp_angle_deg": {"type": "number", "minimum": 0, "maximum": 180}
       }},
-      "measured": {"type": "object"}
+      "measured": {"type": "object"},
+      "approved_pipeline": {"type": "string", "pattern": "^[0-9a-f]{64}$", "description": "Real-part pipeline fingerprint of the build the owner approved; set by `critter part approve`."}
     }}
   },
   "allOf": [{

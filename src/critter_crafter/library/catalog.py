@@ -388,12 +388,15 @@ def _compile_real(src: dict[str, Any]) -> dict[str, Any]:
     real = src.get("real")
     if not real:
         return {}
-    return {"real": {
+    compiled = {
         "archive_path": real["archive_path"],
         "sha256": real["sha256"],
         "fit": dict(sorted(real["fit"].items())),
         "texture_size": int(src["budget"].get("texture_size", 1024)),
-    }}
+    }
+    if real.get("approved_pipeline"):
+        compiled["approved_pipeline"] = real["approved_pipeline"]
+    return {"real": compiled}
 
 
 def reference_part_id(skeleton_id: str, branch_id: str, *, connector: bool = False) -> str:

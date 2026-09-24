@@ -268,8 +268,11 @@ def part_refit(part_ids: tuple[str, ...], all_parts: bool) -> None:
             raise click.ClickException(f"CC_REALPART_SOURCE_CHANGED: {part_id}; re-import it as a new part")
         before = list(record["dimensions_m"])
         profile = _profile(catalog, record["binding_profile_id"], record["binding_profile_version"])
+        demoted = demote_for_refit(record)
         _fit_and_write(catalog, profile, record, record_path, source)
         changed = "unchanged" if before == record["dimensions_m"] else f"envelope {before} -> {record['dimensions_m']}"
+        if demoted:
+            changed += "; was approved, now draft: review and approve it again"
         click.echo(f"refit {part_id}: {changed}")
 
 
@@ -500,15 +503,36 @@ def stale_review_inputs(recorded: dict[str, Any] | None, current: dict[str, Any]
     return sorted(key for key in current if recorded.get(key) != current[key])
 
 
-def _set_status(part_id: str, status: str) -> Path:
+def demote_for_refit(record: dict[str, Any]) -> bool:
+    """A refit produces geometry nobody has reviewed: an approved record goes back to draft."""
+    record["real"].pop("approved_pipeline", None)
+    if record.get("status") == "approved":
+        record["status"] = "draft"
+        return True
+    return False
+
+
+def mark_status(record: dict[str, Any], status: str, pipeline: str | None = None) -> dict[str, Any]:
+    """Set a real part's status. Approval pins the part pipeline of the reviewed build, so a later
+    fitter change cannot put unreviewed geometry into generation (`library build` refuses it)."""
+    record["status"] = status
+    if status == "approved":
+        if not pipeline:
+            raise click.ClickException("approval needs the reviewed part pipeline fingerprint")
+        record["real"]["approved_pipeline"] = pipeline
+    else:
+        record["real"].pop("approved_pipeline", None)
+    return record
+
+
+def _set_status(part_id: str, status: str, pipeline: str | None = None) -> Path:
     path = paths().data / "parts" / f"{part_id}.part.json"
     if not path.is_file():
         raise click.ClickException(f"no source record {path}")
     doc = json.loads(path.read_text(encoding="utf-8"))
     if not doc.get("real"):
         raise click.ClickException(f"{part_id} is not a real part")
-    doc["status"] = status
-    _write_json(path, doc)
+    _write_json(path, mark_status(doc, status, pipeline))
     return path
 
 
@@ -531,7 +555,7 @@ def part_approve(part_id: str) -> None:
                                    f"run `critter part review {part_id}` again")
     if not qa.get("passed"):
         raise click.ClickException(f"{part_id}: QA failed; see {_qa_path(part_id)}")
-    path = _set_status(part_id, "approved")
+    path = _set_status(part_id, "approved", recorded["part"]["pipeline"])
     click.echo(f"approved {part_id} ({path}). Approved parts join generation: rerun `critter recipe golden`, "
                "copy the goldens into the Unity package and rebuild the library.")
 

@@ -152,7 +152,7 @@ def test_real_part_records_compile_without_machine_paths_or_mesh_bytes():
     assert len(parts) >= 3
     for part in parts:
         real = part["real"]
-        assert set(real) == {"archive_path", "sha256", "fit", "texture_size"}
+        assert set(real) - {"approved_pipeline"} == {"archive_path", "sha256", "fit", "texture_size"}
         assert not real["archive_path"].startswith("/") and ":" not in real["archive_path"]
         assert part["inventory_kind"] == "production" and part["source"] == "meshy"
         assert part["status"] in ("draft", "approved", "rejected")
@@ -390,3 +390,41 @@ def test_review_writes_no_report_when_inputs_change_while_blender_runs(tmp_path,
     assert result.exit_code != 0
     assert "qa_pipeline changed while the review ran" in result.output
     assert not (tmp_path / "qa.json").exists()
+
+
+
+def test_refit_demotes_an_approved_record_to_draft():
+    record = {"status": "approved", "real": {"approved_pipeline": "a" * 64}}
+    assert part_commands.demote_for_refit(record) is True
+    assert record["status"] == "draft" and "approved_pipeline" not in record["real"]
+    assert part_commands.demote_for_refit({"status": "draft", "real": {}}) is False
+    rejected = {"status": "rejected", "real": {}}
+    assert part_commands.demote_for_refit(rejected) is False and rejected["status"] == "rejected"
+
+
+def test_approval_pins_the_reviewed_pipeline_and_other_statuses_clear_it():
+    import click
+
+    record = {"status": "draft", "real": {}}
+    with pytest.raises(click.ClickException):
+        part_commands.mark_status(record, "approved")
+    part_commands.mark_status(record, "approved", "b" * 64)
+    assert record["status"] == "approved" and record["real"]["approved_pipeline"] == "b" * 64
+    part_commands.mark_status(record, "rejected")
+    assert record["status"] == "rejected" and "approved_pipeline" not in record["real"]
+
+
+def test_build_refuses_approved_parts_whose_pipeline_changed_since_approval(monkeypatch):
+    from critter_crafter.library.catalog import compile_part
+
+    catalog = _catalog()
+    source = json.loads(next((paths().data / "parts").glob("meshy_insect_leg_*.part.json")).read_text(encoding="utf-8"))
+    profiles = {(p["binding_profile_id"], p["binding_profile_version"]): p for p in catalog["binding_profiles"]}
+    monkeypatch.setattr(library_commands, "realpart_pipeline_fingerprint", lambda: "c" * 64)
+    part_commands.mark_status(source, "approved", "c" * 64)
+    compiled = compile_part(copy.deepcopy(source), profiles)
+    assert compiled["real"]["approved_pipeline"] == "c" * 64
+    catalog["parts"] = [p for p in catalog["parts"] if p["part_id"] != compiled["part_id"]] + [compiled]
+    assert library_commands.stale_approvals(catalog) == []
+    monkeypatch.setattr(library_commands, "realpart_pipeline_fingerprint", lambda: "d" * 64)
+    assert library_commands.stale_approvals(catalog) == [compiled["part_id"]]

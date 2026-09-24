@@ -93,6 +93,14 @@ def real_part_source(part: dict[str, Any], archive: Path | None = None) -> Path 
     return path if path.is_file() else None
 
 
+def stale_approvals(catalog: dict[str, Any]) -> list[str]:
+    """Approved real parts whose approval pinned a different part pipeline than the current one."""
+    current = realpart_pipeline_fingerprint()
+    return sorted(p["part_id"] for p in catalog["parts"]
+                  if p.get("real") and p.get("status") == "approved"
+                  and p["real"].get("approved_pipeline") != current)
+
+
 def real_source_unchanged(part: dict[str, Any]) -> bool:
     """False when the asset archive is available but a real part's source is missing from it or no
     longer has its recorded hash.
@@ -401,6 +409,12 @@ def library_build(out_root: Path | None, clean: bool) -> None:
     # while Blender runs cannot be recorded as the code that produced this build.
     part_pipeline_fingerprint()
     realpart_pipeline_fingerprint()
+    stale = stale_approvals(catalog)
+    if stale:
+        raise click.ClickException(
+            f"CC_APPROVAL_STALE: {', '.join(stale)} were approved for a different real-part pipeline, so "
+            "their rebuilt geometry is unreviewed. Run `critter part refit <id>` (back to draft), then "
+            "build, `critter part review` and `critter part approve` again.")
     out = library_dir(catalog, out_root)
     if clean and out.exists():
         output_root = (out_root or paths().library_out).resolve()
