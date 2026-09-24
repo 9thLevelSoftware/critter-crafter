@@ -58,7 +58,13 @@ def _profile_index(catalog: dict[str, Any]) -> dict[tuple[str, str], dict[str, A
     return {(p["binding_profile_id"], p["binding_profile_version"]): p for p in catalog["binding_profiles"]}
 
 
-def _profile(catalog: dict[str, Any], profile_id: str) -> dict[str, Any]:
+def _profile(catalog: dict[str, Any], profile_id: str, version: str | None = None) -> dict[str, Any]:
+    """The named binding profile: the pinned ``version`` when given, else the latest one."""
+    if version is not None:
+        exact = _profile_index(catalog).get((profile_id, version))
+        if exact is None:
+            raise click.ClickException(f"unknown binding profile {profile_id}@{version}")
+        return exact
     versions = [p for p in catalog["binding_profiles"] if p["binding_profile_id"] == profile_id]
     if not versions:
         known = sorted({p["binding_profile_id"] for p in catalog["binding_profiles"]})
@@ -259,7 +265,8 @@ def part_refit(part_ids: tuple[str, ...], all_parts: bool) -> None:
         if _sha256(source) != record["real"]["sha256"]:
             raise click.ClickException(f"CC_REALPART_SOURCE_CHANGED: {part_id}; re-import it as a new part")
         before = list(record["dimensions_m"])
-        _fit_and_write(catalog, _profile(catalog, record["binding_profile_id"]), record, record_path, source)
+        profile = _profile(catalog, record["binding_profile_id"], record["binding_profile_version"])
+        _fit_and_write(catalog, profile, record, record_path, source)
         changed = "unchanged" if before == record["dimensions_m"] else f"envelope {before} -> {record['dimensions_m']}"
         click.echo(f"refit {part_id}: {changed}")
 
@@ -348,13 +355,66 @@ def judge(real: dict[str, Any], reference: dict[str, Any]) -> list[str]:
     return problems
 
 
+def qa_pipeline_fingerprint() -> str:
+    """Code and thresholds that produce a QA verdict: assembly, deformation metrics, judge, shots."""
+    import inspect
+
+    package = Path(__file__).resolve().parents[1]
+    names = ("blender/ops_partqa.py", "blender/ops_assemble.py", "blender/rigkit.py", "blender/frame.py")
+    payload: dict[str, Any] = {name: hashlib.sha256((package / name).read_bytes()).hexdigest() for name in names}
+    payload["judge"] = hashlib.sha256(inspect.getsource(judge).encode()).hexdigest()
+    payload["limits"] = [STRAIN_P99_LIMIT, STRAIN_P01_LIMIT, FLIPPED_LIMIT]
+    payload["clips"] = [list(c) for c in REVIEW_CLIPS]
+    payload["contract"] = "partqa-v1: all clips every 2nd frame + IK stride poses"
+    return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
+
+
+def plan_review(built: dict[str, Any], part: dict[str, Any], limit: int
+                ) -> list[tuple[dict[str, Any], dict[str, Any], dict[str, Any], list[str]]]:
+    """(skeleton, placeholder recipe, mixed recipe, replaced part ids) for each reviewed skeleton."""
+    index = {s["skeleton_id"]: i for i, s in enumerate(built["skeletons"])}
+    plans = []
+    for skeleton in review_skeletons(built, part, limit):
+        found = _review_recipe(built, skeleton, index[skeleton["skeleton_id"]], part)
+        if found is not None:
+            plans.append((skeleton, *found))
+    return plans
+
+
+def _recipe_parts(recipe: dict[str, Any]) -> set[str]:
+    return {f["part_id"] for f in recipe["fills"]} | {f["connector_part_id"] for f in recipe["fills"] if f["connector_part_id"]}
+
+
+def review_inputs(built: dict[str, Any], src: Path, part: dict[str, Any], limit: int,
+                  plans: list[tuple[dict[str, Any], dict[str, Any], dict[str, Any], list[str]]]) -> dict[str, Any]:
+    """Everything a QA verdict depends on. A verdict is only current while all of it is unchanged:
+    the part's build, the reviewed skeletons' built clips, every part in the compared recipes, the
+    recipes themselves, and the QA/assembly code and thresholds."""
+    from ..library.commands import assembly_pipeline_fingerprint, part_build_state
+
+    parts = {p["part_id"]: p for p in built["parts"]}
+    used = sorted(set().union(*(_recipe_parts(base) | _recipe_parts(mixed) for _, base, mixed, _ in plans))
+                  - {part["part_id"]}) if plans else []
+    return {
+        "part": part_build_state(part, src),
+        "limit": limit,
+        "qa_pipeline": qa_pipeline_fingerprint(),
+        "assembly_pipeline": assembly_pipeline_fingerprint(),
+        "skeletons": {skeleton["skeleton_id"]: skeleton.get("content_fingerprint", "")
+                      for skeleton, _, _, _ in plans},
+        "recipes": {skeleton["skeleton_id"]: {"placeholder": base["fills"], "mixed": mixed["fills"]}
+                    for skeleton, base, mixed, _ in plans},
+        "parts": {pid: part_build_state(parts[pid], src) for pid in used},
+    }
+
+
 @part.command("review")
 @click.argument("part_id")
 @click.option("--skeletons", "limit", type=int, default=3, show_default=True)
 @click.option("--size", type=int, default=320, show_default=True)
 def part_review(part_id: str, limit: int, size: int) -> None:
     """Deform PART_ID through the built clips of skeletons that accept it; write QA + review sheet."""
-    from ..library.commands import _built_catalog, _gait, part_build_state
+    from ..library.commands import _built_catalog, _gait
 
     built, src = _built_catalog()
     part = next((p for p in built["parts"] if p["part_id"] == part_id), None)
@@ -363,36 +423,32 @@ def part_review(part_id: str, limit: int, size: int) -> None:
     if not part.get("asset", {}).get("fbx"):
         raise click.ClickException(f"{part_id} is not built; run `critter library build`")
     parts = {p["part_id"]: p for p in built["parts"]}
-    index = {s["skeleton_id"]: i for i, s in enumerate(built["skeletons"])}
+    plans = plan_review(built, part, limit)
+    if not plans:
+        raise click.ClickException(f"no built skeleton accepts {part_id}")
     out = paths().work / "review" / "parts" / part_id
     jobs, meta = [], []
-    for skeleton in review_skeletons(built, part, limit):
-        found = _review_recipe(built, skeleton, index[skeleton["skeleton_id"]], part)
-        if found is None:
-            continue
-        base, mixed, replaced = found
+    for skeleton, base, mixed, replaced in plans:
         common = {"skeleton": skeleton, "library_dir": str(src),
                   "gait_profile": _gait(built, skeleton["locomotion_hint"]), "frame_step": 2, "stride": True}
-        used = {f["part_id"] for f in mixed["fills"]} | {f["connector_part_id"] for f in mixed["fills"] if f["connector_part_id"]}
         shots = [{"clip": clip, "at": at, "view": "three_quarter",
                   "path": str(out / f"{skeleton['skeleton_id']}_{i}_{clip}.png")}
                  for i, (clip, at) in enumerate(REVIEW_CLIPS)]
         exports = {} if meta else {"out_fbx": str(out / f"{skeleton['skeleton_id']}_mixed.fbx"),
                                    "out_glb": str(out / f"{skeleton['skeleton_id']}_mixed.glb")}
         jobs.append({"op": "partqa", "args": {**common, "recipe": mixed, "measure": [part_id], "shots": shots,
-                                              "size": size, "parts": {p: parts[p] for p in used}, **exports}})
-        base_used = {f["part_id"] for f in base["fills"]} | {f["connector_part_id"] for f in base["fills"] if f["connector_part_id"]}
+                                              "size": size, "parts": {p: parts[p] for p in _recipe_parts(mixed)},
+                                              **exports}})
         jobs.append({"op": "partqa", "args": {**common, "recipe": base, "measure": sorted(set(replaced)),
-                                              "parts": {p: parts[p] for p in base_used}}})
+                                              "parts": {p: parts[p] for p in _recipe_parts(base)}}})
         meta.append((skeleton, replaced, shots))
-    if not jobs:
-        raise click.ClickException(f"no built skeleton accepts {part_id}")
     click.echo(f"deforming {part_id} on {len(meta)} skeleton(s) ...")
     try:
         results = run_op("batch", {"jobs": jobs})["results"]
     except BlenderError as e:
         raise click.ClickException(str(e))
-    report: dict[str, Any] = {"part_id": part_id, "build_state": part_build_state(part, src), "skeletons": []}
+    report: dict[str, Any] = {"part_id": part_id, "inputs": review_inputs(built, src, part, limit, plans),
+                              "skeletons": []}
     pngs, labels = [], []
     passed = True
     for (skeleton, replaced, shots), real_res, ref_res in zip(meta, results[0::2], results[1::2]):
@@ -420,6 +476,13 @@ def part_review(part_id: str, limit: int, size: int) -> None:
         raise SystemExit(1)
 
 
+def stale_review_inputs(recorded: dict[str, Any] | None, current: dict[str, Any]) -> list[str]:
+    """Names of the QA inputs that changed since the review (all of them if none were recorded)."""
+    if not isinstance(recorded, dict):
+        return sorted(current)
+    return sorted(key for key in current if recorded.get(key) != current[key])
+
+
 def _set_status(part_id: str, status: str) -> Path:
     path = paths().data / "parts" / f"{part_id}.part.json"
     if not path.is_file():
@@ -436,15 +499,19 @@ def _set_status(part_id: str, status: str) -> Path:
 @click.argument("part_id")
 def part_approve(part_id: str) -> None:
     """Mark PART_ID approved (generatable) after a passing `critter part review` of the current build."""
-    from ..library.commands import _built_catalog, part_build_state
+    from ..library.commands import _built_catalog
 
     built, src = _built_catalog()
     part = next((p for p in built["parts"] if p["part_id"] == part_id), None)
     qa = _read_qa(part_id)
     if part is None or qa is None:
         raise click.ClickException(f"run `critter part review {part_id}` first")
-    if qa.get("build_state") != part_build_state(part, src):
-        raise click.ClickException(f"{part_id}: the QA report is for a different build; review again")
+    recorded = qa.get("inputs") if isinstance(qa.get("inputs"), dict) else None
+    limit = int(recorded.get("limit", 3)) if recorded else 3
+    stale = stale_review_inputs(recorded, review_inputs(built, src, part, limit, plan_review(built, part, limit)))
+    if stale:
+        raise click.ClickException(f"{part_id}: the review is stale ({', '.join(stale)} changed); "
+                                   f"run `critter part review {part_id}` again")
     if not qa.get("passed"):
         raise click.ClickException(f"{part_id}: QA failed; see {_qa_path(part_id)}")
     path = _set_status(part_id, "approved")
@@ -460,4 +527,5 @@ def part_reject(part_id: str) -> None:
     click.echo(f"rejected {part_id} ({path})")
 
 
-__all__ = ["part", "part_record", "default_length", "judge", "review_skeletons", "TEMPLATE_DEFAULTS"]
+__all__ = ["part", "part_record", "default_length", "judge", "review_skeletons", "plan_review",
+           "review_inputs", "stale_review_inputs", "qa_pipeline_fingerprint", "TEMPLATE_DEFAULTS"]

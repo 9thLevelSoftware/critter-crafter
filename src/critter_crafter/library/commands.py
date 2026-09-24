@@ -85,7 +85,11 @@ def real_part_source(part: dict[str, Any], archive: Path | None = None) -> Path 
     root = archive or find_asset_archive()
     if root is None:
         return None
-    path = root / real["archive_path"]
+    base = root.resolve()
+    path = (base / real["archive_path"]).resolve()
+    # An absolute or `..` path would read an arbitrary local file instead of the private archive.
+    if not path.is_relative_to(base):
+        raise click.ClickException(f"CC_ARCHIVE_PATH: {part['part_id']}: {real['archive_path']} leaves the asset archive")
     return path if path.is_file() else None
 
 

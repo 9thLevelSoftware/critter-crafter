@@ -256,3 +256,63 @@ def test_edge_loops_sit_where_the_weights_change_slope():
     assert joint_planes(bones, [0.05, 0.03], "flesh") == [0.4, 0.45, 0.5, 0.87, 0.9, 0.93]
     assert joint_planes(bones, None, "smooth") == [0.225, 0.45, 0.675, 0.9, 0.95]
     assert joint_planes([(0.0, 1.0)], None, "single") == []
+
+
+@pytest.mark.parametrize("archive_path", ["../outside.glb", "/etc/outside.glb", "a/../../outside.glb"])
+def test_real_part_sources_cannot_leave_the_asset_archive(tmp_path, archive_path):
+    import click
+
+    archive = tmp_path / "archive"
+    archive.mkdir()
+    (tmp_path / "outside.glb").write_bytes(b"glTF")
+    part = {"part_id": "x_v1", "real": {"archive_path": archive_path}}
+    with pytest.raises(click.ClickException, match="CC_ARCHIVE_PATH"):
+        library_commands.real_part_source(part, archive)
+
+
+@pytest.mark.parametrize("archive_path, ok", [
+    ("procedural-biomass-assembly/artifacts/x/01a0", True), ("../x", False), ("/x", False),
+    ("a/../b", False), ("a\\b", False), ("C:/x", False),
+])
+def test_schema_pins_archive_paths_inside_the_archive(archive_path, ok):
+    import jsonschema
+
+    schema = json.loads((paths().schemas / "part.v3.schema.json").read_text(encoding="utf-8"))
+    record = json.loads(next((paths().data / "parts").glob("meshy_*.part.json")).read_text(encoding="utf-8"))
+    record["real"]["archive_path"] = archive_path
+    errors = list(jsonschema.Draft202012Validator(schema).iter_errors(record))
+    assert (not errors) == ok, errors
+
+
+def test_refit_resolves_the_records_pinned_profile_version():
+    catalog = _catalog()
+    newer = copy.deepcopy(next(p for p in catalog["binding_profiles"] if p["binding_profile_id"] == "limb3_plantigrade"))
+    newer["binding_profile_version"] = "9.0.0"
+    newer["bone_fractions"] = [0.3, 0.5, 0.2]
+    catalog["binding_profiles"].append(newer)
+    assert part_commands._profile(catalog, "limb3_plantigrade")["binding_profile_version"] == "9.0.0"
+    pinned = part_commands._profile(catalog, "limb3_plantigrade", "1.0.0")
+    assert pinned["binding_profile_version"] == "1.0.0" and pinned["bone_fractions"] == [0.45, 0.45, 0.1]
+
+
+def test_a_review_goes_stale_when_any_reviewed_input_changes(tmp_path, monkeypatch):
+    catalog = _catalog()
+    monkeypatch.setattr(library_commands, "part_build_state", lambda part, out, **_: {"part": part["part_id"]})
+    for skeleton in catalog["skeletons"]:
+        skeleton["content_fingerprint"] = "built-" + skeleton["skeleton_id"]
+    part = next(p for p in real_parts(catalog) if p["binding_profile_id"] == "insect_leg4_articulated")
+    plans = part_commands.plan_review(catalog, part, 3)
+    assert len(plans) == 3 and all(replaced for *_, replaced in plans)
+    recorded = part_commands.review_inputs(catalog, tmp_path, part, 3, plans)
+    assert recorded["parts"] and part["part_id"] not in recorded["parts"]
+    assert part_commands.stale_review_inputs(recorded, recorded) == []
+    assert part_commands.stale_review_inputs(None, recorded) == sorted(recorded)
+
+    reviewed = plans[0][0]["skeleton_id"]
+    next(s for s in catalog["skeletons"] if s["skeleton_id"] == reviewed)["content_fingerprint"] = "rebaked"
+    current = part_commands.review_inputs(catalog, tmp_path, part, 3, part_commands.plan_review(catalog, part, 3))
+    assert part_commands.stale_review_inputs(recorded, current) == ["skeletons"]
+
+    monkeypatch.setattr(part_commands, "qa_pipeline_fingerprint", lambda: "changed judge")
+    current = part_commands.review_inputs(catalog, tmp_path, part, 3, plans)
+    assert "qa_pipeline" in part_commands.stale_review_inputs(recorded, current)

@@ -56,7 +56,7 @@
     }},
     "provenance": {"type": "object"},
     "real": {"type": "object", "additionalProperties": false, "required": ["archive_path", "sha256", "fit"], "properties": {
-      "archive_path": {"type": "string", "pattern": "^[^\\\\:]+$", "description": "Path of the source mesh relative to the asset archive root (never copied into this repository)."},
+      "archive_path": {"type": "string", "pattern": "^(?![/.])(?!.*(^|/)\\.\\.(/|$))[^\\\\:]+$", "description": "Path of the source mesh relative to the asset archive root, without a leading slash or '..' segments (never copied into this repository)."},
       "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
       "fit": {"type": "object", "additionalProperties": false, "required": ["axis"], "properties": {
         "axis": {"enum": ["+x", "-x", "+y", "-y", "+z", "-z"]},
