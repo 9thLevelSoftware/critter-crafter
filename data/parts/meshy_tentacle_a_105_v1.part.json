@@ -1,0 +1,64 @@
+{
+  "schema_version": "3.0.0",
+  "part_id": "meshy_tentacle_a_105_v1",
+  "category": "appendage",
+  "template": "tentacle8",
+  "binding_profile_id": "tentacle8_flexible",
+  "binding_profile_version": "1.0.0",
+  "side": "symmetric",
+  "girth_m": 0.189,
+  "species_tags": [
+    "cephalopod"
+  ],
+  "roles": [
+    "locomotor",
+    "slither"
+  ],
+  "size_class": null,
+  "status": "draft",
+  "style_profile": "flesh_stylized_v1",
+  "dimensions_m": [
+    0.214089,
+    0.229646,
+    1.076057
+  ],
+  "length_m": 1.05,
+  "budget": {
+    "max_triangles": 2500,
+    "max_material_slots": 1,
+    "texture_size": 1024
+  },
+  "fallback": {
+    "primitive": "capsule",
+    "albedo": "#a8675e"
+  },
+  "provenance": {
+    "source": "meshy",
+    "meshy_task_id": "01a0c123-407b-77a5-b778-5e2ee086765e",
+    "license": "meshy-output: may be paid-private; never publish mesh, texture or render bytes"
+  },
+  "real": {
+    "archive_path": "procedural-biomass-assembly/artifacts/meshy_mcp_scout/biomass_cephalopod_tentacle_v1/01a0c123-407b-77a5-b778-5e2ee086765e",
+    "sha256": "2002d6e529e7c93f62619ebfa76cbdfaf102f2801dae99242788a88ccc3ba3ff",
+    "fit": {
+      "axis": "-x"
+    },
+    "measured": {
+      "dimensions_m": [
+        0.214089,
+        0.229646,
+        1.076057
+      ],
+      "uniform_scale": 0.485144,
+      "radial_scale": 1.012786,
+      "radial_scale_wanted": 1.012786,
+      "nominal_girth_m": 0.186614,
+      "up_source": "bend",
+      "end_to_end_bend_deg": 48.284,
+      "strain_p99": 1.4025,
+      "strain_max": 1.7325,
+      "islands": 2,
+      "triangles": 1832
+    }
+  }
+}

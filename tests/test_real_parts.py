@@ -170,6 +170,67 @@ def test_each_real_part_fits_branches_of_its_profile():
         assert accepted, f"{part['part_id']} fits no branch"
 
 
+TENTACLE_SOURCE = "01a0c123-407b-77a5-b778-5e2ee086765e"
+TENTACLE_LENGTH_VARIANTS = {
+    "meshy_tentacle_a_055_v1": 0.55,
+    "meshy_tentacle_a_070_v1": 0.70,
+    "meshy_tentacle_a_105_v1": 1.05,
+}
+# Current tentacle8 appendage millimetres these lengths are for (extras 1.10 m is the 1.05 m band).
+TENTACLE_VARIANT_BELLIES = {
+    "meshy_tentacle_a_055_v1": ("dragger_forelimb_puller_compact_v3",),
+    "meshy_tentacle_a_070_v1": ("dragger_forelimb_puller_elongated_v3", "dragger_belly_hauler_compact_v3"),
+    "meshy_tentacle_a_105_v1": ("dragger_belly_hauler_balanced_v3",),
+}
+
+
+def test_tentacle_length_variants_are_draft_appendages_of_the_same_source():
+    import jsonschema
+
+    from critter_crafter import mathutil as mu
+    from critter_crafter.recipes.generator import length_fits
+
+    schema = json.loads((paths().schemas / "part.v3.schema.json").read_text(encoding="utf-8"))
+    validator = jsonschema.Draft202012Validator(schema)
+    catalog = _catalog()
+    source = next(p for p in real_parts(catalog) if p["part_id"] == "meshy_tentacle_a_v1")
+    by_id = {p["part_id"]: p for p in real_parts(catalog)}
+    skeletons = {s["skeleton_id"]: s for s in catalog["skeletons"]}
+
+    assert source["length_m"] == pytest.approx(1.6)
+    assert source["category"] == "appendage"
+    assert TENTACLE_SOURCE in source["real"]["archive_path"]
+    assert "01a0c11e" not in source["real"]["archive_path"]
+    assert "meshy_tentacle_a_240_v1" not in by_id
+    assert all(p["length_m"] != pytest.approx(2.4) for p in by_id.values())
+
+    for part_id, length_m in TENTACLE_LENGTH_VARIANTS.items():
+        path = paths().data / "parts" / f"{part_id}.part.json"
+        record = json.loads(path.read_text(encoding="utf-8"))
+        assert list(validator.iter_errors(record)) == []
+        assert record["status"] == "draft" and record["category"] == "appendage"
+        assert record["template"] == "tentacle8"
+        assert record["length_m"] == pytest.approx(length_m)
+        assert record["real"]["archive_path"] == source["real"]["archive_path"]
+        assert record["real"]["sha256"] == source["real"]["sha256"]
+        assert record["real"]["fit"] == {"axis": "-x"}
+        assert TENTACLE_SOURCE in record["real"]["archive_path"]
+        assert "01a0c11e" not in record["real"]["archive_path"]
+        part = by_id[part_id]
+        assert part["status"] == "draft" and part["inventory_kind"] == "production"
+        for skeleton_id in TENTACLE_VARIANT_BELLIES[part_id]:
+            belly = next(b for b in skeletons[skeleton_id]["branches"] if b["branch_id"] == "belly")
+            assert belly["accepts"]["categories"] == ["appendage"]
+            assert part_accepted(part, belly), f"{part_id} should fit {skeleton_id} belly {belly['length_m']} m"
+        # extras tentacle8 length is 1.10 m; no such skeleton yet, but the 1.05 m band covers it.
+        if length_m == pytest.approx(1.05):
+            assert length_fits(int(part["length_mm"]), mu.mm(1.10))
+        for skeleton in catalog["skeletons"]:
+            for branch in skeleton["branches"]:
+                if branch["branch_id"] == "body" and "tail" in branch["accepts"]["categories"]:
+                    assert not part_accepted(part, branch)
+
+
 def test_draft_real_parts_never_generate_but_approved_ones_can():
     catalog = _catalog()
     for skeleton in catalog["skeletons"]:

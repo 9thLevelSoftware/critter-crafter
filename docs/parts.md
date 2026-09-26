@@ -165,7 +165,10 @@ this compares like with like.
 | `meshy_insect_leg_a_v1` | `biomass_insect_leg_v1/01a0c114…` | `insect_leg4_articulated` | 0.90 m | modelled with a ~110° knee; straightened, dorsal spikes kept |
 | `meshy_frayed_arm_a_v1` | `biomass_human_arm_v1/01a0c10e…` | `limb3_plantigrade` | 0.85 m | frayed shoulder tendrils, clawed hand |
 | `meshy_animal_skull_a_v1` | `biomass_animal_skull_v1/01a0c171…` | `head1_neck` | 0.30 m | rigid; snout on +Z |
-| `meshy_tentacle_a_v1` | `biomass_cephalopod_tentacle_v1/01a0c123…` | `tentacle8_flexible` | 1.60 m | S-curve straightened; suckers ventral |
+| `meshy_tentacle_a_v1` | `biomass_cephalopod_tentacle_v1/01a0c123…` | `tentacle8_flexible` | 1.60 m | S-curve straightened; suckers ventral; covers hauler elongated |
+| `meshy_tentacle_a_055_v1` | same `01a0c123…` source | `tentacle8_flexible` | 0.55 m | length variant; puller compact 0.5544 m |
+| `meshy_tentacle_a_070_v1` | same `01a0c123…` source | `tentacle8_flexible` | 0.70 m | length variant; puller elongated / hauler compact |
+| `meshy_tentacle_a_105_v1` | same `01a0c123…` source | `tentacle8_flexible` | 1.05 m | length variant; hauler balanced 1.062 m and extras 1.10 m band |
 
 Scout meshes not imported yet:
 

@@ -192,8 +192,9 @@ Not done in M2, by design or for lack of time:
 - **The high-poly scout meshes** (250k–830k triangles). The decimation path exists, but none was
   reviewed. Two of the high-poly tentacles look straighter than `01a0c123` and are worth a try.
 - **The coiled tentacle `01a0c11e`.** Reject or regenerate it; a loop can't be straightened.
-- **Size coverage.** One length per part covers 0.8–1.25× of it. The tentacle profile spans 0.55–3.26 m,
-  so import length variants (`--length`) of the same source for more coverage.
+- **Size coverage.** One length per part covers 0.8–1.25× of it. Tentacle appendage millimetres now
+  have draft length variants of `01a0c123` at 0.55 / 0.70 / 1.05 m plus the existing 1.60 m (no 2.40 m
+  appendage; serpentine `body` stays `tail`). Coiled `01a0c11e` is still rejected.
 - **Weighting upgrade.** Voxel proxy + bone heat + Robust Skin Weights Transfer (from the tools
   research) remains the upgrade if review shows pinching. Axial weights plus loops passed QA, so it
   wasn't needed yet.
