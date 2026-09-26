@@ -5,7 +5,7 @@ from pathlib import Path
 import click
 from ..config import paths
 from .archetypes import ARCHETYPES, FAMILIES, PRESETS, build_candidate
-from .review import ReviewError, make_receipt, verify_receipt
+from .review import ReviewError, make_receipt, verify_qa
 
 
 def _write_json(path: Path, doc: dict) -> None:
@@ -189,19 +189,27 @@ def skeleton_review(families, out, skeleton_ids) -> None:
     click.echo(f"serve with: python -m http.server 8765 --directory \"{directory}\"")
 
 
+def _qa_result(skeleton_id: str) -> dict:
+    path = paths().work / "review" / "foundation-v3" / "qa.json"
+    if not path.is_file():
+        return {}
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    for result in doc.get("results") or []:
+        if isinstance(result, dict) and result.get("skeleton_id") == skeleton_id:
+            return result
+    return {}
+
+
 def _set_status(family: str | None, ids: tuple[str, ...], status: str) -> int:
     from ..library.commands import _built_catalog, skeleton_content_hash
     cat, source = _built_catalog()
     selected = _selection(cat, (family,) if family else (), ids)
-    # Validate the entire request before changing any status.
+    # Validate the entire request before changing any status. Receipt files are optional spot-checks.
     for skel in selected:
         sid = skel["skeleton_id"]
-        receipt_path = paths().work / "review" / "receipts" / f"{sid}.json"
-        if not receipt_path.is_file():
-            raise click.ClickException(f"CC_REVIEW_MISSING: {sid}; run `skeleton review` first")
         try:
-            verify_receipt(json.loads(receipt_path.read_text(encoding="utf-8")), sid,
-                           skeleton_content_hash(cat, skel, source), require_passing=status == "approved")
+            verify_qa(_qa_result(sid), sid, skeleton_content_hash(cat, skel, source),
+                      require_passing=status == "approved")
         except ReviewError as exc:
             raise click.ClickException(str(exc)) from exc
     for skel in selected:
@@ -216,7 +224,7 @@ def _set_status(family: str | None, ids: tuple[str, ...], status: str) -> int:
 @click.option("--family", type=click.Choice(FAMILIES), default=None)
 @click.argument("skeleton_ids", nargs=-1)
 def skeleton_approve(family, skeleton_ids) -> None:
-    """Human visual approval, valid only for a current passing review bundle."""
+    """Approve from current passing skeleton QA bound to content_fingerprint."""
     if not family and not skeleton_ids:
         raise click.ClickException("give --family or skeleton IDs")
     click.echo(f"approved {_set_status(family, skeleton_ids, 'approved')} skeleton(s)")
@@ -226,7 +234,7 @@ def skeleton_approve(family, skeleton_ids) -> None:
 @click.option("--family", type=click.Choice(FAMILIES), default=None)
 @click.argument("skeleton_ids", nargs=-1)
 def skeleton_reject(family, skeleton_ids) -> None:
-    """Record visual rejection of current reviewed content."""
+    """Reject current content when QA is bound to the same content_fingerprint."""
     if not family and not skeleton_ids:
         raise click.ClickException("give --family or skeleton IDs")
     click.echo(f"rejected {_set_status(family, skeleton_ids, 'rejected')} skeleton(s)")

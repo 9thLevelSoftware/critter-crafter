@@ -45,13 +45,13 @@ Walk and run are no longer baked travel clips. Every compiled skeleton carries a
 
 ## Motion, QA, review, and approval
 
-The motion plan emits the eight clips `idle`, `walk`, `run`, `stun`, `telegraph`, `attack`, `hit`, and `death` at 30 FPS, with local bone rotations, contacts, root samples, and loop metadata. `skeleton qa` validates every frame of actual built `motion.json` clips and writes diagnostics. `skeleton review` requires those built assets, then creates a local review bundle with three modes—bones, mannequin, assembled—and four views—front, side, top, three-quarter. Start it with:
+The motion plan emits the eight clips `idle`, `walk`, `run`, `stun`, `telegraph`, `attack`, `hit`, and `death` at 30 FPS, with local bone rotations, contacts, root samples, and loop metadata. `skeleton qa` validates every frame of actual built `motion.json` clips and writes diagnostics bound to `content_fingerprint` in `work/review/foundation-v3/qa.json`. `skeleton approve` requires that passing QA for the current fingerprint (`qa.passed`, `qa_version`, `sample_source == "evaluated_blender"`, 8 clips). `skeleton reject` requires a current QA result bound to the same fingerprint; the QA may have failed. Neither command requires `work/review/receipts/{id}.json`. `skeleton review` remains optional for spot-checks: it still builds a local 3-mode × 4-view HTML bundle. Start it with:
 
 ```powershell
 python -m http.server 8765 --directory work/review/foundation-v3
 ```
 
-Each reviewed bundle receives a content-fingerprint receipt under `work/review/receipts/`, including a fresh receipt when QA fails. `skeleton approve` requires a passing receipt; `skeleton reject` only requires a current receipt matching the built content. Any source, profile, setting, baked motion, assembled mesh, or review output change makes a prior receipt stale. The review modes are bones/contact overlay, neutral weighted mannequin, and compatible assembled parts; each is presented from front, side, top, and three-quarter views with the actual built clips and travel/grid context.
+Any source, profile, setting, baked motion, or assembled mesh change makes a prior QA result stale. The optional review modes are bones/contact overlay, neutral weighted mannequin, and compatible assembled parts; each is presented from front, side, top, and three-quarter views with the actual built clips and travel/grid context.
 
 Unity playback uses the clip timing and nominal speed metadata, with duration-aware rates verified against the requested movement speed. Locomotion contact phases remain aligned in normalized clip time when durations differ, following [Unity's Blend Tree guidance](https://docs.unity3d.com/6000.0/Documentation/Manual/class-BlendTree.html).
 

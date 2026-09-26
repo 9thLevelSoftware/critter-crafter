@@ -76,6 +76,18 @@ def test_failed_qa_can_be_reviewed_and_rejected_but_not_approved(tmp_path):
         review.verify_receipt(receipt, "test", "abc", require_passing=False)
 
 
+def test_qa_bound_to_fingerprint_gates_approve_without_a_receipt():
+    review.verify_qa(qa_result(), "test", "abc")
+    with pytest.raises(review.ReviewError, match="CC_REVIEW_STALE"):
+        review.verify_qa(qa_result(), "test", "changed")
+    failed = qa_result(False)
+    review.verify_qa(failed, "test", "abc", require_passing=False)
+    with pytest.raises(review.ReviewError, match="CC_REVIEW_QA"):
+        review.verify_qa(failed, "test", "abc")
+    with pytest.raises(review.ReviewError, match="CC_REVIEW_QA"):
+        review.verify_qa({}, "test", "abc", require_passing=False)
+
+
 def test_polish_override_requires_matching_source_and_never_overwrites(tmp_path):
     directory = tmp_path / "polish"
     directory.mkdir()

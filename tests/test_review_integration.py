@@ -78,7 +78,7 @@ def _qa_result(passed: bool, fingerprint: str) -> dict:
             "clips_checked": 8, "samples_checked": 16, "contacts_checked": 8, "joint_limits_checked": 1}
 
 
-def test_receipts_require_complete_coverage_for_approval_and_bind_runtime_qa(tmp_path):
+def test_optional_receipts_still_require_complete_coverage_and_bind_runtime_qa(tmp_path):
     output = tmp_path / "review.html"; output.write_text("review")
     fingerprint = "fingerprint-at-runtime"
     receipt = review.make_receipt("review_subject", fingerprint, _qa_result(True, fingerprint), [output],
@@ -94,6 +94,65 @@ def test_receipts_require_complete_coverage_for_approval_and_bind_runtime_qa(tmp
                                    modes=["bones", "mannequin", "assembled"],
                                    views=["front", "side", "top", "three_quarter"])
     review.verify_receipt(rejected, "review_subject", fingerprint, require_passing=False)
+
+
+def _status_fixture(tmp_path, monkeypatch, *, passed: bool = True, qa_fingerprint: str | None = None,
+                    write_qa: bool = True, write_receipt: bool = False):
+    fingerprint = "content-at-runtime"
+    catalog, skeleton = _catalog_and_skeleton()
+    data = tmp_path / "data" / "skeletons"
+    data.mkdir(parents=True)
+    source = data / f"{skeleton['skeleton_id']}.skeleton.json"
+    source.write_text(json.dumps({"schema_version": "3.0.0", "skeleton_id": skeleton["skeleton_id"],
+                                  "family": "biped", "status": "draft"}))
+    monkeypatch.setattr(library_commands, "_built_catalog", lambda: (catalog, tmp_path / "library"))
+    monkeypatch.setattr(library_commands, "skeleton_content_hash", lambda *_: fingerprint)
+    monkeypatch.setattr(skeleton_commands, "paths", lambda: SimpleNamespace(data=tmp_path / "data", work=tmp_path / "work"))
+    if write_qa:
+        qa_path = tmp_path / "work" / "review" / "foundation-v3" / "qa.json"
+        qa_path.parent.mkdir(parents=True)
+        qa_path.write_text(json.dumps({"schema_version": "3.0.0", "results": [
+            _qa_result(passed, qa_fingerprint if qa_fingerprint is not None else fingerprint)
+        ]}))
+    if write_receipt:
+        receipt_path = tmp_path / "work" / "review" / "receipts" / f"{skeleton['skeleton_id']}.json"
+        receipt_path.parent.mkdir(parents=True)
+        receipt_path.write_text(json.dumps({"schema_version": "3.0.0", "skeleton_id": skeleton["skeleton_id"],
+                                            "content_fingerprint": fingerprint}))
+    return skeleton["skeleton_id"], source, fingerprint
+
+
+def test_approve_reads_passing_qa_bound_to_fingerprint_without_a_receipt(tmp_path, monkeypatch):
+    sid, source, _fingerprint = _status_fixture(tmp_path, monkeypatch)
+    assert not (tmp_path / "work" / "review" / "receipts").exists()
+    assert skeleton_commands._set_status(None, (sid,), "approved") == 1
+    assert json.loads(source.read_text())["status"] == "approved"
+
+
+def test_leftover_receipt_cannot_approve_without_current_qa(tmp_path, monkeypatch):
+    sid, source, _fingerprint = _status_fixture(tmp_path, monkeypatch, write_qa=False, write_receipt=True)
+    with pytest.raises(ClickException, match="CC_REVIEW_QA"):
+        skeleton_commands._set_status(None, (sid,), "approved")
+    assert json.loads(source.read_text())["status"] == "draft"
+
+
+def test_failing_qa_blocks_approve_but_allows_reject_without_a_receipt(tmp_path, monkeypatch):
+    sid, source, _fingerprint = _status_fixture(tmp_path, monkeypatch, passed=False)
+    assert not (tmp_path / "work" / "review" / "receipts").exists()
+    with pytest.raises(ClickException, match="CC_REVIEW_QA"):
+        skeleton_commands._set_status(None, (sid,), "approved")
+    assert json.loads(source.read_text())["status"] == "draft"
+    assert skeleton_commands._set_status(None, (sid,), "rejected") == 1
+    assert json.loads(source.read_text())["status"] == "rejected"
+
+
+def test_stale_qa_fingerprint_blocks_approve_and_reject(tmp_path, monkeypatch):
+    sid, source, _fingerprint = _status_fixture(tmp_path, monkeypatch, qa_fingerprint="previous-content")
+    with pytest.raises(ClickException, match="CC_REVIEW_STALE"):
+        skeleton_commands._set_status(None, (sid,), "approved")
+    with pytest.raises(ClickException, match="CC_REVIEW_STALE"):
+        skeleton_commands._set_status(None, (sid,), "rejected")
+    assert json.loads(source.read_text())["status"] == "draft"
 
 
 def test_interrupted_assembly_persists_base_catalog_without_assembled_glb(tmp_path, monkeypatch):

@@ -64,13 +64,22 @@ def _verify_qa(qa: dict, skeleton_id: str, fingerprint: str) -> None:
         raise ReviewError(f"CC_REVIEW_QA: {skeleton_id} lacks complete evaluated evidence")
 
 
+def verify_qa(qa: dict, skeleton_id: str, fingerprint: str, require_passing: bool = True) -> None:
+    """Approve from passing skeleton QA bound to content_fingerprint; reject may use a failing result."""
+    recorded = qa.get("content_fingerprint") if isinstance(qa, dict) else None
+    if recorded and recorded != fingerprint:
+        raise ReviewError(f"CC_REVIEW_STALE: {skeleton_id}; rebuild and run skeleton qa again")
+    bound = qa if isinstance(qa, dict) else {}
+    _verify_qa(bound, skeleton_id, fingerprint)
+    if require_passing and bound.get("passed") is not True:
+        raise ReviewError(f"CC_REVIEW_QA: {skeleton_id}")
+
+
 def verify_receipt(receipt: dict, skeleton_id: str, fingerprint: str, require_passing: bool = True) -> None:
     if (receipt.get("schema_version") != "3.0.0" or receipt.get("skeleton_id") != skeleton_id
             or receipt.get("content_fingerprint") != fingerprint):
         raise ReviewError(f"CC_REVIEW_STALE: {skeleton_id}; rebuild, run QA and review again")
-    _verify_qa(receipt.get("qa", {}), skeleton_id, fingerprint)
-    if require_passing and receipt.get("qa", {}).get("passed") is not True:
-        raise ReviewError(f"CC_REVIEW_QA: {skeleton_id}")
+    verify_qa(receipt.get("qa", {}), skeleton_id, fingerprint, require_passing=require_passing)
     if require_passing and (set(receipt.get("modes", [])) != {"bones", "mannequin", "assembled"}
             or set(receipt.get("views", [])) != {"front", "side", "top", "three_quarter"}):
         raise ReviewError(f"CC_REVIEW_COVERAGE: {skeleton_id} requires all three modes and four views")
