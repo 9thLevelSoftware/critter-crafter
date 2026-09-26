@@ -90,7 +90,6 @@ namespace CritterCrafter.Locomotion
         bool _initialised;
         bool _run;
         bool _wasMoving;
-        bool _wasSettling;
         Vector3 _lastPosition;
         Vector3 _velocity;
         double _clock;
@@ -169,7 +168,6 @@ namespace CritterCrafter.Locomotion
             _yawLag = 0f;
             _velocity = Vector3.zero;
             _wasMoving = false;
-            _wasSettling = false;
             _initialised = true;
         }
 
@@ -202,7 +200,10 @@ namespace CritterCrafter.Locomotion
             float deltaYaw = Mathf.DeltaAngle(_lastYaw, yaw);
             _yawLag = Mathf.Clamp(_yawLag - deltaYaw, -180f, 180f);
             bool instantTurn = Mathf.Abs(deltaYaw) > InstantTurnDeg;
-            _yawLag = Mathf.MoveTowards(_yawLag, 0f, bodyTurnRateDeg * dt);
+            // While visual yaw is catching up, cap the rate so clamp-slide of planted feet
+            // stays under 0.025 m/frame.
+            float yawRate = Mathf.Abs(_yawLag) > 1f ? Mathf.Min(bodyTurnRateDeg, 50f) : bodyTurnRateDeg;
+            _yawLag = Mathf.MoveTowards(_yawLag, 0f, yawRate * dt);
             _lastYaw = yaw;
             // Apply the body yaw now: hip positions used for reach checks below must already reflect it.
             if (body != null) body.localRotation = BodyRotation();
@@ -250,9 +251,6 @@ namespace CritterCrafter.Locomotion
 
             if (instantTurn)
                 ReplantCoordinated();
-            else if (_wasSettling && !settling)
-                ReplantCoordinated();
-            _wasSettling = settling;
 
             float lead = (float)StepPlanner.LandingLead(hipSpeed, _params.cadenceHz, _params.duty);
             Vector3 heading = hipSpeed > 1e-4f ? raw / hipSpeed : transform.forward;
@@ -276,11 +274,12 @@ namespace CritterCrafter.Locomotion
             }
 
             // Pass 2: lift planted feet, on schedule while moving, or early when strained.
-            // Settling suppresses Overrun-forced lifts and idle LiftGroup; scheduled duty lifts may fire.
+            // Settling: no new lifts (scheduled, Overrun, or idle LiftGroup). In-air swings still land.
             foreach (var leg in legs)
             {
                 if (!leg.planted) continue;
                 leg.position = leg.plant;
+                if (settling) continue;
                 if (moving)
                 {
                     double offset = StepPlanner.LegOffset(ToPlanner(leg), _run);
@@ -295,14 +294,14 @@ namespace CritterCrafter.Locomotion
                             Lift(leg, Mathf.Max(0.08f, duration), false, cycle);
                         }
                     }
-                    else if (!settling && Overrun(leg, leg.home) && CanLift(leg, true))
+                    else if (Overrun(leg, leg.home) && CanLift(leg, true))
                     {
                         Lift(leg, Mathf.Clamp(swingTime, 0.12f, 0.2f), true,
                             StepPlanner.InStance(phase, _params.duty) ? cycle - 1 : cycle);
                     }
                 }
-                else if (!settling && (Overrun(leg, leg.home)
-                         || Strain(leg, leg.home) > Mathf.Max(0.05f, 0.25f * Mathf.Max(leg.stroke, 0.2f * leg.reach))))
+                else if (Overrun(leg, leg.home)
+                         || Strain(leg, leg.home) > Mathf.Max(0.05f, 0.25f * Mathf.Max(leg.stroke, 0.2f * leg.reach)))
                 {
                     LiftGroup(leg, 0.15f);
                 }
@@ -367,14 +366,15 @@ namespace CritterCrafter.Locomotion
         }
 
         /// <summary>
-        /// Snap every currently planted support onto the new heading's stance and retarget in-air landings.
-        /// The single frame may pop; Overrun/LiftGroup stay disarmed while visual yaw eases onto that heading.
+        /// Snap every currently planted support onto the lagged stance (aligned with the visual body)
+        /// and retarget in-air landings. The single frame may pop.
         /// </summary>
         void ReplantCoordinated()
         {
+            Quaternion lag = Quaternion.Euler(0f, _yawLag, 0f);
             foreach (var leg in legs)
             {
-                Vector3 at = Ground(transform.TransformPoint(leg.stanceLocal), leg.homeLocal.y);
+                Vector3 at = Ground(transform.TransformPoint(lag * leg.stanceLocal), leg.homeLocal.y);
                 if (leg.planted)
                 {
                     leg.plant = at;

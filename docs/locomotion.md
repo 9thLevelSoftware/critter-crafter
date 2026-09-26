@@ -78,7 +78,7 @@ Game integration: move the creature root with the agent (`updatePosition = true`
 
 - **`critter skeleton qa`** checks every skeleton's locomotion block: speed bands, support at the walk and run duty factors, step rate and stance stroke at the published speeds.
 - **`critter recipe golden`** writes `tests/golden_v3/locomotion.json`. The Unity `StepPlannerGoldenTests` requires the C# `StepPlanner` to match the Python reference (`src/critter_crafter/locomotion/stepper.py`) within 1e-6.
-- **The Unity `RuntimeLegsPlantFeetAtGameSpeed` Play Mode test** runs one skeleton per legged family at 2.5 m/s and checks IK residual, planted slip (after five warmup frames), support, step rate and the overlay state. `RuntimeInstantTurnSettlesWithoutShuffle` covers a moving 180 on a two-bone quadruped trot (window after yaw unwind; snap/replant frame excluded from slip). `RuntimeAttackReleasesIkAndKeepsSupport` checks that telegraph/attack releases the attack-branch IK while other support feet stay planted.
+- **The Unity `RuntimeLegsPlantFeetAtGameSpeed` Play Mode test** runs one skeleton per legged family at 2.5 m/s and checks IK residual, planted slip (after five warmup frames), support, step rate and the overlay state. `RuntimeInstantTurnSettlesWithoutShuffle` covers a moving 180 on a two-bone quadruped trot (window from heading change through yaw ease; snap/replant frame excluded from slip). `RuntimeAttackReleasesIkAndKeepsSupport` checks that telegraph/attack releases the attack-branch IK within 0.2 s while other support feet stay planted.
 
 ## Known limitations
 

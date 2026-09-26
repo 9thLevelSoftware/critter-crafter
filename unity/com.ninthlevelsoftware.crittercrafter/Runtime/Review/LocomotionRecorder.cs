@@ -23,11 +23,17 @@ namespace CritterCrafter.Review
         public int frames;
         /// <summary>Frames at the start (standing to full speed in one frame) excluded from slip.</summary>
         public int warmup_frames;
-        /// <summary>Leg lifts in the 0.4 s after an instant heading snap, excluding the replant itself.</summary>
+        /// <summary>Phase-group lifts in the turn window, excluding the replant itself.</summary>
         public int steps_in_turn_window;
         /// <summary>Planted-tip slip in the turn window, excluding the snap/replant frame.</summary>
         public float max_turn_slip_m;
         public int instant_turns;
+        /// <summary>LateUpdate frames spent inside the heading-change-through-yaw-ease window.</summary>
+        public int turn_window_frames;
+        /// <summary>Support legs that were planted when the heading snapped.</summary>
+        public int supports_planted_at_turn;
+        /// <summary>Of those, how many lifted during the window (excluding the snap frame).</summary>
+        public int supports_lifted_in_turn;
     }
 
     /// <summary>
@@ -55,13 +61,13 @@ namespace CritterCrafter.Review
         readonly StringBuilder _csv = new StringBuilder("frame,time,speed,residual,slip,planted_supports\n");
         readonly StringBuilder _legCsv = new StringBuilder("frame,leg,planted,forced,ankle_reach_frac,hip_y,foot_x,foot_y,foot_z\n");
         float _lastHeading;
-        float _turnWindowUntil = -1f;
-        bool _awaitingUnwind;
+        bool _turnWindowOpen;
         bool _sawYawLag;
+        bool _capturePlantedAtTurn;
         int _lastReplantCount;
-        const float TurnWindowSeconds = 0.4f;
+        readonly HashSet<string> _plantedAtTurn = new HashSet<string>();
+        readonly HashSet<string> _liftedFromTurn = new HashSet<string>();
         const float InstantTurnDeg = 90f;
-        const float UnwindDoneDeg = 5f;
 
         /// <summary>Invoked at the start of Update with the new sample time, before the creature is placed.</summary>
         public Action<float> BeforePlace;
@@ -122,17 +128,9 @@ namespace CritterCrafter.Review
             if (Mathf.Abs(Mathf.DeltaAngle(prevHeading, _lastHeading)) > InstantTurnDeg)
             {
                 Metrics.instant_turns++;
-                _awaitingUnwind = true;
+                _turnWindowOpen = true;
                 _sawYawLag = false;
-            }
-            // Window starts after visual yaw has actually unwound. Do not open it on the snap
-            // frame, when YawLag is still 0 because gait has not stepped yet.
-            if (_awaitingUnwind && Mathf.Abs(_gait.YawLag) > InstantTurnDeg * 0.5f)
-                _sawYawLag = true;
-            if (_awaitingUnwind && _sawYawLag && Mathf.Abs(_gait.YawLag) <= UnwindDoneDeg)
-            {
-                _turnWindowUntil = _time + TurnWindowSeconds;
-                _awaitingUnwind = false;
+                _capturePlantedAtTurn = true;
             }
         }
 
@@ -166,16 +164,31 @@ namespace CritterCrafter.Review
             float residual = 0f, slip = 0f;
             int planted = 0;
             var now = new Dictionary<string, Vector3>();
-            bool inTurnWindow = _turnWindowUntil >= 0f && _time <= _turnWindowUntil;
+            if (_turnWindowOpen && Mathf.Abs(_gait.YawLag) > 1f) _sawYawLag = true;
+            if (_turnWindowOpen && _sawYawLag && Mathf.Abs(_gait.YawLag) <= 1f)
+                _turnWindowOpen = false;
+            bool inTurnWindow = _turnWindowOpen;
             bool snapFrame = _gait.ReplantCount != _lastReplantCount;
             _lastReplantCount = _gait.ReplantCount;
+            if (_capturePlantedAtTurn)
+            {
+                foreach (var leg in _gait.Legs)
+                    if (leg.support && _wasPlanted.TryGetValue(leg.branchId, out var was) && was)
+                        _plantedAtTurn.Add(leg.branchId);
+                Metrics.supports_planted_at_turn = _plantedAtTurn.Count;
+                _capturePlantedAtTurn = false;
+            }
             var groupsLifted = new HashSet<int>();
             foreach (var leg in _gait.Legs)
             {
                 bool wasPlanted;
-                if (_wasPlanted.TryGetValue(leg.branchId, out wasPlanted) && wasPlanted && !leg.planted
-                    && inTurnWindow && !snapFrame)
+                _wasPlanted.TryGetValue(leg.branchId, out wasPlanted);
+                if (wasPlanted && !leg.planted && inTurnWindow && !snapFrame)
+                {
                     groupsLifted.Add(leg.group);
+                    if (_plantedAtTurn.Contains(leg.branchId))
+                        _liftedFromTurn.Add(leg.branchId);
+                }
                 _wasPlanted[leg.branchId] = leg.planted;
                 if (!_tips.TryGetValue(leg.branchId, out var tip) || leg.weight < 0.999f) continue;
                 Vector3 p = tip.position;
@@ -210,6 +223,11 @@ namespace CritterCrafter.Review
                 if (countSlip) m.max_planted_slip_m = Mathf.Max(m.max_planted_slip_m, slip);
                 if (inTurnWindow && !snapFrame) m.max_turn_slip_m = Mathf.Max(m.max_turn_slip_m, slip);
                 m.min_planted_supports = Mathf.Min(m.min_planted_supports, planted);
+            }
+            if (inTurnWindow)
+            {
+                m.turn_window_frames++;
+                m.supports_lifted_in_turn = _liftedFromTurn.Count;
             }
             m.cadence_hz = Mathf.Max(m.cadence_hz, (float)_gait.Current.cadenceHz);
             m.overspeed |= _gait.Current.overspeed;

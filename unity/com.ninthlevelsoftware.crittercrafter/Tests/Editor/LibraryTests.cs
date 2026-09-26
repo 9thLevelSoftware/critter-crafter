@@ -280,8 +280,9 @@ namespace CritterCrafter.Tests
         [UnityTest]
         public IEnumerator RuntimeInstantTurnSettlesWithoutShuffle()
         {
-            // Two-bone quadruped trot: instant 180 while moving. Snap/replant may pop; the 0.4 s
-            // window starts after visual yaw has unwound and must not shuffle every support.
+            // Two-bone quadruped trot: instant 180 while moving. Snap/replant may pop; the
+            // window runs from the heading change through yaw ease. Planted supports must not
+            // all lift, and planted slip stays under 0.025 m.
             EditorSettings.enterPlayModeOptionsEnabled = true;
             EditorSettings.enterPlayModeOptions = EnterPlayModeOptions.DisableDomainReload | EnterPlayModeOptions.DisableSceneReload;
             yield return new EnterPlayMode();
@@ -311,6 +312,10 @@ namespace CritterCrafter.Tests
             yield return new ExitPlayMode();
 
             Assert.Greater(metrics.instant_turns, 0, id + ": path must include an instant 180");
+            Assert.Greater(metrics.turn_window_frames, 0, id + ": turn window never opened");
+            Assert.Greater(metrics.supports_planted_at_turn, 0, id + ": no supports were planted at the heading change");
+            Assert.Less(metrics.supports_lifted_in_turn, metrics.supports_planted_at_turn,
+                id + ": every support planted at the heading change lifted during the ease");
             Assert.LessOrEqual(metrics.steps_in_turn_window, groups, id + ": turn-window group steps exceed phase groups");
             Assert.Less(metrics.max_turn_slip_m, 0.025f, id + ": planted feet slide in the turn window");
         }
@@ -340,8 +345,8 @@ namespace CritterCrafter.Tests
                 var motion = c.GetComponent<CreatureMotion>();
                 if (motion == null) motion = c.gameObject.AddComponent<CreatureMotion>();
                 float speed = (float)gait.Block.v_walk_mps;
-                bool telegraphed = false, attacked = false, sawAttackState = false, hasAttackLeg = false;
-                float telegraphAt = -1f, attackAfter02 = 1f, minOtherWeight = 1f;
+                bool telegraphed = false, attacked = false, sawAttackState = false, hasAttackLeg = false, sampled02 = false;
+                float telegraphAt = -1f, attackAt = -1f, attackAt02 = 1f, minOtherWeight = 1f;
                 var recorder = holder.AddComponent<LocomotionRecorder>();
                 recorder.BeforePlace = t =>
                 {
@@ -355,18 +360,21 @@ namespace CritterCrafter.Tests
                     {
                         motion.PlayAttack();
                         attacked = true;
+                        attackAt = t;
                     }
-                    if (!telegraphed) return;
+                    if (!attacked) return;
                     foreach (var leg in gait.Legs)
                     {
-                        if (leg.attack)
-                        {
-                            hasAttackLeg = true;
-                            if (t >= telegraphAt + 0.2f)
-                                attackAfter02 = Mathf.Min(attackAfter02, leg.weight);
-                        }
-                        else
-                            minOtherWeight = Mathf.Min(minOtherWeight, leg.weight);
+                        if (leg.attack) hasAttackLeg = true;
+                        else minOtherWeight = Mathf.Min(minOtherWeight, leg.weight);
+                    }
+                    // Snapshot at 0.2 s after attack start — a later drop must not pass.
+                    if (!sampled02 && t >= attackAt + 0.2f)
+                    {
+                        sampled02 = true;
+                        attackAt02 = 1f;
+                        foreach (var leg in gait.Legs)
+                            if (leg.attack) attackAt02 = Mathf.Min(attackAt02, leg.weight);
                     }
                 };
                 recorder.Begin(gait, ReviewCourse.Straight(speed, 2.2f),
@@ -377,7 +385,7 @@ namespace CritterCrafter.Tests
                     var info = c.Animator.GetCurrentAnimatorStateInfo(0);
                     sawAttackState |= info.IsName("Telegraph") || info.IsName("Attack");
                 }
-                results.Add((id, attacked, sawAttackState, hasAttackLeg, attackAfter02, minOtherWeight, recorder.Metrics));
+                results.Add((id, attacked, sawAttackState, hasAttackLeg, attackAt02, minOtherWeight, recorder.Metrics));
                 Object.Destroy(holder);
                 restore();
                 yield return null;
@@ -385,14 +393,15 @@ namespace CritterCrafter.Tests
             Time.captureFramerate = 0;
             yield return new ExitPlayMode();
 
-            foreach (var (id, attacked, sawState, hasAttackLeg, attackAfter02, minOtherWeight, metrics) in results)
+            Assert.IsTrue(results.Exists(r => r.hasAttackLeg), "need a creature whose attack_branch_id is a gait leg");
+            foreach (var (id, attacked, sawState, hasAttackLeg, attackAt02, minOtherWeight, metrics) in results)
             {
                 Assert.IsTrue(attacked, id + ": attack must play");
                 Assert.IsTrue(sawState, id + ": Animator should be in Telegraph or Attack");
                 Assert.Greater(minOtherWeight, 0.999f, id + ": non-attack feet should stay at IK weight 1");
                 Assert.Less(metrics.max_planted_slip_m, 0.025f, id + ": support feet slide during attack");
                 if (hasAttackLeg)
-                    Assert.Less(attackAfter02, 0.01f, id + ": attack-leg IK weight should drop within 0.2 s");
+                    Assert.Less(attackAt02, 0.01f, id + ": attack-leg IK weight should drop within 0.2 s of attack start");
             }
         }
 
