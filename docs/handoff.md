@@ -34,7 +34,7 @@ critter-crafter is a standalone tool that builds procedural monsters from three 
 | Unity | `F:\Unity\6000.6.0f1\Editor\Unity.exe`; test project `unity/TestProject` |
 | Animation Rigging | Resolves to the built-in 6.6.0. The package declares `1.3.0`. |
 | Enter Play Mode Options | The TestProject has them enabled (no domain or scene reload), set by the Play Mode test and capture. This is intentional. |
-| Asset archive | `9thLevelSoftware/synaptic-sea-asset-archive` (private) cloned **next to** this repo, or `CRITTER_ASSET_ARCHIVE` / `[paths].asset_archive` in `critter.toml`. Needed only to build real parts. |
+| Asset archive | `9thLevelSoftware/synaptic-sea-asset-archive` (private) cloned **next to** this repo, or `CRITTER_ASSET_ARCHIVE` / `[paths].asset_archive` in `critter.toml`. Needed only to build real parts. The local clone may be a sparse checkout: if `library build` reports `CC_ARCHIVE_MISSING`, add each part record's `archive_path` with `git sparse-checkout add`. |
 | Gitignored build output | `work/` (reviews, logs, part previews), `library/` (built library), `dist/` |
 | Linux / cloud sessions | Blender 5.2.2 for Linux (`CRITTER_BLENDER`) runs the whole suite. Workbench/EEVEE renders need Mesa EGL (`apt-get install libegl1 libegl-mesa0 libgl1-mesa-dri`). There is no Unity there. |
 
@@ -144,7 +144,7 @@ The golden, Unity-test and QA steps fail loudly if skipped.
   - a few centimetres of downhill foot slide on the 20° ramp;
   - the first stride from standing can drag a foot (tests exclude the first second);
   - see `docs/locomotion.md` → Known limitations.
-- **Dragger refinement.** The owner said "refine later". Placeholder parts make the hands read as feet and the head small. The real arm and skull fit dragger branches, so approving them should help. Possible tuning: `dragSurge`, `dragHeaveDeg`, `dragRollDeg` on `CreatureGait`, and the arm stance in `_dragger`.
+- **Dragger refinement.** The owner said "refine later". The torso is now hauled by the hands (it rests while a hand grips and lunges through the pull; see `docs/locomotion.md` → Dragging). This awaits the owner's review of the `work/review/dragger-after` GIFs against `work/review/dragger-before`. Placeholder parts still make the hands read as feet and the head small. Tuning: `dragGrip`, `dragSettle`, `dragHeaveDeg`, `dragRollDeg`, `dragYawDeg` on `CreatureGait`, and the arm stance in `_dragger`. At 2.5 m/s the crawl reads as a scramble; a slower dragger move speed in the game would look more deliberate.
 - **Arms fit leg branches.** A `limb3_plantigrade` part matches arm and leg branches alike (no
   `tags_any` on any branch), so the real arm also becomes humanoid and quadruped legs, walking on
   hands. Decide whether that's a feature; if not, tag leg branches and ship leg parts.

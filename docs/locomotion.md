@@ -11,7 +11,7 @@ Every compiled skeleton carries a `locomotion` block (catalog frame, metres). It
 | Mode | Used by | Runtime behaviour |
 |---|---|---|
 | `legs` | bipeds, quadrupeds, hexapods, crawlers, the radial walker, legged serpentines | Scheduled stepping plus Animation Rigging IK per leg |
-| `legs` with `gait: "drag"` | draggers | The torso slides on the ground; the arms reach, plant and haul it, with a visual lurch and heave |
+| `legs` with `gait: "drag"` | draggers | The torso lies on the ground and only the planted hands move it: it rests while a hand grips, lunges through the pull, and stops (see [Dragging](#dragging)) |
 | `slide` | limbless serpentines | No feet; the baked undulation advances one cycle per `travel_per_cycle_m` of ground travel |
 
 ## Speeds (the game should read these)
@@ -53,7 +53,7 @@ The package depends on **Animation Rigging** (a core package in Unity 6). `Critt
   - advances the gait clock;
   - schedules steps, and forces early steps when a foot overruns its reach (turns);
   - raycasts the ground (`AssemblyOptions.groundMask`);
-  - sets body height, pitch and roll from the planted feet, plus the drag lurch;
+  - sets body height, pitch and roll from the planted feet (draggers: the haul-driven torso instead);
   - smooths the visible body yaw after instant turns (`bodyTurnRateDeg`);
   - drives the Animator's `Speed`, `Gait` (0 = walk, 1 = run) and `GaitPhase`.
 - **`ikWeight`** at 0 falls back to the overlay with neutral legs, for LOD or off-screen creatures.
@@ -78,7 +78,22 @@ Game integration: move the creature root with the agent (`updatePosition = true`
 
 - **`critter skeleton qa`** checks every skeleton's locomotion block: speed bands, support at the walk and run duty factors, step rate and stance stroke at the published speeds.
 - **`critter recipe golden`** writes `tests/golden_v3/locomotion.json`. The Unity `StepPlannerGoldenTests` requires the C# `StepPlanner` to match the Python reference (`src/critter_crafter/locomotion/stepper.py`) within 1e-6.
-- **The Unity `RuntimeLegsPlantFeetAtGameSpeed` Play Mode test** runs one skeleton per legged family at 2.5 m/s and checks IK residual, planted slip (after a one-second warmup), support, step rate and the overlay state.
+- **The Unity `RuntimeLegsPlantFeetAtGameSpeed` Play Mode test** runs one skeleton per legged family at 2.5 m/s and checks IK residual, planted slip (after a one-second warmup), support, step rate and the overlay state. For the dragger it also checks that the torso travels in hauls: it nearly stops between pulls (under 0.15× its mean speed) and lunges through them (over 1.8×).
+
+## Dragging
+
+The root (the agent) is the travel intent and still moves at an even speed. The dragger's torso does not follow it evenly; its lead over the root comes from the arms:
+
+- Each haul is half a gait cycle, one per arm, and moves the torso exactly as far as the root travels in that time, so the two never drift apart.
+- **Grip** (`dragGrip`, default 0.2 of the haul, and never less than the hand-over overlap): the new hand has just planted and the trailing hand has not lifted yet. The torso rests.
+- **Pull:** the torso lunges toward the planted hand on a smoothstep, peaking at about twice the average speed. The chest lifts (`dragHeaveDeg`), and the shoulders roll (`dragRollDeg`) and turn (`dragYawDeg`) toward the pulling arm.
+- **Settle** (`dragSettle`, default 0.15): the torso comes to rest before the next grip.
+- **Stopping:** the torso eases onto the root over `dragStopSettle` (0.3 s).
+- **Arms, not legs:** the dragger arm branches bend with the elbow pointing up, out and back (branch `up` in `_dragger`), and the forearm and wrist twist so the palm lies flat. Before, the elbows pointed straight up and read as knees.
+
+The torso is at most about 0.2 of one haul (≈ 0.12 m at walk, ≈ 0.14 m at 2.5 m/s) ahead of or behind the root, so colliders on the root sit slightly off the torso.
+
+The grip-pull-stop rhythm reads best at walk speed, about one haul per arm per second. At 2.5 m/s a dragger hauls almost twice as often and it reads as a scramble. If the crawl should look deliberate in the game, use the dragger's own `v_walk_mps` or `v_run_mps` as its move speed rather than the shared threat speed.
 
 ## Known limitations
 

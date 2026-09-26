@@ -407,7 +407,8 @@ def _dragger(a: dict[str, Any], h: float, length: float, width: float) -> tuple[
         arm = _branch(
             f"arm_{side}", "limb3", "core",
             origin=_v(sx * radius * (.95 if pull else 1.1), shoulder_y, shoulder_z),
-            direction=[sx * spread, -.12, 1.0], up=[0, 1, 0],
+            # Elbows flare up, out and back like a crawling arm, not straight up like a knee.
+            direction=[sx * spread, -.12, 1.0], up=[sx * .55, .75, -.35],
             length=arm_length, side=side, attach=2,
             mirror_of="arm_L" if side == "R" else "", role="locomotor",
             phase=phase, support=.6, contact="hand", parent_joint="end",
@@ -415,6 +416,8 @@ def _dragger(a: dict[str, Any], h: float, length: float, width: float) -> tuple[
         # Mid-pull: the upper arm lifts toward ``up``, the forearm folds down to the ground (profile
         # flexion is bone -X), the hand lies flat. At the far end of the stroke the arm is almost straight.
         arm["stance_deg"] = [30.0, -75.0, 30.0]
+        # Forearm and wrist turn to lay the palm flat under the flared elbow.
+        arm["stance_z_deg"] = [0.0, 15.0 * sx, 20.0 * sx]
         arm["_extension_target"] = .72
         arm["_ground_contact"] = True
         branches.append(arm)
