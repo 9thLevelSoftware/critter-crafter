@@ -22,6 +22,11 @@
       "binding_profile_hash": "e088e7673adc66d2bce1d37b45a1231bcd22608e189e3843f6c3fa8177da397b"
     },
     {
+      "binding_profile_id": "limb3_brachial",
+      "binding_profile_version": "1.0.0",
+      "binding_profile_hash": "1c39af36eddbc1a305c46777442763d2bc3e1cf6d5d228fccb5bcf9fa3989e3a"
+    },
+    {
       "binding_profile_id": "limb3_digitigrade",
       "binding_profile_version": "1.0.0",
       "binding_profile_hash": "fc7038b0f4753861ea313250016d87cb31f708d048351b4d6d45c8b7c0d63db7"

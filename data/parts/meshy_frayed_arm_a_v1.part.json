@@ -3,10 +3,10 @@
   "part_id": "meshy_frayed_arm_a_v1",
   "category": "limb",
   "template": "limb3",
-  "binding_profile_id": "limb3_plantigrade",
+  "binding_profile_id": "limb3_brachial",
   "binding_profile_version": "1.0.0",
   "side": "symmetric",
-  "girth_m": 0.187,
+  "girth_m": 0.17,
   "species_tags": [
     "human"
   ],
@@ -19,8 +19,8 @@
   "status": "draft",
   "style_profile": "flesh_stylized_v1",
   "dimensions_m": [
-    0.303342,
-    0.199285,
+    0.275765,
+    0.181168,
     0.876612
   ],
   "length_m": 0.85,
@@ -46,20 +46,20 @@
     },
     "measured": {
       "dimensions_m": [
-        0.303342,
-        0.199285,
+        0.275765,
+        0.181168,
         0.876612
       ],
       "uniform_scale": 0.379925,
-      "radial_scale": 0.942489,
-      "radial_scale_wanted": 0.942489,
+      "radial_scale": 0.856808,
+      "radial_scale_wanted": 0.856808,
       "nominal_girth_m": 0.198411,
       "up_source": "bend",
       "end_to_end_bend_deg": 9.303,
       "strain_p99": 1.6372,
       "strain_max": 2.1859,
       "islands": 1,
-      "triangles": 1904
+      "triangles": 1894
     }
   }
 }

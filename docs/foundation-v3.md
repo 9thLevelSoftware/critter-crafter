@@ -13,6 +13,7 @@ appendage1_terminal
 core1_body
 head1_neck
 insect_leg4_articulated
+limb3_brachial
 limb3_digitigrade
 limb3_plantigrade
 spine3_axial

@@ -101,7 +101,7 @@
         -0.35
       ],
       "length_m": 0.9916,
-      "girth_m": 0.2182,
+      "girth_m": 0.1983,
       "size_class": "M",
       "side": "L",
       "required": true,
@@ -114,7 +114,7 @@
         ]
       },
       "connector_size_class": "M",
-      "binding_profile_id": "limb3_plantigrade",
+      "binding_profile_id": "limb3_brachial",
       "binding_profile_version": "1.0.0",
       "socket": {
         "parent_joint": "end",
@@ -144,9 +144,9 @@
         "cadence_hz": 1.5
       },
       "stance_deg": [
-        44.791,
-        -90.955,
-        32.0
+        47.855,
+        -94.776,
+        37.911
       ],
       "stance_z_deg": [
         0.0,
@@ -159,7 +159,7 @@
           "bone_index": 2,
           "local_point_m": [
             0.0,
-            0.0992,
+            0.1785,
             0.0
           ]
         }
@@ -186,7 +186,7 @@
         -0.35
       ],
       "length_m": 0.9916,
-      "girth_m": 0.2182,
+      "girth_m": 0.1983,
       "size_class": "M",
       "side": "R",
       "required": true,
@@ -199,7 +199,7 @@
         ]
       },
       "connector_size_class": "M",
-      "binding_profile_id": "limb3_plantigrade",
+      "binding_profile_id": "limb3_brachial",
       "binding_profile_version": "1.0.0",
       "socket": {
         "parent_joint": "end",
@@ -229,9 +229,9 @@
         "cadence_hz": 1.5
       },
       "stance_deg": [
-        44.791,
-        -90.955,
-        32.0
+        47.855,
+        -94.776,
+        37.911
       ],
       "stance_z_deg": [
         0.0,
@@ -245,7 +245,7 @@
           "bone_index": 2,
           "local_point_m": [
             0.0,
-            0.0992,
+            0.1785,
             0.0
           ]
         }
@@ -438,7 +438,7 @@
   "neutral_pose": {
     "root_offset_m": [
       0.0,
-      -0.0,
+      0.0,
       0.0
     ],
     "rotations": [
@@ -481,55 +481,55 @@
       {
         "bone_name": "arm_L_b0",
         "rotation_xyzw": [
-          0.38099776,
+          0.40558035,
           0.0,
           0.0,
-          0.92457596
+          0.9140594
         ]
       },
       {
         "bone_name": "arm_L_b1",
         "rotation_xyzw": [
-          -0.70687555,
-          -0.09306193,
-          0.09152357,
-          0.69519053
+          -0.72965911,
+          -0.09606144,
+          0.08837016,
+          0.67123804
         ]
       },
       {
         "bone_name": "arm_L_b2",
         "rotation_xyzw": [
-          0.27144981,
-          0.04786392,
-          0.16692134,
-          0.94665797
+          0.31989875,
+          0.05640678,
+          0.16423144,
+          0.93140276
         ]
       },
       {
         "bone_name": "arm_R_b0",
         "rotation_xyzw": [
-          0.38099776,
+          0.40558035,
           0.0,
           0.0,
-          0.92457596
+          0.9140594
         ]
       },
       {
         "bone_name": "arm_R_b1",
         "rotation_xyzw": [
-          -0.70687555,
-          0.09306193,
-          -0.09152357,
-          0.69519053
+          -0.72965911,
+          0.09606144,
+          -0.08837016,
+          0.67123804
         ]
       },
       {
         "bone_name": "arm_R_b2",
         "rotation_xyzw": [
-          0.27144981,
-          -0.04786392,
-          -0.16692134,
-          0.94665797
+          0.31989875,
+          -0.05640678,
+          -0.16423144,
+          0.93140276
         ]
       },
       {

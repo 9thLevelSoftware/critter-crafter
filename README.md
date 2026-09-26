@@ -2,7 +2,7 @@
 
 Skeleton-first procedural monster assets for Unity. Package version `0.2.0` uses the deterministic `cc-gen-3` generator and SplitMix64. A recipe selects one skeleton and fills its branches with compatible parts and optional connectors.
 
-The v3 foundation is chain based. Each branch names an immutable binding profile, version, and SHA-256 identity. The current profiles are `appendage1_terminal`, `core1_body`, `head1_neck`, `insect_leg4_articulated`, `limb3_digitigrade`, `limb3_plantigrade`, `spine3_axial`, and `tentacle8_flexible`. Branch sockets are local to their named parent joint and carry a complete orientation. Skeleton neutral pose is a separate set of local anatomical deltas: bind first, then apply neutral exactly once.
+The v3 foundation is chain based. Each branch names an immutable binding profile, version, and SHA-256 identity. The current profiles are `appendage1_terminal`, `core1_body`, `head1_neck`, `insect_leg4_articulated`, `limb3_brachial` (arms), `limb3_digitigrade`, `limb3_plantigrade`, `spine3_axial`, and `tentacle8_flexible`. Branch sockets are local to their named parent joint and carry a complete orientation. Skeleton neutral pose is a separate set of local anatomical deltas: bind first, then apply neutral exactly once.
 
 The v2 source documents and `tests/golden/` fixtures remain frozen historical compatibility evidence. Active v3 loading selects `data/library.json` schema `3.0.0`; v2 inputs are rejected rather than silently migrated. The archived v2 workflow requires its original package/library version and is not available through the active `cc-gen-3` dispatch. The v3 parity fixtures in `tests/golden_v3/` use an in-memory approved copy (`fixture_only_approval: true`) and do not approve candidate source files.
 
