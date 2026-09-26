@@ -133,9 +133,9 @@ branches, import the same source again as a second record with a different `--le
 Sides are `symmetric` by default: one mesh serves left and right branches. `--mirror-x` makes a true
 mirror variant when handedness shows.
 
-Branches accept parts by category, template and profile. There are no tags on the current skeletons,
-so a `limb3_plantigrade` arm also fits plantigrade **leg** branches: bipeds and quadrupeds then walk on
-hands. Give leg branches `accepts.tags_any` (and legs a matching tag) if that's unwanted.
+Branches accept parts by category, template and profile. Arms and legs are different profiles
+(`limb3_brachial` for arms, `limb3_plantigrade`/`limb3_digitigrade` for legs), so an arm part fits only
+arm branches.
 
 ## QA
 
@@ -163,7 +163,7 @@ this compares like with like.
 | Part | Source | Profile | Length | Notes |
 |---|---|---|---|---|
 | `meshy_insect_leg_a_v1` | `biomass_insect_leg_v1/01a0c114…` | `insect_leg4_articulated` | 0.90 m | modelled with a ~110° knee; straightened, dorsal spikes kept |
-| `meshy_frayed_arm_a_v1` | `biomass_human_arm_v1/01a0c10e…` | `limb3_plantigrade` | 0.85 m | frayed shoulder tendrils, clawed hand |
+| `meshy_frayed_arm_a_v1` | `biomass_human_arm_v1/01a0c10e…` | `limb3_brachial` | 0.85 m | frayed shoulder tendrils, clawed hand |
 | `meshy_animal_skull_a_v1` | `biomass_animal_skull_v1/01a0c171…` | `head1_neck` | 0.30 m | rigid; snout on +Z |
 | `meshy_tentacle_a_v1` | `biomass_cephalopod_tentacle_v1/01a0c123…` | `tentacle8_flexible` | 1.60 m | S-curve straightened; suckers ventral |
 

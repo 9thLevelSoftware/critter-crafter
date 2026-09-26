@@ -55,19 +55,20 @@ _PROFILES = {
 }
 _PROFILE_FRACTIONS = {
     "core1_body": (1.0,), "spine3_axial": (.34, .33, .33),
-    "limb3_plantigrade": (.45, .45, .10), "limb3_digitigrade": (.35, .45, .20),
+    "limb3_plantigrade": (.45, .45, .10), "limb3_digitigrade": (.35, .45, .20), "limb3_brachial": (.42, .40, .18),
     "insect_leg4_articulated": (.20, .35, .35, .10), "tentacle8_flexible": (.125,) * 8,
     "head1_neck": (1.0,), "appendage1_terminal": (1.0,),
 }
 _PROFILE_GIRTH = {
     "core1_body": .30, "spine3_axial": .30,
-    "limb3_plantigrade": .22, "limb3_digitigrade": .18,
+    "limb3_plantigrade": .22, "limb3_digitigrade": .18, "limb3_brachial": .20,
     "insect_leg4_articulated": .15, "tentacle8_flexible": .18,
     "head1_neck": .28, "appendage1_terminal": .16,
 }
 _JOINTS = {
     "core1_body": ("upper",), "spine3_axial": ("pelvis", "lower", "end"),
     "limb3_plantigrade": ("upper", "lower", "end"), "limb3_digitigrade": ("upper", "lower", "end"),
+    "limb3_brachial": ("upper", "lower", "end"),
     "insect_leg4_articulated": ("upper", "femur", "tibia", "end"),
     "tentacle8_flexible": ("seg0", "seg1", "seg2", "seg3", "seg4", "seg5", "seg6", "end"),
     "head1_neck": ("upper",), "appendage1_terminal": ("upper",),
@@ -105,6 +106,7 @@ def _branch(branch_id: str, template: str, parent: str | None, *, origin: list[f
     stance = {
         "limb3_plantigrade": [12.0, -28.0, 16.0],
         "limb3_digitigrade": [14.0, -34.0, 19.0],
+        "limb3_brachial": [10.0, -60.0, 8.0],
         "insect_leg4_articulated": [10.0, -32.0, -38.0, 12.0],
         "tentacle8_flexible": [0.0] * 8,
     }.get(profile_id, [0.0] * joints)
@@ -188,6 +190,8 @@ def _mammal_leg(leg: dict[str, Any], *, fore: bool = False, fit_hip: bool = True
 def _ground_by_first_joint(branch: dict[str, Any]) -> None:
     """Swing the first joint (within its limits) until the contact meets the ground, keeping length."""
     lo, hi = _bone_limits(branch["binding_profile_id"])[0]
+    # Search where height rises with the angle: a wide shoulder (arms) swings past vertical.
+    lo, hi = max(lo, -75.0), min(hi, 75.0)
     def height(angle: float) -> float:
         angles = [angle] + list(branch["stance_deg"][1:])
         return _contact_height(branch, angles, None, branch["stance_z_deg"]) - _contact_clearance(branch["contacts"][0]["kind"])
@@ -278,13 +282,15 @@ def _biped(a: dict[str, Any], h: float, length: float, width: float) -> tuple[li
         _mammal_leg(leg)
     arm_len = h * .42 * a["limb_scale"]
     shoulder_x = min(width * .34, (torso_length * _PROFILE_GIRTH["spine3_axial"] +
-                                   arm_len * _PROFILE_GIRTH["limb3_plantigrade"]) * .46)
+                                   arm_len * _PROFILE_GIRTH["limb3_brachial"]) * .46)
     for side, sx in (("L", 1), ("R", -1)):
         branches.append(_branch(f"arm_{side}", "limb3", "core",
                                 origin=_v(sx * shoulder_x, torso_origin_y + torso_length * .74, 0),
-                                direction=[sx * .4, -.8, .1], up=[0, 0, 1], length=arm_len, side=side,
+                                # Arms, not legs: the elbow points back and the forearm folds forward.
+                                direction=[sx * .4, -.8, .1], up=[0, 0, -1], length=arm_len, side=side,
                                 attach=2, mirror_of="arm_L" if side == "R" else "", role="manipulator",
-                                phase=math.pi if side == "L" else 0, support=0.0, contact="hand", parent_joint="end"))
+                                phase=math.pi if side == "L" else 0, support=0.0, contact="hand", parent_joint="end",
+                                profile_id="limb3_brachial"))
     branches.append(_branch("head", "head1", "core", origin=_v(0, torso_origin_y + torso_length, 0),
                             direction=[0, .5, 1], up=[0, 1, 0], length=h * .18,
                             role="head", attach=2, parent_joint="end"))
@@ -411,12 +417,12 @@ def _dragger(a: dict[str, Any], h: float, length: float, width: float) -> tuple[
             direction=[sx * spread, -.12, 1.0], up=[sx * .55, .75, -.35],
             length=arm_length, side=side, attach=2,
             mirror_of="arm_L" if side == "R" else "", role="locomotor",
-            phase=phase, support=.6, contact="hand", parent_joint="end",
+            phase=phase, support=.6, contact="hand", parent_joint="end", profile_id="limb3_brachial",
         )
         # Mid-pull: the upper arm lifts toward ``up``, the forearm folds down to the ground (profile
         # flexion is bone -X), the hand lies flat. At the far end of the stroke the arm is almost straight.
         arm["stance_deg"] = [30.0, -75.0, 30.0]
-        # Forearm and wrist turn to lay the palm flat under the flared elbow.
+        # The elbow (carrying angle) and wrist angle sideways to lay the palm flat under the flared elbow.
         arm["stance_z_deg"] = [0.0, 15.0 * sx, 20.0 * sx]
         arm["_extension_target"] = .72
         arm["_ground_contact"] = True

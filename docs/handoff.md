@@ -145,9 +145,7 @@ The golden, Unity-test and QA steps fail loudly if skipped.
   - the first stride from standing can drag a foot (tests exclude the first second);
   - see `docs/locomotion.md` → Known limitations.
 - **Dragger refinement.** The owner said "refine later". The torso is now hauled by the hands (it rests while a hand grips and lunges through the pull; see `docs/locomotion.md` → Dragging). This awaits the owner's review of the `work/review/dragger-after` GIFs against `work/review/dragger-before`. Placeholder parts still make the hands read as feet and the head small. Tuning: `dragGrip`, `dragSettle`, `dragHeaveDeg`, `dragRollDeg`, `dragYawDeg` on `CreatureGait`, and the arm stance in `_dragger`. At 2.5 m/s the crawl reads as a scramble; a slower dragger move speed in the game would look more deliberate.
-- **Arms fit leg branches.** A `limb3_plantigrade` part matches arm and leg branches alike (no
-  `tags_any` on any branch), so the real arm also becomes humanoid and quadruped legs, walking on
-  hands. Decide whether that's a feature; if not, tag leg branches and ship leg parts.
+- **Arms are their own limb type.** Biped and dragger arms use `limb3_brachial`: a wide-ranging shoulder, an elbow that points back (bipeds) or up, out and back (draggers), a longer hand, and a wrist that bends both ways. `meshy_frayed_arm_a_v1` is refit to it, so it fits arms only and no longer fills legs. Biped arms rest with the elbow bent about 55–60°; straighter arms left the punch and rake targets out of reach.
 - **Pools** (`data/pools/pools.json`) still list only the biped, quadruped and crawler families. Add the new families when the game needs them; this changes the golden recipes.
 - **All 39 skeletons are still `draft`.** `critter skeleton approve` needs a passing review receipt from `critter skeleton review`. This process predates runtime locomotion and may deserve simplifying, given the owner's no-governance preference.
 - **Variety** is still 13 body plans × 3 presets, well below M4's target of at least 80 skeletons. The earlier review suggested optional branches (tails, dorsal parts, extra arms) and wider seeded proportions.
@@ -161,7 +159,7 @@ mixed real-plus-placeholder library imports and animates in Unity.
 | Part | Profile | Length | Fit | Deformation QA (worst skeleton, real vs placeholder) |
 |---|---|---|---|---|
 | `meshy_insect_leg_a_v1` | `insect_leg4_articulated` | 0.90 m | modelled with a 110° knee, straightened (strain p99 1.41); radial 0.79; 1,939 tris with edge loops; `smooth` weights | crawler, hexapod, radial: p01 0.62 (0.71), p99 1.40 (1.61), flipped 0.06% (1.33%) |
-| `meshy_frayed_arm_a_v1` | `limb3_plantigrade` | 0.85 m | 9° bend (strain p99 1.64); radial 0.94; frayed shoulder tendrils ride rigidly; 1,904 tris | biped, dragger, quadruped: p01 0.60 (0.41–0.64), p99 1.47 (1.74), flipped 0.54% (0.88%) |
+| `meshy_frayed_arm_a_v1` | `limb3_brachial` | 0.85 m | 9° bend (strain p99 1.64); radial 0.94; frayed shoulder tendrils ride rigidly; 1,894 tris | biped and dragger arms: p01 0.54–0.60 (ref 0.59–0.64), p99 1.26–1.45 (ref 1.42–1.61), flipped 0.2–1.2% (ref 0.9%) |
 | `meshy_tentacle_a_v1` | `tentacle8_flexible` | 1.60 m | S-curve straightened (strain p99 1.40); suckers ventral; 1,832 tris | dragger belly, the only accepting skeleton at 1.6 m: p01 0.84 (0.80), p99 1.17 (1.21), 0 flipped |
 | `meshy_animal_skull_a_v1` | `head1_neck` | 0.30 m | rigid, centred on its bounding box, snout on +Z; 1,460 tris | biped, dragger, quadruped: rigid single bone, strain 1.000 |
 
