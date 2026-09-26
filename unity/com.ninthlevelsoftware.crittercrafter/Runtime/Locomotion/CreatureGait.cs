@@ -322,6 +322,7 @@ namespace CritterCrafter.Locomotion
 
             UpdateWeights(dt);
             UpdateBody(dt, hipSpeed);
+            HoldHipsToPlantedReach();
             ApplyTargets();
             UpdateAnimator(hipSpeed);
         }
@@ -364,21 +365,21 @@ namespace CritterCrafter.Locomotion
                 Quaternion sole = Quaternion.AngleAxis(yaw, Vector3.up)
                     * Quaternion.Euler(0f, transform.eulerAngles.y + _yawLag, 0f)
                     * bodyBaseLocalRotation;
+                bool slopePlant = leg.planted && Mathf.Abs(_slopeRad) > 5f * Mathf.Deg2Rad;
+                Quaternion offsetFrame = slopePlant ? sole : frame;
                 Vector3 femur = coxa + frame * leg.femurFromCoxa;
-                Vector3 ankle = leg.position + frame * leg.ankleOffset;
+                Vector3 ankle = leg.position + offsetFrame * leg.ankleOffset;
                 Vector3 reach = ankle - femur;
                 float max = HingeReachFraction * leg.hingeReach;
                 leg.clamped = reach.sqrMagnitude > max * max;
                 if (leg.clamped)
                 {
                     ankle = femur + reach.normalized * max;
-                    leg.position = ankle - frame * leg.ankleOffset;
+                    leg.position = ankle - offsetFrame * leg.ankleOffset;
                     if (leg.planted) leg.plant = leg.position;
                 }
                 // Sole stays height-only: do not pitch/roll the IK target with the body.
-                Quaternion targetRot = Mathf.Abs(_slopeRad) > 5f * Mathf.Deg2Rad
-                    ? sole * leg.ankleRotation
-                    : frame * leg.ankleRotation;
+                Quaternion targetRot = slopePlant ? sole * leg.ankleRotation : frame * leg.ankleRotation;
                 leg.target.SetPositionAndRotation(ankle, targetRot);
                 if (leg.coxaAim != null) leg.coxaAim.position = coxa + frame * leg.coxaDirection;
                 if (leg.hint != null) leg.hint.position = coxa + frame * leg.hintFromCoxa;
@@ -478,9 +479,7 @@ namespace CritterCrafter.Locomotion
             // Instant heading changes (agents with huge angular speed) leave planted feet far from home or
             // out of reach; re-step them early rather than stretching the chain.
             if (leg.clamped) return true;
-            if (leg.hip != null && Vector3.Distance(leg.hip.position, leg.plant) > 0.85f * leg.reach
-                && (!leg.hinge || Mathf.Abs(_slopeRad) > 5f * Mathf.Deg2Rad))
-                return true;
+            if (!leg.hinge && leg.hip != null && Vector3.Distance(leg.hip.position, leg.plant) > 0.92f * leg.reach) return true;
             return Strain(leg, home) > Mathf.Max(0.6f * leg.stroke, 0.35f * leg.reach);
         }
 
@@ -495,12 +494,6 @@ namespace CritterCrafter.Locomotion
         /// <summary>Lifting keeps at least min_support planted supports; early steps also respect a swing cap.</summary>
         bool CanLift(Leg leg, bool early)
         {
-            // Stance/lead keep most slope plants in reach. If this frame's hip-to-plant is already
-            // past remaining reach, lift now (before ApplyTargets drags) — min_support would
-            // otherwise deadlock a biped/trot for a whole downhill frame.
-            if (Mathf.Abs(_slopeRad) > 5f * Mathf.Deg2Rad && leg.hip != null
-                && Vector3.Distance(leg.hip.position, leg.plant) > 0.85f * leg.reach)
-                return true;
             if (leg.support && PlantedSupports(leg) < _block.min_support) return false;
             if (!early) return true;
             int swinging = 0;
@@ -639,8 +632,10 @@ namespace CritterCrafter.Locomotion
                 pitch = Mathf.Clamp(_slopeRad * Mathf.Rad2Deg, -maxBodyTiltDeg, maxBodyTiltDeg);
             float k = 1f - Mathf.Exp(-dt / 0.12f);
             _bodyHeight = Mathf.Lerp(_bodyHeight, height, k);
-            _bodyPitch = Mathf.Lerp(_bodyPitch, pitch, k);
             _bodyRoll = Mathf.Lerp(_bodyRoll, roll, k);
+            // Snap pitch on a slope so the hips match this frame (lerp left a downhill clamp).
+            if (Mathf.Abs(_slopeRad) > 5f * Mathf.Deg2Rad) _bodyPitch = pitch;
+            else _bodyPitch = Mathf.Lerp(_bodyPitch, pitch, k);
             // A small vertical dip at twice the stride frequency while moving. It only ever lowers the
             // body: raising the hips would cost reach exactly when a trailing foot is furthest back.
             float bob = speed > 0.05f
@@ -664,6 +659,42 @@ namespace CritterCrafter.Locomotion
             body.localPosition = bodyBaseLocalPosition + Vector3.up * (_bodyHeight + bob)
                 + footAbout - footYaw * (footTilt * footPivot);
             body.localRotation = BodyRotation();
+        }
+
+        /// <summary>
+        /// Keep planted supports in reach by moving the hips, not the feet and not a min_support lift.
+        /// </summary>
+        void HoldHipsToPlantedReach()
+        {
+            if (body == null || Mathf.Abs(_slopeRad) <= 5f * Mathf.Deg2Rad) return;
+            for (int iter = 0; iter < 3; iter++)
+            {
+                Vector3 pull = Vector3.zero;
+                float worst = 0f;
+                foreach (var leg in legs)
+                {
+                    if (!leg.planted || !leg.support || leg.hip == null) continue;
+                    Vector3 hip = leg.hip.position;
+                    Vector3 target = leg.plant;
+                    float max = MaxReachFraction * leg.reach;
+                    if (leg.hinge && leg.hingeReach > 0f)
+                    {
+                        Quaternion sole = Quaternion.Euler(0f, transform.eulerAngles.y + _yawLag, 0f)
+                            * bodyBaseLocalRotation;
+                        target = leg.plant + sole * leg.ankleOffset;
+                        max = HingeReachFraction * leg.hingeReach;
+                    }
+                    Vector3 d = hip - target;
+                    float dist = d.magnitude;
+                    if (dist <= max || dist < 1e-5f) continue;
+                    float over = dist - max;
+                    if (over <= worst) continue;
+                    worst = over;
+                    pull = target + d * (max / dist) - hip;
+                }
+                if (worst <= 0f) return;
+                body.position += pull;
+            }
         }
 
         Quaternion BodyRotation() =>

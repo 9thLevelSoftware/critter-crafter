@@ -288,7 +288,7 @@ namespace CritterCrafter.Tests
             EditorSettings.enterPlayModeOptions = EnterPlayModeOptions.DisableDomainReload | EnterPlayModeOptions.DisableSceneReload;
             yield return new EnterPlayMode();
             Time.captureFramerate = 30;
-            var results = new List<(string id, string dir, LocomotionMetrics metrics, bool hasGait)>();
+            var results = new List<(string id, string dir, LocomotionMetrics metrics, bool hasGait, int minSupport)>();
             foreach (var id in OnePerFamily)
             {
                 foreach (var downhill in new[] { false, true })
@@ -310,7 +310,8 @@ namespace CritterCrafter.Tests
                         while (!recorder.Done) yield return null;
                         metrics = recorder.Metrics;
                     }
-                    results.Add((id, downhill ? "downhill" : "uphill", metrics, gait != null));
+                    results.Add((id, downhill ? "downhill" : "uphill", metrics, gait != null,
+                        gait != null ? gait.Block.min_support : 0));
                     Object.Destroy(holder);
                     restore();
                     yield return null;
@@ -320,13 +321,15 @@ namespace CritterCrafter.Tests
             yield return new ExitPlayMode();
 
             var fails = new List<string>();
-            foreach (var (id, dir, metrics, hasGait) in results)
+            foreach (var (id, dir, metrics, hasGait, minSupport) in results)
             {
                 if (!hasGait) { fails.Add(id + ": runtime-leg skeletons get a CreatureGait"); continue; }
                 if (metrics.ramp_frames < 10)
                     fails.Add($"{id} {dir}: never reached the ramp ({metrics.ramp_frames} frames)");
                 if (!(metrics.max_ramp_slip_m < 0.025f))
                     fails.Add($"{id} {dir}: planted feet slide on the ramp {metrics.max_ramp_slip_m}");
+                if (minSupport > 0 && metrics.min_ramp_supports < minSupport)
+                    fails.Add($"{id} {dir}: planted supports {metrics.min_ramp_supports} < min_support {minSupport}");
             }
             Assert.That(fails, Is.Empty, string.Join("\n", fails));
         }

@@ -40,6 +40,8 @@ namespace CritterCrafter.Review
         public float max_ramp_slip_m;
         /// <summary>LateUpdate frames spent with the root on the ramp (z from 2 to 2+run).</summary>
         public int ramp_frames;
+        /// <summary>Minimum planted supports on the ramp, excluding the snap/replant frame.</summary>
+        public int min_ramp_supports = int.MaxValue;
     }
 
     /// <summary>
@@ -235,7 +237,11 @@ namespace CritterCrafter.Review
                 if (ReviewCourse.OnRamp(_gait.transform.position))
                 {
                     m.ramp_frames++;
-                    if (!snapFrame) m.max_ramp_slip_m = Mathf.Max(m.max_ramp_slip_m, slip);
+                    if (!snapFrame)
+                    {
+                        m.max_ramp_slip_m = Mathf.Max(m.max_ramp_slip_m, slip);
+                        m.min_ramp_supports = Mathf.Min(m.min_ramp_supports, planted);
+                    }
                 }
             }
             if (inTurnWindow)
