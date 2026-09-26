@@ -93,7 +93,7 @@ namespace CritterCrafter.Locomotion
         Vector3 _lastPosition;
         Vector3 _velocity;
         double _clock;
-        float _bodyHeight, _bodyPitch, _bodyRoll, _bodySurge;
+        float _bodyHeight, _bodyPitch, _bodyRoll, _bodyYaw, _bodySurge;
         float _lastYaw, _yawLag;
         GaitParams _params;
 
@@ -108,6 +108,8 @@ namespace CritterCrafter.Locomotion
         public Vector3 Velocity => _velocity;
         public float Speed => new Vector3(_velocity.x, 0f, _velocity.z).magnitude;
         public LocomotionData Block => _block;
+        /// <summary>The posed torso (grounded bodies travel in hauls relative to the root).</summary>
+        public Transform Body => body;
 
         internal void Configure(Transform bodyTransform, Rig locomotionRig, List<Leg> builtLegs, LayerMask mask)
         {
@@ -449,45 +451,83 @@ namespace CritterCrafter.Locomotion
 
         [Tooltip("Shoulder roll toward the pulling arm for grounded (dragging) bodies (degrees).")]
         public float dragRollDeg = 8f;
-        [Tooltip("Crawl lurch: body surge amplitude as a fraction of the pull stroke.")]
-        public float dragSurge = 0.18f;
         [Tooltip("Crawl heave: chest lift at mid-pull (degrees).")]
         public float dragHeaveDeg = 6f;
+        [Tooltip("Crawl: shoulders turn toward the pulling arm (degrees).")]
+        public float dragYawDeg = 6f;
+        [Tooltip("Crawl: fraction of each haul the torso rests while the new hand grips (at least the hand-over overlap).")]
+        [Range(0f, 0.45f)] public float dragGrip = 0.2f;
+        [Tooltip("Crawl: fraction at the end of each haul the torso rests after the pull.")]
+        [Range(0f, 0.45f)] public float dragSettle = 0.15f;
+        [Tooltip("Crawl: time constant (s) for the torso to settle onto the root once travel stops.")]
+        public float dragStopSettle = 0.3f;
+
+        /// <summary>
+        /// Haul-driven torso travel for grounded bodies. Each haul (one per arm, 1/groups of a cycle) moves
+        /// the torso the same distance the root travels, but only while the new hand pulls: the torso rests
+        /// as the hand grips, lunges through the pull and stops. Returns the torso's lead over the root along
+        /// the heading (m), and the pull progress (0..1, or -1 outside the pull) and its side.
+        /// </summary>
+        float HaulSurge(float speed, out float pull, out int side)
+        {
+            pull = -1f;
+            side = 0;
+            int groups = 0;
+            foreach (var leg in legs) groups = Math.Max(groups, leg.group + 1);
+            if (groups < 1 || _params.cadenceHz <= 0.0) return 0f;
+            float span = 1f / groups;
+            float w = -1f;
+            foreach (var leg in legs)
+            {
+                // The arm that planted most recently (phase within its first haul span) is the one pulling.
+                double phase = StepPlanner.LegPhase(_clock, StepPlanner.LegOffset(ToPlanner(leg), _run));
+                if (phase >= span) continue;
+                w = (float)(phase / span);
+                side = leg.homeLocal.x < 0f ? -1 : 1;
+                break;
+            }
+            if (w < 0f) return 0f;
+            // The trailing hand stays planted for the hand-over overlap; the torso must not move before it lifts.
+            float grip = Mathf.Max(dragGrip, (float)(groups * _params.duty - 1.0));
+            float settle = Mathf.Min(dragSettle, 0.9f - grip);
+            float u = Mathf.Clamp01((w - grip) / Mathf.Max(0.05f, 1f - grip - settle));
+            if (w >= grip && w <= 1f - settle) pull = u;
+            float eased = (float)StepPlanner.Smoothstep(u);
+            float perHaul = speed * span / (float)_params.cadenceHz;
+            return perHaul * (eased - w);
+        }
 
         void UpdateBody(float dt, float speed)
         {
             if (body == null) return;
             if (_block.body_on_ground)
             {
-                // Crawling haul: the torso slides on the ground. Each planted hand drags the body in a
-                // pulse: it lags as the hand slaps down, surges through the pull, and the chest lifts
-                // mid-pull and rolls toward the hauling arm. The root (agent) still moves smoothly.
-                float pull = -1f;
+                // Crawling haul: the torso lies on the ground and only the planted hands move it. The root
+                // (agent) is the travel intent and moves smoothly; the torso rests while a hand grips, lunges
+                // toward it through the pull, and stops. The chest lifts mid-pull and the shoulders roll and
+                // turn toward the hauling arm.
+                bool moving = speed > 0.05f;
+                float pull = -1f, surge = 0f;
                 int side = 0;
-                foreach (var leg in legs)
-                {
-                    if (!leg.planted || leg.forced || _params.duty <= 0.0) continue;
-                    double phase = StepPlanner.LegPhase(_clock, StepPlanner.LegOffset(ToPlanner(leg), _run));
-                    float u = Mathf.Clamp01((float)(phase / _params.duty));
-                    if (pull < 0f || u < pull) { pull = u; side = leg.homeLocal.x < 0f ? -1 : 1; }
-                }
-                bool hauling = speed > 0.05f && pull >= 0f;
-                float strength = hauling ? Mathf.Clamp01(speed / Mathf.Max(0.1f, (float)_block.v_walk_mps)) : 0f;
-                float surge = hauling ? -dragSurge * (float)_block.usable_stroke_m * strength * Mathf.Cos(Mathf.PI * pull) : 0f;
-                float heave = hauling ? -dragHeaveDeg * strength * Mathf.Sin(Mathf.PI * pull) : 0f;
-                float dragRoll = hauling ? dragRollDeg * side * Mathf.Sin(Mathf.PI * pull) : 0f;
+                if (moving) surge = HaulSurge(speed, out pull, out side);
+                float strength = Mathf.Clamp01(speed / Mathf.Max(0.1f, (float)_block.v_walk_mps));
+                float arc = pull >= 0f ? Mathf.Sin(Mathf.PI * pull) : 0f;
                 float kg = 1f - Mathf.Exp(-dt / 0.06f);
+                // Travel follows the haul closely; once stopped, the torso settles onto the root slowly.
+                float ks = moving ? 1f - Mathf.Exp(-dt / 0.03f) : 1f - Mathf.Exp(-dt / Mathf.Max(0.01f, dragStopSettle));
                 _bodyHeight = Mathf.Lerp(_bodyHeight, 0f, kg);
-                _bodySurge = Mathf.Lerp(_bodySurge, surge, kg);
-                _bodyPitch = Mathf.Lerp(_bodyPitch, heave, kg);
-                _bodyRoll = Mathf.Lerp(_bodyRoll, dragRoll, kg);
+                _bodySurge = Mathf.Lerp(_bodySurge, surge, ks);
+                _bodyPitch = Mathf.Lerp(_bodyPitch, -dragHeaveDeg * strength * arc, kg);
+                _bodyRoll = Mathf.Lerp(_bodyRoll, dragRollDeg * side * strength * arc, kg);
+                _bodyYaw = Mathf.Lerp(_bodyYaw, dragYawDeg * side * strength * arc, kg);
                 // Pitch and roll about the rear of the torso so the hips and trailing body stay grounded.
                 Vector3 pivot = _block.body_pivot_m != null && _block.body_pivot_m.Length == 3
                     ? CritterFrame.Position(_block.body_pivot_m) : Vector3.zero;
-                Quaternion tilt = Quaternion.Euler(_bodyPitch, 0f, _bodyRoll);
+                Quaternion tilt = Quaternion.Euler(_bodyPitch, _bodyYaw, _bodyRoll);
                 Quaternion yawLag = Quaternion.Euler(0f, _yawLag, 0f);
                 Vector3 about = yawLag * pivot;
-                body.localPosition = bodyBaseLocalPosition + Vector3.forward * _bodySurge + about - yawLag * (tilt * pivot);
+                // Surge runs along the lagged body heading, so an instant root turn does not swing it sideways.
+                body.localPosition = bodyBaseLocalPosition + yawLag * (Vector3.forward * _bodySurge) + about - yawLag * (tilt * pivot);
                 body.localRotation = BodyRotation();
                 return;
             }
@@ -537,7 +577,7 @@ namespace CritterCrafter.Locomotion
         }
 
         Quaternion BodyRotation() =>
-            Quaternion.Euler(0f, _yawLag, 0f) * Quaternion.Euler(_bodyPitch, 0f, _bodyRoll) * bodyBaseLocalRotation;
+            Quaternion.Euler(0f, _yawLag, 0f) * Quaternion.Euler(_bodyPitch, _bodyYaw, _bodyRoll) * bodyBaseLocalRotation;
 
         void UpdateAnimator(float speed)
         {

@@ -23,6 +23,10 @@ namespace CritterCrafter.Review
         public int frames;
         /// <summary>Frames at the start (standing to full speed in one frame) excluded from slip.</summary>
         public int warmup_frames;
+        /// <summary>Torso planar speed after warmup (grounded bodies travel in hauls, not at the root's speed).</summary>
+        public float body_speed_min_mps = float.MaxValue;
+        public float body_speed_max_mps;
+        public float body_speed_mean_mps;
     }
 
     /// <summary>
@@ -46,7 +50,9 @@ namespace CritterCrafter.Review
         int _cell;
         readonly Dictionary<string, Transform> _tips = new Dictionary<string, Transform>();
         readonly Dictionary<string, Vector3> _lastPlanted = new Dictionary<string, Vector3>();
-        readonly StringBuilder _csv = new StringBuilder("frame,time,speed,residual,slip,planted_supports\n");
+        readonly StringBuilder _csv = new StringBuilder("frame,time,speed,body_speed,residual,slip,planted_supports\n");
+        Vector3 _lastBody;
+        float _bodyTravel, _bodyTime;
         readonly StringBuilder _legCsv = new StringBuilder("frame,leg,planted,forced,ankle_reach_frac,hip_y,foot_x,foot_y,foot_z\n");
 
         /// <param name="outDir">Frame/metrics folder, or null to measure only.</param>
@@ -164,8 +170,26 @@ namespace CritterCrafter.Review
             }
             m.cadence_hz = Mathf.Max(m.cadence_hz, (float)_gait.Current.cadenceHz);
             m.overspeed |= _gait.Current.overspeed;
-            _csv.AppendLine(string.Format(CultureInfo.InvariantCulture, "{0},{1:F3},{2:F3},{3:F4},{4:F4},{5}",
-                _frame, _time, _gait.Speed, residual, slip, planted));
+            float bodySpeed = 0f;
+            Transform body = _gait.Body != null ? _gait.Body : _gait.transform;
+            Vector3 b = body.position;
+            if (_frame > 0 && Time.deltaTime > 0f)
+            {
+                Vector3 d = b - _lastBody;
+                d.y = 0f;
+                bodySpeed = d.magnitude / Time.deltaTime;
+                if (_frame >= m.warmup_frames)
+                {
+                    m.body_speed_min_mps = Mathf.Min(m.body_speed_min_mps, bodySpeed);
+                    m.body_speed_max_mps = Mathf.Max(m.body_speed_max_mps, bodySpeed);
+                    _bodyTravel += d.magnitude;
+                    _bodyTime += Time.deltaTime;
+                    m.body_speed_mean_mps = _bodyTravel / _bodyTime;
+                }
+            }
+            _lastBody = b;
+            _csv.AppendLine(string.Format(CultureInfo.InvariantCulture, "{0},{1:F3},{2:F3},{3:F3},{4:F4},{5:F4},{6}",
+                _frame, _time, _gait.Speed, bodySpeed, residual, slip, planted));
         }
 
         void Render()

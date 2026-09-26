@@ -269,6 +269,13 @@ namespace CritterCrafter.Tests
                 Assert.LessOrEqual(metrics.cadence_hz, block.cadence_max_hz + 1e-4, id + ": cadence");
                 Assert.IsFalse(metrics.overspeed, id + ": overspeed");
                 Assert.IsTrue(loco, id + ": moving plays the overlay");
+                if (block.body_on_ground)
+                {
+                    // Draggers: the hands haul the torso, so it rests while a hand grips and lunges through
+                    // the pull, instead of gliding at the root's speed.
+                    Assert.Less(metrics.body_speed_min_mps, 0.15f * metrics.body_speed_mean_mps, id + ": torso rests between hauls");
+                    Assert.Greater(metrics.body_speed_max_mps, 1.8f * metrics.body_speed_mean_mps, id + ": torso lunges through the pull");
+                }
             }
         }
 
