@@ -43,6 +43,10 @@ Recipe matching uses one uniform length scale in the inclusive 0.8–1.25 range 
 
 Walk and run are no longer baked travel clips. Every compiled skeleton carries a `locomotion` block and the Unity package places feet at runtime; walk/run bake as one-cycle overlays driven by the gait clock. See [locomotion.md](locomotion.md). The tentacle radial archetype was retired, leaving 13 archetypes and 39 candidates; statements below about 14 archetypes, 42 candidates and 336 clips describe the earlier delivery.
 
+## Runtime batching
+
+The assembler emits one `SkinnedMeshRenderer` per filled part and per connector. It does not merge skinned meshes (`Mesh.CombineMeshes` is not valid for SMR bone weights). TestProject keeps CPU skinning (`PlayerSettings.meshDeformation: 0`). GPU-batched skinning is a later one-line project setting (`PlayerSettings.meshDeformation = GPUBatched`) for TestProject and the game; it is not this package's job and must not be flipped as a side effect of measurement. `CreatureBaker` is not in the first production library. The EditMode report at 1/8/32 instances (`BatchingMeasurementTests`) is the measurement gate for that later PR; there is no millisecond CI frame-time budget.
+
 ## Motion, QA, review, and approval
 
 The motion plan emits the eight clips `idle`, `walk`, `run`, `stun`, `telegraph`, `attack`, `hit`, and `death` at 30 FPS, with local bone rotations, contacts, root samples, and loop metadata. `skeleton qa` validates every frame of actual built `motion.json` clips and writes diagnostics bound to `content_fingerprint` in `work/review/foundation-v3/qa.json`. `skeleton approve` requires that passing QA for the current fingerprint (`qa.passed`, `qa_version`, `sample_source == "evaluated_blender"`, 8 clips). `skeleton reject` requires a current QA result bound to the same fingerprint; the QA may have failed. Neither command requires `work/review/receipts/{id}.json`. `skeleton review` remains optional for spot-checks: it still builds a local 3-mode × 4-view HTML bundle. Start it with:

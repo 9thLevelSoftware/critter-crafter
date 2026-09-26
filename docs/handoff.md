@@ -152,6 +152,7 @@ The golden, Unity-test and QA steps fail loudly if skipped.
 - **Pools** (`data/pools/pools.json`) still list only the biped, quadruped and crawler families. Add the new families when the game needs them; this changes the golden recipes.
 - **All 39 skeletons are still `draft`.** `critter skeleton approve` needs a passing `skeleton qa` bound to the current `content_fingerprint`. The 3×4 HTML review bundle is optional spot-check only; a receipt file is not required.
 - **Variety** is still 13 body plans × 3 presets, well below M4's target of at least 80 skeletons. The earlier review suggested optional branches (tails, dorsal parts, extra arms) and wider seeded proportions.
+- **GPU-batched skinning** is a later one-line `PlayerSettings.meshDeformation = GPUBatched` change, not a package code change. TestProject stays on CPU (`meshDeformation: 0`). Do not flip it for the 1/8/32 SMR/batch/tri report (`BatchingMeasurementTests`). `CreatureBaker` waits on that report plus an owner request. No millisecond CI gate.
 
 ## M2 status (real parts)
 
