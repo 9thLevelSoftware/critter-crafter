@@ -142,6 +142,11 @@ namespace CritterCrafter.Tests
                 var creature = root.GetComponentInChildren<AssembledCreature>();
                 Assert.IsNotNull(creature);
                 Assert.That(creature.name, Does.Contain("_fallback"), "Assemble must run with the plumbed options");
+                var capsule = creature.GetComponent<CapsuleCollider>();
+                if (collision == CreatureCollision.SingleCapsule)
+                    Assert.IsNotNull(capsule, "Assemble received SingleCapsule");
+                else
+                    Assert.IsNull(capsule, "Assemble received None");
             }
         }
 
@@ -166,17 +171,23 @@ namespace CritterCrafter.Tests
             creatureGo.transform.localRotation = Quaternion.Euler(0f, 30f, 0f);
             var creature = creatureGo.AddComponent<AssembledCreature>();
 
+            var expectedWorld = parent.transform.TransformPoint(new Vector3(1f, 2f, 3f));
             var threat = ThreatHierarchy.Wrap(creature, "pose");
             _objects.Add(threat);
 
             Assert.AreEqual(parent.transform, threat.transform.parent);
             Assert.That(Vector3.Distance(threat.transform.localPosition, new Vector3(1f, 2f, 3f)), Is.LessThan(1e-5f));
             Assert.That(Quaternion.Angle(threat.transform.localRotation, Quaternion.Euler(0f, 30f, 0f)), Is.LessThan(0.01f));
+            Assert.That(Vector3.Distance(threat.transform.position, expectedWorld), Is.LessThan(1e-5f));
             Assert.AreEqual(8, threat.layer);
             var mesh = threat.transform.Find("Mesh");
             Assert.IsNotNull(mesh);
             Assert.AreEqual("Mesh", mesh.name);
             Assert.AreEqual(8, mesh.gameObject.layer);
+            Assert.AreEqual(mesh, creature.transform.parent);
+            Assert.That(Vector3.Distance(creature.transform.localPosition, Vector3.zero), Is.LessThan(1e-5f));
+            Assert.That(Quaternion.Angle(creature.transform.localRotation, Quaternion.identity), Is.LessThan(0.01f));
+            Assert.That(Vector3.Distance(creature.transform.position, expectedWorld), Is.LessThan(1e-5f));
             Assert.IsNull(threat.GetComponent<NavMeshAgent>());
             Assert.IsNull(creature.GetComponent<NavMeshAgent>());
         }

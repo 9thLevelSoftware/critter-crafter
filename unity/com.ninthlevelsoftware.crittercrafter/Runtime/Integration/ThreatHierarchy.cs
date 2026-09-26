@@ -33,6 +33,8 @@ namespace CritterCrafter
             mesh.transform.SetParent(threat.transform, false);
 
             creatureTransform.SetParent(mesh.transform, false);
+            creatureTransform.localPosition = Vector3.zero;
+            creatureTransform.localRotation = Quaternion.identity;
             return threat;
         }
     }
