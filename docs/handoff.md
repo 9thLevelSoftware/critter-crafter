@@ -177,13 +177,13 @@ Status against acceptance:
   and `work/parts/<id>/preview.png`, then run `critter part approve <id>`. Approval makes a part
   generatable, which changes the golden recipes: re-run `recipe golden` and copy the goldens into the
   Unity package.
-- **Unity import and animation:** pending. A built library now carries `asset.albedo_png` per real part.
-  `LibraryImporter` copies the PNG and binds it to `_BaseMap`/`_MainTex`. That C# is unverified: run the
-  EditMode tests and import `library/biomass_core-v0.2.0` once. Until a part is approved, draft-review
-  assemblies still use the placeholders. To look at a real part in Unity before approval, use the
-  mixed creature `critter part review` exports (`work/review/parts/<id>/<skeleton>_mixed.fbx|.glb`):
-  the first reviewed skeleton, with the real part on every accepting branch and all eight clips. The
-  FBX has no texture path, so assign `<id>_albedo.png` from the built library.
+- **Unity import and animation:** EditMode tests assert `asset.albedo_png` is copied and bound to
+  `_BaseMap`/`_MainTex` (smoothness 0.25) when a built library is present; they skip if none is.
+  Until a part is approved, draft-review assemblies still use the placeholders. To look at a real
+  part in Unity before approval, use the mixed creature `critter part review` exports
+  (`work/review/parts/<id>/<skeleton>_mixed.fbx|.glb`): the first reviewed skeleton, with the real
+  part on every accepting branch and all eight clips. The FBX has no texture path, so assign
+  `<id>_albedo.png` from the built library.
 
 Not done in M2, by design or for lack of time:
 

@@ -183,5 +183,5 @@ Scout meshes not imported yet:
   is the upgrade if review shows pinching at sharp knees.
 - Straightening a tight bend stretches the inside and compresses the outside by up to about 1.5×. The
   fit's `strain_p99`/`strain_max` report it; texture stretch follows.
-- The Unity texture binding (`asset.albedo_png` → `_BaseMap`/`_MainTex`) was written without a Unity
-  editor in the loop. Run the EditMode tests and an import of a built library before relying on it.
+- EditMode tests assert `asset.albedo_png` binds to `_BaseMap`/`_MainTex` (smoothness 0.25) when a
+  built library is present; they skip if none is.

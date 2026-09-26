@@ -23,7 +23,7 @@ namespace CritterCrafter.Tests
         CritterLibrary RawLib => _report.Library;
         readonly List<GameObject> _spawned = new List<GameObject>();
 
-        static string FindLibraryDir()
+        internal static string FindLibraryDir()
         {
             var env = System.Environment.GetEnvironmentVariable("CRITTER_LIBRARY_DIR");
             if (!string.IsNullOrEmpty(env) && File.Exists(Path.Combine(env, "catalog.json"))) return env;
