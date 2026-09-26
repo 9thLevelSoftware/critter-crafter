@@ -3,6 +3,7 @@ from __future__ import annotations
 import bisect
 import json
 import math
+import os
 import struct
 import subprocess
 import zlib
@@ -220,20 +221,25 @@ def _sample_sampler(times, outputs, interpolation: str, time_s: float, path: str
 
 def read_glb(path: Path):
     data = path.read_bytes()
-    magic, version, size = struct.unpack_from("<III", data)
-    if magic != 0x46546C67 or version != 2 or size != len(data):
-        raise ValueError(f"CC_GLB_HEADER: {path}")
-    offset, document, binary = 12, None, b""
-    while offset < len(data):
-        length, kind = struct.unpack_from("<II", data, offset); offset += 8
-        chunk = data[offset:offset+length]; offset += length
-        if kind == 0x4E4F534A:
-            document = json.loads(chunk)
-        elif kind == 0x004E4942:
-            binary = chunk
-    if document is None:
-        raise ValueError("CC_GLB_JSON_MISSING")
-    return document, binary
+    try:
+        if len(data) < 12:
+            raise ValueError(f"CC_GLB_HEADER: {path}")
+        magic, version, size = struct.unpack_from("<III", data)
+        if magic != 0x46546C67 or version != 2 or size != len(data):
+            raise ValueError(f"CC_GLB_HEADER: {path}")
+        offset, document, binary = 12, None, b""
+        while offset < len(data):
+            length, kind = struct.unpack_from("<II", data, offset); offset += 8
+            chunk = data[offset:offset+length]; offset += length
+            if kind == 0x4E4F534A:
+                document = json.loads(chunk)
+            elif kind == 0x004E4942:
+                binary = chunk
+        if document is None:
+            raise ValueError("CC_GLB_JSON_MISSING")
+        return document, binary
+    except (struct.error, json.JSONDecodeError) as exc:
+        raise ValueError(f"CC_GLB_HEADER: {path}") from exc
 
 
 def validate_glb_rest(path: Path, skeleton: dict) -> dict:
@@ -894,7 +900,7 @@ def validate_glb_skin_contract(path: Path, *, max_influences: int = 4) -> dict:
     diagnostics: list[str] = []
     try:
         document, binary = read_glb(path)
-    except ValueError as exc:
+    except (ValueError, struct.error) as exc:
         return {"passed": False, "diagnostics": [str(exc)], "max_influences": 0, "vertices_checked": 0}
     nodes = document.get("nodes", [])
     meshes = document.get("meshes", [])
@@ -990,16 +996,16 @@ def validate_glb_skin_contract(path: Path, *, max_influences: int = 4) -> dict:
                         joint_values[vertex_index], weight_values[vertex_index], strict=True
                     ):
                         weight = float(weight_value)
+                        joint_slot = int(joint_value)
+                        if not 0 <= joint_slot < len(joints):
+                            _report_once(diagnostics, "CC_GLB_SURFACE_JOINT_INDEX",
+                                         f"{prim_label}: {joint_slot}")
+                            continue
                         if not math.isfinite(weight) or weight < 0:
                             _report_once(diagnostics, "CC_GLB_SURFACE_WEIGHTS",
                                          f"{prim_label}: invalid vertex weight")
                             continue
                         if weight <= 1e-8:
-                            continue
-                        joint_slot = int(joint_value)
-                        if not 0 <= joint_slot < len(joints):
-                            _report_once(diagnostics, "CC_GLB_SURFACE_JOINT_INDEX",
-                                         f"{prim_label}: {joint_slot}")
                             continue
                         influences += 1
                         weight_sum += weight
@@ -1025,6 +1031,13 @@ _FBX_MAGIC = b"Kaydara FBX Binary  \x00\x1a\x00"
 
 
 def _read_fbx_prop(data: bytes, offset: int) -> tuple[Any, int]:
+    try:
+        return _read_fbx_prop_raw(data, offset)
+    except (struct.error, zlib.error, IndexError):
+        raise ValueError("CC_FBX_HEADER") from None
+
+
+def _read_fbx_prop_raw(data: bytes, offset: int) -> tuple[Any, int]:
     if offset >= len(data):
         raise ValueError("CC_FBX_HEADER")
     code = chr(data[offset])
@@ -1099,16 +1112,21 @@ def read_fbx(path: Path) -> list[dict[str, Any]]:
     data = path.read_bytes()
     if not data.startswith(_FBX_MAGIC):
         raise ValueError(f"CC_FBX_HEADER: {path}")
-    version = struct.unpack_from("<I", data, 23)[0]
-    offset = 27
-    large = version >= 7500
-    nodes = []
-    while offset < len(data):
-        node, offset = _read_fbx_node(data, offset, large)
-        if node is None:
-            break
-        nodes.append(node)
-    return nodes
+    try:
+        version = struct.unpack_from("<I", data, 23)[0]
+        offset = 27
+        large = version >= 7500
+        nodes = []
+        while offset < len(data):
+            node, offset = _read_fbx_node(data, offset, large)
+            if node is None:
+                break
+            nodes.append(node)
+        return nodes
+    except (struct.error, zlib.error, IndexError, ValueError) as exc:
+        if isinstance(exc, ValueError) and str(exc).startswith("CC_FBX"):
+            raise
+        raise ValueError(f"CC_FBX_HEADER: {path}") from exc
 
 
 def _fbx_child(node: dict[str, Any], name: str) -> dict[str, Any] | None:
@@ -1137,20 +1155,15 @@ def validate_fbx_skin_contract(path: Path, *, max_influences: int = 4) -> dict:
     diagnostics: list[str] = []
     try:
         roots = read_fbx(path)
-    except ValueError as exc:
-        return {"passed": False, "diagnostics": [str(exc)], "max_influences": 0, "vertices_checked": 0}
+    except (ValueError, struct.error, zlib.error) as exc:
+        detail = str(exc) if str(exc).startswith("CC_FBX") else f"CC_FBX_HEADER: {path}"
+        return {"passed": False, "diagnostics": [detail], "max_influences": 0, "vertices_checked": 0}
 
     objects = next((node for node in roots if node["name"] == "Objects"), None)
     connections = next((node for node in roots if node["name"] == "Connections"), None)
     if objects is None:
         return {"passed": False, "diagnostics": ["CC_FBX_SKIN_ROOT: missing Objects"],
                 "max_influences": 0, "vertices_checked": 0}
-
-    by_id: dict[int, dict[str, Any]] = {}
-    for node in objects.get("children") or []:
-        identity = _fbx_id(node)
-        if identity is not None:
-            by_id[identity] = node
 
     child_of: dict[int, list[int]] = {}
     parent_of: dict[int, list[int]] = {}
@@ -1268,12 +1281,49 @@ def validate_fbx_skin_contract(path: Path, *, max_influences: int = 4) -> dict:
     }
 
 
-def run_gltf_validator(tool: str, path: Path, *, log_dir: Path | None = None) -> dict:
-    """Run the Khronos native CLI. Errors fail; the tool must not be Node/npm."""
+def _path_inside(path: Path, root: Path) -> bool:
+    try:
+        path.resolve().relative_to(root.resolve())
+        return True
+    except ValueError:
+        return False
+
+
+def _validator_log_path(log_dir: Path, glb: Path, root: Path | None) -> Path:
+    if root is not None:
+        try:
+            rel = glb.resolve().relative_to(root.resolve()).as_posix()
+        except ValueError:
+            rel = f"{glb.parent.name}/{glb.name}"
+    else:
+        rel = f"{glb.parent.name}/{glb.name}"
+    return log_dir / (rel.replace("/", "__") + ".json")
+
+
+def run_gltf_validator(tool: str, path: Path, *, log_dir: Path | None = None,
+                       root: Path | None = None) -> dict:
+    """Run the Khronos native CLI. Errors fail; never .cmd/.bat, never a GLB outside root."""
+    raw = Path(tool)
+    if ".." in raw.parts:
+        return {"passed": False, "diagnostics": ["CC_GLTF_VALIDATOR: path escapes"]}
+    suffix = raw.suffix.lower()
+    if suffix in {".cmd", ".bat", ".com"}:
+        return {"passed": False, "diagnostics": [f"CC_GLTF_VALIDATOR: refused {suffix} executable"]}
+    if os.name == "nt" and suffix != ".exe":
+        return {"passed": False, "diagnostics": ["CC_GLTF_VALIDATOR: validator must be a .exe"]}
+    if os.name != "nt" and suffix:
+        return {"passed": False, "diagnostics": ["CC_GLTF_VALIDATOR: validator must have no extension"]}
+    try:
+        resolved_tool = raw.resolve()
+        glb = path.resolve()
+    except OSError as exc:
+        return {"passed": False, "diagnostics": [f"CC_GLTF_VALIDATOR: {exc}"]}
+    if root is not None and not _path_inside(glb, root):
+        return {"passed": False, "diagnostics": [f"CC_GLTF_VALIDATOR: {path} leaves the library"]}
     try:
         proc = subprocess.run(
-            [tool, "--stdout", "--no-write-timestamp", str(path)],
-            capture_output=True, text=True, timeout=120,
+            [str(resolved_tool), "--stdout", "--no-write-timestamp", str(glb)],
+            capture_output=True, text=True, timeout=120, shell=False,
         )
     except (OSError, subprocess.TimeoutExpired) as exc:
         return {"passed": False, "diagnostics": [f"CC_GLTF_VALIDATOR: {path.name}: {exc}"]}
@@ -1284,7 +1334,7 @@ def run_gltf_validator(tool: str, path: Path, *, log_dir: Path | None = None) ->
         return {"passed": False, "diagnostics": [f"CC_GLTF_VALIDATOR: {path.name}: {detail[:500]}"]}
     if log_dir is not None:
         log_dir.mkdir(parents=True, exist_ok=True)
-        (log_dir / f"{path.stem}.json").write_text(
+        _validator_log_path(log_dir, glb, root).write_text(
             json.dumps(report, indent=2) + "\n", encoding="utf-8", newline="\n"
         )
     issues = report.get("issues") or {}
@@ -1319,40 +1369,51 @@ def _part_max_influences(part: dict[str, Any]) -> int:
 
 
 def export_qa_problems(catalog: dict[str, Any], out: Path, *, validator: str | None = None,
-                       log_dir: Path | None = None) -> list[str]:
-    """Fail-closed skin contract for every built FBX/GLB. Validator Errors fail when the tool is present."""
+                       log_dir: Path | None = None, include_base: bool = True,
+                       include_assembled: bool = False) -> list[str]:
+    """Fail-closed skin contract for built FBX/GLB. Validator Errors fail when the pinned tool is present."""
     problems: list[str] = []
 
-    def check_pair(asset_id: str, asset: dict[str, Any] | None, *, max_influences: int,
-                   assembled: bool = False) -> None:
-        if not isinstance(asset, dict):
+    def check_file(asset_id: str, relative: str | None, *, kind: str, max_influences: int) -> None:
+        if not isinstance(relative, str) or not relative:
             return
-        fbx_rel, glb_rel = asset.get("fbx"), asset.get("assembled_glb") if assembled else asset.get("glb")
-        if assembled:
-            fbx_rel = None
-        if isinstance(fbx_rel, str) and fbx_rel:
-            fbx_path = out / fbx_rel
-            if not fbx_path.is_file():
-                problems.append(f"CC_FBX_SKIN_ROOT: {asset_id}: missing {fbx_rel}")
-            else:
-                report = validate_fbx_skin_contract(fbx_path, max_influences=max_influences)
-                problems.extend(_attach(asset_id, report["diagnostics"]))
-        if isinstance(glb_rel, str) and glb_rel:
-            glb_path = out / glb_rel
-            if not glb_path.is_file():
-                problems.append(f"CC_GLB_SKIN_ROOT: {asset_id}: missing {glb_rel}")
-                return
-            report = validate_glb_skin_contract(glb_path, max_influences=max_influences)
+        path = out / relative
+        if ".." in Path(relative).parts or not _path_inside(path, out):
+            code = "CC_FBX_SKIN_ROOT" if kind == "fbx" else "CC_GLB_SKIN_ROOT"
+            problems.append(f"{code}: {asset_id}: {relative} leaves the library")
+            return
+        if not path.is_file():
+            code = "CC_FBX_SKIN_ROOT" if kind == "fbx" else "CC_GLB_SKIN_ROOT"
+            problems.append(f"{code}: {asset_id}: missing {relative}")
+            return
+        if kind == "fbx":
+            report = validate_fbx_skin_contract(path, max_influences=max_influences)
             problems.extend(_attach(asset_id, report["diagnostics"]))
-            if validator:
-                validated = run_gltf_validator(validator, glb_path, log_dir=log_dir)
-                problems.extend(_attach(asset_id, validated["diagnostics"]))
+            return
+        report = validate_glb_skin_contract(path, max_influences=max_influences)
+        problems.extend(_attach(asset_id, report["diagnostics"]))
+        if validator:
+            validated = run_gltf_validator(validator, path, log_dir=log_dir, root=out)
+            problems.extend(_attach(asset_id, validated["diagnostics"]))
 
     for skeleton in catalog.get("skeletons") or []:
         asset_id = str(skeleton.get("skeleton_id", "skeleton"))
-        check_pair(asset_id, skeleton.get("asset"), max_influences=4)
-        check_pair(asset_id, skeleton.get("asset"), max_influences=4, assembled=True)
-    for part in catalog.get("parts") or []:
-        check_pair(str(part.get("part_id", "part")), part.get("asset"),
-                   max_influences=_part_max_influences(part))
+        asset = skeleton.get("asset")
+        if not isinstance(asset, dict):
+            continue
+        if include_base:
+            check_file(asset_id, asset.get("fbx"), kind="fbx", max_influences=4)
+            check_file(asset_id, asset.get("glb"), kind="glb", max_influences=4)
+        if include_assembled:
+            check_file(asset_id, asset.get("assembled_glb"), kind="glb", max_influences=4)
+    if include_base:
+        for part in catalog.get("parts") or []:
+            asset = part.get("asset")
+            if not isinstance(asset, dict):
+                continue
+            max_influences = _part_max_influences(part)
+            check_file(str(part.get("part_id", "part")), asset.get("fbx"), kind="fbx",
+                       max_influences=max_influences)
+            check_file(str(part.get("part_id", "part")), asset.get("glb"), kind="glb",
+                       max_influences=max_influences)
     return problems

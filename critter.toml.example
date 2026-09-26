@@ -15,6 +15,6 @@
 #   Linux:   gltf_validator-2.0.0-dev.3.10-linux64.tar.xz
 #   macOS:   gltf_validator-2.0.0-dev.3.10-macos64.tar.xz
 # Hash the unpacked executable (Get-FileHash / sha256sum), not the zip.
+# The validator runs only when gltf_validator_sha256 matches the file. No PATH lookup.
 # gltf_validator = "tools/gltf_validator.exe"
-# gltf_validator_version = "2.0.0-dev.3.10"
 # gltf_validator_sha256 = "4388a152ff90b68c6430ae03862e05e257a9d50a500ed7d0eb1cd420dc75ff96"

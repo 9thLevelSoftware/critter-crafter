@@ -14,7 +14,7 @@ from typing import Any
 import click
 
 from ..blender.runner import BlenderError, run_op, snippet
-from ..config import find_asset_archive, paths, resolve_gltf_validator
+from ..config import export_validator_problems, find_asset_archive, paths
 from ..schema.validate import validate_sources
 from ..recipes.generator import generate_for_skeleton
 from .catalog import dumps
@@ -452,6 +452,12 @@ def library_build(out_root: Path | None, clean: bool) -> None:
             f"CC_APPROVAL_STALE: {', '.join(stale)} were approved for a different real-part pipeline, so "
             "their rebuilt geometry is unreviewed. Run `critter part refit <id>` (back to draft), then "
             "build, `critter part review` and `critter part approve` again.")
+    validator, gate_problems, gate_warnings = export_validator_problems()
+    for warning in gate_warnings:
+        click.echo(warning, err=True)
+    if gate_problems:
+        raise click.ClickException("\n".join(gate_problems))
+    validator_logs = paths().work / "logs" / "gltf-validator"
     out = library_dir(catalog, out_root)
     if clean and out.exists():
         output_root = (out_root or paths().library_out).resolve()
@@ -520,14 +526,9 @@ def library_build(out_root: Path | None, clean: bool) -> None:
     except BlenderError as e:
         raise click.ClickException(str(e))
     require_part_pipelines_unchanged()
-    validator, validator_status = resolve_gltf_validator()
-    validator_logs = paths().work / "logs" / "gltf-validator"
     problems = apply_results(catalog, out, result["results"])
-    if validator_status and validator_status.startswith("CC_GLTF_VALIDATOR_MISSING"):
-        click.echo(validator_status, err=True)
-    elif validator_status:
-        problems.append(validator_status)
-    problems.extend(export_qa_problems(catalog, out, validator=validator, log_dir=validator_logs))
+    problems.extend(export_qa_problems(catalog, out, validator=validator, log_dir=validator_logs,
+                                       include_assembled=False))
     if problems:
         for problem in problems:
             click.echo(problem, err=True)
@@ -589,7 +590,8 @@ def library_build(out_root: Path | None, clean: bool) -> None:
         state.setdefault("assemblies", {})[sid] = _assembly_state(
             catalog, job["args"]["recipe"], out, skeleton["content_fingerprint"], part_states
         )
-    problems = export_qa_problems(catalog, out, validator=validator, log_dir=validator_logs)
+    problems = export_qa_problems(catalog, out, validator=validator, log_dir=validator_logs,
+                                  include_base=False, include_assembled=True)
     if problems:
         for problem in problems:
             click.echo(problem, err=True)

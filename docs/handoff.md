@@ -35,7 +35,7 @@ critter-crafter is a standalone tool that builds procedural monsters from three 
 | Animation Rigging | Resolves to the built-in 6.6.0. The package declares `1.3.0`. |
 | Enter Play Mode Options | The TestProject has them enabled (no domain or scene reload), set by the Play Mode test and capture. This is intentional. |
 | Asset archive | `9thLevelSoftware/synaptic-sea-asset-archive` (private) cloned **next to** this repo, or `CRITTER_ASSET_ARCHIVE` / `[paths].asset_archive` in `critter.toml`. Needed only to build real parts. |
-| glTF-Validator | Optional native Khronos CLI **2.0.0-dev.3.10** (not npm/Node). Pin `[tools].gltf_validator` + `gltf_validator_sha256` in `critter.toml` (see `critter.toml.example`). Windows exe SHA-256 `4388a152ff90b68c6430ae03862e05e257a9d50a500ed7d0eb1cd420dc75ff96`. Missing tool → `CC_GLTF_VALIDATOR_MISSING` warning; present Errors fail `library build`. |
+| glTF-Validator | Optional native Khronos CLI **2.0.0-dev.3.10** (not npm/Node/PATH). Pin `[tools].gltf_validator` + `gltf_validator_sha256` in `critter.toml` (see `critter.toml.example`). Windows exe SHA-256 `4388a152ff90b68c6430ae03862e05e257a9d50a500ed7d0eb1cd420dc75ff96`. Runs only when the SHA-256 pin matches. Missing tool → `CC_GLTF_VALIDATOR_MISSING` warning; Errors fail `library build`. |
 | Gitignored build output | `work/` (reviews, logs, part previews), `library/` (built library), `dist/` |
 | Linux / cloud sessions | Blender 5.2.2 for Linux (`CRITTER_BLENDER`) runs the whole suite. Workbench/EEVEE renders need Mesa EGL (`apt-get install libegl1 libegl-mesa0 libgl1-mesa-dri`). There is no Unity there. |
 

@@ -1,15 +1,15 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import math
 import struct
-import sys
 from pathlib import Path
 
 import pytest
 
-from critter_crafter.config import resolve_gltf_validator
+from critter_crafter.config import export_validator_problems
 from critter_crafter.library.export_validation import (
     export_qa_problems,
     matrix_inverse,
@@ -102,7 +102,8 @@ class _GlbBuilder:
               root_end_rotation_deg: float = 90.0, bind_nonfinite: bool = False,
               omit_weights: bool = False, omit_joints: bool = False, omit_skin: bool = False,
               joint_index: int = 0, empty_joints: bool = False,
-              joints_without_weights: bool = False) -> None:
+              joints_without_weights: bool = False,
+              weight_slots: list[float] | None = None) -> None:
         times = self.accessor([[0.0], [2 / 30]], "SCALAR", stride_padding=4)
         root_t = self.accessor([[0.0, 0.0, 0.0], [.2, root_end_y, 0.0]], "VEC3")
         root_r = self.accessor([_qz(0), _qz(root_end_rotation_deg)], "VEC4")
@@ -136,13 +137,19 @@ class _GlbBuilder:
                 [-.1, surface_y, 0.0], [.1, surface_y, 0.0], [0.0, surface_y, .1]
             ], "VEC3")
             attributes = {"POSITION": positions}
+            slots = list(weight_slots) if weight_slots is not None else [surface_weight, 0.0, 0.0, 0.0]
+            pad = slots + [0.0] * 8
+            w0, w1 = pad[:4], pad[4:8]
+            j0 = [joint_index if i == 0 else 0 for i in range(4)]
             if not omit_joints:
-                attributes["JOINTS_0"] = self.accessor([[joint_index, 0, 0, 0]] * 3, "VEC4",
-                                                       component_type=5121)
+                attributes["JOINTS_0"] = self.accessor([j0] * 3, "VEC4", component_type=5121)
             if not omit_weights:
-                attributes["WEIGHTS_0"] = self.accessor([[surface_weight, 0.0, 0.0, 0.0]] * 3, "VEC4")
+                attributes["WEIGHTS_0"] = self.accessor([w0] * 3, "VEC4")
             if joints_without_weights:
                 attributes["JOINTS_1"] = self.accessor([[0, 0, 0, 0]] * 3, "VEC4", component_type=5121)
+            elif any(value > 0 for value in w1) or len(slots) > 4:
+                attributes["JOINTS_1"] = self.accessor([[0, 0, 0, 0]] * 3, "VEC4", component_type=5121)
+                attributes["WEIGHTS_1"] = self.accessor([w1] * 3, "VEC4")
             mesh_index = 0
             meshes = [{"primitives": [{"attributes": attributes}]}]
         display_node = {"name": "display_mesh"}
@@ -338,12 +345,21 @@ def test_glb_skin_contract_rejects_unpaired_second_influence_set(tmp_path: Path)
     assert any("CC_GLB_SURFACE_ATTRIBUTES" in diagnostic for diagnostic in report["diagnostics"])
 
 
-def test_glb_skin_contract_rejects_negative_and_non_normalized_weights(tmp_path: Path) -> None:
+def test_glb_skin_contract_rejects_negative_weight_even_when_sum_is_one(tmp_path: Path) -> None:
     path = tmp_path / "negative.glb"
-    _GlbBuilder().write(path, surface_y=.01, surface_weight=-0.2)
+    _GlbBuilder().write(path, surface_y=.01, weight_slots=[1.2, -0.2, 0.0, 0.0])
     report = validate_glb_skin_contract(path)
     assert not report["passed"]
-    assert any("CC_GLB_SURFACE_WEIGHTS" in diagnostic for diagnostic in report["diagnostics"])
+    assert any("invalid vertex weight" in diagnostic for diagnostic in report["diagnostics"])
+
+
+def test_glb_skin_contract_rejects_positive_non_normalized_weights(tmp_path: Path) -> None:
+    path = tmp_path / "denorm.glb"
+    _GlbBuilder().write(path, surface_y=.01, surface_weight=0.8)
+    report = validate_glb_skin_contract(path)
+    assert not report["passed"]
+    assert any("CC_GLB_SURFACE_WEIGHTS" in diagnostic and "sum=" in diagnostic
+               for diagnostic in report["diagnostics"])
 
 
 def test_glb_skin_contract_rejects_bad_joint_index(tmp_path: Path) -> None:
@@ -352,6 +368,30 @@ def test_glb_skin_contract_rejects_bad_joint_index(tmp_path: Path) -> None:
     report = validate_glb_skin_contract(path)
     assert not report["passed"]
     assert any("CC_GLB_SURFACE_JOINT_INDEX" in diagnostic for diagnostic in report["diagnostics"])
+
+
+def test_glb_skin_contract_rejects_tiny_weight_with_bad_joint_index(tmp_path: Path) -> None:
+    path = tmp_path / "tiny_index.glb"
+    _GlbBuilder().write(path, surface_y=.01, joint_index=9, surface_weight=1e-9)
+    report = validate_glb_skin_contract(path)
+    assert not report["passed"]
+    assert any("CC_GLB_SURFACE_JOINT_INDEX" in diagnostic for diagnostic in report["diagnostics"])
+
+
+def test_glb_skin_contract_rejects_too_many_influences(tmp_path: Path) -> None:
+    path = tmp_path / "five.glb"
+    _GlbBuilder().write(path, surface_y=.01, weight_slots=[0.2, 0.2, 0.2, 0.2, 0.2])
+    report = validate_glb_skin_contract(path, max_influences=4)
+    assert not report["passed"]
+    assert any("CC_GLB_SURFACE_INFLUENCES" in diagnostic for diagnostic in report["diagnostics"])
+
+
+def test_glb_skin_contract_rejects_connector_over_two_influences(tmp_path: Path) -> None:
+    path = tmp_path / "connector.glb"
+    _GlbBuilder().write(path, surface_y=.01, weight_slots=[0.4, 0.3, 0.3])
+    report = validate_glb_skin_contract(path, max_influences=2)
+    assert not report["passed"]
+    assert any("CC_GLB_SURFACE_INFLUENCES" in diagnostic for diagnostic in report["diagnostics"])
 
 
 def test_glb_skin_contract_rejects_missing_skin_root(tmp_path: Path) -> None:
@@ -479,18 +519,28 @@ def test_fbx_skin_contract_rejects_missing_weights_array(tmp_path: Path) -> None
     assert any("CC_FBX_SKIN_ATTRIBUTES" in diagnostic for diagnostic in report["diagnostics"])
 
 
-def test_fbx_skin_contract_rejects_negative_and_non_normalized_weights(tmp_path: Path) -> None:
-    negative = tmp_path / "negative.fbx"
-    _write_fbx(negative, weights=[-1.0, 1.0, 1.0])
-    report = validate_fbx_skin_contract(negative)
+def test_fbx_skin_contract_rejects_negative_weights(tmp_path: Path) -> None:
+    path = tmp_path / "negative.fbx"
+    _write_fbx(path, weights=[-1.0, 1.0, 1.0])
+    report = validate_fbx_skin_contract(path)
     assert not report["passed"]
-    assert any("CC_FBX_SKIN_WEIGHTS" in diagnostic for diagnostic in report["diagnostics"])
+    assert any("invalid weight" in diagnostic for diagnostic in report["diagnostics"])
 
-    denorm = tmp_path / "denorm.fbx"
-    _write_fbx(denorm, weights=[0.5, 0.5, 0.5])
-    report = validate_fbx_skin_contract(denorm)
+
+def test_fbx_skin_contract_rejects_positive_non_normalized_weights(tmp_path: Path) -> None:
+    path = tmp_path / "denorm.fbx"
+    _write_fbx(path, weights=[0.5, 0.5, 0.5])
+    report = validate_fbx_skin_contract(path)
     assert not report["passed"]
-    assert any("CC_FBX_SKIN_WEIGHTS" in diagnostic for diagnostic in report["diagnostics"])
+    assert any("sum=" in diagnostic for diagnostic in report["diagnostics"])
+
+
+def test_fbx_truncated_file_is_cc_fbx_header(tmp_path: Path) -> None:
+    path = tmp_path / "trunc.fbx"
+    path.write_bytes(b"Kaydara FBX Binary  \x00\x1a\x00" + struct.pack("<I", 7400) + b"\x00\x01")
+    report = validate_fbx_skin_contract(path)
+    assert not report["passed"]
+    assert any("CC_FBX_HEADER" in diagnostic for diagnostic in report["diagnostics"])
 
 
 def test_fbx_skin_contract_rejects_bad_vertex_index(tmp_path: Path) -> None:
@@ -541,6 +591,34 @@ def test_export_qa_problems_fails_library_assets_on_skin_contract(tmp_path: Path
     assert export_qa_problems(ok_catalog, tmp_path) == []
 
 
+def test_export_qa_skips_assembled_glb_on_the_base_pass(tmp_path: Path) -> None:
+    ok_dir = tmp_path / "skeletons" / "s"
+    ok_dir.mkdir(parents=True)
+    _GlbBuilder().write(ok_dir / "s.glb", surface_y=.01)
+    _write_fbx(ok_dir / "s.fbx")
+    (ok_dir / "assembled.glb").write_bytes(b"stale")
+    catalog = {"skeletons": [{
+        "skeleton_id": "s",
+        "asset": {
+            "fbx": "skeletons/s/s.fbx", "glb": "skeletons/s/s.glb",
+            "assembled_glb": "skeletons/s/assembled.glb",
+        },
+    }], "parts": []}
+    assert export_qa_problems(catalog, tmp_path, include_assembled=False) == []
+    problems = export_qa_problems(catalog, tmp_path, include_base=False, include_assembled=True)
+    assert any("CC_GLB" in item for item in problems)
+
+
+def _fake_validator_run(payload: dict):
+    def fake_run(args, capture_output, text, timeout, shell=False):
+        class Result:
+            stdout = json.dumps(payload)
+            stderr = ""
+            returncode = 1 if payload.get("issues", {}).get("numErrors") else 0
+        return Result()
+    return fake_run
+
+
 def test_export_qa_problems_fails_on_validator_errors(tmp_path: Path, monkeypatch) -> None:
     ok_dir = tmp_path / "parts" / "ok"
     ok_dir.mkdir(parents=True)
@@ -550,57 +628,137 @@ def test_export_qa_problems_fails_on_validator_errors(tmp_path: Path, monkeypatc
         "part_id": "ok", "category": "limb",
         "asset": {"fbx": "parts/ok/ok.fbx", "glb": "parts/ok/ok.glb", "triangles": 1},
     }]}
-    monkeypatch.setattr(
-        "critter_crafter.library.export_validation.run_gltf_validator",
-        lambda *_args, **_kwargs: {"passed": False, "diagnostics": ["CC_GLTF_VALIDATOR: ACCESSOR_WEIGHT_NEGATIVE"]},
-    )
-    problems = export_qa_problems(catalog, tmp_path, validator="gltf_validator")
-    assert any("CC_GLTF_VALIDATOR" in item for item in problems)
+    exe = tmp_path / "gltf_validator.exe"
+    exe.write_bytes(b"native")
+    payload = {"issues": {"numErrors": 1, "messages": [
+        {"severity": 0, "code": "ACCESSOR_WEIGHT_NEGATIVE", "message": "neg"},
+    ]}}
+    monkeypatch.setattr("critter_crafter.library.export_validation.subprocess.run",
+                        _fake_validator_run(payload))
+    problems = export_qa_problems(catalog, tmp_path, validator=str(exe))
+    assert any(item.startswith("CC_GLTF_VALIDATOR:") and "ACCESSOR_WEIGHT_NEGATIVE" in item
+               for item in problems)
+    assert not any(item.startswith("CC_GLTF_VALIDATOR_HASH") for item in problems)
+    assert not any(item.startswith("CC_GLTF_VALIDATOR_MISSING") for item in problems)
 
 
-def test_gltf_validator_errors_fail_and_missing_tool_is_skipped(tmp_path: Path, monkeypatch) -> None:
+def test_gltf_validator_warnings_do_not_fail(tmp_path: Path, monkeypatch) -> None:
     glb = tmp_path / "ok.glb"
     _GlbBuilder().write(glb, surface_y=.01)
-    report = run_gltf_validator(sys.executable, glb)
-    assert not report["passed"]
-    assert any("CC_GLTF_VALIDATOR" in diagnostic for diagnostic in report["diagnostics"])
+    exe = tmp_path / "gltf_validator.exe"
+    exe.write_bytes(b"native")
+    payload = {"issues": {"numErrors": 0, "messages": [
+        {"severity": 1, "code": "UNUSED_OBJECT", "message": "warn"},
+    ]}}
+    monkeypatch.setattr("critter_crafter.library.export_validation.subprocess.run",
+                        _fake_validator_run(payload))
+    report = run_gltf_validator(str(exe), glb, root=tmp_path)
+    assert report["passed"], report["diagnostics"]
+    assert report["diagnostics"] == []
 
-    monkeypatch.setattr("critter_crafter.config.find_gltf_validator", lambda: None)
-    monkeypatch.setattr("critter_crafter.config.gltf_validator_expected_sha256", lambda: None)
-    path, status = resolve_gltf_validator()
-    assert path is None
-    assert status is not None and status.startswith("CC_GLTF_VALIDATOR_MISSING")
+
+def test_gltf_validator_missing_is_a_warning_not_a_problem(monkeypatch) -> None:
+    monkeypatch.delenv("CRITTER_GLTF_VALIDATOR", raising=False)
+    monkeypatch.setattr("critter_crafter.config._toml", lambda: {})
+    monkeypatch.setattr("shutil.which", lambda *_a, **_k: (_ for _ in ()).throw(AssertionError("PATH")))
+    tool, problems, warnings = export_validator_problems()
+    assert tool is None
+    assert problems == []
+    assert len(warnings) == 1 and warnings[0].startswith("CC_GLTF_VALIDATOR_MISSING")
+
+
+def test_gltf_validator_hash_mismatch_is_in_build_problems(monkeypatch, tmp_path: Path) -> None:
+    binary = tmp_path / "gltf_validator.exe"
+    binary.write_bytes(b"not-the-pinned-binary")
+    monkeypatch.setenv("CRITTER_GLTF_VALIDATOR", str(binary))
+    monkeypatch.setattr("critter_crafter.config._toml", lambda: {
+        "tools": {"gltf_validator_sha256": "0" * 64},
+    })
+    tool, problems, warnings = export_validator_problems()
+    assert tool is None
+    assert warnings == []
+    assert len(problems) == 1 and problems[0].startswith("CC_GLTF_VALIDATOR_HASH")
+
+
+def test_gltf_validator_requires_sha256_pin(monkeypatch, tmp_path: Path) -> None:
+    binary = tmp_path / "gltf_validator.exe"
+    binary.write_bytes(b"native")
+    monkeypatch.setenv("CRITTER_GLTF_VALIDATOR", str(binary))
+    monkeypatch.setattr("critter_crafter.config._toml", lambda: {})
+    tool, problems, warnings = export_validator_problems()
+    assert tool is None
+    assert len(problems) == 1 and problems[0].startswith("CC_GLTF_VALIDATOR_HASH")
+
+
+def test_gltf_validator_refuses_cmd_and_dotdot(monkeypatch, tmp_path: Path) -> None:
+    cmd = tmp_path / "gltf_validator.cmd"
+    cmd.write_text("@echo pwned", encoding="utf-8")
+    digest = hashlib.sha256(cmd.read_bytes()).hexdigest()
+    monkeypatch.setenv("CRITTER_GLTF_VALIDATOR", str(cmd))
+    monkeypatch.setattr("critter_crafter.config._toml", lambda: {
+        "tools": {"gltf_validator_sha256": digest},
+    })
+    tool, problems, warnings = export_validator_problems()
+    assert tool is None
+    assert warnings == []
+    assert len(problems) == 1 and problems[0].startswith("CC_GLTF_VALIDATOR:")
+    assert not problems[0].startswith("CC_GLTF_VALIDATOR_HASH")
+    assert not problems[0].startswith("CC_GLTF_VALIDATOR_MISSING")
+
+    monkeypatch.setenv("CRITTER_GLTF_VALIDATOR", str(tmp_path / ".." / "gltf_validator.exe"))
+    tool, problems, warnings = export_validator_problems()
+    assert tool is None
+    assert any(item.startswith("CC_GLTF_VALIDATOR:") and "escapes" in item for item in problems)
+
+
+def test_gltf_validator_refuses_glb_outside_library(tmp_path: Path, monkeypatch) -> None:
+    library = tmp_path / "lib"
+    library.mkdir()
+    outside = tmp_path / "secret.glb"
+    outside.write_bytes(b"not-inside")
+    exe = tmp_path / "gltf_validator.exe"
+    exe.write_bytes(b"native")
+    called: list = []
+
+    def fake_run(*args, **kwargs):
+        called.append(args)
+        raise AssertionError("subprocess must not run")
+
+    monkeypatch.setattr("critter_crafter.library.export_validation.subprocess.run", fake_run)
+    report = run_gltf_validator(str(exe), outside, root=library)
+    assert not report["passed"]
+    assert called == []
+    assert any(item.startswith("CC_GLTF_VALIDATOR:") for item in report["diagnostics"])
 
 
 def test_gltf_validator_parses_khronos_error_report(tmp_path: Path, monkeypatch) -> None:
     glb = tmp_path / "asset.glb"
     glb.write_bytes(b"not-a-glb")
+    exe = tmp_path / "gltf_validator.exe"
+    exe.write_bytes(b"native")
     payload = {
         "issues": {
             "numErrors": 1,
             "messages": [{"severity": 0, "code": "GLB_HEADER", "message": "bad header"}],
         }
     }
-
-    def fake_run(args, capture_output, text, timeout):
-        class Result:
-            stdout = json.dumps(payload)
-            stderr = ""
-            returncode = 1
-        return Result()
-
-    monkeypatch.setattr("critter_crafter.library.export_validation.subprocess.run", fake_run)
-    report = run_gltf_validator("gltf_validator", glb)
+    monkeypatch.setattr("critter_crafter.library.export_validation.subprocess.run",
+                        _fake_validator_run(payload))
+    report = run_gltf_validator(str(exe), glb, root=tmp_path)
     assert not report["passed"]
-    assert any("GLB_HEADER" in diagnostic for diagnostic in report["diagnostics"])
+    assert any(item.startswith("CC_GLTF_VALIDATOR:") and "GLB_HEADER" in item
+               for item in report["diagnostics"])
 
 
-def test_gltf_validator_hash_mismatch_is_a_build_error(monkeypatch, tmp_path: Path) -> None:
+def test_matching_sha256_pin_returns_the_tool(monkeypatch, tmp_path: Path) -> None:
     binary = tmp_path / "gltf_validator.exe"
-    binary.write_bytes(b"not-the-pinned-binary")
-    monkeypatch.setattr("critter_crafter.config.find_gltf_validator", lambda: str(binary))
-    monkeypatch.setattr("critter_crafter.config.gltf_validator_expected_sha256",
-                        lambda: "0" * 64)
-    path, status = resolve_gltf_validator()
-    assert path is None
-    assert status is not None and status.startswith("CC_GLTF_VALIDATOR_HASH")
+    binary.write_bytes(b"native-cli")
+    digest = hashlib.sha256(binary.read_bytes()).hexdigest()
+    monkeypatch.setenv("CRITTER_GLTF_VALIDATOR", str(binary))
+    monkeypatch.setattr("critter_crafter.config._toml", lambda: {
+        "tools": {"gltf_validator_sha256": digest},
+    })
+    tool, problems, warnings = export_validator_problems()
+    assert Path(tool) == binary.resolve()
+    assert problems == []
+    assert warnings == []

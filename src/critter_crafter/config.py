@@ -117,27 +117,54 @@ def find_asset_archive() -> Path | None:
     return sibling if sibling.is_dir() else None
 
 
-def _tool_file(value: str | None) -> str | None:
-    if not value:
-        return None
-    path = Path(value)
-    if not path.is_absolute():
-        path = repo_root() / path
-    return str(path) if path.is_file() else None
+_VALIDATOR_MISSING = (
+    "CC_GLTF_VALIDATOR_MISSING: Khronos glTF-Validator binary not found; "
+    "GLB Errors are not fail-closed. Pin [tools].gltf_validator and "
+    "gltf_validator_sha256 in critter.toml or set CRITTER_GLTF_VALIDATOR."
+)
+_VALIDATOR_SCRIPTS = {".cmd", ".bat", ".com"}
+
+
+def _configured_gltf_validator() -> str | None:
+    env = os.environ.get("CRITTER_GLTF_VALIDATOR")
+    if env and str(env).strip():
+        return str(env).strip()
+    cfg = _toml().get("tools", {}).get("gltf_validator")
+    if cfg and str(cfg).strip():
+        return str(cfg).strip()
+    return None
+
+
+def _validator_executable(value: str) -> tuple[str | None, str | None]:
+    """Resolve a configured native CLI. Never PATH, never .., never .cmd/.bat/.com."""
+    raw = Path(value)
+    if ".." in raw.parts:
+        return None, "CC_GLTF_VALIDATOR: path escapes"
+    path = raw if raw.is_absolute() else repo_root() / raw
+    try:
+        path = path.resolve()
+    except OSError:
+        return None, "CC_GLTF_VALIDATOR: invalid tool path"
+    suffix = path.suffix.lower()
+    if suffix in _VALIDATOR_SCRIPTS:
+        return None, f"CC_GLTF_VALIDATOR: refused {suffix} executable"
+    if os.name == "nt":
+        if suffix != ".exe":
+            return None, "CC_GLTF_VALIDATOR: validator must be a .exe"
+    elif suffix:
+        return None, "CC_GLTF_VALIDATOR: validator must have no extension"
+    if not path.is_file():
+        return None, None
+    return str(path), None
 
 
 def find_gltf_validator() -> str | None:
-    """CRITTER_GLTF_VALIDATOR -> critter.toml [tools].gltf_validator -> PATH.
-
-    Native Khronos CLI only (gltf_validator.exe). Not the npm package.
-    """
-    found = _tool_file(os.environ.get("CRITTER_GLTF_VALIDATOR"))
-    if found:
-        return found
-    found = _tool_file(_toml().get("tools", {}).get("gltf_validator"))
-    if found:
-        return found
-    return shutil.which("gltf_validator") or shutil.which("gltf_validator.exe")
+    """CRITTER_GLTF_VALIDATOR -> critter.toml [tools].gltf_validator. No PATH lookup."""
+    configured = _configured_gltf_validator()
+    if configured is None:
+        return None
+    path, _error = _validator_executable(configured)
+    return path
 
 
 def gltf_validator_expected_sha256() -> str | None:
@@ -151,18 +178,32 @@ def resolve_gltf_validator() -> tuple[str | None, str | None]:
     """Return (binary, diagnostic).
 
     Missing tool: (None, CC_GLTF_VALIDATOR_MISSING) — caller warns and still builds.
-    Hash mismatch against [tools].gltf_validator_sha256: (None, CC_GLTF_VALIDATOR_HASH) — fail the build.
+    Hash mismatch or missing pin: (None, CC_GLTF_VALIDATOR_HASH) — fail the build.
+    Unsafe path: (None, CC_GLTF_VALIDATOR: ...) — fail the build, do not run.
+    A binary is returned only when the SHA-256 pin matches.
     """
-    path = find_gltf_validator()
+    configured = _configured_gltf_validator()
+    if configured is None:
+        return None, _VALIDATOR_MISSING
+    path, error = _validator_executable(configured)
+    if error:
+        return None, error
     if path is None:
-        return None, (
-            "CC_GLTF_VALIDATOR_MISSING: Khronos glTF-Validator binary not found; "
-            "GLB Errors are not fail-closed. Pin [tools].gltf_validator in critter.toml "
-            "or set CRITTER_GLTF_VALIDATOR."
-        )
+        return None, _VALIDATOR_MISSING
     expected = gltf_validator_expected_sha256()
-    if expected:
-        digest = hashlib.sha256(Path(path).read_bytes()).hexdigest()
-        if digest != expected:
-            return None, f"CC_GLTF_VALIDATOR_HASH: {path}: {digest} != {expected}"
+    if not expected:
+        return None, "CC_GLTF_VALIDATOR_HASH: pin [tools].gltf_validator_sha256 to run the validator"
+    digest = hashlib.sha256(Path(path).read_bytes()).hexdigest()
+    if digest != expected:
+        return None, f"CC_GLTF_VALIDATOR_HASH: {path}: {digest} != {expected}"
     return path, None
+
+
+def export_validator_problems() -> tuple[str | None, list[str], list[str]]:
+    """Same gate library build uses: (tool, problems, warnings). HASH/unsafe fail; MISSING warns."""
+    tool, status = resolve_gltf_validator()
+    if status is None:
+        return tool, [], []
+    if status.startswith("CC_GLTF_VALIDATOR_MISSING"):
+        return None, [], [status]
+    return None, [status], []

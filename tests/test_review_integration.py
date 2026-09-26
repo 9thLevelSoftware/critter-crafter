@@ -251,8 +251,8 @@ def test_interrupted_assembly_persists_base_catalog_without_assembled_glb(tmp_pa
         return []
     monkeypatch.setattr(library_commands, "apply_results", apply_base)
     monkeypatch.setattr(library_commands, "export_qa_problems", lambda *a, **k: [])
-    monkeypatch.setattr(library_commands, "resolve_gltf_validator",
-                        lambda: (None, "CC_GLTF_VALIDATOR_MISSING: test"))
+    monkeypatch.setattr(library_commands, "export_validator_problems",
+                        lambda: (None, [], ["CC_GLTF_VALIDATOR_MISSING: test"]))
 
     calls = 0
     def interrupted(_op, _args):
@@ -298,8 +298,8 @@ def test_assembly_cache_tracks_baked_base_content_and_polish(tmp_path, monkeypat
     monkeypatch.setattr(library_commands, "assembly_pipeline_fingerprint", lambda: "assembly-pipeline-v1")
     monkeypatch.setattr(library_commands, "part_pipeline_fingerprint", lambda: "part-pipeline-v1")
     monkeypatch.setattr(library_commands, "export_qa_problems", lambda *a, **k: [])
-    monkeypatch.setattr(library_commands, "resolve_gltf_validator",
-                        lambda: (None, "CC_GLTF_VALIDATOR_MISSING: test"))
+    monkeypatch.setattr(library_commands, "export_validator_problems",
+                        lambda: (None, [], ["CC_GLTF_VALIDATOR_MISSING: test"]))
 
     def jobs(cat, out):
         skeleton = cat["skeletons"][0]
