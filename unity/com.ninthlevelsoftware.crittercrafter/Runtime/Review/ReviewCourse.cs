@@ -18,6 +18,8 @@ namespace CritterCrafter.Review
 
         public const float RampAngleDeg = 20f;
         public const float RampLength = 4f;
+        /// <summary>World-Z span of the ramp top surface (from z=2 to z=2+RampRun).</summary>
+        public static float RampRun => RampLength * Mathf.Cos(RampAngleDeg * Mathf.Deg2Rad);
 
         public static void Build(Transform parent, Material material)
         {
@@ -95,6 +97,39 @@ namespace CritterCrafter.Review
                 new Waypoint { time = 0f, position = a, headingDeg = 0f },
                 new Waypoint { time = seconds, position = a + Vector3.forward * speed * seconds, headingDeg = 0f },
             };
+        }
+
+        /// <summary>Straight up the 20° ramp: flat → ramp (z=2..2+run) → plateau.</summary>
+        public static List<Waypoint> Uphill(float speed)
+        {
+            var a = new Vector3(0f, 0f, -1.5f);
+            var b = new Vector3(0f, 0f, 2f + RampRun + 1.2f);
+            float t = Vector3.Distance(a, b) / speed;
+            return new List<Waypoint>
+            {
+                new Waypoint { time = 0f, position = a, headingDeg = 0f },
+                new Waypoint { time = t, position = b, headingDeg = 0f },
+            };
+        }
+
+        /// <summary>Straight down the 20° ramp: plateau → ramp (z=2+run..2) → flat.</summary>
+        public static List<Waypoint> Downhill(float speed)
+        {
+            var a = new Vector3(0f, 0f, 2f + RampRun + 1.2f);
+            var b = new Vector3(0f, 0f, 0.5f);
+            float t = Vector3.Distance(a, b) / speed;
+            return new List<Waypoint>
+            {
+                new Waypoint { time = 0f, position = a, headingDeg = 180f },
+                new Waypoint { time = t, position = b, headingDeg = 180f },
+            };
+        }
+
+        public static bool OnRamp(Vector3 p)
+        {
+            // Skip the cube/plane seam at each end so slip is the uniform 20° slope, not the lip.
+            const float edge = 0.5f;
+            return p.z >= 2f + edge && p.z <= 2f + RampRun - edge && Mathf.Abs(p.x) < 1.8f;
         }
 
         public static void Sample(List<Waypoint> path, float time, out Vector3 position, out float heading)

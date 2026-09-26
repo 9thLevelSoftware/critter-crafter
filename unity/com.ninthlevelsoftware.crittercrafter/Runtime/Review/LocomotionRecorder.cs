@@ -36,6 +36,10 @@ namespace CritterCrafter.Review
         public int supports_lifted_in_turn;
         /// <summary>True if yaw lag went above 1° after a heading snap and later fell to 1° or below.</summary>
         public bool yaw_eased;
+        /// <summary>Planted-tip slip while the root is on the 20° ramp, including downhill frames.</summary>
+        public float max_ramp_slip_m;
+        /// <summary>LateUpdate frames spent with the root on the ramp (z from 2 to 2+run).</summary>
+        public int ramp_frames;
     }
 
     /// <summary>
@@ -227,6 +231,12 @@ namespace CritterCrafter.Review
                 if (countSlip) m.max_planted_slip_m = Mathf.Max(m.max_planted_slip_m, slip);
                 if (inTurnWindow && !snapFrame) m.max_turn_slip_m = Mathf.Max(m.max_turn_slip_m, slip);
                 m.min_planted_supports = Mathf.Min(m.min_planted_supports, planted);
+                // Ramp slip includes downhill frames; warmup does not apply on the ramp itself.
+                if (ReviewCourse.OnRamp(_gait.transform.position))
+                {
+                    m.ramp_frames++;
+                    if (!snapFrame) m.max_ramp_slip_m = Mathf.Max(m.max_ramp_slip_m, slip);
+                }
             }
             if (inTurnWindow)
             {
