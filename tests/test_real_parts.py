@@ -179,7 +179,11 @@ TENTACLE_LENGTH_VARIANTS = {
 # Current tentacle8 appendage millimetres these lengths are for (extras 1.10 m is the 1.05 m band).
 TENTACLE_VARIANT_BELLIES = {
     "meshy_tentacle_a_055_v1": ("dragger_forelimb_puller_compact_v3",),
-    "meshy_tentacle_a_070_v1": ("dragger_forelimb_puller_elongated_v3", "dragger_belly_hauler_compact_v3"),
+    "meshy_tentacle_a_070_v1": (
+        "dragger_forelimb_puller_balanced_v3",
+        "dragger_forelimb_puller_elongated_v3",
+        "dragger_belly_hauler_compact_v3",
+    ),
     "meshy_tentacle_a_105_v1": ("dragger_belly_hauler_balanced_v3",),
 }
 
@@ -210,6 +214,7 @@ def test_tentacle_length_variants_are_draft_appendages_of_the_same_source():
         assert list(validator.iter_errors(record)) == []
         assert record["status"] == "draft" and record["category"] == "appendage"
         assert record["template"] == "tentacle8"
+        assert record["binding_profile_id"] == "tentacle8_flexible"
         assert record["length_m"] == pytest.approx(length_m)
         assert record["real"]["archive_path"] == source["real"]["archive_path"]
         assert record["real"]["sha256"] == source["real"]["sha256"]
@@ -222,6 +227,8 @@ def test_tentacle_length_variants_are_draft_appendages_of_the_same_source():
             belly = next(b for b in skeletons[skeleton_id]["branches"] if b["branch_id"] == "belly")
             assert belly["accepts"]["categories"] == ["appendage"]
             assert part_accepted(part, belly), f"{part_id} should fit {skeleton_id} belly {belly['length_m']} m"
+        if length_m == pytest.approx(0.70):
+            assert length_fits(int(part["length_mm"]), 676)  # puller balanced 0.6761 m
         # extras tentacle8 length is 1.10 m; no such skeleton yet, but the 1.05 m band covers it.
         if length_m == pytest.approx(1.05):
             assert length_fits(int(part["length_mm"]), mu.mm(1.10))

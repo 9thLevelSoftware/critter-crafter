@@ -60405,6 +60405,156 @@
       }
     },
     {
+      "part_id": "meshy_tentacle_a_055_v1",
+      "category": "appendage",
+      "template": "tentacle8",
+      "binding_profile_id": "tentacle8_flexible",
+      "binding_profile_version": "1.0.0",
+      "binding_profile_hash": "8493287eeca1b911cf341ce10c8a76a89abbd26a5f2630ce5beec711473a1fb4",
+      "inventory_kind": "production",
+      "species_tags": [
+        "cephalopod"
+      ],
+      "roles": [
+        "locomotor",
+        "slither"
+      ],
+      "size_class": "",
+      "side": "symmetric",
+      "status": "draft",
+      "style_profile": "flesh_stylized_v1",
+      "dimensions_m": [
+        0.112142,
+        0.120291,
+        0.563649
+      ],
+      "length_m": 0.55,
+      "length_mm": 550,
+      "girth_m": 0.099,
+      "girth_mm": 99,
+      "max_triangles": 2500,
+      "max_material_slots": 1,
+      "connector_radius_m": 0.0,
+      "connector_span_m": [],
+      "connector_interface": {},
+      "fallback_primitive": "capsule",
+      "albedo": "#a8675e",
+      "source": "meshy",
+      "real": {
+        "archive_path": "procedural-biomass-assembly/artifacts/meshy_mcp_scout/biomass_cephalopod_tentacle_v1/01a0c123-407b-77a5-b778-5e2ee086765e",
+        "sha256": "2002d6e529e7c93f62619ebfa76cbdfaf102f2801dae99242788a88ccc3ba3ff",
+        "fit": {
+          "axis": "-x"
+        },
+        "texture_size": 1024
+      },
+      "asset": {
+        "fbx": "",
+        "glb": "",
+        "triangles": 0
+      }
+    },
+    {
+      "part_id": "meshy_tentacle_a_070_v1",
+      "category": "appendage",
+      "template": "tentacle8",
+      "binding_profile_id": "tentacle8_flexible",
+      "binding_profile_version": "1.0.0",
+      "binding_profile_hash": "8493287eeca1b911cf341ce10c8a76a89abbd26a5f2630ce5beec711473a1fb4",
+      "inventory_kind": "production",
+      "species_tags": [
+        "cephalopod"
+      ],
+      "roles": [
+        "locomotor",
+        "slither"
+      ],
+      "size_class": "",
+      "side": "symmetric",
+      "status": "draft",
+      "style_profile": "flesh_stylized_v1",
+      "dimensions_m": [
+        0.142726,
+        0.153097,
+        0.717371
+      ],
+      "length_m": 0.7,
+      "length_mm": 700,
+      "girth_m": 0.126,
+      "girth_mm": 126,
+      "max_triangles": 2500,
+      "max_material_slots": 1,
+      "connector_radius_m": 0.0,
+      "connector_span_m": [],
+      "connector_interface": {},
+      "fallback_primitive": "capsule",
+      "albedo": "#a8675e",
+      "source": "meshy",
+      "real": {
+        "archive_path": "procedural-biomass-assembly/artifacts/meshy_mcp_scout/biomass_cephalopod_tentacle_v1/01a0c123-407b-77a5-b778-5e2ee086765e",
+        "sha256": "2002d6e529e7c93f62619ebfa76cbdfaf102f2801dae99242788a88ccc3ba3ff",
+        "fit": {
+          "axis": "-x"
+        },
+        "texture_size": 1024
+      },
+      "asset": {
+        "fbx": "",
+        "glb": "",
+        "triangles": 0
+      }
+    },
+    {
+      "part_id": "meshy_tentacle_a_105_v1",
+      "category": "appendage",
+      "template": "tentacle8",
+      "binding_profile_id": "tentacle8_flexible",
+      "binding_profile_version": "1.0.0",
+      "binding_profile_hash": "8493287eeca1b911cf341ce10c8a76a89abbd26a5f2630ce5beec711473a1fb4",
+      "inventory_kind": "production",
+      "species_tags": [
+        "cephalopod"
+      ],
+      "roles": [
+        "locomotor",
+        "slither"
+      ],
+      "size_class": "",
+      "side": "symmetric",
+      "status": "draft",
+      "style_profile": "flesh_stylized_v1",
+      "dimensions_m": [
+        0.214089,
+        0.229646,
+        1.076057
+      ],
+      "length_m": 1.05,
+      "length_mm": 1050,
+      "girth_m": 0.189,
+      "girth_mm": 189,
+      "max_triangles": 2500,
+      "max_material_slots": 1,
+      "connector_radius_m": 0.0,
+      "connector_span_m": [],
+      "connector_interface": {},
+      "fallback_primitive": "capsule",
+      "albedo": "#a8675e",
+      "source": "meshy",
+      "real": {
+        "archive_path": "procedural-biomass-assembly/artifacts/meshy_mcp_scout/biomass_cephalopod_tentacle_v1/01a0c123-407b-77a5-b778-5e2ee086765e",
+        "sha256": "2002d6e529e7c93f62619ebfa76cbdfaf102f2801dae99242788a88ccc3ba3ff",
+        "fit": {
+          "axis": "-x"
+        },
+        "texture_size": 1024
+      },
+      "asset": {
+        "fbx": "",
+        "glb": "",
+        "triangles": 0
+      }
+    },
+    {
       "part_id": "meshy_tentacle_a_v1",
       "category": "appendage",
       "template": "tentacle8",
