@@ -264,6 +264,9 @@ def test_approved_real_parts_generate_including_the_arm_on_walking_legs():
     used = {f["part_id"] for f in fills}
     assert {"meshy_insect_leg_a_v1", "meshy_animal_skull_a_v1", "meshy_frayed_arm_a_v1"} <= used
     assert any(f["part_id"] == "meshy_frayed_arm_a_v1" and f["branch_id"].startswith("leg") for f in fills)
+    recipes = json.loads((paths().root / "tests" / "golden_v3" / "recipes.json").read_text(encoding="utf-8"))
+    row = next(item for item in recipes["rows"] if item["pool_id"] == "any" and item["seed"] == 71)
+    assert "belly=meshy_tentacle_a_v1+" in row["canonical"]
 
 
 def test_build_jobs_carry_the_resolved_archive_source(tmp_path, monkeypatch):

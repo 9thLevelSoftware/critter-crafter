@@ -65,6 +65,17 @@ def test_pool_any_lists_all_seven_families():
     pools = json.loads((paths().data / "pools" / "pools.json").read_text(encoding="utf-8"))
     pool = next(item for item in pools["pools"] if item["pool_id"] == "any")
     assert set(pool["families"]) == set(FAMILIES)
+    family_by_id = {
+        skeleton["skeleton_id"]: skeleton["family"]
+        for skeleton in json.loads((GOLDEN_V3 / "catalog.json").read_text(encoding="utf-8"))["skeletons"]
+    }
+    recipes = json.loads((GOLDEN_V3 / "recipes.json").read_text(encoding="utf-8"))
+    picked = {
+        family_by_id[row["canonical"].split("|", 1)[0]]
+        for row in recipes["rows"]
+        if row["pool_id"] == "any"
+    }
+    assert picked == set(FAMILIES)
 
 
 @pytest.mark.parametrize("pool", ["any", "biped", "quadruped", "crawler"])
@@ -147,6 +158,11 @@ def test_golden_matches_current_generator(authored_catalog):
     assert recipes["fixture_only_approval"] is True
     rows = recipes["rows"]
     assert len(rows) >= 500
+    assert not any(
+        tag in row["canonical"]
+        for row in rows
+        for tag in ("_extras_v3", "_armed_v3", "_finned_v3")
+    )
     approved_golden = copy.deepcopy(golden_cat)
     for skeleton in approved_golden["skeletons"]:
         skeleton["status"] = "approved"
