@@ -90,21 +90,16 @@ namespace CritterCrafter.Locomotion
         bool _initialised;
         bool _run;
         bool _wasMoving;
+        bool _wasSettling;
         Vector3 _lastPosition;
         Vector3 _velocity;
         double _clock;
         float _bodyHeight, _bodyPitch, _bodyRoll, _bodySurge;
         float _lastYaw, _yawLag;
-        /// <summary>Seconds remaining that Overrun-forced lifts and idle LiftGroup stay disarmed after an instant turn.</summary>
-        float _turnSettle;
-        /// <summary>Seconds remaining that landing prediction is capped at v_walk_mps after idle→moving.</summary>
-        float _firstStrideRemain;
         int _replantCount;
         GaitParams _params;
 
         const float InstantTurnDeg = 90f;
-        const float TurnSettleDuration = 0.25f;
-        const float FirstStrideLeadCapSeconds = 0.1f;
 
         static readonly int SpeedParam = Animator.StringToHash("Speed");
         static readonly int GaitParam = Animator.StringToHash("Gait");
@@ -119,6 +114,8 @@ namespace CritterCrafter.Locomotion
         public LocomotionData Block => _block;
         /// <summary>Increments each time planted supports are snapped after an instant heading change.</summary>
         public int ReplantCount => _replantCount;
+        /// <summary>Remaining visual yaw lag (degrees). Eases at <see cref="bodyTurnRateDeg"/>.</summary>
+        public float YawLag => _yawLag;
 
         internal void Configure(Transform bodyTransform, Rig locomotionRig, List<Leg> builtLegs, LayerMask mask)
         {
@@ -171,9 +168,8 @@ namespace CritterCrafter.Locomotion
             _lastYaw = transform.eulerAngles.y;
             _yawLag = 0f;
             _velocity = Vector3.zero;
-            _turnSettle = 0f;
-            _firstStrideRemain = 0f;
             _wasMoving = false;
+            _wasSettling = false;
             _initialised = true;
         }
 
@@ -200,80 +196,67 @@ namespace CritterCrafter.Locomotion
             _lastPosition = position;
             float blend = velocitySmoothing > 0f ? 1f - Mathf.Exp(-dt / velocitySmoothing) : 1f;
             _velocity = Vector3.Lerp(_velocity, raw, blend);
-            float speed = Speed;
+            // Plan from the hips' actual displacement this frame, not the smoothed display speed.
+            float hipSpeed = raw.magnitude;
             float yaw = transform.eulerAngles.y;
             float deltaYaw = Mathf.DeltaAngle(_lastYaw, yaw);
             _yawLag = Mathf.Clamp(_yawLag - deltaYaw, -180f, 180f);
             bool instantTurn = Mathf.Abs(deltaYaw) > InstantTurnDeg;
-            if (instantTurn)
-                _turnSettle = Mathf.Max(TurnSettleDuration, Mathf.Abs(deltaYaw) / Mathf.Max(1f, bodyTurnRateDeg));
-            // Hold visual yaw during settle so replanted feet stay reachable; ease after Overrun is armed again.
-            if (_turnSettle <= 0f)
-                _yawLag = Mathf.MoveTowards(_yawLag, 0f, bodyTurnRateDeg * dt);
+            _yawLag = Mathf.MoveTowards(_yawLag, 0f, bodyTurnRateDeg * dt);
             _lastYaw = yaw;
             // Apply the body yaw now: hip positions used for reach checks below must already reflect it.
             if (body != null) body.localRotation = BodyRotation();
-            if (_turnSettle > 0f) _turnSettle -= dt;
+            // One settle: while visual yaw is catching up, do not Overrun-lift or idle LiftGroup.
+            bool settling = Mathf.Abs(_yawLag) > 1f;
 
             if (_block.Slides)
             {
                 // Limbless travel: advance the phase-driven undulation with ground speed.
-                _params = StepPlanner.SlideParams(_block, speed);
-                if (speed > 0.05f) _clock += _params.cadenceHz * dt;
+                _params = StepPlanner.SlideParams(_block, hipSpeed);
+                if (hipSpeed > 0.05f) _clock += _params.cadenceHz * dt;
                 if (body != null) body.localRotation = BodyRotation();
-                UpdateAnimator(speed);
+                UpdateAnimator(hipSpeed);
                 return;
             }
 
-            _params = StepPlanner.Params(_block, speed);
+            _params = StepPlanner.Params(_block, hipSpeed);
             // Hysteresis around the walk/run pattern switch keeps the pattern from chattering.
             if (_run && _params.weight < 0.4) _run = false;
             else if (!_run && _params.weight > 0.6) _run = true;
-            bool moving = speed > 0.05f && _params.cadenceHz > 0.0;
+            bool moving = hipSpeed > 0.05f && _params.cadenceHz > 0.0;
             float swingTime = (float)StepPlanner.SwingTime(_params.cadenceHz, _params.duty);
             if (moving && !_wasMoving)
             {
                 // Feet standing at home are mid-stance: start the clock there so the first stride is
                 // not spent stretching planted legs. Lift swing-phase legs now rather than waiting
-                // for Overrun, and cap landing prediction at walk speed for a beat.
+                // for Overrun. Do not teleport a planted foot.
                 _clock = 0.5 * _params.duty - StepPlanner.LegOffset(ToPlanner(legs[0]), _run);
-                _firstStrideRemain = FirstStrideLeadCapSeconds;
                 foreach (var leg in legs)
                 {
                     double offset = StepPlanner.LegOffset(ToPlanner(leg), _run);
                     double phase = StepPlanner.LegPhase(_clock, offset);
                     double cycle = Math.Floor(_clock + offset);
                     if (StepPlanner.InStance(phase, _params.duty))
-                    {
-                        Vector3 at = Ground(transform.TransformPoint(Quaternion.Euler(0f, _yawLag, 0f) * leg.stanceLocal),
-                            leg.homeLocal.y);
-                        float startLead = (float)StepPlanner.LandingLead(speed, _params.cadenceHz, _params.duty);
-                        Vector3 startHeading = speed > 1e-4f ? _velocity / speed : transform.forward;
-                        if (startLead > 0f)
-                            at = Ground(at + startHeading * Mathf.Min(startLead, 0.2f * Mathf.Max(leg.stroke, 0.05f)),
-                                leg.homeLocal.y);
-                        leg.plant = at;
-                        leg.position = at;
                         leg.lastSwingCycle = cycle - 1;
-                    }
                     else
-                        Lift(leg, Mathf.Min(swingTime, 0.08f), false, cycle);
+                    {
+                        float duration = (float)((1.0 - phase) / Math.Max(1e-6, _params.cadenceHz));
+                        Lift(leg, duration, false, cycle);
+                    }
                 }
             }
-            if (!moving) _firstStrideRemain = 0f;
             _wasMoving = moving;
-            if (_firstStrideRemain > 0f) _firstStrideRemain = Mathf.Max(0f, _firstStrideRemain - dt);
             if (moving) _clock += _params.cadenceHz * dt;
 
             if (instantTurn)
                 ReplantCoordinated();
+            else if (_wasSettling && !settling)
+                ReplantCoordinated();
+            _wasSettling = settling;
 
-            float predictSpeed = speed;
-            if (_firstStrideRemain > 0f && _block.v_walk_mps > 0.0)
-                predictSpeed = Mathf.Min(speed, (float)_block.v_walk_mps);
-            float lead = (float)StepPlanner.LandingLead(predictSpeed, _params.cadenceHz, _params.duty);
-            Vector3 heading = speed > 1e-4f ? _velocity / speed : transform.forward;
-            Vector3 predictVel = heading * predictSpeed;
+            float lead = (float)StepPlanner.LandingLead(hipSpeed, _params.cadenceHz, _params.duty);
+            Vector3 heading = hipSpeed > 1e-4f ? raw / hipSpeed : transform.forward;
+            Vector3 predictVel = heading * hipSpeed;
             Quaternion lag = Quaternion.Euler(0f, _yawLag, 0f);
 
             // Pass 1: advance swings. A swing owns its own monotonic progress, so gait changes (duty,
@@ -292,9 +275,8 @@ namespace CritterCrafter.Locomotion
                 if (u >= 1f) Plant(leg, land);
             }
 
-            bool settling = _turnSettle > 0f;
             // Pass 2: lift planted feet, on schedule while moving, or early when strained.
-            // Turn settle suppresses Overrun-forced lifts and idle LiftGroup; scheduled duty lifts may fire.
+            // Settling suppresses Overrun-forced lifts and idle LiftGroup; scheduled duty lifts may fire.
             foreach (var leg in legs)
             {
                 if (!leg.planted) continue;
@@ -327,9 +309,9 @@ namespace CritterCrafter.Locomotion
             }
 
             UpdateWeights(dt);
-            UpdateBody(dt, speed);
+            UpdateBody(dt, hipSpeed);
             ApplyTargets();
-            UpdateAnimator(speed);
+            UpdateAnimator(hipSpeed);
         }
 
         const float MaxCoxaYawDeg = 45f;
@@ -347,22 +329,13 @@ namespace CritterCrafter.Locomotion
         {
             Quaternion bodyRotation = body != null ? body.rotation : transform.rotation;
             Vector3 up = bodyRotation * Vector3.up;
-            bool freezePlant = _turnSettle > 0f;
             foreach (var leg in legs)
             {
                 if (leg.target == null) continue;
-                // During turn settle, leave planted targets at the coordinated plant so clamp-slide
-                // cannot drag every support with the easing body yaw.
-                bool freeze = freezePlant && leg.planted;
                 if (!leg.hinge || leg.coxa == null)
                 {
                     Vector3 reachable = ClampToReach(leg, leg.position);
                     leg.clamped = reachable != leg.position;
-                    if (freeze)
-                    {
-                        leg.target.position = leg.position;
-                        continue;
-                    }
                     if (leg.planted && leg.clamped) leg.plant = reachable;
                     leg.position = reachable;
                     leg.target.position = leg.position;
@@ -381,7 +354,7 @@ namespace CritterCrafter.Locomotion
                 Vector3 reach = ankle - femur;
                 float max = HingeReachFraction * leg.hingeReach;
                 leg.clamped = reach.sqrMagnitude > max * max;
-                if (leg.clamped && !freeze)
+                if (leg.clamped)
                 {
                     ankle = femur + reach.normalized * max;
                     leg.position = ankle - frame * leg.ankleOffset;
@@ -394,15 +367,14 @@ namespace CritterCrafter.Locomotion
         }
 
         /// <summary>
-        /// Snap every currently planted support to the lagged stance and retarget in-air landings.
-        /// The single frame may pop; Overrun/LiftGroup stay disarmed for <see cref="TurnSettleDuration"/>.
+        /// Snap every currently planted support onto the new heading's stance and retarget in-air landings.
+        /// The single frame may pop; Overrun/LiftGroup stay disarmed while visual yaw eases onto that heading.
         /// </summary>
         void ReplantCoordinated()
         {
-            Quaternion lag = Quaternion.Euler(0f, _yawLag, 0f);
             foreach (var leg in legs)
             {
-                Vector3 at = Ground(transform.TransformPoint(lag * leg.stanceLocal), leg.homeLocal.y);
+                Vector3 at = Ground(transform.TransformPoint(leg.stanceLocal), leg.homeLocal.y);
                 if (leg.planted)
                 {
                     leg.plant = at;
@@ -440,11 +412,11 @@ namespace CritterCrafter.Locomotion
 
         const float MaxReachFraction = 0.95f;
 
-        static Vector3 ClampToReach(Leg leg, Vector3 p, float fraction = MaxReachFraction)
+        static Vector3 ClampToReach(Leg leg, Vector3 p)
         {
             if (leg.hip == null) return p;
             Vector3 d = p - leg.hip.position;
-            float max = fraction * leg.reach;
+            float max = MaxReachFraction * leg.reach;
             return d.sqrMagnitude > max * max ? leg.hip.position + d.normalized * max : p;
         }
 

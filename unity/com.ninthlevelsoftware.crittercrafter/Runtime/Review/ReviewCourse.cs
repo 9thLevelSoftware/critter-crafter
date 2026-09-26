@@ -68,6 +68,23 @@ namespace CritterCrafter.Review
             };
         }
 
+        /// <summary>
+        /// Flat-ground walk, instant 180 while still moving, then continue (trot/walk after the snap).
+        /// </summary>
+        public static List<Waypoint> Turn180(float speed, float before = 1.2f, float after = 1.2f)
+        {
+            var a = new Vector3(0f, 0f, -3f);
+            var b = a + Vector3.forward * speed * before;
+            var c = b + Vector3.back * speed * after;
+            return new List<Waypoint>
+            {
+                new Waypoint { time = 0f, position = a, headingDeg = 0f },
+                new Waypoint { time = before, position = b, headingDeg = 0f },
+                new Waypoint { time = before + 1e-4f, position = b, headingDeg = 180f },
+                new Waypoint { time = before + after, position = c, headingDeg = 180f },
+            };
+        }
+
         /// <summary>A straight line at constant speed (used by tests).</summary>
         public static List<Waypoint> Straight(float speed, float seconds)
         {

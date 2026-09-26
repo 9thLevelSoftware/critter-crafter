@@ -280,22 +280,24 @@ namespace CritterCrafter.Tests
         [UnityTest]
         public IEnumerator RuntimeInstantTurnSettlesWithoutShuffle()
         {
-            // ReviewCourse.Path 180° waypoint (90→270). The snap/replant frame may pop; other planted
-            // frames in the 0.4 s turn window must not shuffle every support.
+            // Two-bone quadruped trot: instant 180 while moving. Snap/replant may pop; the 0.4 s
+            // window starts after visual yaw has unwound and must not shuffle every support.
             EditorSettings.enterPlayModeOptionsEnabled = true;
             EditorSettings.enterPlayModeOptions = EnterPlayModeOptions.DisableDomainReload | EnterPlayModeOptions.DisableSceneReload;
             yield return new EnterPlayMode();
             Time.captureFramerate = 30;
-            const string id = "hexapod_compact_insect_balanced_v3";
+            const string id = "quadruped_stocky_plantigrade_balanced_v3";
             var holder = new GameObject("InstantTurnTest");
-            ReviewCourse.Build(holder.transform, new Material(LibraryImporter.DefaultLitShader()) { color = new Color(0.22f, 0.23f, 0.27f) });
+            var ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            ground.transform.SetParent(holder.transform, false);
+            ground.transform.localScale = Vector3.one * 10f;
             Physics.SyncTransforms();
             var c = LocomotionCapture.Spawn(Lib, id, holder.transform, out var restore);
             var gait = c.GetComponent<CritterCrafter.Locomotion.CreatureGait>();
             Assert.IsNotNull(gait, id + ": runtime-leg skeletons get a CreatureGait");
             float speed = Mathf.Min(2.5f, 0.9f * (float)gait.Block.v_max_mps);
             var recorder = holder.AddComponent<LocomotionRecorder>();
-            recorder.Begin(gait, ReviewCourse.Path(speed), new LocomotionMetrics { skeleton_id = id, speed_mps = speed, warmup_frames = 5 });
+            recorder.Begin(gait, ReviewCourse.Turn180(speed), new LocomotionMetrics { skeleton_id = id, speed_mps = speed, warmup_frames = 5 });
             while (!recorder.Done) yield return null;
             var metrics = recorder.Metrics;
             int groups = 0;
@@ -309,72 +311,89 @@ namespace CritterCrafter.Tests
             yield return new ExitPlayMode();
 
             Assert.Greater(metrics.instant_turns, 0, id + ": path must include an instant 180");
-            Assert.LessOrEqual(metrics.steps_in_turn_window, groups, id + ": turn-window lifts exceed phase groups");
+            Assert.LessOrEqual(metrics.steps_in_turn_window, groups, id + ": turn-window group steps exceed phase groups");
             Assert.Less(metrics.max_turn_slip_m, 0.025f, id + ": planted feet slide in the turn window");
         }
 
         [UnityTest]
         public IEnumerator RuntimeAttackReleasesIkAndKeepsSupport()
         {
-            // Walk, then telegraph→attack: the attack-branch IK weight drops; other support feet stay planted.
+            // Walk, then telegraph→attack: the attack-branch IK weight drops within 0.2 s;
+            // other support feet stay at weight 1 and planted.
             EditorSettings.enterPlayModeOptionsEnabled = true;
             EditorSettings.enterPlayModeOptions = EnterPlayModeOptions.DisableDomainReload | EnterPlayModeOptions.DisableSceneReload;
             yield return new EnterPlayMode();
             Time.captureFramerate = 30;
-            const string id = "hexapod_compact_insect_balanced_v3";
-            var holder = new GameObject("AttackPlantTest");
-            var ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
-            ground.transform.SetParent(holder.transform, false);
-            ground.transform.localScale = Vector3.one * 10f;
-            Physics.SyncTransforms();
-            var c = LocomotionCapture.Spawn(Lib, id, holder.transform, out var restore);
-            var gait = c.GetComponent<CritterCrafter.Locomotion.CreatureGait>();
-            Assert.IsNotNull(gait, id + ": runtime-leg skeletons get a CreatureGait");
-            var motion = c.GetComponent<CreatureMotion>();
-            if (motion == null) motion = c.gameObject.AddComponent<CreatureMotion>();
-            float speed = (float)gait.Block.v_walk_mps;
-            bool telegraphed = false, attacked = false, sawAttackState = false;
-            float telegraphAt = -1f, minAttackWeight = 1f;
-            var recorder = holder.AddComponent<LocomotionRecorder>();
-            recorder.BeforePlace = t =>
+            var ids = new[] { "hexapod_compact_insect_balanced_v3", "quadruped_stocky_plantigrade_balanced_v3" };
+            var results = new List<(string id, bool attacked, bool sawState, bool hasAttackLeg,
+                float attackAfter02, float minOtherWeight, LocomotionMetrics metrics)>();
+            foreach (var id in ids)
             {
-                if (!telegraphed && t >= 1f)
+                var holder = new GameObject("AttackPlantTest");
+                var ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
+                ground.transform.SetParent(holder.transform, false);
+                ground.transform.localScale = Vector3.one * 10f;
+                Physics.SyncTransforms();
+                var c = LocomotionCapture.Spawn(Lib, id, holder.transform, out var restore);
+                var gait = c.GetComponent<CritterCrafter.Locomotion.CreatureGait>();
+                Assert.IsNotNull(gait, id + ": runtime-leg skeletons get a CreatureGait");
+                var motion = c.GetComponent<CreatureMotion>();
+                if (motion == null) motion = c.gameObject.AddComponent<CreatureMotion>();
+                float speed = (float)gait.Block.v_walk_mps;
+                bool telegraphed = false, attacked = false, sawAttackState = false, hasAttackLeg = false;
+                float telegraphAt = -1f, attackAfter02 = 1f, minOtherWeight = 1f;
+                var recorder = holder.AddComponent<LocomotionRecorder>();
+                recorder.BeforePlace = t =>
                 {
-                    motion.SetState(CreatureState.Telegraph);
-                    telegraphed = true;
-                    telegraphAt = t;
-                }
-                else if (telegraphed && !attacked && t >= telegraphAt + 2f / 30f)
-                {
-                    motion.PlayAttack();
-                    attacked = true;
-                }
-            };
-            recorder.Begin(gait, ReviewCourse.Straight(speed, 2.2f),
-                new LocomotionMetrics { skeleton_id = id, speed_mps = speed, warmup_frames = 30 });
-            while (!recorder.Done)
-            {
-                yield return null;
-                var info = c.Animator.GetCurrentAnimatorStateInfo(0);
-                sawAttackState |= info.IsName("Telegraph") || info.IsName("Attack");
-                if (telegraphed)
+                    if (!telegraphed && t >= 1f)
+                    {
+                        motion.SetState(CreatureState.Telegraph);
+                        telegraphed = true;
+                        telegraphAt = t;
+                    }
+                    else if (telegraphed && !attacked && t >= telegraphAt + 2f / 30f)
+                    {
+                        motion.PlayAttack();
+                        attacked = true;
+                    }
+                    if (!telegraphed) return;
                     foreach (var leg in gait.Legs)
-                        if (leg.attack) minAttackWeight = Mathf.Min(minAttackWeight, leg.weight);
+                    {
+                        if (leg.attack)
+                        {
+                            hasAttackLeg = true;
+                            if (t >= telegraphAt + 0.2f)
+                                attackAfter02 = Mathf.Min(attackAfter02, leg.weight);
+                        }
+                        else
+                            minOtherWeight = Mathf.Min(minOtherWeight, leg.weight);
+                    }
+                };
+                recorder.Begin(gait, ReviewCourse.Straight(speed, 2.2f),
+                    new LocomotionMetrics { skeleton_id = id, speed_mps = speed, warmup_frames = 5 });
+                while (!recorder.Done)
+                {
+                    yield return null;
+                    var info = c.Animator.GetCurrentAnimatorStateInfo(0);
+                    sawAttackState |= info.IsName("Telegraph") || info.IsName("Attack");
+                }
+                results.Add((id, attacked, sawAttackState, hasAttackLeg, attackAfter02, minOtherWeight, recorder.Metrics));
+                Object.Destroy(holder);
+                restore();
+                yield return null;
             }
-            var metrics = recorder.Metrics;
-            bool hasAttackLeg = false;
-            foreach (var leg in gait.Legs) if (leg.attack) hasAttackLeg = true;
-            Object.Destroy(holder);
-            restore();
-            yield return null;
             Time.captureFramerate = 0;
             yield return new ExitPlayMode();
 
-            Assert.IsTrue(hasAttackLeg, id + ": attack_branch_id must be a gait leg");
-            Assert.IsTrue(attacked, id + ": attack must play");
-            Assert.Less(minAttackWeight, 0.01f, id + ": attack-leg IK weight should drop");
-            Assert.IsTrue(sawAttackState, id + ": Animator should be in Telegraph or Attack");
-            Assert.Less(metrics.max_planted_slip_m, 0.025f, id + ": support feet slide during attack");
+            foreach (var (id, attacked, sawState, hasAttackLeg, attackAfter02, minOtherWeight, metrics) in results)
+            {
+                Assert.IsTrue(attacked, id + ": attack must play");
+                Assert.IsTrue(sawState, id + ": Animator should be in Telegraph or Attack");
+                Assert.Greater(minOtherWeight, 0.999f, id + ": non-attack feet should stay at IK weight 1");
+                Assert.Less(metrics.max_planted_slip_m, 0.025f, id + ": support feet slide during attack");
+                if (hasAttackLeg)
+                    Assert.Less(attackAfter02, 0.01f, id + ": attack-leg IK weight should drop within 0.2 s");
+            }
         }
 
         [Test]

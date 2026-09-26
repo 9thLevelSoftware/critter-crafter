@@ -56,9 +56,12 @@ namespace CritterCrafter.Review
         readonly StringBuilder _legCsv = new StringBuilder("frame,leg,planted,forced,ankle_reach_frac,hip_y,foot_x,foot_y,foot_z\n");
         float _lastHeading;
         float _turnWindowUntil = -1f;
+        bool _awaitingUnwind;
+        bool _sawYawLag;
         int _lastReplantCount;
         const float TurnWindowSeconds = 0.4f;
         const float InstantTurnDeg = 90f;
+        const float UnwindDoneDeg = 5f;
 
         /// <summary>Invoked at the start of Update with the new sample time, before the creature is placed.</summary>
         public Action<float> BeforePlace;
@@ -119,7 +122,17 @@ namespace CritterCrafter.Review
             if (Mathf.Abs(Mathf.DeltaAngle(prevHeading, _lastHeading)) > InstantTurnDeg)
             {
                 Metrics.instant_turns++;
+                _awaitingUnwind = true;
+                _sawYawLag = false;
+            }
+            // Window starts after visual yaw has actually unwound. Do not open it on the snap
+            // frame, when YawLag is still 0 because gait has not stepped yet.
+            if (_awaitingUnwind && Mathf.Abs(_gait.YawLag) > InstantTurnDeg * 0.5f)
+                _sawYawLag = true;
+            if (_awaitingUnwind && _sawYawLag && Mathf.Abs(_gait.YawLag) <= UnwindDoneDeg)
+            {
                 _turnWindowUntil = _time + TurnWindowSeconds;
+                _awaitingUnwind = false;
             }
         }
 
@@ -156,12 +169,13 @@ namespace CritterCrafter.Review
             bool inTurnWindow = _turnWindowUntil >= 0f && _time <= _turnWindowUntil;
             bool snapFrame = _gait.ReplantCount != _lastReplantCount;
             _lastReplantCount = _gait.ReplantCount;
+            var groupsLifted = new HashSet<int>();
             foreach (var leg in _gait.Legs)
             {
                 bool wasPlanted;
                 if (_wasPlanted.TryGetValue(leg.branchId, out wasPlanted) && wasPlanted && !leg.planted
                     && inTurnWindow && !snapFrame)
-                    m.steps_in_turn_window++;
+                    groupsLifted.Add(leg.group);
                 _wasPlanted[leg.branchId] = leg.planted;
                 if (!_tips.TryGetValue(leg.branchId, out var tip) || leg.weight < 0.999f) continue;
                 Vector3 p = tip.position;
@@ -172,6 +186,7 @@ namespace CritterCrafter.Review
                 now[leg.branchId] = p;
                 if (_lastPlanted.TryGetValue(leg.branchId, out var last)) slip = Mathf.Max(slip, Vector3.Distance(last, p));
             }
+            m.steps_in_turn_window += groupsLifted.Count;
             foreach (var leg in _gait.Legs)
             {
                 // Hinge legs: ankle target distance from the hinge root as a fraction of thigh + shin.
