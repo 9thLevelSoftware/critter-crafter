@@ -203,6 +203,7 @@ Not done in M2, by design or for lack of time:
 ## M5 notes (Synaptic Sea)
 
 - Threats move with `NavMeshAgent` (`acceleration = 999`, `angularSpeed = 999`). The runtime already handles instant turns.
-- Set each threat's `move_speed` from the skeleton's published speeds.
-- Keep the game's `Threat_<id>` root / `"Mesh"` child contract. The adapter plugs in at `ThreatPlaceholderFactory.Build`.
+- Set each threat's `move_speed` from the skeleton's published speeds. The in-repo test double uses `v_run_mps` (fallback 2.5); the game may also cap with `v_max_mps`.
+- Keep the game's `Threat_<id>` root / `"Mesh"` child contract. `ThreatHierarchy.Wrap` (Runtime/Integration) builds that **without** referencing `NavMeshAgent`, so `CritterCrafter.Runtime` stays AI-free. The game owns `ThreatPlaceholderFactory`; this repo ships `FakeThreatFactory` in EditMode tests (`M5AdapterTests`), not a game-named factory.
 - `CreatureGait` runs at execution order 1000, after agent movement.
+- `AssemblyOptions.collision` is plumbed through the factory. The game's None vs SingleCapsule choice is unverified; tests assert the option, not a collider.

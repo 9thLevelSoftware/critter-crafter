@@ -63,7 +63,7 @@ The package depends on **Animation Rigging** (a core package in Unity 6). `Critt
   - IK targets sit on the ankle; the foot contact is offset from it in body space.
 - **`CreatureMotion`** keeps its game-facing API (`SetVelocity`, `SetState`, `PlayAttack`, `PlayHit`). Leg weights follow its state: the attack leg is released during telegraph and attack, and every leg fades out at death.
 
-Game integration: move the creature root with the agent (`updatePosition = true`) and leave the feet to `CreatureGait`, which should run after movement (it uses execution order 1000). No root motion is applied.
+Game integration: move the creature root with the agent (`updatePosition = true`) and leave the feet to `CreatureGait`, which should run after movement (it uses execution order 1000). No root motion is applied. This package wraps the assembled creature under `Threat_{id}/Mesh` via `ThreatHierarchy` (no `NavMeshAgent` in Runtime). Agent wiring belongs in the game, or in the EditMode `FakeThreatFactory` test double.
 
 ## Review and verification
 
