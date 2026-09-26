@@ -1,5 +1,7 @@
 """Real Blender FBX regression fixture for two-bone skinned connector assembly."""
 
+import json
+
 import pytest
 
 from critter_crafter.blender.runner import BlenderError, run_op
@@ -33,7 +35,7 @@ def test_large_girth_connector_respects_triangle_budget_and_normalizes_weights(t
     profile = next(profile for profile in catalog["binding_profiles"]
                    if (profile["binding_profile_id"], profile["binding_profile_version"])
                    == (connector["binding_profile_id"], connector["binding_profile_version"]))
-    result = run_op("placeholder", {
+    result = run_op("connector", {
         "part": connector, "template": profile,
         "out_fbx": str(tmp_path / "connector.fbx"),
         "out_glb": str(tmp_path / "connector.glb"),
@@ -41,9 +43,35 @@ def test_large_girth_connector_respects_triangle_budget_and_normalizes_weights(t
 
     assert connector["connector_radius_m"] > .2
     assert result["triangles"] <= connector["max_triangles"]
-    assert result["max_influences"] <= 4
+    assert connector["max_triangles"] == 800
+    assert result["max_influences"] <= 2
+    assert result["bones"] == ["b0", "b1"]
     assert result["min_weight_sum"] == pytest.approx(1.0)
     assert result["max_weight_sum"] == pytest.approx(1.0)
+
+
+def test_limb3_sdf_join_compared_to_loft_at_800(tmp_path):
+    catalog = _catalog()
+    connector = next(part for part in catalog["parts"]
+                     if part["part_id"] == "reference_connector_biped_plantigrade_humanoid_balanced_v3_leg_l_v1")
+    profile = next(profile for profile in catalog["binding_profiles"]
+                   if (profile["binding_profile_id"], profile["binding_profile_version"])
+                   == (connector["binding_profile_id"], connector["binding_profile_version"]))
+    loft = run_op("placeholder", {
+        "part": connector, "template": profile,
+        "out_fbx": str(tmp_path / "loft.fbx"), "out_glb": str(tmp_path / "loft.glb"),
+    })["result"]
+    sdf = run_op("connector", {
+        "part": connector, "template": profile,
+        "out_fbx": str(tmp_path / "sdf.fbx"), "out_glb": str(tmp_path / "sdf.glb"),
+    })["result"]
+    print("LIMB3_CONNECTOR_COMPARE", json.dumps({"loft": loft, "sdf": sdf}, sort_keys=True))
+    assert loft["triangles"] <= 800
+    assert sdf["triangles"] <= 800
+    assert sdf["max_influences"] <= 2
+    assert sdf["bones"] == ["b0", "b1"]
+    assert sdf["min_weight_sum"] == pytest.approx(1.0)
+    assert sdf.get("baker") == "sdf"
 
 
 def test_actual_assembly_rejects_incompatible_connector_profile(tmp_path):

@@ -73,13 +73,23 @@ def realpart_pipeline_fingerprint() -> str:
     return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
 
 
+@functools.lru_cache(maxsize=None)
+def connector_pipeline_fingerprint() -> str:
+    """Fingerprint only the compiler-generated connector baker. Never hashed into real parts."""
+    package = Path(__file__).resolve().parents[1]
+    names = ("blender/ops_connector.py", "blender/ops_placeholder.py", "blender/rigkit.py", "blender/frame.py")
+    payload = {name: hashlib.sha256((package / name).read_bytes()).hexdigest() for name in names}
+    payload["contract"] = "cc-gen-3/blender-5.2/connector-sdf-fbx-secondary-X-v1"
+    return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
+
+
 def require_part_pipelines_unchanged() -> None:
     """Fail when part pipeline code changed after the build pinned its fingerprints.
 
     Blender imports the op modules only once it starts, so an edit saved between pinning and that
     import would put new code's artifacts under the old fingerprint. Recompute uncached and compare.
     """
-    for fingerprint in (part_pipeline_fingerprint, realpart_pipeline_fingerprint):
+    for fingerprint in (part_pipeline_fingerprint, realpart_pipeline_fingerprint, connector_pipeline_fingerprint):
         fresh = getattr(fingerprint, "__wrapped__", fingerprint)()
         if fresh != fingerprint():
             raise click.ClickException("CC_BUILD_STALE: part pipeline code changed while Blender was "
@@ -87,7 +97,11 @@ def require_part_pipelines_unchanged() -> None:
 
 
 def part_pipeline_for(part: dict[str, Any]) -> str:
-    return realpart_pipeline_fingerprint() if part.get("real") else part_pipeline_fingerprint()
+    if part.get("real"):
+        return realpart_pipeline_fingerprint()
+    if part.get("category") == "connector":
+        return connector_pipeline_fingerprint()
+    return part_pipeline_fingerprint()
 
 
 def real_part_source(part: dict[str, Any], archive: Path | None = None) -> Path | None:
@@ -325,7 +339,8 @@ def build_jobs(catalog: dict[str, Any], out: Path, only: set[str] | None = None)
             continue
         if p["source"] not in ("placeholder", "reference"):
             continue
-        jobs.append({"op": "placeholder", "args": {
+        op = "connector" if p["category"] == "connector" else "placeholder"
+        jobs.append({"op": op, "args": {
             "part": p, "template": profile or templates[p["template"]],
             "out_fbx": str(out / kind / pid / f"{pid}.fbx"),
             "out_glb": str(out / kind / pid / f"{pid}.glb"),
@@ -422,6 +437,7 @@ def library_build(out_root: Path | None, clean: bool) -> None:
     # while Blender runs cannot be recorded as the code that produced this build.
     part_pipeline_fingerprint()
     realpart_pipeline_fingerprint()
+    connector_pipeline_fingerprint()
     stale = stale_approvals(catalog)
     if stale:
         raise click.ClickException(
@@ -518,7 +534,7 @@ def library_build(out_root: Path | None, clean: bool) -> None:
     assembly_jobs: list[dict[str, Any]] = []
     part_states = state["parts"]
     rebuilt_parts = {
-        job["args"]["part"]["part_id"] for job in pending if job["op"] in ("placeholder", "realpart")
+        job["args"]["part"]["part_id"] for job in pending if job["op"] in ("placeholder", "realpart", "connector")
     }
     for index, skeleton in enumerate(catalog["skeletons"]):
         sid = skeleton["skeleton_id"]

@@ -21,7 +21,7 @@ def test_reference_connector_uses_its_authored_elliptical_thickness(tmp_path):
     template = next(item for item in catalog["binding_profiles"]
                     if (item["binding_profile_id"], item["binding_profile_version"])
                     == (part["binding_profile_id"], part["binding_profile_version"]))
-    result = run_op("placeholder", {
+    result = run_op("connector", {
         "part": part, "template": template,
         "out_fbx": str(tmp_path / "ellipse.fbx"), "out_glb": str(tmp_path / "ellipse.glb"),
     })["result"]
@@ -31,6 +31,7 @@ def test_reference_connector_uses_its_authored_elliptical_thickness(tmp_path):
     assert lower[1] < -.04 and upper[1] > .04  # a full rounded ellipse, not a flattened plane
     assert max(abs(lower[1]), abs(upper[1])) <= .05 * 1.025 + 1e-6
     assert result["triangles"] <= part["max_triangles"]
-    assert result["max_influences"] <= 4
+    assert result.get("baker") == "sdf"
+    assert result["max_influences"] <= 2
     assert result["min_weight_sum"] == pytest.approx(1.0)
     assert result["max_weight_sum"] == pytest.approx(1.0)

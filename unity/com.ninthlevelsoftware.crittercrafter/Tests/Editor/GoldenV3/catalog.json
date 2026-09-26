@@ -62033,7 +62033,7 @@
       "length_mm": 111,
       "girth_m": 0.1522,
       "girth_mm": 152,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0761,
       "connector_span_m": [
@@ -62101,7 +62101,7 @@
       "length_mm": 111,
       "girth_m": 0.1522,
       "girth_mm": 152,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0761,
       "connector_span_m": [
@@ -62169,7 +62169,7 @@
       "length_mm": 47,
       "girth_m": 0.083,
       "girth_mm": 83,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0415,
       "connector_span_m": [
@@ -62237,7 +62237,7 @@
       "length_mm": 154,
       "girth_m": 0.1737,
       "girth_mm": 174,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.08685,
       "connector_span_m": [
@@ -62305,7 +62305,7 @@
       "length_mm": 154,
       "girth_m": 0.1737,
       "girth_mm": 174,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.08685,
       "connector_span_m": [
@@ -62373,7 +62373,7 @@
       "length_mm": 90,
       "girth_m": 0.1232,
       "girth_mm": 123,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0616,
       "connector_span_m": [
@@ -62441,7 +62441,7 @@
       "length_mm": 90,
       "girth_m": 0.1232,
       "girth_mm": 123,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0616,
       "connector_span_m": [
@@ -62509,7 +62509,7 @@
       "length_mm": 44,
       "girth_m": 0.0764,
       "girth_mm": 76,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0382,
       "connector_span_m": [
@@ -62577,7 +62577,7 @@
       "length_mm": 130,
       "girth_m": 0.1467,
       "girth_mm": 147,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.07335,
       "connector_span_m": [
@@ -62645,7 +62645,7 @@
       "length_mm": 130,
       "girth_m": 0.1467,
       "girth_mm": 147,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.07335,
       "connector_span_m": [
@@ -62713,7 +62713,7 @@
       "length_mm": 131,
       "girth_m": 0.1807,
       "girth_mm": 181,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.09035,
       "connector_span_m": [
@@ -62781,7 +62781,7 @@
       "length_mm": 131,
       "girth_m": 0.1807,
       "girth_mm": 181,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.09035,
       "connector_span_m": [
@@ -62849,7 +62849,7 @@
       "length_mm": 50,
       "girth_m": 0.088,
       "girth_mm": 88,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.044,
       "connector_span_m": [
@@ -62917,7 +62917,7 @@
       "length_mm": 160,
       "girth_m": 0.1992,
       "girth_mm": 199,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0996,
       "connector_span_m": [
@@ -62985,7 +62985,7 @@
       "length_mm": 160,
       "girth_m": 0.1992,
       "girth_mm": 199,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0996,
       "connector_span_m": [
@@ -63053,7 +63053,7 @@
       "length_mm": 117,
       "girth_m": 0.1606,
       "girth_mm": 161,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0803,
       "connector_span_m": [
@@ -63121,7 +63121,7 @@
       "length_mm": 117,
       "girth_m": 0.1606,
       "girth_mm": 161,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0803,
       "connector_span_m": [
@@ -63189,7 +63189,7 @@
       "length_mm": 50,
       "girth_m": 0.0876,
       "girth_mm": 88,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0438,
       "connector_span_m": [
@@ -63257,7 +63257,7 @@
       "length_mm": 160,
       "girth_m": 0.2233,
       "girth_mm": 223,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.11165,
       "connector_span_m": [
@@ -63325,7 +63325,7 @@
       "length_mm": 160,
       "girth_m": 0.2233,
       "girth_mm": 223,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.11165,
       "connector_span_m": [
@@ -63393,7 +63393,7 @@
       "length_mm": 95,
       "girth_m": 0.1301,
       "girth_mm": 130,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.06505,
       "connector_span_m": [
@@ -63461,7 +63461,7 @@
       "length_mm": 95,
       "girth_m": 0.1301,
       "girth_mm": 130,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.06505,
       "connector_span_m": [
@@ -63529,7 +63529,7 @@
       "length_mm": 46,
       "girth_m": 0.0806,
       "girth_mm": 81,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0403,
       "connector_span_m": [
@@ -63597,7 +63597,7 @@
       "length_mm": 137,
       "girth_m": 0.1883,
       "girth_mm": 188,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.09415,
       "connector_span_m": [
@@ -63665,7 +63665,7 @@
       "length_mm": 137,
       "girth_m": 0.1883,
       "girth_mm": 188,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.09415,
       "connector_span_m": [
@@ -63733,7 +63733,7 @@
       "length_mm": 139,
       "girth_m": 0.1907,
       "girth_mm": 191,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.09535,
       "connector_span_m": [
@@ -63801,7 +63801,7 @@
       "length_mm": 139,
       "girth_m": 0.1907,
       "girth_mm": 191,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.09535,
       "connector_span_m": [
@@ -63869,7 +63869,7 @@
       "length_mm": 53,
       "girth_m": 0.0929,
       "girth_mm": 93,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.04645,
       "connector_span_m": [
@@ -63937,7 +63937,7 @@
       "length_mm": 160,
       "girth_m": 0.2563,
       "girth_mm": 256,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.12815,
       "connector_span_m": [
@@ -64005,7 +64005,7 @@
       "length_mm": 160,
       "girth_m": 0.2563,
       "girth_mm": 256,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.12815,
       "connector_span_m": [
@@ -64073,7 +64073,7 @@
       "length_mm": 159,
       "girth_m": 0.1487,
       "girth_mm": 149,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.07435,
       "connector_span_m": [
@@ -64141,7 +64141,7 @@
       "length_mm": 159,
       "girth_m": 0.1487,
       "girth_mm": 149,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.07435,
       "connector_span_m": [
@@ -64209,7 +64209,7 @@
       "length_mm": 159,
       "girth_m": 0.1487,
       "girth_mm": 149,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.07435,
       "connector_span_m": [
@@ -64277,7 +64277,7 @@
       "length_mm": 156,
       "girth_m": 0.1466,
       "girth_mm": 147,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0733,
       "connector_span_m": [
@@ -64345,7 +64345,7 @@
       "length_mm": 156,
       "girth_m": 0.1466,
       "girth_mm": 147,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0733,
       "connector_span_m": [
@@ -64413,7 +64413,7 @@
       "length_mm": 156,
       "girth_m": 0.1466,
       "girth_mm": 147,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0733,
       "connector_span_m": [
@@ -64481,7 +64481,7 @@
       "length_mm": 160,
       "girth_m": 0.1499,
       "girth_mm": 150,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.07495,
       "connector_span_m": [
@@ -64549,7 +64549,7 @@
       "length_mm": 160,
       "girth_m": 0.1499,
       "girth_mm": 150,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.07495,
       "connector_span_m": [
@@ -64617,7 +64617,7 @@
       "length_mm": 160,
       "girth_m": 0.1499,
       "girth_mm": 150,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.07495,
       "connector_span_m": [
@@ -64685,7 +64685,7 @@
       "length_mm": 144,
       "girth_m": 0.1348,
       "girth_mm": 135,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0674,
       "connector_span_m": [
@@ -64753,7 +64753,7 @@
       "length_mm": 144,
       "girth_m": 0.1348,
       "girth_mm": 135,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0674,
       "connector_span_m": [
@@ -64821,7 +64821,7 @@
       "length_mm": 144,
       "girth_m": 0.1348,
       "girth_mm": 135,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0674,
       "connector_span_m": [
@@ -64889,7 +64889,7 @@
       "length_mm": 144,
       "girth_m": 0.1348,
       "girth_mm": 135,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0674,
       "connector_span_m": [
@@ -64957,7 +64957,7 @@
       "length_mm": 144,
       "girth_m": 0.1348,
       "girth_mm": 135,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0674,
       "connector_span_m": [
@@ -65025,7 +65025,7 @@
       "length_mm": 144,
       "girth_m": 0.1348,
       "girth_mm": 135,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0674,
       "connector_span_m": [
@@ -65093,7 +65093,7 @@
       "length_mm": 144,
       "girth_m": 0.1348,
       "girth_mm": 135,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0674,
       "connector_span_m": [
@@ -65161,7 +65161,7 @@
       "length_mm": 144,
       "girth_m": 0.1348,
       "girth_mm": 135,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0674,
       "connector_span_m": [
@@ -65229,7 +65229,7 @@
       "length_mm": 142,
       "girth_m": 0.1328,
       "girth_mm": 133,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0664,
       "connector_span_m": [
@@ -65297,7 +65297,7 @@
       "length_mm": 142,
       "girth_m": 0.1328,
       "girth_mm": 133,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0664,
       "connector_span_m": [
@@ -65365,7 +65365,7 @@
       "length_mm": 142,
       "girth_m": 0.1328,
       "girth_mm": 133,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0664,
       "connector_span_m": [
@@ -65433,7 +65433,7 @@
       "length_mm": 142,
       "girth_m": 0.1328,
       "girth_mm": 133,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0664,
       "connector_span_m": [
@@ -65501,7 +65501,7 @@
       "length_mm": 142,
       "girth_m": 0.1328,
       "girth_mm": 133,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0664,
       "connector_span_m": [
@@ -65569,7 +65569,7 @@
       "length_mm": 142,
       "girth_m": 0.1328,
       "girth_mm": 133,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0664,
       "connector_span_m": [
@@ -65637,7 +65637,7 @@
       "length_mm": 142,
       "girth_m": 0.1328,
       "girth_mm": 133,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0664,
       "connector_span_m": [
@@ -65705,7 +65705,7 @@
       "length_mm": 142,
       "girth_m": 0.1328,
       "girth_mm": 133,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0664,
       "connector_span_m": [
@@ -65773,7 +65773,7 @@
       "length_mm": 145,
       "girth_m": 0.1358,
       "girth_mm": 136,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0679,
       "connector_span_m": [
@@ -65841,7 +65841,7 @@
       "length_mm": 145,
       "girth_m": 0.1358,
       "girth_mm": 136,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0679,
       "connector_span_m": [
@@ -65909,7 +65909,7 @@
       "length_mm": 145,
       "girth_m": 0.1358,
       "girth_mm": 136,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0679,
       "connector_span_m": [
@@ -65977,7 +65977,7 @@
       "length_mm": 145,
       "girth_m": 0.1358,
       "girth_mm": 136,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0679,
       "connector_span_m": [
@@ -66045,7 +66045,7 @@
       "length_mm": 145,
       "girth_m": 0.1358,
       "girth_mm": 136,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0679,
       "connector_span_m": [
@@ -66113,7 +66113,7 @@
       "length_mm": 145,
       "girth_m": 0.1358,
       "girth_mm": 136,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0679,
       "connector_span_m": [
@@ -66181,7 +66181,7 @@
       "length_mm": 145,
       "girth_m": 0.1358,
       "girth_mm": 136,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0679,
       "connector_span_m": [
@@ -66249,7 +66249,7 @@
       "length_mm": 145,
       "girth_m": 0.1358,
       "girth_mm": 136,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0679,
       "connector_span_m": [
@@ -66317,7 +66317,7 @@
       "length_mm": 147,
       "girth_m": 0.2025,
       "girth_mm": 203,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.10125,
       "connector_span_m": [
@@ -66385,7 +66385,7 @@
       "length_mm": 147,
       "girth_m": 0.2025,
       "girth_mm": 203,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.10125,
       "connector_span_m": [
@@ -66453,7 +66453,7 @@
       "length_mm": 160,
       "girth_m": 0.1912,
       "girth_mm": 191,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0956,
       "connector_span_m": [
@@ -66521,7 +66521,7 @@
       "length_mm": 56,
       "girth_m": 0.0981,
       "girth_mm": 98,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.04905,
       "connector_span_m": [
@@ -66589,7 +66589,7 @@
       "length_mm": 106,
       "girth_m": 0.1461,
       "girth_mm": 146,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.07305,
       "connector_span_m": [
@@ -66657,7 +66657,7 @@
       "length_mm": 106,
       "girth_m": 0.1461,
       "girth_mm": 146,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.07305,
       "connector_span_m": [
@@ -66725,7 +66725,7 @@
       "length_mm": 139,
       "girth_m": 0.1567,
       "girth_mm": 157,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.07835,
       "connector_span_m": [
@@ -66793,7 +66793,7 @@
       "length_mm": 46,
       "girth_m": 0.0805,
       "girth_mm": 81,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.04025,
       "connector_span_m": [
@@ -66861,7 +66861,7 @@
       "length_mm": 160,
       "girth_m": 0.2903,
       "girth_mm": 290,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.14515,
       "connector_span_m": [
@@ -66929,7 +66929,7 @@
       "length_mm": 160,
       "girth_m": 0.2903,
       "girth_mm": 290,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.14515,
       "connector_span_m": [
@@ -66997,7 +66997,7 @@
       "length_mm": 160,
       "girth_m": 0.2447,
       "girth_mm": 245,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.12235,
       "connector_span_m": [
@@ -67065,7 +67065,7 @@
       "length_mm": 72,
       "girth_m": 0.1256,
       "girth_mm": 126,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0628,
       "connector_span_m": [
@@ -67133,7 +67133,7 @@
       "length_mm": 159,
       "girth_m": 0.2182,
       "girth_mm": 218,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.1091,
       "connector_span_m": [
@@ -67201,7 +67201,7 @@
       "length_mm": 159,
       "girth_m": 0.2182,
       "girth_mm": 218,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.1091,
       "connector_span_m": [
@@ -67269,7 +67269,7 @@
       "length_mm": 108,
       "girth_m": 0.1217,
       "girth_mm": 122,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.06085,
       "connector_span_m": [
@@ -67337,7 +67337,7 @@
       "length_mm": 40,
       "girth_m": 0.0694,
       "girth_mm": 69,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0347,
       "connector_span_m": [
@@ -67405,7 +67405,7 @@
       "length_mm": 114,
       "girth_m": 0.1574,
       "girth_mm": 157,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0787,
       "connector_span_m": [
@@ -67473,7 +67473,7 @@
       "length_mm": 114,
       "girth_m": 0.1574,
       "girth_mm": 157,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0787,
       "connector_span_m": [
@@ -67541,7 +67541,7 @@
       "length_mm": 89,
       "girth_m": 0.0998,
       "girth_mm": 100,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0499,
       "connector_span_m": [
@@ -67609,7 +67609,7 @@
       "length_mm": 33,
       "girth_m": 0.0569,
       "girth_mm": 57,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.02845,
       "connector_span_m": [
@@ -67677,7 +67677,7 @@
       "length_mm": 160,
       "girth_m": 0.3128,
       "girth_mm": 313,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.1564,
       "connector_span_m": [
@@ -67745,7 +67745,7 @@
       "length_mm": 160,
       "girth_m": 0.3128,
       "girth_mm": 313,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.1564,
       "connector_span_m": [
@@ -67813,7 +67813,7 @@
       "length_mm": 138,
       "girth_m": 0.1558,
       "girth_mm": 156,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0779,
       "connector_span_m": [
@@ -67881,7 +67881,7 @@
       "length_mm": 51,
       "girth_m": 0.0888,
       "girth_mm": 89,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0444,
       "connector_span_m": [
@@ -67949,7 +67949,7 @@
       "length_mm": 132,
       "girth_m": 0.1234,
       "girth_mm": 123,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0617,
       "connector_span_m": [
@@ -68017,7 +68017,7 @@
       "length_mm": 132,
       "girth_m": 0.1234,
       "girth_mm": 123,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0617,
       "connector_span_m": [
@@ -68085,7 +68085,7 @@
       "length_mm": 132,
       "girth_m": 0.1234,
       "girth_mm": 123,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0617,
       "connector_span_m": [
@@ -68153,7 +68153,7 @@
       "length_mm": 132,
       "girth_m": 0.1234,
       "girth_mm": 123,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0617,
       "connector_span_m": [
@@ -68221,7 +68221,7 @@
       "length_mm": 132,
       "girth_m": 0.1234,
       "girth_mm": 123,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0617,
       "connector_span_m": [
@@ -68289,7 +68289,7 @@
       "length_mm": 132,
       "girth_m": 0.1234,
       "girth_mm": 123,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0617,
       "connector_span_m": [
@@ -68357,7 +68357,7 @@
       "length_mm": 130,
       "girth_m": 0.1217,
       "girth_mm": 122,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.06085,
       "connector_span_m": [
@@ -68425,7 +68425,7 @@
       "length_mm": 130,
       "girth_m": 0.1217,
       "girth_mm": 122,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.06085,
       "connector_span_m": [
@@ -68493,7 +68493,7 @@
       "length_mm": 130,
       "girth_m": 0.1217,
       "girth_mm": 122,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.06085,
       "connector_span_m": [
@@ -68561,7 +68561,7 @@
       "length_mm": 130,
       "girth_m": 0.1217,
       "girth_mm": 122,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.06085,
       "connector_span_m": [
@@ -68629,7 +68629,7 @@
       "length_mm": 130,
       "girth_m": 0.1217,
       "girth_mm": 122,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.06085,
       "connector_span_m": [
@@ -68697,7 +68697,7 @@
       "length_mm": 130,
       "girth_m": 0.1217,
       "girth_mm": 122,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.06085,
       "connector_span_m": [
@@ -68765,7 +68765,7 @@
       "length_mm": 133,
       "girth_m": 0.1244,
       "girth_mm": 124,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0622,
       "connector_span_m": [
@@ -68833,7 +68833,7 @@
       "length_mm": 133,
       "girth_m": 0.1244,
       "girth_mm": 124,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0622,
       "connector_span_m": [
@@ -68901,7 +68901,7 @@
       "length_mm": 133,
       "girth_m": 0.1244,
       "girth_mm": 124,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0622,
       "connector_span_m": [
@@ -68969,7 +68969,7 @@
       "length_mm": 133,
       "girth_m": 0.1244,
       "girth_mm": 124,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0622,
       "connector_span_m": [
@@ -69037,7 +69037,7 @@
       "length_mm": 133,
       "girth_m": 0.1244,
       "girth_mm": 124,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0622,
       "connector_span_m": [
@@ -69105,7 +69105,7 @@
       "length_mm": 133,
       "girth_m": 0.1244,
       "girth_mm": 124,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0622,
       "connector_span_m": [
@@ -69173,7 +69173,7 @@
       "length_mm": 158,
       "girth_m": 0.1486,
       "girth_mm": 149,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0743,
       "connector_span_m": [
@@ -69241,7 +69241,7 @@
       "length_mm": 158,
       "girth_m": 0.1486,
       "girth_mm": 149,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0743,
       "connector_span_m": [
@@ -69309,7 +69309,7 @@
       "length_mm": 158,
       "girth_m": 0.1486,
       "girth_mm": 149,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0743,
       "connector_span_m": [
@@ -69377,7 +69377,7 @@
       "length_mm": 158,
       "girth_m": 0.1486,
       "girth_mm": 149,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0743,
       "connector_span_m": [
@@ -69445,7 +69445,7 @@
       "length_mm": 158,
       "girth_m": 0.1486,
       "girth_mm": 149,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0743,
       "connector_span_m": [
@@ -69513,7 +69513,7 @@
       "length_mm": 158,
       "girth_m": 0.1486,
       "girth_mm": 149,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0743,
       "connector_span_m": [
@@ -69581,7 +69581,7 @@
       "length_mm": 156,
       "girth_m": 0.1464,
       "girth_mm": 146,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0732,
       "connector_span_m": [
@@ -69649,7 +69649,7 @@
       "length_mm": 156,
       "girth_m": 0.1464,
       "girth_mm": 146,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0732,
       "connector_span_m": [
@@ -69717,7 +69717,7 @@
       "length_mm": 156,
       "girth_m": 0.1464,
       "girth_mm": 146,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0732,
       "connector_span_m": [
@@ -69785,7 +69785,7 @@
       "length_mm": 156,
       "girth_m": 0.1464,
       "girth_mm": 146,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0732,
       "connector_span_m": [
@@ -69853,7 +69853,7 @@
       "length_mm": 156,
       "girth_m": 0.1464,
       "girth_mm": 146,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0732,
       "connector_span_m": [
@@ -69921,7 +69921,7 @@
       "length_mm": 156,
       "girth_m": 0.1464,
       "girth_mm": 146,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0732,
       "connector_span_m": [
@@ -69989,7 +69989,7 @@
       "length_mm": 160,
       "girth_m": 0.1498,
       "girth_mm": 150,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0749,
       "connector_span_m": [
@@ -70057,7 +70057,7 @@
       "length_mm": 160,
       "girth_m": 0.1498,
       "girth_mm": 150,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0749,
       "connector_span_m": [
@@ -70125,7 +70125,7 @@
       "length_mm": 160,
       "girth_m": 0.1498,
       "girth_mm": 150,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0749,
       "connector_span_m": [
@@ -70193,7 +70193,7 @@
       "length_mm": 160,
       "girth_m": 0.1498,
       "girth_mm": 150,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0749,
       "connector_span_m": [
@@ -70261,7 +70261,7 @@
       "length_mm": 160,
       "girth_m": 0.1498,
       "girth_mm": 150,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0749,
       "connector_span_m": [
@@ -70329,7 +70329,7 @@
       "length_mm": 160,
       "girth_m": 0.1498,
       "girth_mm": 150,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0749,
       "connector_span_m": [
@@ -70397,7 +70397,7 @@
       "length_mm": 60,
       "girth_m": 0.1048,
       "girth_mm": 105,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0524,
       "connector_span_m": [
@@ -70465,7 +70465,7 @@
       "length_mm": 160,
       "girth_m": 0.2468,
       "girth_mm": 247,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.1234,
       "connector_span_m": [
@@ -70533,7 +70533,7 @@
       "length_mm": 160,
       "girth_m": 0.2404,
       "girth_mm": 240,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.1202,
       "connector_span_m": [
@@ -70601,7 +70601,7 @@
       "length_mm": 160,
       "girth_m": 0.2468,
       "girth_mm": 247,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.1234,
       "connector_span_m": [
@@ -70669,7 +70669,7 @@
       "length_mm": 160,
       "girth_m": 0.2404,
       "girth_mm": 240,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.1202,
       "connector_span_m": [
@@ -70737,7 +70737,7 @@
       "length_mm": 49,
       "girth_m": 0.0859,
       "girth_mm": 86,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.04295,
       "connector_span_m": [
@@ -70805,7 +70805,7 @@
       "length_mm": 160,
       "girth_m": 0.2092,
       "girth_mm": 209,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.1046,
       "connector_span_m": [
@@ -70873,7 +70873,7 @@
       "length_mm": 160,
       "girth_m": 0.2032,
       "girth_mm": 203,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.1016,
       "connector_span_m": [
@@ -70941,7 +70941,7 @@
       "length_mm": 160,
       "girth_m": 0.2092,
       "girth_mm": 209,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.1046,
       "connector_span_m": [
@@ -71009,7 +71009,7 @@
       "length_mm": 160,
       "girth_m": 0.2032,
       "girth_mm": 203,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.1016,
       "connector_span_m": [
@@ -71077,7 +71077,7 @@
       "length_mm": 77,
       "girth_m": 0.1341,
       "girth_mm": 134,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.06705,
       "connector_span_m": [
@@ -71145,7 +71145,7 @@
       "length_mm": 160,
       "girth_m": 0.282,
       "girth_mm": 282,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.141,
       "connector_span_m": [
@@ -71213,7 +71213,7 @@
       "length_mm": 160,
       "girth_m": 0.2755,
       "girth_mm": 276,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.13775,
       "connector_span_m": [
@@ -71281,7 +71281,7 @@
       "length_mm": 160,
       "girth_m": 0.282,
       "girth_mm": 282,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.141,
       "connector_span_m": [
@@ -71349,7 +71349,7 @@
       "length_mm": 160,
       "girth_m": 0.2755,
       "girth_mm": 276,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.13775,
       "connector_span_m": [
@@ -71417,7 +71417,7 @@
       "length_mm": 48,
       "girth_m": 0.084,
       "girth_mm": 84,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.042,
       "connector_span_m": [
@@ -71485,7 +71485,7 @@
       "length_mm": 160,
       "girth_m": 0.2609,
       "girth_mm": 261,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.13045,
       "connector_span_m": [
@@ -71553,7 +71553,7 @@
       "length_mm": 160,
       "girth_m": 0.2572,
       "girth_mm": 257,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.1286,
       "connector_span_m": [
@@ -71621,7 +71621,7 @@
       "length_mm": 160,
       "girth_m": 0.2609,
       "girth_mm": 261,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.13045,
       "connector_span_m": [
@@ -71689,7 +71689,7 @@
       "length_mm": 160,
       "girth_m": 0.2572,
       "girth_mm": 257,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.1286,
       "connector_span_m": [
@@ -71757,7 +71757,7 @@
       "length_mm": 39,
       "girth_m": 0.0689,
       "girth_mm": 69,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.03445,
       "connector_span_m": [
@@ -71825,7 +71825,7 @@
       "length_mm": 160,
       "girth_m": 0.2207,
       "girth_mm": 221,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.11035,
       "connector_span_m": [
@@ -71893,7 +71893,7 @@
       "length_mm": 158,
       "girth_m": 0.217,
       "girth_mm": 217,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.1085,
       "connector_span_m": [
@@ -71961,7 +71961,7 @@
       "length_mm": 160,
       "girth_m": 0.2207,
       "girth_mm": 221,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.11035,
       "connector_span_m": [
@@ -72029,7 +72029,7 @@
       "length_mm": 158,
       "girth_m": 0.217,
       "girth_mm": 217,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.1085,
       "connector_span_m": [
@@ -72097,7 +72097,7 @@
       "length_mm": 61,
       "girth_m": 0.1075,
       "girth_mm": 108,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.05375,
       "connector_span_m": [
@@ -72165,7 +72165,7 @@
       "length_mm": 160,
       "girth_m": 0.2987,
       "girth_mm": 299,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.14935,
       "connector_span_m": [
@@ -72233,7 +72233,7 @@
       "length_mm": 160,
       "girth_m": 0.2952,
       "girth_mm": 295,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.1476,
       "connector_span_m": [
@@ -72301,7 +72301,7 @@
       "length_mm": 160,
       "girth_m": 0.2987,
       "girth_mm": 299,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.14935,
       "connector_span_m": [
@@ -72369,7 +72369,7 @@
       "length_mm": 160,
       "girth_m": 0.2952,
       "girth_mm": 295,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.1476,
       "connector_span_m": [
@@ -72437,7 +72437,7 @@
       "length_mm": 136,
       "girth_m": 0.1271,
       "girth_mm": 127,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.06355,
       "connector_span_m": [
@@ -72505,7 +72505,7 @@
       "length_mm": 136,
       "girth_m": 0.1271,
       "girth_mm": 127,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.06355,
       "connector_span_m": [
@@ -72573,7 +72573,7 @@
       "length_mm": 136,
       "girth_m": 0.1271,
       "girth_mm": 127,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.06355,
       "connector_span_m": [
@@ -72641,7 +72641,7 @@
       "length_mm": 136,
       "girth_m": 0.1271,
       "girth_mm": 127,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.06355,
       "connector_span_m": [
@@ -72709,7 +72709,7 @@
       "length_mm": 136,
       "girth_m": 0.1271,
       "girth_mm": 127,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.06355,
       "connector_span_m": [
@@ -72777,7 +72777,7 @@
       "length_mm": 136,
       "girth_m": 0.1271,
       "girth_mm": 127,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.06355,
       "connector_span_m": [
@@ -72845,7 +72845,7 @@
       "length_mm": 107,
       "girth_m": 0.1007,
       "girth_mm": 101,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.05035,
       "connector_span_m": [
@@ -72913,7 +72913,7 @@
       "length_mm": 107,
       "girth_m": 0.1007,
       "girth_mm": 101,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.05035,
       "connector_span_m": [
@@ -72981,7 +72981,7 @@
       "length_mm": 107,
       "girth_m": 0.1007,
       "girth_mm": 101,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.05035,
       "connector_span_m": [
@@ -73049,7 +73049,7 @@
       "length_mm": 107,
       "girth_m": 0.1007,
       "girth_mm": 101,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.05035,
       "connector_span_m": [
@@ -73117,7 +73117,7 @@
       "length_mm": 107,
       "girth_m": 0.1007,
       "girth_mm": 101,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.05035,
       "connector_span_m": [
@@ -73185,7 +73185,7 @@
       "length_mm": 107,
       "girth_m": 0.1007,
       "girth_mm": 101,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.05035,
       "connector_span_m": [
@@ -73253,7 +73253,7 @@
       "length_mm": 160,
       "girth_m": 0.1652,
       "girth_mm": 165,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0826,
       "connector_span_m": [
@@ -73321,7 +73321,7 @@
       "length_mm": 160,
       "girth_m": 0.1652,
       "girth_mm": 165,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0826,
       "connector_span_m": [
@@ -73389,7 +73389,7 @@
       "length_mm": 160,
       "girth_m": 0.1652,
       "girth_mm": 165,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0826,
       "connector_span_m": [
@@ -73457,7 +73457,7 @@
       "length_mm": 160,
       "girth_m": 0.1652,
       "girth_mm": 165,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0826,
       "connector_span_m": [
@@ -73525,7 +73525,7 @@
       "length_mm": 160,
       "girth_m": 0.1652,
       "girth_mm": 165,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0826,
       "connector_span_m": [
@@ -73593,7 +73593,7 @@
       "length_mm": 160,
       "girth_m": 0.1652,
       "girth_mm": 165,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0826,
       "connector_span_m": [
@@ -73654,14 +73654,14 @@
       "style_profile": "",
       "dimensions_m": [
         0.4585,
-        0.194028,
+        0.189589,
         0.16
       ],
       "length_m": 0.16,
       "length_mm": 160,
       "girth_m": 0.4585,
       "girth_mm": 459,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.22925,
       "connector_span_m": [
@@ -73729,7 +73729,7 @@
       "length_mm": 72,
       "girth_m": 0.1268,
       "girth_mm": 127,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0634,
       "connector_span_m": [
@@ -73797,7 +73797,7 @@
       "length_mm": 160,
       "girth_m": 0.3759,
       "girth_mm": 376,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.18795,
       "connector_span_m": [
@@ -73865,7 +73865,7 @@
       "length_mm": 59,
       "girth_m": 0.104,
       "girth_mm": 104,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.052,
       "connector_span_m": [
@@ -73926,14 +73926,14 @@
       "style_profile": "",
       "dimensions_m": [
         0.5868,
-        0.251044,
+        0.245299,
         0.16
       ],
       "length_m": 0.16,
       "length_mm": 160,
       "girth_m": 0.5868,
       "girth_mm": 587,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.2934,
       "connector_span_m": [
@@ -74001,7 +74001,7 @@
       "length_mm": 93,
       "girth_m": 0.1623,
       "girth_mm": 162,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.08115,
       "connector_span_m": [
@@ -74069,7 +74069,7 @@
       "length_mm": 160,
       "girth_m": 0.4084,
       "girth_mm": 408,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.2042,
       "connector_span_m": [
@@ -74137,7 +74137,7 @@
       "length_mm": 65,
       "girth_m": 0.113,
       "girth_mm": 113,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0565,
       "connector_span_m": [
@@ -74205,7 +74205,7 @@
       "length_mm": 71,
       "girth_m": 0.097,
       "girth_mm": 97,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0485,
       "connector_span_m": [
@@ -74273,7 +74273,7 @@
       "length_mm": 71,
       "girth_m": 0.097,
       "girth_mm": 97,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0485,
       "connector_span_m": [
@@ -74341,7 +74341,7 @@
       "length_mm": 71,
       "girth_m": 0.097,
       "girth_mm": 97,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0485,
       "connector_span_m": [
@@ -74409,7 +74409,7 @@
       "length_mm": 71,
       "girth_m": 0.097,
       "girth_mm": 97,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0485,
       "connector_span_m": [
@@ -74477,7 +74477,7 @@
       "length_mm": 160,
       "girth_m": 0.3349,
       "girth_mm": 335,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.16745,
       "connector_span_m": [
@@ -74545,7 +74545,7 @@
       "length_mm": 53,
       "girth_m": 0.0926,
       "girth_mm": 93,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0463,
       "connector_span_m": [
@@ -74613,7 +74613,7 @@
       "length_mm": 59,
       "girth_m": 0.0816,
       "girth_mm": 82,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0408,
       "connector_span_m": [
@@ -74681,7 +74681,7 @@
       "length_mm": 59,
       "girth_m": 0.0816,
       "girth_mm": 82,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0408,
       "connector_span_m": [
@@ -74749,7 +74749,7 @@
       "length_mm": 59,
       "girth_m": 0.0816,
       "girth_mm": 82,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0408,
       "connector_span_m": [
@@ -74817,7 +74817,7 @@
       "length_mm": 59,
       "girth_m": 0.0816,
       "girth_mm": 82,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0408,
       "connector_span_m": [
@@ -74885,7 +74885,7 @@
       "length_mm": 160,
       "girth_m": 0.5228,
       "girth_mm": 523,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.2614,
       "connector_span_m": [
@@ -74953,7 +74953,7 @@
       "length_mm": 83,
       "girth_m": 0.1446,
       "girth_mm": 145,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0723,
       "connector_span_m": [
@@ -75021,7 +75021,7 @@
       "length_mm": 81,
       "girth_m": 0.1116,
       "girth_mm": 112,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0558,
       "connector_span_m": [
@@ -75089,7 +75089,7 @@
       "length_mm": 81,
       "girth_m": 0.1116,
       "girth_mm": 112,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0558,
       "connector_span_m": [
@@ -75157,7 +75157,7 @@
       "length_mm": 81,
       "girth_m": 0.1116,
       "girth_mm": 112,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0558,
       "connector_span_m": [
@@ -75225,7 +75225,7 @@
       "length_mm": 81,
       "girth_m": 0.1116,
       "girth_mm": 112,
-      "max_triangles": 300,
+      "max_triangles": 800,
       "max_material_slots": 1,
       "connector_radius_m": 0.0558,
       "connector_span_m": [

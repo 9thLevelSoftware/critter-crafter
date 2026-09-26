@@ -1,8 +1,8 @@
-"""Procedural placeholder parts and connectors: a lofted, lumpy flesh tube skinned to the part's template chain.
+"""Procedural placeholder body parts: a lofted, lumpy flesh tube skinned to the part's template chain.
 
 Part space (docs/frame.md): origin = attachment point, +Z along the part, +Y = up reference,
-dimensions_m = [width_x, thickness_y, length_z]. Connectors span z in [span0, span1] around the
-snap point and are weighted from bone b0 (parent side) to b1 (child side).
+dimensions_m = [width_x, thickness_y, length_z]. Connector loft geometry remains here as the
+fallback surface for ``ops_connector``; library jobs bake connectors through that op.
 """
 
 from __future__ import annotations

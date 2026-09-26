@@ -24,6 +24,7 @@ GENERATOR = "cc-gen-3"
 DEFAULT_OPTIONAL_FILL_PCT = 50
 ROOT_BONE = "root"
 REFERENCE_GROUND_CLEARANCE_M = 0.005
+CONNECTOR_MAX_TRIANGLES = 800
 
 
 class CatalogError(Exception):
@@ -549,7 +550,7 @@ def _reference_parts(skeletons: list[dict[str, Any]]) -> list[dict[str, Any]]:
             if branch["connector_size_class"]:
                 span = mu.r6(min(0.08, length * 0.08))
                 connector_segments = 16 if girth * 0.5 > 0.2 else 12
-                connector_rings = min(10, max(3, 300 // (2 * connector_segments) - 1))
+                connector_rings = min(10, max(3, CONNECTOR_MAX_TRIANGLES // (2 * connector_segments) - 1))
                 connector_thickness = _reference_thickness(
                     skeleton, branch, "connector", -span, span, connector_rings, [0.0, 0.5, 1.0]
                 )
@@ -572,7 +573,7 @@ def _reference_parts(skeletons: list[dict[str, Any]]) -> list[dict[str, Any]]:
                     "length_mm": mu.mm(2 * span),
                     "girth_m": girth,
                     "girth_mm": branch["girth_mm"],
-                    "max_triangles": 300,
+                    "max_triangles": CONNECTOR_MAX_TRIANGLES,
                     "max_material_slots": 1,
                     "connector_radius_m": mu.r6(girth / 2),
                     "connector_span_m": [-span, span],

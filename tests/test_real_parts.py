@@ -272,7 +272,7 @@ def test_build_jobs_carry_the_resolved_archive_source(tmp_path, monkeypatch):
 def test_real_part_pipeline_is_fingerprinted_separately_from_placeholders():
     catalog = _catalog()
     real = real_parts(catalog)[0]
-    reference = next(p for p in catalog["parts"] if not p.get("real"))
+    reference = next(p for p in catalog["parts"] if not p.get("real") and p["category"] != "connector")
     assert library_commands.part_pipeline_for(real) == library_commands.realpart_pipeline_fingerprint()
     assert library_commands.part_pipeline_for(reference) == library_commands.part_pipeline_fingerprint()
     assert library_commands.realpart_pipeline_fingerprint() != library_commands.part_pipeline_fingerprint()
