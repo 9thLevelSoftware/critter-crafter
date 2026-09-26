@@ -636,7 +636,12 @@ def _base_skeleton_id(skeleton_id: str) -> str:
 
 
 def _reuse_original_frames(doc: dict[str, Any]) -> None:
-    """Copy required-branch frames from the frozen original 39 so extras don't pick a second libm ULP."""
+    """Copy required-branch frames from the frozen original 39 so extras don't pick a second libm ULP.
+
+    Only seed 1 is the committed set. Other seeds must match generate_all at that seed.
+    """
+    if doc.get("provenance", {}).get("seed", 1) != 1:
+        return
     original_id = _base_skeleton_id(doc["skeleton_id"])
     path = paths().data / "skeletons" / f"{original_id}.skeleton.json"
     if original_id == doc["skeleton_id"] or not path.is_file():

@@ -15,6 +15,7 @@ from critter_crafter.skeletons.archetypes import (
     _PROFILE_FRACTIONS,
     _contact_height,
     _contact_point_world,
+    _base_skeleton_id,
     _extras_fit,
     build_candidate,
     generate_all,
@@ -394,6 +395,19 @@ def test_committed_extras_match_generate_extras() -> None:
         for candidate in extras
     ]
     assert committed == extras
+
+
+def test_extras_required_frames_match_generate_all_at_the_same_seed() -> None:
+    extras = {candidate["skeleton_id"]: candidate for candidate in generate_extras(seed=2)}
+    bases = {candidate["skeleton_id"]: candidate for candidate in generate_all(seed=2)}
+    for extra in extras.values():
+        base = bases[_base_skeleton_id(extra["skeleton_id"])]
+        extra_required = {branch["branch_id"]: branch for branch in extra["branches"] if branch["required"]}
+        for branch in base["branches"]:
+            shared = extra_required[branch["branch_id"]]
+            assert shared["origin_m"] == branch["origin_m"]
+            assert shared["direction"] == branch["direction"]
+            assert shared["up"] == branch["up"]
 
 
 def test_extras_are_optional_non_locomotor_and_fill_at_100() -> None:
