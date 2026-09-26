@@ -350,7 +350,8 @@ def test_glb_skin_contract_rejects_negative_weight_even_when_sum_is_one(tmp_path
     _GlbBuilder().write(path, surface_y=.01, weight_slots=[1.2, -0.2, 0.0, 0.0])
     report = validate_glb_skin_contract(path)
     assert not report["passed"]
-    assert any("invalid vertex weight" in diagnostic for diagnostic in report["diagnostics"])
+    assert any(diagnostic.startswith("CC_GLB_SURFACE_WEIGHTS:") and "invalid vertex weight" in diagnostic
+               for diagnostic in report["diagnostics"])
 
 
 def test_glb_skin_contract_rejects_positive_non_normalized_weights(tmp_path: Path) -> None:
@@ -358,7 +359,7 @@ def test_glb_skin_contract_rejects_positive_non_normalized_weights(tmp_path: Pat
     _GlbBuilder().write(path, surface_y=.01, surface_weight=0.8)
     report = validate_glb_skin_contract(path)
     assert not report["passed"]
-    assert any("CC_GLB_SURFACE_WEIGHTS" in diagnostic and "sum=" in diagnostic
+    assert any(diagnostic.startswith("CC_GLB_SURFACE_WEIGHTS:") and "sum=" in diagnostic
                for diagnostic in report["diagnostics"])
 
 
@@ -378,20 +379,37 @@ def test_glb_skin_contract_rejects_tiny_weight_with_bad_joint_index(tmp_path: Pa
     assert any("CC_GLB_SURFACE_JOINT_INDEX" in diagnostic for diagnostic in report["diagnostics"])
 
 
-def test_glb_skin_contract_rejects_too_many_influences(tmp_path: Path) -> None:
-    path = tmp_path / "five.glb"
-    _GlbBuilder().write(path, surface_y=.01, weight_slots=[0.2, 0.2, 0.2, 0.2, 0.2])
-    report = validate_glb_skin_contract(path, max_influences=4)
-    assert not report["passed"]
-    assert any("CC_GLB_SURFACE_INFLUENCES" in diagnostic for diagnostic in report["diagnostics"])
+def _influence_catalog(tmp_path: Path, *, part_id: str, category: str, influences: int) -> dict:
+    folder = tmp_path / ("connectors" if category == "connector" else "parts") / part_id
+    folder.mkdir(parents=True)
+    slots = [1.0 / influences] * influences
+    _GlbBuilder().write(folder / f"{part_id}.glb", surface_y=.01, weight_slots=slots)
+    _write_fbx(folder / f"{part_id}.fbx", influence_count=influences)
+    kind = "connectors" if category == "connector" else "parts"
+    part: dict = {
+        "part_id": part_id, "category": category,
+        "asset": {"fbx": f"{kind}/{part_id}/{part_id}.fbx",
+                  "glb": f"{kind}/{part_id}/{part_id}.glb", "triangles": 1},
+    }
+    if category == "connector":
+        part["connector_interface"] = {"max_influences": 2}
+    return {"skeletons": [], "parts": [part]}
 
 
-def test_glb_skin_contract_rejects_connector_over_two_influences(tmp_path: Path) -> None:
-    path = tmp_path / "connector.glb"
-    _GlbBuilder().write(path, surface_y=.01, weight_slots=[0.4, 0.3, 0.3])
-    report = validate_glb_skin_contract(path, max_influences=2)
-    assert not report["passed"]
-    assert any("CC_GLB_SURFACE_INFLUENCES" in diagnostic for diagnostic in report["diagnostics"])
+def test_export_qa_enforces_part_and_connector_influence_caps(tmp_path: Path) -> None:
+    four = _influence_catalog(tmp_path, part_id="limb4", category="limb", influences=4)
+    assert export_qa_problems(four, tmp_path) == []
+    five = _influence_catalog(tmp_path, part_id="limb5", category="limb", influences=5)
+    five_codes = "\n".join(export_qa_problems(five, tmp_path))
+    assert "CC_GLB_SURFACE_INFLUENCES" in five_codes
+    assert "CC_FBX_SKIN_INFLUENCES" in five_codes
+
+    two = _influence_catalog(tmp_path, part_id="conn2", category="connector", influences=2)
+    assert export_qa_problems(two, tmp_path) == []
+    three = _influence_catalog(tmp_path, part_id="conn3", category="connector", influences=3)
+    three_codes = "\n".join(export_qa_problems(three, tmp_path))
+    assert "CC_GLB_SURFACE_INFLUENCES" in three_codes
+    assert "CC_FBX_SKIN_INFLUENCES" in three_codes
 
 
 def test_glb_skin_contract_rejects_missing_skin_root(tmp_path: Path) -> None:
@@ -458,11 +476,17 @@ def _write_fbx_node(buf: bytearray, node: dict) -> None:
 
 def _write_fbx(path: Path, *, indexes: list[int] | None = None, weights: list[float] | None = None,
                include_skin: bool = True, include_bone: bool = True,
-               omit_indexes: bool = False, omit_weights: bool = False) -> None:
+               omit_indexes: bool = False, omit_weights: bool = False,
+               influence_count: int | None = None) -> None:
     if indexes is None:
         indexes = [0, 1, 2]
     if weights is None:
         weights = [1.0, 1.0, 1.0]
+    if influence_count is not None:
+        share = 1.0 / influence_count
+        cluster_specs = [(indexes, [share] * len(indexes))] * influence_count
+    else:
+        cluster_specs = [(indexes, weights)]
     verts = [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0]
     objects = [
         {"name": "Geometry", "props": [("L", 100), ("S", "mesh\x00\x01Geometry"), ("S", "Mesh")],
@@ -473,20 +497,23 @@ def _write_fbx(path: Path, *, indexes: list[int] | None = None, weights: list[fl
     if include_skin:
         objects.append({"name": "Deformer",
                         "props": [("L", 400), ("S", "Skin\x00\x01Deformer"), ("S", "Skin")]})
-        cluster_children = []
-        if not omit_indexes:
-            cluster_children.append({"name": "Indexes", "props": [("i", indexes)]})
-        if not omit_weights:
-            cluster_children.append({"name": "Weights", "props": [("d", weights)]})
-        objects.append({"name": "Deformer",
-                        "props": [("L", 500), ("S", "Cluster\x00\x01Deformer"), ("S", "Cluster")],
-                        "children": cluster_children})
         connections.append({"name": "C", "props": [("S", "OO"), ("L", 400), ("L", 100)]})
-        connections.append({"name": "C", "props": [("S", "OO"), ("L", 500), ("L", 400)]})
         if include_bone:
             objects.append({"name": "Model",
                             "props": [("L", 300), ("S", "b0\x00\x01Model"), ("S", "LimbNode")]})
-            connections.append({"name": "C", "props": [("S", "OO"), ("L", 300), ("L", 500)]})
+        for i, (cluster_indexes, cluster_weights) in enumerate(cluster_specs):
+            cid = 500 + i
+            cluster_children = []
+            if not omit_indexes:
+                cluster_children.append({"name": "Indexes", "props": [("i", cluster_indexes)]})
+            if not omit_weights:
+                cluster_children.append({"name": "Weights", "props": [("d", cluster_weights)]})
+            objects.append({"name": "Deformer",
+                            "props": [("L", cid), ("S", f"Cluster{i}\x00\x01Deformer"), ("S", "Cluster")],
+                            "children": cluster_children})
+            connections.append({"name": "C", "props": [("S", "OO"), ("L", cid), ("L", 400)]})
+            if include_bone:
+                connections.append({"name": "C", "props": [("S", "OO"), ("L", 300), ("L", cid)]})
     buf = bytearray(b"Kaydara FBX Binary  \x00\x1a\x00")
     buf.extend(struct.pack("<I", 7400))
     _write_fbx_node(buf, {"name": "Objects", "props": [], "children": objects})
@@ -524,7 +551,8 @@ def test_fbx_skin_contract_rejects_negative_weights(tmp_path: Path) -> None:
     _write_fbx(path, weights=[-1.0, 1.0, 1.0])
     report = validate_fbx_skin_contract(path)
     assert not report["passed"]
-    assert any("invalid weight" in diagnostic for diagnostic in report["diagnostics"])
+    assert any(diagnostic.startswith("CC_FBX_SKIN_WEIGHTS:") and "invalid weight" in diagnostic
+               for diagnostic in report["diagnostics"])
 
 
 def test_fbx_skin_contract_rejects_positive_non_normalized_weights(tmp_path: Path) -> None:
@@ -532,7 +560,8 @@ def test_fbx_skin_contract_rejects_positive_non_normalized_weights(tmp_path: Pat
     _write_fbx(path, weights=[0.5, 0.5, 0.5])
     report = validate_fbx_skin_contract(path)
     assert not report["passed"]
-    assert any("sum=" in diagnostic for diagnostic in report["diagnostics"])
+    assert any(diagnostic.startswith("CC_FBX_SKIN_WEIGHTS:") and "sum=" in diagnostic
+               for diagnostic in report["diagnostics"])
 
 
 def test_fbx_truncated_file_is_cc_fbx_header(tmp_path: Path) -> None:
