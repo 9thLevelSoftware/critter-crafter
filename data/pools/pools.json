@@ -6,7 +6,11 @@
       "families": [
         "biped",
         "quadruped",
-        "crawler"
+        "crawler",
+        "hexapod",
+        "dragger",
+        "serpentine",
+        "radial"
       ],
       "skeleton_ids": []
     },

@@ -7,7 +7,7 @@ import pytest
 from critter_crafter.cli import _catalog_without_extras
 from critter_crafter.config import paths
 from critter_crafter.library.catalog import compile_catalog, load_sources, reference_part_id
-from critter_crafter.skeletons.archetypes import is_extras_id
+from critter_crafter.skeletons.archetypes import FAMILIES, is_extras_id
 from critter_crafter.recipes.generator import (
     GenerationError,
     canonical,
@@ -59,6 +59,12 @@ def test_sources_validate_clean():
     assert cat is not None
     assert diags == []
     assert {s["status"] for s in cat["skeletons"]} == {"draft"}
+
+
+def test_pool_any_lists_all_seven_families():
+    pools = json.loads((paths().data / "pools" / "pools.json").read_text(encoding="utf-8"))
+    pool = next(item for item in pools["pools"] if item["pool_id"] == "any")
+    assert set(pool["families"]) == set(FAMILIES)
 
 
 @pytest.mark.parametrize("pool", ["any", "biped", "quadruped", "crawler"])

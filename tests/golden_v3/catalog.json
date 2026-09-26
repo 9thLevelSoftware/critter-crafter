@@ -82767,7 +82767,11 @@
       "families": [
         "biped",
         "crawler",
-        "quadruped"
+        "dragger",
+        "hexapod",
+        "quadruped",
+        "radial",
+        "serpentine"
       ],
       "skeleton_ids": []
     },

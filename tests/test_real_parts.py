@@ -262,7 +262,6 @@ def test_approved_real_parts_generate_including_the_arm_on_walking_legs():
     pools = [p["pool_id"] for p in catalog["pools"]]
     fills = [f for pool in pools for seed in range(1, 41) for f in generate(catalog, pool, seed)["fills"]]
     used = {f["part_id"] for f in fills}
-    # Tentacle stays a hole in current pools (dragger belly only; dragger is not in any/biped/quadruped/crawler).
     assert {"meshy_insect_leg_a_v1", "meshy_animal_skull_a_v1", "meshy_frayed_arm_a_v1"} <= used
     assert any(f["part_id"] == "meshy_frayed_arm_a_v1" and f["branch_id"].startswith("leg") for f in fills)
 
