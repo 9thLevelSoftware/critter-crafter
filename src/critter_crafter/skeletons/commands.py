@@ -50,6 +50,8 @@ def skeleton_vary(families, archetypes, presets, style, seed, count, force, extr
     if extras:
         if style != "anatomical":
             raise click.ClickException("horror+extras is out of scope")
+        if count is not None:
+            raise click.ClickException("--count cannot be combined with --extras")
         docs = generate_extras(seed=seed)
         if families:
             docs = [doc for doc in docs if doc["family"] in families]

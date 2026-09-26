@@ -12,6 +12,7 @@ import click
 from . import __version__
 from .config import find_blender, find_unity, paths
 from .library.catalog import compile_catalog, dumps, load_sources
+from .skeletons.archetypes import is_extras_id
 from .recipes.generator import GenerationError, canonical, generate
 from .recipes.validate import validate_recipe
 from .schema.validate import validate_sources
@@ -24,6 +25,18 @@ def _compiled_catalog() -> dict:
         for d in diags:
             click.echo(d, err=True)
         raise click.ClickException(f"{len(errors)} validation error(s)")
+    return catalog
+
+
+def _catalog_without_extras(catalog: dict) -> dict:
+    """Keep recipe/locomotion goldens on the original 39; extras stay draft files."""
+    extras_tags = ("_extras_v3", "_armed_v3", "_finned_v3")
+    catalog = json.loads(json.dumps(catalog))
+    catalog["skeletons"] = [skeleton for skeleton in catalog["skeletons"] if not is_extras_id(skeleton["skeleton_id"])]
+    catalog["parts"] = [
+        part for part in catalog["parts"]
+        if not any(tag in part["part_id"] for tag in extras_tags)
+    ]
     return catalog
 
 
@@ -153,7 +166,7 @@ def recipe_sweep(pool_ids: tuple[str, ...], seeds: str, review_drafts: bool) -> 
 @click.option("--out", type=click.Path(path_type=Path), default=None)
 def recipe_golden(seeds: str, out: Path | None) -> None:
     """Write v3 parity fixtures from an in-memory approved copy; preserve v2 fixtures."""
-    cat = _compiled_catalog()
+    cat = _catalog_without_extras(_compiled_catalog())
     gdir = out or paths().root / "tests" / "golden_v3"
     if gdir.resolve() == (paths().root / "tests" / "golden").resolve():
         raise click.ClickException("legacy golden fixtures are frozen; choose a v3 output directory")

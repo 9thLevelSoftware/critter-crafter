@@ -4,8 +4,10 @@ from pathlib import Path
 
 import pytest
 
+from critter_crafter.cli import _catalog_without_extras
 from critter_crafter.config import paths
 from critter_crafter.library.catalog import compile_catalog, load_sources, reference_part_id
+from critter_crafter.skeletons.archetypes import is_extras_id
 from critter_crafter.recipes.generator import (
     GenerationError,
     canonical,
@@ -19,21 +21,6 @@ from critter_crafter.schema.validate import validate_sources
 
 GOLDEN_LEGACY = Path(__file__).parent / "golden"
 GOLDEN_V3 = Path(__file__).parent / "golden_v3"
-_EXTRAS_ID_TAGS = ("_extras_v3", "_armed_v3", "_finned_v3")
-
-
-def _is_extras_id(skeleton_id: str) -> bool:
-    return skeleton_id.endswith(_EXTRAS_ID_TAGS)
-
-
-def _without_extras_catalog(catalog: dict) -> dict:
-    result = copy.deepcopy(catalog)
-    result["skeletons"] = [skeleton for skeleton in result["skeletons"] if not _is_extras_id(skeleton["skeleton_id"])]
-    result["parts"] = [
-        part for part in result["parts"]
-        if not any(tag in part["part_id"] for tag in _EXTRAS_ID_TAGS)
-    ]
-    return result
 
 
 @pytest.fixture(scope="module")
@@ -147,7 +134,8 @@ def test_legacy_golden_remains_explicitly_v2():
 def test_golden_matches_current_generator(authored_catalog):
     """golden_v3 is shared with Unity; regenerate with `critter recipe golden`."""
     golden_cat = json.loads((GOLDEN_V3 / "catalog.json").read_text(encoding="utf-8"))
-    assert golden_cat == json.loads(json.dumps(_without_extras_catalog(authored_catalog))), "catalog changed: run `critter recipe golden`"
+    assert golden_cat == json.loads(json.dumps(_catalog_without_extras(authored_catalog))), "catalog changed: run `critter recipe golden`"
+    assert not any(is_extras_id(skeleton["skeleton_id"]) for skeleton in golden_cat["skeletons"])
     recipes = json.loads((GOLDEN_V3 / "recipes.json").read_text(encoding="utf-8"))
     assert recipes["generator"] == "cc-gen-3"
     assert recipes["fixture_only_approval"] is True

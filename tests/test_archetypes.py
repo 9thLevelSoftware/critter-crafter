@@ -15,9 +15,11 @@ from critter_crafter.skeletons.archetypes import (
     _PROFILE_FRACTIONS,
     _contact_height,
     _contact_point_world,
+    _extras_fit,
     build_candidate,
     generate_all,
     generate_extras,
+    is_extras_id,
     write_profiles,
 )
 from critter_crafter import mathutil as mu
@@ -92,8 +94,16 @@ def test_write_profiles_emits_the_exact_profiles_referenced_by_candidates(tmp_pa
     assert {path.stem.removesuffix(".binding") for path in written} == referenced
 
 
-def _is_extras_id(skeleton_id: str) -> bool:
-    return skeleton_id.endswith(("_extras_v3", "_armed_v3", "_finned_v3"))
+def _nearly_equal(left, right, abs_tol: float = 2e-15) -> bool:
+    if isinstance(left, float) and isinstance(right, (int, float)):
+        return math.isclose(left, float(right), rel_tol=0.0, abs_tol=abs_tol)
+    if isinstance(right, float) and isinstance(left, (int, float)):
+        return math.isclose(float(left), right, rel_tol=0.0, abs_tol=abs_tol)
+    if isinstance(left, dict) and isinstance(right, dict):
+        return left.keys() == right.keys() and all(_nearly_equal(left[key], right[key], abs_tol) for key in left)
+    if isinstance(left, list) and isinstance(right, list):
+        return len(left) == len(right) and all(_nearly_equal(a, b, abs_tol) for a, b in zip(left, right))
+    return left == right
 
 
 def test_committed_v3_sources_are_the_seed_one_candidate_set() -> None:
@@ -101,10 +111,13 @@ def test_committed_v3_sources_are_the_seed_one_candidate_set() -> None:
     committed = [
         json.loads(path.read_text(encoding="utf-8"))
         for path in sorted(source_dir.glob("*_v3.skeleton.json"))
-        if not _is_extras_id(path.name.replace(".skeleton.json", ""))
+        if not is_extras_id(path.name.replace(".skeleton.json", ""))
     ]
+    generated = generate_all(seed=1)
 
-    assert committed == generate_all(seed=1)
+    assert [doc["skeleton_id"] for doc in committed] == [doc["skeleton_id"] for doc in generated]
+    assert len(committed) == 39
+    assert _nearly_equal(committed, generated)
 
 
 def test_sockets_are_unit_relative_rotations_and_radial_plans_declare_ring_counts() -> None:
@@ -369,6 +382,13 @@ def test_generate_extras_is_forty_one_unique_anatomical_drafts() -> None:
 def test_committed_extras_match_generate_extras() -> None:
     source_dir = Path(__file__).parents[1] / "data" / "skeletons"
     extras = generate_extras(seed=1)
+    extra_ids = {candidate["skeleton_id"] for candidate in extras}
+    on_disk = {
+        path.name.replace(".skeleton.json", "")
+        for path in source_dir.glob("*.skeleton.json")
+        if is_extras_id(path.name.replace(".skeleton.json", ""))
+    }
+    assert on_disk == extra_ids
     committed = [
         json.loads((source_dir / f"{candidate['skeleton_id']}.skeleton.json").read_text(encoding="utf-8"))
         for candidate in extras
@@ -377,23 +397,38 @@ def test_committed_extras_match_generate_extras() -> None:
 
 
 def test_extras_are_optional_non_locomotor_and_fill_at_100() -> None:
+    expected = {
+        "biped": {"arm2_L", "arm2_R", "back"},
+        "quadruped": {"tail", "dorsal_0"},
+        "crawler": {"dorsal"},
+        "hexapod": {"mandible_L", "mandible_R"},
+        "radial": {"crown"},
+        "serpentine": {"tail_2", "fin_L", "fin_R"},
+        "dragger": {"stump_L", "stump_R"},
+    }
     for candidate in generate_extras():
-        extras = [branch for branch in candidate["branches"] if not branch["required"]]
-        assert extras
+        if candidate["skeleton_id"].endswith("_armed_v3"):
+            extra_ids = {"arm2_L", "arm2_R"}
+        elif candidate["skeleton_id"].endswith("_finned_v3"):
+            extra_ids = {"fin_L", "fin_R"}
+        else:
+            extra_ids = expected[candidate["family"]]
+        extras = [branch for branch in candidate["branches"] if branch["branch_id"] in extra_ids]
+        assert {branch["branch_id"] for branch in extras} == extra_ids
+        assert all(branch["required"] or branch["branch_id"] in extra_ids for branch in candidate["branches"])
         support = set(candidate["anatomy"]["support_branches"])
         contacts = set(candidate["anatomy"]["contact_branches"])
         for branch in extras:
+            assert branch["required"] is False
             assert branch["optional_fill_pct"] == 100
             assert branch["gait"]["role"] != "locomotor"
             assert not branch.get("contacts")
             assert branch["branch_id"] not in support
             assert branch["branch_id"] not in contacts
+            if branch["branch_id"].startswith("arm2_"):
+                assert branch["gait"]["role"] == "manipulator"
         if candidate["family"] == "serpentine":
             assert all(branch["parent_branch"] == "body" for branch in extras)
-        if candidate["skeleton_id"].endswith("_armed_v3"):
-            assert {branch["branch_id"] for branch in extras} == {"arm2_L", "arm2_R"}
-        if candidate["skeleton_id"].endswith("_finned_v3"):
-            assert {branch["branch_id"] for branch in extras} == {"fin_L", "fin_R"}
 
 
 def test_extra_arms_share_primary_arm_origin_height() -> None:
@@ -406,6 +441,14 @@ def test_extra_arms_share_primary_arm_origin_height() -> None:
         assert extra["origin_m"][1] == arm["origin_m"][1]
         assert extra["length_m"] == arm["length_m"]
         assert extra["attach_bone_index"] == 2
+        assert extra["gait"]["role"] == "manipulator"
+
+
+def test_extras_budget_gate_skips_when_parts_would_exceed_16() -> None:
+    filled = [{"template": "core1"} for _ in range(16)]
+    incoming = [{"template": "appendage1"}]
+    assert _extras_fit(filled, incoming) is False
+    assert _extras_fit(filled[:15], incoming) is True
 
 
 def test_extras_last_bone_tips_stay_above_ground() -> None:
@@ -430,3 +473,23 @@ def test_extras_last_bone_tips_stay_above_ground() -> None:
 def test_horror_plus_extras_raises() -> None:
     with pytest.raises(ValueError, match="horror"):
         build_candidate("biped_plantigrade_humanoid", "balanced", seed=1, style="horror", extras=True)
+
+
+def test_named_extras_only_exist_for_the_two_balanced_pairs() -> None:
+    with pytest.raises(ValueError, match="armed"):
+        build_candidate("biped_digitigrade_creature", "balanced", seed=1, extras="armed")
+    with pytest.raises(ValueError, match="finned"):
+        build_candidate("serpentine_limbless_articulated", "compact", seed=1, extras="finned")
+    armed = build_candidate("biped_plantigrade_humanoid", "balanced", seed=1, extras="armed")
+    finned = build_candidate("serpentine_limbless_articulated", "balanced", seed=1, extras="finned")
+    assert armed["skeleton_id"] == "biped_plantigrade_humanoid_balanced_armed_v3"
+    assert finned["skeleton_id"] == "serpentine_limbless_articulated_balanced_finned_v3"
+
+
+def test_skeleton_vary_extras_rejects_count() -> None:
+    from click.testing import CliRunner
+    from critter_crafter.cli import main
+
+    result = CliRunner().invoke(main, ["skeleton", "vary", "--extras", "--count", "1"])
+    assert result.exit_code != 0
+    assert "--count" in result.output

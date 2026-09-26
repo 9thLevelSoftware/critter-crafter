@@ -448,6 +448,13 @@ _FAMILY_EXTRAS: dict[str, tuple[str, ...]] = {
     "dragger": ("stump_pair",),
 }
 _NAMED_EXTRAS = {"armed": ("extra_arm_pair",), "finned": ("fins",)}
+_ARMED = ("biped_plantigrade_humanoid", "balanced")
+_FINNED = ("serpentine_limbless_articulated", "balanced")
+_EXTRAS_ID_SUFFIXES = ("_extras_v3", "_armed_v3", "_finned_v3")
+
+
+def is_extras_id(skeleton_id: str) -> bool:
+    return skeleton_id.endswith(_EXTRAS_ID_SUFFIXES)
 
 
 def _find_branch(branches: list[dict[str, Any]], branch_id: str) -> dict[str, Any]:
@@ -585,8 +592,8 @@ def _rule_stump_pair(branches: list[dict[str, Any]]) -> list[dict[str, Any]]:
             side=side, attach=0, mirror_of="stump_L" if side == "R" else "",
             role="sway", parent_joint="pelvis",
         )
-        # Plantigrade lower swing_x is [-5, 135]; +8° stance inverts past that floor.
-        record["stance_deg"] = _scaled_stance(record, [-5.0, 8.0, 0.0], 1.0)
+        # Compact scales stance by 1.14; 1.75° stays under the plantigrade lower authoring high (2°).
+        record["stance_deg"] = [-5.0, 1.75, 0.0]
         added.append(record)
     return added
 
@@ -606,27 +613,45 @@ _EXTRAS_RULES = {
 
 
 def _extras_rule_ids(plan: str, extras: bool | str) -> tuple[str, ...]:
-    family_rules = _FAMILY_EXTRAS[plan]
     if extras is True:
-        return family_rules
-    named = _NAMED_EXTRAS.get(extras if isinstance(extras, str) else "")
-    if named is None:
-        raise ValueError("extras must be False, True, 'armed', or 'finned'")
-    return tuple(rule for rule in named if rule in family_rules)
+        return _FAMILY_EXTRAS[plan]
+    if extras in _NAMED_EXTRAS:
+        return _NAMED_EXTRAS[extras]
+    raise ValueError("extras must be False, True, 'armed', or 'finned'")
 
 
-def _apply_optional_branches(
-    a: dict[str, Any],
-    branches: list[dict[str, Any]],
-    supports: list[str],
-    contacts: list[str],
-    extras: bool | str,
-) -> None:
+def _apply_optional_branches(plan: str, branches: list[dict[str, Any]], extras: bool | str) -> None:
     """Append budget-gated optional branches. Does not mark them support/locomotor."""
-    for rule_id in _extras_rule_ids(a["plan"], extras):
+    for rule_id in _extras_rule_ids(plan, extras):
         incoming = _EXTRAS_RULES[rule_id](branches)
         if incoming and _extras_fit(branches, incoming):
             branches.extend(incoming)
+
+
+def _base_skeleton_id(skeleton_id: str) -> str:
+    for suffix in _EXTRAS_ID_SUFFIXES:
+        if skeleton_id.endswith(suffix):
+            return f"{skeleton_id[:-len(suffix)]}_v3"
+    return skeleton_id
+
+
+def _reuse_original_frames(doc: dict[str, Any]) -> None:
+    """Copy required-branch frames from the frozen original 39 so extras don't pick a second libm ULP."""
+    original_id = _base_skeleton_id(doc["skeleton_id"])
+    path = paths().data / "skeletons" / f"{original_id}.skeleton.json"
+    if original_id == doc["skeleton_id"] or not path.is_file():
+        return
+    original = json.loads(path.read_text(encoding="utf-8"))
+    by_id = {branch["branch_id"]: branch for branch in original["branches"]}
+    for branch in doc["branches"]:
+        src = by_id.get(branch["branch_id"])
+        if src is None:
+            continue
+        branch["direction"] = list(src["direction"])
+        branch["up"] = list(src["up"])
+        branch["origin_m"] = list(src["origin_m"])
+    _socketize(doc["branches"])
+    doc["neutral_pose"] = _neutral_pose(doc["branches"], doc["anatomy"]["support_branches"])
 
 
 def _qmul(a: tuple[float, float, float, float], b: tuple[float, float, float, float]) -> tuple[float, float, float, float]:
@@ -783,6 +808,10 @@ def build_candidate(archetype: str, preset: str, seed: int = 1, style: str = "an
         raise ValueError("extras must be False, True, 'armed', or 'finned'")
     if extras and style == "horror":
         raise ValueError("horror+extras is out of scope")
+    if extras == "armed" and (archetype, preset) != _ARMED:
+        raise ValueError("extras='armed' is only for biped_plantigrade_humanoid balanced")
+    if extras == "finned" and (archetype, preset) != _FINNED:
+        raise ValueError("extras='finned' is only for serpentine_limbless_articulated balanced")
     a = dict(ARCHETYPES[archetype])
     shape = {
         "compact": {"height": .92, "length": .82, "width": 1.12, "limb": .88, "stance": 1.14, "radial": .90},
@@ -799,7 +828,7 @@ def build_candidate(archetype: str, preset: str, seed: int = 1, style: str = "an
         width = a["width"] * shape["width"] * _r(seed, 3)
     branches, supports, contacts, symmetry = _BUILDERS[a["plan"]](a, h, length, width)
     if extras:
-        _apply_optional_branches(a, branches, supports, contacts, extras)
+        _apply_optional_branches(a["plan"], branches, extras)
     _scale_stance(branches, shape["stance"])
     if style == "horror":
         _apply_horror_modifier(branches)
@@ -829,9 +858,12 @@ def build_candidate(archetype: str, preset: str, seed: int = 1, style: str = "an
     extras_suffix = "" if extras is False else "_extras" if extras is True else f"_{extras}"
     locomotion = {"biped": "biped", "quadruped": "quadruped", "crawler": "crawl", "hexapod": "crawl",
                   "radial": "crawl", "serpentine": "slither", "dragger": "drag"}[a["plan"]]
-    return {"schema_version": "3.0.0", "skeleton_id": f"{archetype}_{preset}{style_suffix}{extras_suffix}_v3", "family": a["family"], "locomotion_hint": locomotion, "status": "draft",
+    doc = {"schema_version": "3.0.0", "skeleton_id": f"{archetype}_{preset}{style_suffix}{extras_suffix}_v3", "family": a["family"], "locomotion_hint": locomotion, "status": "draft",
             "symmetry_pct": 100 if symmetry == "bilateral" else 92, "branches": branches,
             "neutral_pose": _neutral_pose(branches, supports), "anatomy": anatomy, "provenance": {"generator": "cc-gen-3", "seed": seed, "preset": preset}}
+    if extras:
+        _reuse_original_frames(doc)
+    return doc
 
 
 def generate_all(seed: int = 1, style: str = "anatomical") -> list[dict[str, Any]]:

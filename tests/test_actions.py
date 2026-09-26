@@ -185,7 +185,11 @@ def test_one_bone_bites_follow_the_exact_reach_sphere_for_the_full_cycle() -> No
 
 
 def test_grounded_windups_lift_and_tail_whips_retract() -> None:
-    skeletons = {item["anatomy"]["archetype_id"]: item for item in _skeletons() if "balanced" in item["skeleton_id"]}
+    skeletons = {
+        item["anatomy"]["archetype_id"]: item
+        for item in _skeletons()
+        if item["skeleton_id"].endswith("_balanced_v3")
+    }
     for archetype_id in ("serpentine_limbless_articulated", "serpentine_segmented_paired_legs"):
         skeleton = skeletons[archetype_id]
         branch = next(item for item in skeleton["branches"] if item["branch_id"] == "body")
