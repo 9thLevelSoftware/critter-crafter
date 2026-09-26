@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import click
 from ..config import paths
-from .archetypes import ARCHETYPES, FAMILIES, PRESETS, build_candidate
+from .archetypes import ARCHETYPES, FAMILIES, PRESETS, build_candidate, generate_extras
 from .review import ReviewError, make_receipt, verify_qa
 
 
@@ -43,10 +43,30 @@ def skeleton() -> None:
 @click.option("--seed", type=int, default=1, show_default=True)
 @click.option("--count", type=click.IntRange(1, 6), default=None, help="Maximum selected candidates per family")
 @click.option("--force", is_flag=True, help="Regenerate reviewed candidates as drafts")
-def skeleton_vary(families, archetypes, presets, style, seed, count, force) -> None:
-    """Write 14 curated archetypes x 3 presets by default; keep legacy IDs frozen."""
-    chosen = [a for a in (archetypes or sorted(ARCHETYPES)) if not families or ARCHETYPES[a]["family"] in families]
+@click.option("--extras/--no-extras", default=False, help="Write the 41 extras drafts instead of the original 39")
+def skeleton_vary(families, archetypes, presets, style, seed, count, force, extras) -> None:
+    """Write 13 curated archetypes x 3 presets by default; keep legacy IDs frozen."""
     written = kept = 0
+    if extras:
+        if style != "anatomical":
+            raise click.ClickException("horror+extras is out of scope")
+        docs = generate_extras(seed=seed)
+        if families:
+            docs = [doc for doc in docs if doc["family"] in families]
+        if archetypes:
+            docs = [doc for doc in docs if doc["anatomy"]["archetype_id"] in archetypes]
+        if presets:
+            docs = [doc for doc in docs if doc["provenance"]["preset"] in presets]
+        for doc in docs:
+            path = paths().data / "skeletons" / f"{doc['skeleton_id']}.skeleton.json"
+            if path.exists() and not force and json.loads(path.read_text(encoding="utf-8")).get("status") != "draft":
+                kept += 1
+                continue
+            _write_json(path, doc)
+            written += 1
+        click.echo(f"wrote {written} drafts; preserved {kept} reviewed candidates")
+        return
+    chosen = [a for a in (archetypes or sorted(ARCHETYPES)) if not families or ARCHETYPES[a]["family"] in families]
     per_family: dict[str, int] = {}
     for archetype in chosen:
         family = ARCHETYPES[archetype]["family"]

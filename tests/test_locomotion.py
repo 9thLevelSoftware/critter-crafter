@@ -2,12 +2,22 @@
 
 from __future__ import annotations
 
+import copy
 import pytest
 
 from critter_crafter.config import paths
 from critter_crafter.library.catalog import compile_catalog, load_sources
 from critter_crafter.locomotion import stepper
 from critter_crafter.locomotion.block import cadence_max_hz, support_holds
+
+
+def _without_extras(catalog):
+    result = copy.deepcopy(catalog)
+    result["skeletons"] = [
+        skeleton for skeleton in result["skeletons"]
+        if not skeleton["skeleton_id"].endswith(("_extras_v3", "_armed_v3", "_finned_v3"))
+    ]
+    return result
 
 GAME_SPEED = 2.5
 
@@ -140,4 +150,4 @@ def test_locomotion_golden_matches_current_planner(catalog):
     import json
     from critter_crafter.locomotion.qa import golden_rows
     golden = json.loads((paths().root / "tests" / "golden_v3" / "locomotion.json").read_text(encoding="utf-8"))
-    assert golden["rows"] == json.loads(json.dumps(golden_rows(catalog))), "run `critter recipe golden`"
+    assert golden["rows"] == json.loads(json.dumps(golden_rows(_without_extras(catalog)))), "run `critter recipe golden`"

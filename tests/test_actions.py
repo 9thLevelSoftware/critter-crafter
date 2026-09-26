@@ -200,6 +200,7 @@ def test_belly_hauler_shove_fits_its_low_short_arm_and_remains_meaningful() -> N
     haulers = [
         item for item in _skeletons()
         if item["anatomy"]["archetype_id"] == "dragger_belly_hauler"
+        and not item["skeleton_id"].endswith(("_extras_v3", "_armed_v3", "_finned_v3"))
     ]
     assert len(haulers) == 3
     for skeleton in haulers:

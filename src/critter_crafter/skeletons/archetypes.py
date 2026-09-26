@@ -96,7 +96,8 @@ def _contact_point(kind: str, length: float, fraction: float, girth_m: float) ->
 def _branch(branch_id: str, template: str, parent: str | None, *, origin: list[float], direction: list[float],
             up: list[float], length: float, side: str = "C", attach: int = 0, mirror_of: str = "",
             role: str = "none", phase: float = 0.0, support: float = 0.5, contact: str | None = None,
-            parent_joint: str = "root", gait: dict[str, float] | None = None, profile_id: str | None = None) -> dict[str, Any]:
+            parent_joint: str = "root", gait: dict[str, float] | None = None, profile_id: str | None = None,
+            required: bool = True, optional_fill_pct: int | None = None) -> dict[str, Any]:
     joints = _FRACTIONS[template]
     profile_id = profile_id or _PROFILES[template]
     length = round(length, 4)
@@ -115,7 +116,7 @@ def _branch(branch_id: str, template: str, parent: str | None, *, origin: list[f
         "origin_m": origin, "direction": direction, "up": up, "length_m": length,
         "girth_m": round(length * _PROFILE_GIRTH[profile_id], 4),
         "size_class": "L" if template in {"core1", "spine3"} else "M", "side": side,
-        "required": True, "accepts": {"categories": [category], "templates": [template]},
+        "required": required, "accepts": {"categories": [category], "templates": [template]},
         "connector_size_class": None if role == "core" else "M", "binding_profile_id": profile_id,
         "binding_profile_version": "1.0.0", "socket": {"parent_joint": parent_joint, "position_m": origin,
         "rotation_xyzw": [0.0, 0.0, 0.0, 1.0]},
@@ -125,6 +126,8 @@ def _branch(branch_id: str, template: str, parent: str | None, *, origin: list[f
                   "cadence_hz": 1.5 if role == "locomotor" else 0.0},
         "stance_deg": stance, "stance_z_deg": stance_z,
     }
+    if not required or optional_fill_pct is not None:
+        record["optional_fill_pct"] = int(100 if optional_fill_pct is None else optional_fill_pct)
     if mirror_of:
         record["mirror_of"] = mirror_of
     if contact:
@@ -434,6 +437,197 @@ def _dragger(a: dict[str, Any], h: float, length: float, width: float) -> tuple[
 
 _BUILDERS = {"biped": _biped, "quadruped": _quadruped, "crawler": _crawler, "hexapod": _hexapod, "radial": _radial, "serpentine": _serpentine, "dragger": _dragger}
 
+# Parallel extras series: constants only, never a new _r draw. Not support/locomotor.
+_FAMILY_EXTRAS: dict[str, tuple[str, ...]] = {
+    "biped": ("extra_arm_pair", "back_tentacle"),
+    "quadruped": ("tail", "dorsal"),
+    "crawler": ("dorsal_tentacle",),
+    "hexapod": ("mandibles",),
+    "radial": ("crown",),
+    "serpentine": ("second_tail", "fins"),
+    "dragger": ("stump_pair",),
+}
+_NAMED_EXTRAS = {"armed": ("extra_arm_pair",), "finned": ("fins",)}
+
+
+def _find_branch(branches: list[dict[str, Any]], branch_id: str) -> dict[str, Any]:
+    return next(branch for branch in branches if branch["branch_id"] == branch_id)
+
+
+def _extra(branch_id: str, template: str, parent: str | None, **kwargs: Any) -> dict[str, Any]:
+    kwargs.setdefault("required", False)
+    kwargs.setdefault("optional_fill_pct", 100)
+    kwargs.setdefault("support", 0.0)
+    return _branch(branch_id, template, parent, **kwargs)
+
+
+def _extras_fit(branches: list[dict[str, Any]], incoming: list[dict[str, Any]]) -> bool:
+    next_parts = len(branches) + len(incoming)
+    next_bones = 1 + sum(_FRACTIONS[branch["template"]] for branch in (*branches, *incoming))
+    next_tris = 900 + next_bones * 155
+    return next_parts <= 16 and next_bones <= 120 and next_tris <= 30_000
+
+
+def _rule_extra_arm_pair(branches: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    arm = _find_branch(branches, "arm_L")
+    added: list[dict[str, Any]] = []
+    for side, sx in (("L", 1), ("R", -1)):
+        record = _extra(
+            f"arm2_{side}", "limb3", "core",
+            origin=_v(sx * abs(arm["origin_m"][0]) * 1.25, arm["origin_m"][1], arm["origin_m"][2] - 0.08),
+            direction=[sx * 0.4, -0.8, -0.15], up=[0, 0, 1], length=arm["length_m"],
+            side=side, attach=2, mirror_of="arm2_L" if side == "R" else "",
+            role="manipulator", parent_joint="end", profile_id=arm["binding_profile_id"],
+        )
+        record["stance_deg"] = list(arm["stance_deg"])
+        record["stance_z_deg"] = list(arm["stance_z_deg"])
+        added.append(record)
+    return added
+
+
+def _rule_back_tentacle(branches: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    core = _find_branch(branches, "core")
+    return [_extra(
+        "back", "tentacle8", "core",
+        origin=_v(0, core["origin_m"][1] + core["length_m"] * 0.55, core["origin_m"][2] - 0.08),
+        direction=[0, 0.4, -1], up=[0, 1, 0], length=1.10,
+        attach=1, role="sway", parent_joint="lower",
+    )]
+
+
+def _rule_tail(branches: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    core = _find_branch(branches, "core")
+    return [_extra(
+        "tail", "tentacle8", "core",
+        origin=_v(0, core["origin_m"][1], core["origin_m"][2] - 0.02),
+        direction=[0, 0.25, -1], up=[0, 1, 0], length=1.10,
+        attach=0, role="sway", parent_joint="pelvis",
+    )]
+
+
+def _rule_dorsal(branches: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    core = _find_branch(branches, "core")
+    return [_extra(
+        "dorsal_0", "appendage1", "core",
+        origin=_v(0, core["origin_m"][1] + 0.12, core["origin_m"][2] + core["length_m"] * 0.5),
+        direction=[0, 1, 0], up=[0, 0, 1], length=0.35,
+        attach=1, role="sway", parent_joint="lower",
+    )]
+
+
+def _rule_dorsal_tentacle(branches: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    core = _find_branch(branches, "core")
+    return [_extra(
+        "dorsal", "tentacle8", "core",
+        origin=_v(0, core["origin_m"][1] + 0.08, core["origin_m"][2] + core["length_m"] * 0.5),
+        direction=[0, 1, -0.3], up=[0, 0, 1], length=1.10,
+        attach=0, role="sway", parent_joint="upper",
+    )]
+
+
+def _rule_mandibles(branches: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    core = _find_branch(branches, "core")
+    added: list[dict[str, Any]] = []
+    for side, sx in (("L", 1), ("R", -1)):
+        added.append(_extra(
+            f"mandible_{side}", "appendage1", "core",
+            origin=_v(sx * 0.12, core["origin_m"][1] - 0.04, core["origin_m"][2] + core["length_m"]),
+            direction=[sx * 0.4, -0.2, 1], up=[0, 1, 0], length=0.35,
+            side=side, attach=2, mirror_of="mandible_L" if side == "R" else "",
+            role="manipulator", parent_joint="end",
+        ))
+    return added
+
+
+def _rule_crown(branches: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    core = _find_branch(branches, "core")
+    return [_extra(
+        "crown", "appendage1", "core",
+        origin=_v(core["origin_m"][0], core["origin_m"][1] + core["length_m"], core["origin_m"][2]),
+        direction=[0, 1, 0.2], up=[0, 0, 1], length=0.35,
+        attach=-1, role="head", parent_joint="upper",
+    )]
+
+
+def _rule_second_tail(branches: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    body = _find_branch(branches, "body")
+    return [_extra(
+        "tail_2", "tentacle8", "body",
+        origin=_v(body["origin_m"][0] + 0.08, body["origin_m"][1] + 0.04, body["origin_m"][2]),
+        direction=[0.4, 0.2, -1], up=[0, 1, 0], length=1.10,
+        attach=3, role="sway", parent_joint="seg3",
+    )]
+
+
+def _rule_fins(branches: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    body = _find_branch(branches, "body")
+    added: list[dict[str, Any]] = []
+    for side, sx in (("L", 1), ("R", -1)):
+        added.append(_extra(
+            f"fin_{side}", "appendage1", "body",
+            origin=_v(sx * 0.16, body["origin_m"][1], body["origin_m"][2] + 0.1),
+            direction=[sx, 0.3, -0.4], up=[0, 1, 0], length=0.35,
+            side=side, attach=1, mirror_of="fin_L" if side == "R" else "",
+            role="sway", parent_joint="seg1",
+        ))
+    return added
+
+
+def _rule_stump_pair(branches: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    core = _find_branch(branches, "core")
+    radius = core["girth_m"] * 0.5
+    added: list[dict[str, Any]] = []
+    for side, sx in (("L", 1), ("R", -1)):
+        record = _extra(
+            f"stump_{side}", "limb3", "core",
+            origin=_v(sx * radius * 0.9, core["origin_m"][1] + 0.05, core["origin_m"][2] + 0.04),
+            direction=[sx * 0.25, 0.12, -1], up=[0, 1, 0], length=0.40,
+            side=side, attach=0, mirror_of="stump_L" if side == "R" else "",
+            role="sway", parent_joint="pelvis",
+        )
+        # Plantigrade lower swing_x is [-5, 135]; +8° stance inverts past that floor.
+        record["stance_deg"] = _scaled_stance(record, [-5.0, 8.0, 0.0], 1.0)
+        added.append(record)
+    return added
+
+
+_EXTRAS_RULES = {
+    "extra_arm_pair": _rule_extra_arm_pair,
+    "back_tentacle": _rule_back_tentacle,
+    "tail": _rule_tail,
+    "dorsal": _rule_dorsal,
+    "dorsal_tentacle": _rule_dorsal_tentacle,
+    "mandibles": _rule_mandibles,
+    "crown": _rule_crown,
+    "second_tail": _rule_second_tail,
+    "fins": _rule_fins,
+    "stump_pair": _rule_stump_pair,
+}
+
+
+def _extras_rule_ids(plan: str, extras: bool | str) -> tuple[str, ...]:
+    family_rules = _FAMILY_EXTRAS[plan]
+    if extras is True:
+        return family_rules
+    named = _NAMED_EXTRAS.get(extras if isinstance(extras, str) else "")
+    if named is None:
+        raise ValueError("extras must be False, True, 'armed', or 'finned'")
+    return tuple(rule for rule in named if rule in family_rules)
+
+
+def _apply_optional_branches(
+    a: dict[str, Any],
+    branches: list[dict[str, Any]],
+    supports: list[str],
+    contacts: list[str],
+    extras: bool | str,
+) -> None:
+    """Append budget-gated optional branches. Does not mark them support/locomotor."""
+    for rule_id in _extras_rule_ids(a["plan"], extras):
+        incoming = _EXTRAS_RULES[rule_id](branches)
+        if incoming and _extras_fit(branches, incoming):
+            branches.extend(incoming)
+
 
 def _qmul(a: tuple[float, float, float, float], b: tuple[float, float, float, float]) -> tuple[float, float, float, float]:
     ax, ay, az, aw = a; bx, by, bz, bw = b
@@ -576,7 +770,8 @@ def _align_distributed_supports(branches: list[dict[str, Any]], support_branches
         branch["gait"]["bend_pole_m"][1] = round(branch["gait"]["bend_pole_m"][1] + delta, 4)
 
 
-def build_candidate(archetype: str, preset: str, seed: int = 1, style: str = "anatomical") -> dict[str, Any]:
+def build_candidate(archetype: str, preset: str, seed: int = 1, style: str = "anatomical",
+                    extras: bool | str = False) -> dict[str, Any]:
     """Build one stable v3 draft candidate from a curated archetype and proportion preset."""
     if archetype not in ARCHETYPES:
         raise KeyError(f"unknown archetype: {archetype}")
@@ -584,6 +779,10 @@ def build_candidate(archetype: str, preset: str, seed: int = 1, style: str = "an
         raise KeyError(f"unknown preset: {preset}")
     if style not in {"anatomical", "horror"}:
         raise ValueError("style must be 'anatomical' or 'horror'")
+    if extras not in {False, True, "armed", "finned"}:
+        raise ValueError("extras must be False, True, 'armed', or 'finned'")
+    if extras and style == "horror":
+        raise ValueError("horror+extras is out of scope")
     a = dict(ARCHETYPES[archetype])
     shape = {
         "compact": {"height": .92, "length": .82, "width": 1.12, "limb": .88, "stance": 1.14, "radial": .90},
@@ -599,6 +798,8 @@ def build_candidate(archetype: str, preset: str, seed: int = 1, style: str = "an
         length = a["length"] * shape["length"] * _r(seed, 2)
         width = a["width"] * shape["width"] * _r(seed, 3)
     branches, supports, contacts, symmetry = _BUILDERS[a["plan"]](a, h, length, width)
+    if extras:
+        _apply_optional_branches(a, branches, supports, contacts, extras)
     _scale_stance(branches, shape["stance"])
     if style == "horror":
         _apply_horror_modifier(branches)
@@ -625,17 +826,27 @@ def build_candidate(archetype: str, preset: str, seed: int = 1, style: str = "an
                "silhouette": {"height_m": round(h, 4), "length_m": round(length, 4), "width_m": round(width, 4)},
                "budgets": {"bones": bone_count, "parts": len(branches), "triangles": min(30_000, 900 + bone_count * 155)}}
     style_suffix = "" if style == "anatomical" else "_horror"
+    extras_suffix = "" if extras is False else "_extras" if extras is True else f"_{extras}"
     locomotion = {"biped": "biped", "quadruped": "quadruped", "crawler": "crawl", "hexapod": "crawl",
                   "radial": "crawl", "serpentine": "slither", "dragger": "drag"}[a["plan"]]
-    return {"schema_version": "3.0.0", "skeleton_id": f"{archetype}_{preset}{style_suffix}_v3", "family": a["family"], "locomotion_hint": locomotion, "status": "draft",
+    return {"schema_version": "3.0.0", "skeleton_id": f"{archetype}_{preset}{style_suffix}{extras_suffix}_v3", "family": a["family"], "locomotion_hint": locomotion, "status": "draft",
             "symmetry_pct": 100 if symmetry == "bilateral" else 92, "branches": branches,
             "neutral_pose": _neutral_pose(branches, supports), "anatomy": anatomy, "provenance": {"generator": "cc-gen-3", "seed": seed, "preset": preset}}
 
 
 def generate_all(seed: int = 1, style: str = "anatomical") -> list[dict[str, Any]]:
-    """Return all 14 curated archetypes in each compact/balanced/elongated preset."""
+    """Return all 13 curated archetypes in each compact/balanced/elongated preset."""
     return sorted((build_candidate(archetype, preset, seed=seed, style=style)
                    for archetype in ARCHETYPES for preset in PRESETS), key=lambda candidate: candidate["skeleton_id"])
+
+
+def generate_extras(seed: int = 1) -> list[dict[str, Any]]:
+    """Return 41 anatomical extras drafts: 13×3 *_extras_v3 plus armed and finned named variants."""
+    extras = [build_candidate(archetype, preset, seed=seed, extras=True)
+              for archetype in ARCHETYPES for preset in PRESETS]
+    extras.append(build_candidate("biped_plantigrade_humanoid", "balanced", seed=seed, extras="armed"))
+    extras.append(build_candidate("serpentine_limbless_articulated", "balanced", seed=seed, extras="finned"))
+    return sorted(extras, key=lambda candidate: candidate["skeleton_id"])
 
 
 def write_profiles(directory: Path) -> list[Path]:
