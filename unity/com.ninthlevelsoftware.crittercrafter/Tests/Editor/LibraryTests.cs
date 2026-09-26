@@ -313,6 +313,7 @@ namespace CritterCrafter.Tests
 
             Assert.Greater(metrics.instant_turns, 0, id + ": path must include an instant 180");
             Assert.Greater(metrics.turn_window_frames, 0, id + ": turn window never opened");
+            Assert.IsTrue(metrics.yaw_eased, id + ": yaw lag never fell to 1 deg; a hold is not a settle");
             Assert.Greater(metrics.supports_planted_at_turn, 0, id + ": no supports were planted at the heading change");
             Assert.Less(metrics.supports_lifted_in_turn, metrics.supports_planted_at_turn,
                 id + ": every support planted at the heading change lifted during the ease");

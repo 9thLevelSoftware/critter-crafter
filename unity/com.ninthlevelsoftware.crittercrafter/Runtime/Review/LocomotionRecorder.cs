@@ -34,6 +34,8 @@ namespace CritterCrafter.Review
         public int supports_planted_at_turn;
         /// <summary>Of those, how many lifted during the window (excluding the snap frame).</summary>
         public int supports_lifted_in_turn;
+        /// <summary>True if yaw lag went above 1° after a heading snap and later fell to 1° or below.</summary>
+        public bool yaw_eased;
     }
 
     /// <summary>
@@ -165,6 +167,8 @@ namespace CritterCrafter.Review
             int planted = 0;
             var now = new Dictionary<string, Vector3>();
             if (_turnWindowOpen && Mathf.Abs(_gait.YawLag) > 1f) _sawYawLag = true;
+            if (_sawYawLag && Mathf.Abs(_gait.YawLag) <= 1f)
+                m.yaw_eased = true;
             if (_turnWindowOpen && _sawYawLag && Mathf.Abs(_gait.YawLag) <= 1f)
                 _turnWindowOpen = false;
             bool inTurnWindow = _turnWindowOpen;
