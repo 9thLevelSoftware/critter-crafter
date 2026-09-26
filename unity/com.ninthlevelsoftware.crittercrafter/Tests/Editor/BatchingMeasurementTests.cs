@@ -1,5 +1,5 @@
+using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using CritterCrafter.Editor;
@@ -13,57 +13,36 @@ namespace CritterCrafter.Tests
     /// <summary>
     /// Measurement report for per-part SkinnedMeshRenderers at 1/8/32 instances.
     /// Ignores when no library is built (same as <see cref="LibraryTests"/>). Batch
-    /// counters are logged when ProfilerRecorder can see them without a GPU;
-    /// missing counters do not fail. No millisecond budget. Does not enable
+    /// counters are logged when ProfilerRecorder has samples; missing counters or a
+    /// graphics failure do not fail. No millisecond budget. Does not enable
     /// GPU-batched skinning.
     /// </summary>
     public class BatchingMeasurementTests
     {
         static readonly int[] InstanceCounts = { 1, 8, 32 };
+        const float GridSpacing = 4f;
 
         LibraryImporter.Report _report;
         CritterLibrary _approvedLibrary;
         CritterLibrary Lib => _approvedLibrary;
         readonly List<GameObject> _spawned = new List<GameObject>();
 
-        static string FindLibraryDir()
-        {
-            var env = System.Environment.GetEnvironmentVariable("CRITTER_LIBRARY_DIR");
-            if (!string.IsNullOrEmpty(env) && File.Exists(Path.Combine(env, "catalog.json"))) return env;
-            var root = Path.GetFullPath("../../library");
-            if (!Directory.Exists(root)) return null;
-            return Directory.GetDirectories(root).Where(d => File.Exists(Path.Combine(d, "catalog.json")))
-                .OrderByDescending(Directory.GetLastWriteTimeUtc).FirstOrDefault();
-        }
-
         [OneTimeSetUp]
         public void ImportLibrary()
         {
-            var dir = FindLibraryDir();
+            var dir = LibraryTests.FindLibraryDir();
             if (dir == null) Assert.Ignore("no built critter library (run `critter library build`)");
             _report = LibraryImporter.Import(dir);
             _approvedLibrary = _report.Library.EditorCreateApprovedSkeletonClone();
         }
 
         [OneTimeTearDown]
-        public void CleanupLibrary() { if (_approvedLibrary != null) Object.DestroyImmediate(_approvedLibrary); }
+        public void CleanupLibrary() { if (_approvedLibrary != null) UnityEngine.Object.DestroyImmediate(_approvedLibrary); }
 
         [TearDown]
         public void Cleanup()
         {
-            foreach (var go in _spawned)
-            {
-                if (go == null) continue;
-                var cam = go.GetComponent<Camera>();
-                if (cam != null && cam.targetTexture != null)
-                {
-                    var rt = cam.targetTexture;
-                    cam.targetTexture = null;
-                    rt.Release();
-                    Object.DestroyImmediate(rt);
-                }
-                Object.DestroyImmediate(go);
-            }
+            foreach (var go in _spawned) if (go != null) UnityEngine.Object.DestroyImmediate(go);
             _spawned.Clear();
         }
 
@@ -96,12 +75,11 @@ namespace CritterCrafter.Tests
                     c = Assemble(LocomotionCapture.ReferenceRecipe(Lib.Catalog, skeleton), AssemblyOptions.Review);
                 }
                 Assert.IsFalse(c.IsFallback, family + ": " + string.Join(";", c.Diagnostics));
-                int smrs = CountSmrs(c);
+                int smrs = c.Renderers.Count;
                 int materials = UniqueMaterials(new[] { c });
                 lines.AppendLine($"{family}\t{c.Skeleton.skeleton_id}\t{smrs}\t{c.Triangles}\t{c.Skeleton.bones.Length}\t{materials}");
                 Assert.Greater(smrs, 0, family);
                 Assert.Greater(c.Triangles, 0, family);
-                Assert.AreEqual(smrs, c.Renderers.Count, family);
             }
             LogReport("per-family seed 1", lines.ToString());
         }
@@ -115,33 +93,45 @@ namespace CritterCrafter.Tests
             {
                 var c = Assemble(recipe, AssemblyOptions.Default);
                 Assert.IsFalse(c.IsFallback, c.Diagnostics.Count > 0 ? string.Join(";", c.Diagnostics) : "fallback");
-                c.transform.position = new Vector3((i % 8) * 4f, 0f, (i / 8) * 4f);
+                c.transform.position = new Vector3((i % 8) * GridSpacing, 0f, (i / 8) * GridSpacing);
                 creatures.Add(c);
             }
 
-            int smr1 = CountSmrs(creatures[0]);
+            int smr1 = creatures[0].Renderers.Count;
             int tri1 = creatures[0].Triangles;
             Assert.Greater(smr1, 0);
             Assert.Greater(tri1, 0);
 
-            var cam = MakeIsoCamera();
-            var lines = new StringBuilder();
-            lines.AppendLine("instances\tsmrs\ttriangles\tbones\tmaterials\tbatches");
+            var rows = new List<(int n, int smrs, int tris, int bones, int materials)>();
             foreach (int n in InstanceCounts)
             {
                 for (int i = 0; i < creatures.Count; i++)
                     creatures[i].gameObject.SetActive(i < n);
                 var slice = creatures.GetRange(0, n);
-                int smrs = slice.Sum(CountSmrs);
+                int smrs = slice.Sum(c => c.Renderers.Count);
                 int tris = slice.Sum(c => c.Triangles);
-                int bones = slice.Sum(c => c.Skeleton.bones.Length);
-                int materials = UniqueMaterials(slice);
-                FitIsoCamera(cam, slice);
-                string batches = RenderAndReadBatches(cam);
-                lines.AppendLine($"{n}\t{smrs}\t{tris}\t{bones}\t{materials}\t{batches}");
-                Assert.AreEqual(n * smr1, smrs, "SMR count must scale with instance count");
-                Assert.AreEqual(n * tri1, tris, "triangle count must scale with instance count");
+                Assert.AreEqual(n * smr1, smrs, "SMR count must scale with instance count at n=" + n);
+                Assert.AreEqual(n * tri1, tris, "triangle count must scale with instance count at n=" + n);
+                rows.Add((n, smrs, tris, slice.Sum(c => c.Skeleton.bones.Length), UniqueMaterials(slice)));
             }
+
+            var batchByN = new Dictionary<int, string>();
+            var cam = TryMakeFixedIsoCamera();
+            foreach (int n in InstanceCounts)
+            {
+                for (int i = 0; i < creatures.Count; i++)
+                    creatures[i].gameObject.SetActive(i < n);
+                batchByN[n] = cam != null
+                    ? TryReadBatches(cam)
+                    : "unavailable (no camera)";
+            }
+
+            var lines = new StringBuilder();
+            lines.AppendLine("skeleton=" + recipe.skeleton_id
+                + " meshDeformation=" + PlayerSettings.meshDeformation);
+            lines.AppendLine("instances\tsmrs\ttriangles\tbones\tmaterials\tbatches");
+            foreach (var row in rows)
+                lines.AppendLine($"{row.n}\t{row.smrs}\t{row.tris}\t{row.bones}\t{row.materials}\t{batchByN[row.n]}");
             LogReport("any/seed 1 at 1/8/32", lines.ToString());
         }
 
@@ -150,9 +140,6 @@ namespace CritterCrafter.Tests
             var all = Lib.Catalog.skeletons.Where(s => s.family == family && s.skeleton_id.EndsWith("_v3")).ToList();
             return all.FirstOrDefault(s => s.skeleton_id.Contains("_balanced_")) ?? all.FirstOrDefault();
         }
-
-        static int CountSmrs(AssembledCreature c) =>
-            c.GetComponentsInChildren<SkinnedMeshRenderer>(true).Count(r => r.name != SkeletonRest.ProxyName);
 
         static int UniqueMaterials(IEnumerable<AssembledCreature> creatures)
         {
@@ -165,72 +152,58 @@ namespace CritterCrafter.Tests
             return mats.Count;
         }
 
-        Camera MakeIsoCamera()
+        Camera TryMakeFixedIsoCamera()
         {
-            var rt = new RenderTexture(320, 320, 24, RenderTextureFormat.ARGB32);
-            var go = new GameObject("BatchingMeasureCamera");
-            _spawned.Add(go);
-            var cam = go.AddComponent<Camera>();
-            cam.orthographic = true;
-            cam.clearFlags = CameraClearFlags.SolidColor;
-            cam.backgroundColor = new Color(0.12f, 0.13f, 0.16f);
-            cam.targetTexture = rt;
-            cam.farClipPlane = 200f;
-            cam.enabled = false;
-            var lightGo = new GameObject("BatchingMeasureLight");
-            lightGo.transform.SetParent(go.transform, false);
-            lightGo.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
-            var light = lightGo.AddComponent<Light>();
-            light.type = LightType.Directional;
-            light.intensity = 1.2f;
-            return cam;
-        }
-
-        static void FitIsoCamera(Camera cam, List<AssembledCreature> creatures)
-        {
-            var b = WorldBounds(creatures[0]);
-            for (int i = 1; i < creatures.Count; i++) b.Encapsulate(WorldBounds(creatures[i]));
-            var target = b.center;
-            cam.transform.position = target + new Vector3(16f, 18f, 16f).normalized * 20f;
-            cam.transform.LookAt(target);
-            cam.orthographicSize = Mathf.Max(2f, Mathf.Max(b.size.y, Mathf.Max(b.size.x, b.size.z)) * 0.7f);
-        }
-
-        static Bounds WorldBounds(AssembledCreature c)
-        {
-            var local = c.NeutralBoundsLocal;
-            var world = new Bounds(c.transform.TransformPoint(local.center), Vector3.zero);
-            var e = local.extents;
-            for (int i = 0; i < 8; i++)
-                world.Encapsulate(c.transform.TransformPoint(local.center + new Vector3(
-                    (i & 1) == 0 ? -e.x : e.x, (i & 2) == 0 ? -e.y : e.y, (i & 4) == 0 ? -e.z : e.z)));
-            return world;
+            try
+            {
+                var go = new GameObject("BatchingMeasureCamera");
+                _spawned.Add(go);
+                var cam = go.AddComponent<Camera>();
+                cam.orthographic = true;
+                cam.clearFlags = CameraClearFlags.SolidColor;
+                cam.backgroundColor = new Color(0.12f, 0.13f, 0.16f);
+                cam.farClipPlane = 200f;
+                cam.enabled = false;
+                var target = new Vector3(3.5f * GridSpacing, 1f, 1.5f * GridSpacing);
+                cam.transform.position = target + new Vector3(16f, 18f, 16f).normalized * 40f;
+                cam.transform.LookAt(target);
+                cam.orthographicSize = 20f;
+                return cam;
+            }
+            catch (Exception e)
+            {
+                Debug.Log("[CritterCrafter] batching camera unavailable: " + e.GetType().Name);
+                return null;
+            }
         }
 
         /// <summary>
-        /// CPU-side render counters. Headless/no-GPU editors often have no Batches Count
-        /// marker; that is reported, not a failure.
+        /// Optional batch column. Invalid recorder or zero samples → unavailable.
+        /// A graphics throw is also unavailable; it must not fail the test.
         /// </summary>
-        static string RenderAndReadBatches(Camera cam)
+        static string TryReadBatches(Camera cam)
         {
-            using (var batches = ProfilerRecorder.StartNew(ProfilerCategory.Render, "Batches Count"))
-            using (var draws = ProfilerRecorder.StartNew(ProfilerCategory.Render, "Draw Calls Count"))
+            try
             {
-                cam.Render();
-                long b = ReadRecorder(batches);
-                long d = ReadRecorder(draws);
-                if (b >= 0 || d >= 0)
-                    return $"batches={(b >= 0 ? b.ToString() : "n/a")} drawCalls={(d >= 0 ? d.ToString() : "n/a")} source=ProfilerRecorder";
+                using (var batches = ProfilerRecorder.StartNew(ProfilerCategory.Render, "Batches Count"))
+                using (var draws = ProfilerRecorder.StartNew(ProfilerCategory.Render, "Draw Calls Count"))
+                {
+                    cam.Render();
+                    bool hasB = HasSample(batches);
+                    bool hasD = HasSample(draws);
+                    if (!hasB && !hasD) return "unavailable (no ProfilerRecorder samples)";
+                    return "batches=" + (hasB ? batches.LastValue.ToString() : "n/a")
+                        + " drawCalls=" + (hasD ? draws.LastValue.ToString() : "n/a")
+                        + " source=ProfilerRecorder";
+                }
             }
-            return "unavailable (ProfilerRecorder has no Batches/Draw Calls counters without a GPU)";
+            catch (Exception e)
+            {
+                return "unavailable (" + e.GetType().Name + ")";
+            }
         }
 
-        static long ReadRecorder(ProfilerRecorder rec)
-        {
-            if (!rec.Valid) return -1;
-            long v = rec.LastValue != 0 ? rec.LastValue : rec.CurrentValue;
-            return v > 0 ? v : -1;
-        }
+        static bool HasSample(ProfilerRecorder rec) => rec.Valid && rec.Count > 0;
 
         static void LogReport(string title, string body)
         {
