@@ -1,6 +1,6 @@
 # Runtime locomotion
 
-Creatures move with **runtime foot placement**: the game moves the creature (NavMeshAgent, character controller, script) and the Unity package steps its feet to match. Walk and run are not baked travel clips. Feet stay planted in the world at any speed, follow slopes, and re-step after the instant heading changes of an agent with a huge `angularSpeed`.
+Creatures move with **runtime foot placement**: the game moves `Threat_{id}` (NavMeshAgent, character controller, script) and the Unity package steps the feet of the assembled creature under `Mesh` to match. Walk and run are not baked travel clips. Feet stay planted in the world at any speed, follow slopes, and re-step after the instant heading changes of an agent with a huge `angularSpeed`.
 
 Idle, stun, telegraph, attack, hit and death stay baked clips. Walk and run are one-cycle **overlay** clips (upper body, head, tail, body undulation) whose time is driven by the gait clock, so they stay in step with the footfalls.
 
@@ -63,7 +63,7 @@ The package depends on **Animation Rigging** (a core package in Unity 6). `Critt
   - IK targets sit on the ankle; the foot contact is offset from it in body space.
 - **`CreatureMotion`** keeps its game-facing API (`SetVelocity`, `SetState`, `PlayAttack`, `PlayHit`). Leg weights follow its state: the attack leg is released during telegraph and attack, and every leg fades out at death.
 
-Game integration: move the creature root with the agent (`updatePosition = true`) and leave the feet to `CreatureGait`, which should run after movement (it uses execution order 1000). No root motion is applied. This package wraps the assembled creature under `Threat_{id}/Mesh` via `ThreatHierarchy` (no `NavMeshAgent` in Runtime). Agent wiring belongs in the game, or in the EditMode `FakeThreatFactory` test double.
+Game integration: put `NavMeshAgent` on `Threat_{id}` (`updatePosition = true`) and move that threat root. `ThreatHierarchy.Wrap` parents the assembled creature under `Threat_{id}/Mesh`; do not move the inner `Creature_` transform. Leave the feet to `CreatureGait` on the creature (execution order 1000, after agent movement). No root motion is applied. Runtime does not reference `NavMeshAgent`; agent wiring belongs in the game or in the EditMode `FakeThreatFactory` test double.
 
 ## Review and verification
 

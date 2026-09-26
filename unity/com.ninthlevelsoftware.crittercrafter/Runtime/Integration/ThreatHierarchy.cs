@@ -16,12 +16,22 @@ namespace CritterCrafter
             if (creature == null) throw new ArgumentNullException(nameof(creature));
             if (string.IsNullOrEmpty(threatId)) throw new ArgumentException("threat id is required", nameof(threatId));
 
+            var creatureTransform = creature.transform;
+            var parent = creatureTransform.parent;
+            var localPosition = creatureTransform.localPosition;
+            var localRotation = creatureTransform.localRotation;
+            int layer = creature.gameObject.layer;
+
             var threat = new GameObject("Threat_" + threatId);
+            threat.layer = layer;
+            threat.transform.SetParent(parent, false);
+            threat.transform.localPosition = localPosition;
+            threat.transform.localRotation = localRotation;
+
             var mesh = new GameObject(MeshChildName);
+            mesh.layer = layer;
             mesh.transform.SetParent(threat.transform, false);
 
-            var creatureTransform = creature.transform;
-            threat.transform.SetParent(creatureTransform.parent, false);
             creatureTransform.SetParent(mesh.transform, false);
             return threat;
         }
