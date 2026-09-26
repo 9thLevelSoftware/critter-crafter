@@ -550,7 +550,8 @@ def _reference_parts(skeletons: list[dict[str, Any]]) -> list[dict[str, Any]]:
             if branch["connector_size_class"]:
                 span = mu.r6(min(0.08, length * 0.08))
                 connector_segments = 16 if girth * 0.5 > 0.2 else 12
-                connector_rings = min(10, max(3, CONNECTOR_MAX_TRIANGLES // (2 * connector_segments) - 1))
+                # Envelope samples follow the old 300-tri loft, not the 800 SDF cap.
+                connector_rings = min(10, max(3, 300 // (2 * connector_segments) - 1))
                 connector_thickness = _reference_thickness(
                     skeleton, branch, "connector", -span, span, connector_rings, [0.0, 0.5, 1.0]
                 )

@@ -381,6 +381,13 @@ def apply_results(catalog: dict[str, Any], out: Path, results: list[dict[str, An
             p["asset"] = {"fbx": f"{kind}/{pid}/{pid}.fbx", "glb": f"{kind}/{pid}/{pid}.glb", "triangles": res["triangles"]}
             if res["triangles"] > p["max_triangles"]:
                 problems.append(f"CC_BUDGET_TRIS: {pid}: {res['triangles']} > {p['max_triangles']}")
+            if r["op"] == "connector":
+                if res.get("baker") != "sdf":
+                    problems.append(f"CC_CONNECTOR_BAKER: {pid}: {res.get('baker')}")
+                if (res.get("unweighted", 0) or res.get("max_influences", 0) > 2
+                        or abs(res.get("min_weight_sum", 0) - 1) > 1e-4
+                        or abs(res.get("max_weight_sum", 0) - 1) > 1e-4):
+                    problems.append(f"CC_PART_WEIGHTS: {pid}")
             if r["op"] == "realpart":
                 if res.get("texture"):
                     p["asset"]["albedo_png"] = f"{kind}/{pid}/{pid}_albedo.png"

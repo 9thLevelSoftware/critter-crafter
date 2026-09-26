@@ -59,6 +59,25 @@ def test_connector_pipeline_is_fingerprinted_separately_from_placeholders_and_re
     assert library_commands.connector_pipeline_fingerprint() != library_commands.realpart_pipeline_fingerprint()
 
 
+def test_apply_results_rejects_unweighted_or_non_sdf_connectors(tmp_path):
+    catalog = {
+        "schema_version": "3.0.0", "skeletons": [],
+        "parts": [{"part_id": "c", "category": "connector", "max_triangles": 800, "asset": {}}],
+    }
+    weights = library_commands.apply_results(catalog, tmp_path, [{
+        "ok": True, "op": "connector",
+        "result": {"part_id": "c", "triangles": 10, "baker": "sdf", "unweighted": 1,
+                   "max_influences": 2, "min_weight_sum": 1.0, "max_weight_sum": 1.0},
+    }])
+    assert any("CC_PART_WEIGHTS" in item for item in weights)
+    baker = library_commands.apply_results(catalog, tmp_path, [{
+        "ok": True, "op": "connector",
+        "result": {"part_id": "c", "triangles": 10, "baker": "loft", "unweighted": 0,
+                   "max_influences": 2, "min_weight_sum": 1.0, "max_weight_sum": 1.0},
+    }])
+    assert any("CC_CONNECTOR_BAKER" in item for item in baker)
+
+
 def test_realpart_pipeline_fingerprint_does_not_hash_ops_connector():
     real_before = library_commands.realpart_pipeline_fingerprint()
     part_before = library_commands.part_pipeline_fingerprint()

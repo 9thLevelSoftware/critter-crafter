@@ -7,6 +7,7 @@ import pytest
 from critter_crafter.blender.runner import BlenderError, run_op
 from critter_crafter.config import find_blender
 from critter_crafter.library.commands import _catalog
+from critter_crafter.parts.commands import STRAIN_P99_LIMIT
 
 pytestmark = pytest.mark.blender
 if not find_blender():
@@ -44,10 +45,14 @@ def test_large_girth_connector_respects_triangle_budget_and_normalizes_weights(t
     assert connector["connector_radius_m"] > .2
     assert result["triangles"] <= connector["max_triangles"]
     assert connector["max_triangles"] == 800
+    assert result.get("baker") == "sdf"
     assert result["max_influences"] <= 2
     assert result["bones"] == ["b0", "b1"]
-    assert result["min_weight_sum"] == pytest.approx(1.0)
-    assert result["max_weight_sum"] == pytest.approx(1.0)
+    assert result["unweighted"] == 0
+    assert result["min_weight_sum"] == pytest.approx(1.0, abs=1e-4)
+    assert result["max_weight_sum"] == pytest.approx(1.0, abs=1e-4)
+    assert result["nonmanifold_edges"] == 0
+    assert result["boundary_edges"] == 0
 
 
 def test_limb3_sdf_join_compared_to_loft_at_800(tmp_path):
@@ -58,7 +63,7 @@ def test_limb3_sdf_join_compared_to_loft_at_800(tmp_path):
                    if (profile["binding_profile_id"], profile["binding_profile_version"])
                    == (connector["binding_profile_id"], connector["binding_profile_version"]))
     loft = run_op("placeholder", {
-        "part": connector, "template": profile,
+        "part": connector, "template": profile, "measure_swing": True,
         "out_fbx": str(tmp_path / "loft.fbx"), "out_glb": str(tmp_path / "loft.glb"),
     })["result"]
     sdf = run_op("connector", {
@@ -70,8 +75,18 @@ def test_limb3_sdf_join_compared_to_loft_at_800(tmp_path):
     assert sdf["triangles"] <= 800
     assert sdf["max_influences"] <= 2
     assert sdf["bones"] == ["b0", "b1"]
-    assert sdf["min_weight_sum"] == pytest.approx(1.0)
+    assert sdf["unweighted"] == 0
+    assert sdf["min_weight_sum"] == pytest.approx(1.0, abs=1e-4)
+    assert sdf["max_weight_sum"] == pytest.approx(1.0, abs=1e-4)
     assert sdf.get("baker") == "sdf"
+    assert sdf["nonmanifold_edges"] == 0
+    assert sdf["boundary_edges"] == 0
+    s0, s1 = connector["connector_span_m"]
+    lower, upper = sdf["part_space_bounds_m"]
+    slop = sdf.get("voxel_size", 0.002)
+    assert lower[2] >= s0 - slop
+    assert upper[2] <= s1 + slop
+    assert sdf["swing_strain_p99"] <= max(STRAIN_P99_LIMIT, loft["swing_strain_p99"] * 1.25)
 
 
 def test_actual_assembly_rejects_incompatible_connector_profile(tmp_path):

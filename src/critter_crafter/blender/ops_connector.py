@@ -15,11 +15,10 @@ import bmesh
 import bpy
 
 from . import ops_placeholder, rigkit
-from .frame import to_gltf
+from .frame import to_blender, to_gltf
 
 # Task 1: limb3 plantigrade leg_L (girth 0.2233 m). SDF 748 tris, 0 holes,
 # 0 non-manifold, span-accurate; loft 264 tris faceted collar. SDF is the baker.
-USE_SDF_JOIN = True
 TARGET_SDF_TRIS = 600
 
 
@@ -53,9 +52,8 @@ def _ellipsoid(name: str, z: float, rx: float, ry: float, rz: float, segments: i
     bm = bmesh.new()
     bmesh.ops.create_uvsphere(bm, u_segments=segments, v_segments=max(8, segments // 2), radius=1.0)
     for vert in bm.verts:
-        vert.co.x *= rx
-        vert.co.y = vert.co.y * rz + z
-        vert.co.z *= ry
+        sx, sy, sz = vert.co
+        vert.co = to_blender((sx * rx, sz * ry, sy * rz + z))
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     return _obj_from_bmesh(name, bm)
 
@@ -69,10 +67,7 @@ def _elliptical_cylinder(name: str, z0: float, z1: float, rx: float, ry: float, 
     mid = 0.5 * (z0 + z1)
     for vert in bm.verts:
         x, y, z = vert.co
-        # Cone is along local Z; catalog +Z is Blender +Y.
-        vert.co.x = x * rx
-        vert.co.y = z * length + mid
-        vert.co.z = y * ry
+        vert.co = to_blender((x * rx, y * ry, z * length + mid))
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     return _obj_from_bmesh(name, bm)
 
@@ -106,15 +101,28 @@ def _apply_sdf_union(volumes: list[bpy.types.Object], voxel: float) -> bpy.types
     links.new(boolean.outputs["Grid"], to_mesh.inputs["Grid"])
     links.new(to_mesh.outputs["Mesh"], n_out.inputs[0])
 
-    bm = bmesh.new()
-    bmesh.ops.create_cube(bm, size=0.01)
-    dummy = _obj_from_bmesh("cc_connector_sdf", bm)
-    mod = dummy.modifiers.new("SDF", "NODES")
-    mod.node_group = group
-    rigkit.select_only([dummy])
-    bpy.ops.object.modifier_apply(modifier=mod.name)
-    bpy.data.node_groups.remove(group)
-    return dummy
+    dummy = None
+    try:
+        bm = bmesh.new()
+        bmesh.ops.create_cube(bm, size=0.01)
+        dummy = _obj_from_bmesh("cc_connector_sdf", bm)
+        mod = dummy.modifiers.new("SDF", "NODES")
+        mod.node_group = group
+        rigkit.select_only([dummy])
+        applied = bpy.ops.object.modifier_apply(modifier=mod.name)
+        if "FINISHED" not in applied:
+            raise RuntimeError(f"CC_CONNECTOR_NONMANIFOLD: SDF modifier apply {applied}")
+        tris = rigkit.triangle_count(dummy)
+        if not dummy.data.polygons or (len(dummy.data.vertices) <= 8 and tris <= 12):
+            raise ValueError("CC_CONNECTOR_NONMANIFOLD: SDF union produced no surface")
+        return dummy
+    finally:
+        if dummy is not None:
+            leftover = dummy.modifiers.get("SDF")
+            if leftover is not None:
+                dummy.modifiers.remove(leftover)
+        if group.name in bpy.data.node_groups:
+            bpy.data.node_groups.remove(bpy.data.node_groups[group.name])
 
 
 def _repair(obj: bpy.types.Object, part_id: str) -> dict[str, int]:
@@ -151,12 +159,31 @@ def _decimate(obj: bpy.types.Object, max_triangles: int) -> None:
     mod.ratio = max_triangles / tris
     mod.use_collapse_triangulate = True
     rigkit.select_only([obj])
-    bpy.ops.object.modifier_apply(modifier=mod.name)
+    applied = bpy.ops.object.modifier_apply(modifier=mod.name)
+    if "FINISHED" not in applied:
+        raise RuntimeError(f"CC_CONNECTOR_NONMANIFOLD: decimate apply {applied}")
 
 
 def _axial_weights(obj: bpy.types.Object, span: list[float]) -> list[dict[str, float]]:
     bones = [("b0", span[0], 0.0), ("b1", 0.0, span[1])]
     return [ops_placeholder._weights(to_gltf(vert.co)[2], bones, True, span) for vert in obj.data.vertices]
+
+
+def _group_weight_stats(obj: bpy.types.Object) -> tuple[int, int, float, float]:
+    unweighted = 0
+    max_inf = 0
+    sums: list[float] = []
+    for vert in obj.data.vertices:
+        influences = [group.weight for group in vert.groups if group.weight > 1e-4]
+        if not influences:
+            unweighted += 1
+            sums.append(0.0)
+            continue
+        max_inf = max(max_inf, len(influences))
+        sums.append(sum(influences))
+    if not sums:
+        return 0, 0, 0.0, 0.0
+    return unweighted, max_inf, min(sums), max(sums)
 
 
 def _sdf_mesh(part: dict[str, Any]) -> tuple[bpy.types.Object, list[dict[str, float]], dict[str, Any]]:
@@ -165,7 +192,8 @@ def _sdf_mesh(part: dict[str, Any]) -> tuple[bpy.types.Object, list[dict[str, fl
     rx, ry = _radii(part)
     length = z1 - z0
     voxel = _voxel_size(rx, ry, length, TARGET_SDF_TRIS)
-    rz = min(rx, ry, max(length * 0.2, voxel * 2.0))
+    # Each cap must stay inside [span0, span1]: center ± rz cannot cross the far end.
+    rz = min(rx, ry, 0.5 * length)
     parent = _ellipsoid("cc_parent_cap", z0 + rz, rx, ry, rz)
     child = _ellipsoid("cc_child_cap", z1 - rz, rx, ry, rz)
     tube = _elliptical_cylinder("cc_join_tube", z0, z1, rx, ry)
@@ -185,17 +213,6 @@ def _sdf_mesh(part: dict[str, Any]) -> tuple[bpy.types.Object, list[dict[str, fl
     return obj, weights, stats
 
 
-def _loft_mesh(part: dict[str, Any], template: dict[str, Any]) -> tuple[bpy.types.Object, list[dict[str, float]], dict[str, Any]]:
-    verts, faces, weights = ops_placeholder.build_mesh(part, template)
-    mesh = bpy.data.meshes.new(part["part_id"])
-    mesh.from_pydata(verts, [], faces)
-    mesh.validate()
-    mesh.update()
-    obj = bpy.data.objects.new(part["part_id"], mesh)
-    bpy.context.scene.collection.objects.link(obj)
-    return obj, weights, {"baker": "loft", "nonmanifold_edges": 0, "boundary_edges": 0}
-
-
 def _skin_export(part: dict[str, Any], template: dict[str, Any], obj: bpy.types.Object,
                  weights: list[dict[str, float]], args: dict[str, Any], extra: dict[str, Any]) -> dict[str, Any]:
     for poly in obj.data.polygons:
@@ -211,12 +228,19 @@ def _skin_export(part: dict[str, Any], template: dict[str, Any], obj: bpy.types.
     obj.data.materials.append(rigkit.flesh_material(f"M_{part['part_id']}", part.get("albedo", "#9b6874")))
     groups = {bone["name"]: obj.vertex_groups.new(name=bone["name"]) for bone in bones}
     for index, influence in enumerate(weights):
-        for name, value in influence.items():
-            if value > 1e-4:
-                groups[name].add([index], value, "REPLACE")
+        kept = {name: value for name, value in influence.items() if value > 1e-4}
+        total = sum(kept.values())
+        if not kept or total <= 0:
+            continue
+        for name, value in kept.items():
+            groups[name].add([index], value / total, "REPLACE")
     obj.parent = arm
     mod = obj.modifiers.new("Armature", "ARMATURE")
     mod.object = arm
+    unweighted, max_inf, min_sum, max_sum = _group_weight_stats(obj)
+    if unweighted or max_inf > 2 or abs(min_sum - 1.0) > 1e-4 or abs(max_sum - 1.0) > 1e-4:
+        raise ValueError(f"CC_PART_WEIGHTS: {part['part_id']}")
+    swing = ops_placeholder.swing_strain_p99(arm, obj)
     tris = rigkit.triangle_count(obj)
     part_space = [to_gltf(vert.co) for vert in obj.data.vertices]
     rigkit.export_fbx(args["out_fbx"], [arm, obj], animated=False)
@@ -229,9 +253,11 @@ def _skin_export(part: dict[str, Any], template: dict[str, Any], obj: bpy.types.
         "triangles": tris,
         "vertices": len(obj.data.vertices),
         "bones": [bone["name"] for bone in bones],
-        "max_influences": max((len(w) for w in weights), default=0),
-        "min_weight_sum": min((sum(w.values()) for w in weights), default=0.0),
-        "max_weight_sum": max((sum(w.values()) for w in weights), default=0.0),
+        "unweighted": unweighted,
+        "max_influences": max_inf,
+        "min_weight_sum": min_sum,
+        "max_weight_sum": max_sum,
+        "swing_strain_p99": round(swing, 5),
         "part_space_bounds_m": [
             [min(point[axis] for point in part_space) for axis in range(3)],
             [max(point[axis] for point in part_space) for axis in range(3)],
@@ -247,22 +273,5 @@ def run(args: dict[str, Any]) -> dict[str, Any]:
     if part["category"] != "connector":
         raise ValueError(f"CC_CONNECTOR_CATEGORY: {part['part_id']}")
     rigkit.reset_scene()
-    extra: dict[str, Any] = {}
-    obj: bpy.types.Object | None = None
-    weights: list[dict[str, float]] = []
-    if USE_SDF_JOIN:
-        try:
-            obj, weights, extra = _sdf_mesh(part)
-        except ValueError as exc:
-            if str(exc).startswith("CC_CONNECTOR_NONMANIFOLD"):
-                raise
-            extra = {"baker": "loft", "sdf_error": f"{type(exc).__name__}: {exc}"}
-            obj = None
-        except Exception as exc:
-            extra = {"baker": "loft", "sdf_error": f"{type(exc).__name__}: {exc}"}
-            obj = None
-    if obj is None:
-        loft_obj, weights, loft_extra = _loft_mesh(part, template)
-        extra = {**loft_extra, **{k: v for k, v in extra.items() if k == "sdf_error"}}
-        obj = loft_obj
+    obj, weights, extra = _sdf_mesh(part)
     return _skin_export(part, template, obj, weights, args, extra)

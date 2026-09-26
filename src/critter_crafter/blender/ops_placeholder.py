@@ -207,6 +207,31 @@ def build_mesh(part: dict[str, Any], template: dict[str, Any]) -> tuple[list, li
     return verts, faces, weights
 
 
+def swing_strain_p99(arm: bpy.types.Object, obj: bpy.types.Object, degrees: float = 90.0) -> float:
+    """p99 deformed/bind edge-length ratio after rotating bone b1 about local X."""
+    mesh = obj.data
+    rest = [vert.co.copy() for vert in mesh.vertices]
+    edges = [tuple(edge.vertices) for edge in mesh.edges]
+    rest_len = [(rest[a] - rest[b]).length for a, b in edges]
+    bone = arm.pose.bones["b1"]
+    bone.rotation_mode = "XYZ"
+    saved = bone.rotation_euler.copy()
+    bone.rotation_euler[0] = math.radians(degrees)
+    bpy.context.view_layer.update()
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    evaluated = obj.evaluated_get(depsgraph)
+    deformed = evaluated.to_mesh()
+    pos = [vert.co.copy() for vert in deformed.vertices]
+    evaluated.to_mesh_clear()
+    bone.rotation_euler = saved
+    bpy.context.view_layer.update()
+    ratios = [((pos[a] - pos[b]).length / length) for (a, b), length in zip(edges, rest_len) if length > 1e-7]
+    if not ratios:
+        return 1.0
+    ordered = sorted(ratios)
+    return ordered[min(len(ordered) - 1, max(0, int(round(0.99 * (len(ordered) - 1)))))]
+
+
 def run(args: dict[str, Any]) -> dict[str, Any]:
     part = args["part"]
     template = args["template"]
@@ -236,12 +261,7 @@ def run(args: dict[str, Any]) -> dict[str, Any]:
     mod.object = arm
     tris = rigkit.triangle_count(obj)
     part_space = [to_gltf(vertex) for vertex in verts]
-    rigkit.export_fbx(args["out_fbx"], [arm, obj], animated=False)
-    if args.get("out_glb"):
-        rigkit.export_glb(args["out_glb"], [arm, obj], animated=False)
-    if args.get("out_blend"):
-        rigkit.save_blend(args["out_blend"])
-    return {
+    result = {
         "part_id": part["part_id"],
         "triangles": tris,
         "vertices": len(verts),
@@ -254,3 +274,11 @@ def run(args: dict[str, Any]) -> dict[str, Any]:
             [max(point[axis] for point in part_space) for axis in range(3)],
         ],
     }
+    if args.get("measure_swing"):
+        result["swing_strain_p99"] = round(swing_strain_p99(arm, obj), 5)
+    rigkit.export_fbx(args["out_fbx"], [arm, obj], animated=False)
+    if args.get("out_glb"):
+        rigkit.export_glb(args["out_glb"], [arm, obj], animated=False)
+    if args.get("out_blend"):
+        rigkit.save_blend(args["out_blend"])
+    return result

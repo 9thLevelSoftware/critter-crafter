@@ -33,5 +33,5 @@ def test_reference_connector_uses_its_authored_elliptical_thickness(tmp_path):
     assert result["triangles"] <= part["max_triangles"]
     assert result.get("baker") == "sdf"
     assert result["max_influences"] <= 2
-    assert result["min_weight_sum"] == pytest.approx(1.0)
-    assert result["max_weight_sum"] == pytest.approx(1.0)
+    assert result["min_weight_sum"] == pytest.approx(1.0, abs=1e-4)
+    assert result["max_weight_sum"] == pytest.approx(1.0, abs=1e-4)
