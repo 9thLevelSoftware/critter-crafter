@@ -219,7 +219,7 @@ namespace CritterCrafter.Tests
             // Real Play Mode (Animator + Animation Rigging + skinning exactly as in the game): drive one
             // skeleton per family like an agent at 2.5 m/s (or 90% of its published v_max if slower) over a
             // ground collider for 3 s. Planted feet must stay put, IK must reach and support must hold. The
-            // first second (standing to full speed in one frame, first stride) is excluded from slip.
+            // first five frames (standing to full speed) are excluded from slip.
             EditorSettings.enterPlayModeOptionsEnabled = true;
             EditorSettings.enterPlayModeOptions = EnterPlayModeOptions.DisableDomainReload | EnterPlayModeOptions.DisableSceneReload;
             yield return new EnterPlayMode();
@@ -241,7 +241,7 @@ namespace CritterCrafter.Tests
                 {
                     float speed = Mathf.Min(2.5f, 0.9f * (float)block.v_max_mps);
                     var recorder = holder.AddComponent<LocomotionRecorder>();
-                    recorder.Begin(gait, ReviewCourse.Straight(speed, 3f), new LocomotionMetrics { skeleton_id = id, speed_mps = speed, warmup_frames = 30 });
+                    recorder.Begin(gait, ReviewCourse.Straight(speed, 3f), new LocomotionMetrics { skeleton_id = id, speed_mps = speed, warmup_frames = 5 });
                     while (!recorder.Done)
                     {
                         yield return null;
@@ -257,19 +257,124 @@ namespace CritterCrafter.Tests
             Time.captureFramerate = 0;
             yield return new ExitPlayMode();
 
+            var fails = new List<string>();
             foreach (var (id, block, metrics, hasGait, loco) in results)
             {
-                Assert.IsTrue(hasGait, id + ": runtime-leg skeletons get a CreatureGait");
-                Assert.Less(metrics.max_ik_residual_m, 0.01f, id + ": IK residual");
+                if (!hasGait) { fails.Add(id + ": runtime-leg skeletons get a CreatureGait"); continue; }
+                if (!(metrics.max_ik_residual_m < 0.01f))
+                    fails.Add($"{id}: IK residual {metrics.max_ik_residual_m}");
                 // Dragging at game speed shows up as ~8 cm/frame; allow brief settling (under 2.5 cm in one
                 // frame) when short, fast legs re-step at the edge of their reach.
-                Assert.Less(metrics.max_planted_slip_m, 0.025f, id + ": planted feet slide in the world");
-                if (block.min_support > 0)
-                    Assert.GreaterOrEqual(metrics.min_planted_supports, block.min_support, id + ": support");
-                Assert.LessOrEqual(metrics.cadence_hz, block.cadence_max_hz + 1e-4, id + ": cadence");
-                Assert.IsFalse(metrics.overspeed, id + ": overspeed");
-                Assert.IsTrue(loco, id + ": moving plays the overlay");
+                if (!(metrics.max_planted_slip_m < 0.025f))
+                    fails.Add($"{id}: planted feet slide in the world {metrics.max_planted_slip_m}");
+                if (block.min_support > 0 && metrics.min_planted_supports < block.min_support)
+                    fails.Add($"{id}: support {metrics.min_planted_supports} < {block.min_support}");
+                if (!(metrics.cadence_hz <= block.cadence_max_hz + 1e-4))
+                    fails.Add($"{id}: cadence {metrics.cadence_hz}");
+                if (metrics.overspeed) fails.Add(id + ": overspeed");
+                if (!loco) fails.Add(id + ": moving plays the overlay");
             }
+            Assert.That(fails, Is.Empty, string.Join("\n", fails));
+        }
+
+        [UnityTest]
+        public IEnumerator RuntimeInstantTurnSettlesWithoutShuffle()
+        {
+            // ReviewCourse.Path 180° waypoint (90→270). The snap/replant frame may pop; other planted
+            // frames in the 0.4 s turn window must not shuffle every support.
+            EditorSettings.enterPlayModeOptionsEnabled = true;
+            EditorSettings.enterPlayModeOptions = EnterPlayModeOptions.DisableDomainReload | EnterPlayModeOptions.DisableSceneReload;
+            yield return new EnterPlayMode();
+            Time.captureFramerate = 30;
+            const string id = "hexapod_compact_insect_balanced_v3";
+            var holder = new GameObject("InstantTurnTest");
+            ReviewCourse.Build(holder.transform, new Material(LibraryImporter.DefaultLitShader()) { color = new Color(0.22f, 0.23f, 0.27f) });
+            Physics.SyncTransforms();
+            var c = LocomotionCapture.Spawn(Lib, id, holder.transform, out var restore);
+            var gait = c.GetComponent<CritterCrafter.Locomotion.CreatureGait>();
+            Assert.IsNotNull(gait, id + ": runtime-leg skeletons get a CreatureGait");
+            float speed = Mathf.Min(2.5f, 0.9f * (float)gait.Block.v_max_mps);
+            var recorder = holder.AddComponent<LocomotionRecorder>();
+            recorder.Begin(gait, ReviewCourse.Path(speed), new LocomotionMetrics { skeleton_id = id, speed_mps = speed, warmup_frames = 5 });
+            while (!recorder.Done) yield return null;
+            var metrics = recorder.Metrics;
+            int groups = 0;
+            var seen = new HashSet<int>();
+            foreach (var leg in gait.Legs)
+                if (seen.Add(leg.group)) groups++;
+            Object.Destroy(holder);
+            restore();
+            yield return null;
+            Time.captureFramerate = 0;
+            yield return new ExitPlayMode();
+
+            Assert.Greater(metrics.instant_turns, 0, id + ": path must include an instant 180");
+            Assert.LessOrEqual(metrics.steps_in_turn_window, groups, id + ": turn-window lifts exceed phase groups");
+            Assert.Less(metrics.max_turn_slip_m, 0.025f, id + ": planted feet slide in the turn window");
+        }
+
+        [UnityTest]
+        public IEnumerator RuntimeAttackReleasesIkAndKeepsSupport()
+        {
+            // Walk, then telegraph→attack: the attack-branch IK weight drops; other support feet stay planted.
+            EditorSettings.enterPlayModeOptionsEnabled = true;
+            EditorSettings.enterPlayModeOptions = EnterPlayModeOptions.DisableDomainReload | EnterPlayModeOptions.DisableSceneReload;
+            yield return new EnterPlayMode();
+            Time.captureFramerate = 30;
+            const string id = "hexapod_compact_insect_balanced_v3";
+            var holder = new GameObject("AttackPlantTest");
+            var ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            ground.transform.SetParent(holder.transform, false);
+            ground.transform.localScale = Vector3.one * 10f;
+            Physics.SyncTransforms();
+            var c = LocomotionCapture.Spawn(Lib, id, holder.transform, out var restore);
+            var gait = c.GetComponent<CritterCrafter.Locomotion.CreatureGait>();
+            Assert.IsNotNull(gait, id + ": runtime-leg skeletons get a CreatureGait");
+            var motion = c.GetComponent<CreatureMotion>();
+            if (motion == null) motion = c.gameObject.AddComponent<CreatureMotion>();
+            float speed = (float)gait.Block.v_walk_mps;
+            bool telegraphed = false, attacked = false, sawAttackState = false;
+            float telegraphAt = -1f, minAttackWeight = 1f;
+            var recorder = holder.AddComponent<LocomotionRecorder>();
+            recorder.BeforePlace = t =>
+            {
+                if (!telegraphed && t >= 1f)
+                {
+                    motion.SetState(CreatureState.Telegraph);
+                    telegraphed = true;
+                    telegraphAt = t;
+                }
+                else if (telegraphed && !attacked && t >= telegraphAt + 2f / 30f)
+                {
+                    motion.PlayAttack();
+                    attacked = true;
+                }
+            };
+            recorder.Begin(gait, ReviewCourse.Straight(speed, 2.2f),
+                new LocomotionMetrics { skeleton_id = id, speed_mps = speed, warmup_frames = 30 });
+            while (!recorder.Done)
+            {
+                yield return null;
+                var info = c.Animator.GetCurrentAnimatorStateInfo(0);
+                sawAttackState |= info.IsName("Telegraph") || info.IsName("Attack");
+                if (telegraphed)
+                    foreach (var leg in gait.Legs)
+                        if (leg.attack) minAttackWeight = Mathf.Min(minAttackWeight, leg.weight);
+            }
+            var metrics = recorder.Metrics;
+            bool hasAttackLeg = false;
+            foreach (var leg in gait.Legs) if (leg.attack) hasAttackLeg = true;
+            Object.Destroy(holder);
+            restore();
+            yield return null;
+            Time.captureFramerate = 0;
+            yield return new ExitPlayMode();
+
+            Assert.IsTrue(hasAttackLeg, id + ": attack_branch_id must be a gait leg");
+            Assert.IsTrue(attacked, id + ": attack must play");
+            Assert.Less(minAttackWeight, 0.01f, id + ": attack-leg IK weight should drop");
+            Assert.IsTrue(sawAttackState, id + ": Animator should be in Telegraph or Attack");
+            Assert.Less(metrics.max_planted_slip_m, 0.025f, id + ": support feet slide during attack");
         }
 
         [Test]

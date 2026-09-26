@@ -23,6 +23,11 @@ namespace CritterCrafter.Review
         public int frames;
         /// <summary>Frames at the start (standing to full speed in one frame) excluded from slip.</summary>
         public int warmup_frames;
+        /// <summary>Leg lifts in the 0.4 s after an instant heading snap, excluding the replant itself.</summary>
+        public int steps_in_turn_window;
+        /// <summary>Planted-tip slip in the turn window, excluding the snap/replant frame.</summary>
+        public float max_turn_slip_m;
+        public int instant_turns;
     }
 
     /// <summary>
@@ -46,8 +51,17 @@ namespace CritterCrafter.Review
         int _cell;
         readonly Dictionary<string, Transform> _tips = new Dictionary<string, Transform>();
         readonly Dictionary<string, Vector3> _lastPlanted = new Dictionary<string, Vector3>();
+        readonly Dictionary<string, bool> _wasPlanted = new Dictionary<string, bool>();
         readonly StringBuilder _csv = new StringBuilder("frame,time,speed,residual,slip,planted_supports\n");
         readonly StringBuilder _legCsv = new StringBuilder("frame,leg,planted,forced,ankle_reach_frac,hip_y,foot_x,foot_y,foot_z\n");
+        float _lastHeading;
+        float _turnWindowUntil = -1f;
+        int _lastReplantCount;
+        const float TurnWindowSeconds = 0.4f;
+        const float InstantTurnDeg = 90f;
+
+        /// <summary>Invoked at the start of Update with the new sample time, before the creature is placed.</summary>
+        public Action<float> BeforePlace;
 
         /// <param name="outDir">Frame/metrics folder, or null to measure only.</param>
         public void Begin(CreatureGait gait, List<ReviewCourse.Waypoint> path, LocomotionMetrics metrics,
@@ -83,6 +97,7 @@ namespace CritterCrafter.Review
                 { smr.forceMatrixRecalculationPerRender = true; smr.updateWhenOffscreen = true; }
             Place(0f);
             gait.ResetFeet();
+            _lastReplantCount = gait.ReplantCount;
             _started = true;
         }
 
@@ -91,13 +106,21 @@ namespace CritterCrafter.Review
             ReviewCourse.Sample(_path, time, out var pos, out var heading);
             pos.y = ReviewCourse.GroundY(pos);
             _gait.transform.SetPositionAndRotation(pos, Quaternion.Euler(0f, heading, 0f));
+            _lastHeading = heading;
         }
 
         void Update()
         {
             if (_gait == null || Done) return;
             _time += Time.deltaTime;
+            BeforePlace?.Invoke(_time);
+            float prevHeading = _lastHeading;
             Place(_time);
+            if (Mathf.Abs(Mathf.DeltaAngle(prevHeading, _lastHeading)) > InstantTurnDeg)
+            {
+                Metrics.instant_turns++;
+                _turnWindowUntil = _time + TurnWindowSeconds;
+            }
         }
 
         bool _started;
@@ -130,8 +153,16 @@ namespace CritterCrafter.Review
             float residual = 0f, slip = 0f;
             int planted = 0;
             var now = new Dictionary<string, Vector3>();
+            bool inTurnWindow = _turnWindowUntil >= 0f && _time <= _turnWindowUntil;
+            bool snapFrame = _gait.ReplantCount != _lastReplantCount;
+            _lastReplantCount = _gait.ReplantCount;
             foreach (var leg in _gait.Legs)
             {
+                bool wasPlanted;
+                if (_wasPlanted.TryGetValue(leg.branchId, out wasPlanted) && wasPlanted && !leg.planted
+                    && inTurnWindow && !snapFrame)
+                    m.steps_in_turn_window++;
+                _wasPlanted[leg.branchId] = leg.planted;
                 if (!_tips.TryGetValue(leg.branchId, out var tip) || leg.weight < 0.999f) continue;
                 Vector3 p = tip.position;
                 residual = Mathf.Max(residual, Vector3.Distance(p, leg.position));
@@ -159,7 +190,10 @@ namespace CritterCrafter.Review
             if (_frame > 0)
             {
                 m.max_ik_residual_m = Mathf.Max(m.max_ik_residual_m, residual);
-                if (_frame >= m.warmup_frames) m.max_planted_slip_m = Mathf.Max(m.max_planted_slip_m, slip);
+                // Warmup does not apply inside the turn window; the snap/replant frame is always excluded.
+                bool countSlip = !snapFrame && (_frame >= m.warmup_frames || inTurnWindow);
+                if (countSlip) m.max_planted_slip_m = Mathf.Max(m.max_planted_slip_m, slip);
+                if (inTurnWindow && !snapFrame) m.max_turn_slip_m = Mathf.Max(m.max_turn_slip_m, slip);
                 m.min_planted_supports = Mathf.Min(m.min_planted_supports, planted);
             }
             m.cadence_hz = Mathf.Max(m.cadence_hz, (float)_gait.Current.cadenceHz);

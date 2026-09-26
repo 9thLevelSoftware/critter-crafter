@@ -78,11 +78,10 @@ Game integration: move the creature root with the agent (`updatePosition = true`
 
 - **`critter skeleton qa`** checks every skeleton's locomotion block: speed bands, support at the walk and run duty factors, step rate and stance stroke at the published speeds.
 - **`critter recipe golden`** writes `tests/golden_v3/locomotion.json`. The Unity `StepPlannerGoldenTests` requires the C# `StepPlanner` to match the Python reference (`src/critter_crafter/locomotion/stepper.py`) within 1e-6.
-- **The Unity `RuntimeLegsPlantFeetAtGameSpeed` Play Mode test** runs one skeleton per legged family at 2.5 m/s and checks IK residual, planted slip (after a one-second warmup), support, step rate and the overlay state.
+- **The Unity `RuntimeLegsPlantFeetAtGameSpeed` Play Mode test** runs one skeleton per legged family at 2.5 m/s and checks IK residual, planted slip (after five warmup frames), support, step rate and the overlay state. `RuntimeInstantTurnSettlesWithoutShuffle` covers the Path 180° waypoint (snap/replant frame excluded from slip). `RuntimeAttackReleasesIkAndKeepsSupport` checks that telegraph/attack releases the attack-branch IK while other support feet stay planted.
 
 ## Known limitations
 
-- **Instant agent turns** cause a brief shuffle while re-stepping groups catch up with the smoothed body yaw.
 - **On a 20° ramp,** downhill feet can reach the end of their reach and slide a few centimetres.
-- **Starting from standing to full speed in one frame** can drag a foot during the first stride. Tests allow a one-second warmup.
+- **Starting from standing to full speed in one frame** can clamp a foot on the first frame; tests exclude five warmup frames. A `warmup_frames = 0` run may still see that single-frame residual. Plantigrade quadrupeds at 2.5 m/s (legs already near max reach at home, `min_support` 2) can still show ~5–6 cm planted slip in the first second.
 - **Draggers use placeholder parts,** so the hands read as feet and the head is small. Real parts (M2) will improve the read.
