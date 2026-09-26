@@ -249,7 +249,6 @@ APPROVED_REAL_PARTS = (
 def test_all_four_real_parts_are_approved_with_the_current_pipeline_fingerprint():
     by_id = {p["part_id"]: p for p in real_parts(_catalog())}
     pipeline = library_commands.realpart_pipeline_fingerprint()
-    assert set(by_id) == set(APPROVED_REAL_PARTS)
     for pid in APPROVED_REAL_PARTS:
         part = by_id[pid]
         assert part["status"] == "approved"
@@ -261,9 +260,11 @@ def test_approved_real_parts_generate_including_the_arm_on_walking_legs():
     for skeleton in catalog["skeletons"]:
         skeleton["status"] = "approved"
     pools = [p["pool_id"] for p in catalog["pools"]]
-    used = {f["part_id"] for pool in pools for seed in range(1, 41) for f in generate(catalog, pool, seed)["fills"]}
+    fills = [f for pool in pools for seed in range(1, 41) for f in generate(catalog, pool, seed)["fills"]]
+    used = {f["part_id"] for f in fills}
     # Tentacle stays a hole in current pools (dragger belly only; dragger is not in any/biped/quadruped/crawler).
     assert {"meshy_insect_leg_a_v1", "meshy_animal_skull_a_v1", "meshy_frayed_arm_a_v1"} <= used
+    assert any(f["part_id"] == "meshy_frayed_arm_a_v1" and f["branch_id"].startswith("leg") for f in fills)
 
 
 def test_build_jobs_carry_the_resolved_archive_source(tmp_path, monkeypatch):

@@ -134,8 +134,8 @@ Sides are `symmetric` by default: one mesh serves left and right branches. `--mi
 mirror variant when handedness shows.
 
 Branches accept parts by category, template and profile. There are no tags on the current skeletons,
-so a `limb3_plantigrade` arm also fits plantigrade **leg** branches: bipeds and quadrupeds then walk on
-hands. Give leg branches `accepts.tags_any` (and legs a matching tag) if that's unwanted.
+so a `limb3_plantigrade` arm also fits plantigrade **leg** branches. `meshy_frayed_arm_a_v1` is approved
+as-is, without `tags_any`; recipes may put it on biped and quadruped walking legs.
 
 ## QA
 
