@@ -169,23 +169,6 @@ def _axial_weights(obj: bpy.types.Object, span: list[float]) -> list[dict[str, f
     return [ops_placeholder._weights(to_gltf(vert.co)[2], bones, True, span) for vert in obj.data.vertices]
 
 
-def _group_weight_stats(obj: bpy.types.Object) -> tuple[int, int, float, float]:
-    unweighted = 0
-    max_inf = 0
-    sums: list[float] = []
-    for vert in obj.data.vertices:
-        influences = [group.weight for group in vert.groups if group.weight > 1e-4]
-        if not influences:
-            unweighted += 1
-            sums.append(0.0)
-            continue
-        max_inf = max(max_inf, len(influences))
-        sums.append(sum(influences))
-    if not sums:
-        return 0, 0, 0.0, 0.0
-    return unweighted, max_inf, min(sums), max(sums)
-
-
 def _sdf_mesh(part: dict[str, Any]) -> tuple[bpy.types.Object, list[dict[str, float]], dict[str, Any]]:
     span = list(part["connector_span_m"])
     z0, z1 = float(span[0]), float(span[1])
@@ -237,7 +220,18 @@ def _skin_export(part: dict[str, Any], template: dict[str, Any], obj: bpy.types.
     obj.parent = arm
     mod = obj.modifiers.new("Armature", "ARMATURE")
     mod.object = arm
-    unweighted, max_inf, min_sum, max_sum = _group_weight_stats(obj)
+    unweighted = 0
+    max_inf = 0
+    sums: list[float] = []
+    for vert in obj.data.vertices:
+        influences = [group.weight for group in vert.groups if group.weight > 1e-4]
+        if not influences:
+            unweighted += 1
+            sums.append(0.0)
+            continue
+        max_inf = max(max_inf, len(influences))
+        sums.append(sum(influences))
+    min_sum, max_sum = (min(sums), max(sums)) if sums else (0.0, 0.0)
     if unweighted or max_inf > 2 or abs(min_sum - 1.0) > 1e-4 or abs(max_sum - 1.0) > 1e-4:
         raise ValueError(f"CC_PART_WEIGHTS: {part['part_id']}")
     swing = ops_placeholder.swing_strain_p99(arm, obj)

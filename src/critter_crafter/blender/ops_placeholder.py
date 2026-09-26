@@ -2,7 +2,7 @@
 
 Part space (docs/frame.md): origin = attachment point, +Z along the part, +Y = up reference,
 dimensions_m = [width_x, thickness_y, length_z]. Connector loft geometry remains here as the
-fallback surface for ``ops_connector``; library jobs bake connectors through that op.
+reference mannequin collar; library jobs bake connectors through ``ops_connector``.
 """
 
 from __future__ import annotations
