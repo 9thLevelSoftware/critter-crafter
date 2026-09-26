@@ -238,19 +238,40 @@ def test_tentacle_length_variants_are_draft_appendages_of_the_same_source():
                     assert not part_accepted(part, branch)
 
 
+APPROVED_REAL_PARTS = (
+    "meshy_insect_leg_a_v1",
+    "meshy_animal_skull_a_v1",
+    "meshy_tentacle_a_v1",
+)
+DRAFT_REAL_PARTS = ("meshy_frayed_arm_a_v1",)
+
+
+def test_approved_real_parts_pin_the_current_pipeline_and_the_arm_stays_draft():
+    by_id = {p["part_id"]: p for p in real_parts(_catalog())}
+    pipeline = library_commands.realpart_pipeline_fingerprint()
+    for pid in APPROVED_REAL_PARTS:
+        part = by_id[pid]
+        assert part["status"] == "approved"
+        assert part["real"]["approved_pipeline"] == pipeline
+    arm = by_id["meshy_frayed_arm_a_v1"]
+    assert arm["status"] == "draft"
+    assert "approved_pipeline" not in arm["real"]
+
+
 def test_draft_real_parts_never_generate_but_approved_ones_can():
     catalog = _catalog()
     for skeleton in catalog["skeletons"]:
         skeleton["status"] = "approved"
-    ids = {p["part_id"] for p in real_parts(catalog)}
     pools = [p["pool_id"] for p in catalog["pools"]]
-    drafts = {f["part_id"] for pool in pools for seed in range(1, 41) for f in generate(catalog, pool, seed)["fills"]}
-    assert not drafts & ids
+    used = {f["part_id"] for pool in pools for seed in range(1, 41) for f in generate(catalog, pool, seed)["fills"]}
+    assert not used & set(DRAFT_REAL_PARTS)
+    assert {"meshy_insect_leg_a_v1", "meshy_animal_skull_a_v1"} <= used
     approved = copy.deepcopy(catalog)
     for part in real_parts(approved):
         part["status"] = "approved"
-    used = {f["part_id"] for pool in pools for seed in range(1, 201) for f in generate(approved, pool, seed)["fills"]}
-    assert used & ids
+    used_all = {f["part_id"] for pool in pools for seed in range(1, 201)
+                for f in generate(approved, pool, seed)["fills"]}
+    assert used_all & set(APPROVED_REAL_PARTS)
 
 
 def test_build_jobs_carry_the_resolved_archive_source(tmp_path, monkeypatch):
@@ -492,7 +513,7 @@ def test_build_refuses_approved_parts_whose_pipeline_changed_since_approval(monk
     part_commands.mark_status(source, "approved", "c" * 64)
     compiled = compile_part(copy.deepcopy(source), profiles)
     assert compiled["real"]["approved_pipeline"] == "c" * 64
-    catalog["parts"] = [p for p in catalog["parts"] if p["part_id"] != compiled["part_id"]] + [compiled]
+    catalog["parts"] = [compiled]
     assert library_commands.stale_approvals(catalog) == []
     monkeypatch.setattr(library_commands, "realpart_pipeline_fingerprint", lambda: "d" * 64)
     assert library_commands.stale_approvals(catalog) == [compiled["part_id"]]

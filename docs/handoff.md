@@ -2,7 +2,7 @@
 
 ## Current state (one paragraph)
 
-The v3 skeleton foundation and **runtime foot-placement locomotion** are merged to `main` ([PR #1](https://github.com/9thLevelSoftware/critter-crafter/pull/1)). The library has **13 archetypes × 3 presets = 39 draft skeletons**, all passing QA, and all 39 reach the game's 2.5 m/s. **M2 (real parts) is implemented and waiting on the owner.** Four Meshy scout meshes are fitted into production parts: an insect leg, a frayed arm, an animal skull and a tentacle. All four are built into the library with their textures and pass deformation QA through every clip against the placeholders they replace (see [M2 status](#m2-status-real-parts)). They stay `draft` until the owner reviews the sheets and runs `critter part approve`. EditMode tests assert the Unity texture bind (`_BaseMap`/`_MainTex`, smoothness 0.25) when a built library is present and skip if none is. **Next:** owner review of M2, then **M5** (Synaptic Sea integration).
+The v3 skeleton foundation and **runtime foot-placement locomotion** are merged to `main` ([PR #1](https://github.com/9thLevelSoftware/critter-crafter/pull/1)). The library has **13 archetypes × 3 presets = 39 draft skeletons**, all passing QA, and all 39 reach the game's 2.5 m/s. Four Meshy scout meshes are fitted into production parts: an insect leg, a frayed arm, an animal skull and a tentacle. All four are built into the library with their textures and pass deformation QA through every clip against the placeholders they replace (see [M2 status](#m2-status-real-parts)). **`meshy_insect_leg_a_v1`, `meshy_animal_skull_a_v1` and `meshy_tentacle_a_v1` are `approved`.** `meshy_frayed_arm_a_v1` is still `draft` pending its own pull request (walking-on-hands; no `tags_any`). EditMode tests assert the Unity texture bind (`_BaseMap`/`_MainTex`, smoothness 0.25) when a built library is present and skip if none is. **Next:** owner visual review and approve of the frayed arm, then **M5** (Synaptic Sea integration).
 
 ## What the project is
 
@@ -174,10 +174,10 @@ Status against acceptance:
 
 - **≥3 parts pass QA:** done. `critter part list` shows the verdicts; the reports are in
   `work/review/parts/<id>/qa.json`.
-- **Owner approval:** pending. Open `work/review/parts/<id>/sheet.png` (5 clip frames × 3 skeletons)
-  and `work/parts/<id>/preview.png`, then run `critter part approve <id>`. Approval makes a part
-  generatable, which changes the golden recipes: re-run `recipe golden` and copy the goldens into the
-  Unity package.
+- **Owner approval:** insect leg, skull and tentacle are `approved` (pipeline pin in
+  `real.approved_pipeline`). The frayed arm is still `draft` pending its own pull request. Approving a
+  part makes it generatable, which changes the golden recipes: re-run `recipe golden` and copy the
+  goldens into the Unity package.
 - **Unity import and animation:** EditMode tests assert `asset.albedo_png` is copied and bound to
   `_BaseMap`/`_MainTex` (smoothness 0.25) when a built library is present; they skip if none is.
   Until a part is approved, draft-review assemblies still use the placeholders. To look at a real
