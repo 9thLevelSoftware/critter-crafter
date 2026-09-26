@@ -60323,7 +60323,7 @@
       ],
       "size_class": "",
       "side": "symmetric",
-      "status": "draft",
+      "status": "approved",
       "style_profile": "flesh_stylized_v1",
       "dimensions_m": [
         0.303342,
@@ -60348,7 +60348,8 @@
         "fit": {
           "axis": "-y"
         },
-        "texture_size": 1024
+        "texture_size": 1024,
+        "approved_pipeline": "9a5c52b98cb8dab9966d1d8f74f04c86ceaf51ad988acf9f0c85bb28ddafcbb5"
       },
       "asset": {
         "fbx": "",

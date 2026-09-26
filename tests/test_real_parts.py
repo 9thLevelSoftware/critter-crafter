@@ -242,36 +242,28 @@ APPROVED_REAL_PARTS = (
     "meshy_insect_leg_a_v1",
     "meshy_animal_skull_a_v1",
     "meshy_tentacle_a_v1",
+    "meshy_frayed_arm_a_v1",
 )
-DRAFT_REAL_PARTS = ("meshy_frayed_arm_a_v1",)
 
 
-def test_approved_real_parts_pin_the_current_pipeline_and_the_arm_stays_draft():
+def test_all_four_real_parts_are_approved_with_the_current_pipeline_fingerprint():
     by_id = {p["part_id"]: p for p in real_parts(_catalog())}
     pipeline = library_commands.realpart_pipeline_fingerprint()
+    assert set(by_id) == set(APPROVED_REAL_PARTS)
     for pid in APPROVED_REAL_PARTS:
         part = by_id[pid]
         assert part["status"] == "approved"
         assert part["real"]["approved_pipeline"] == pipeline
-    arm = by_id["meshy_frayed_arm_a_v1"]
-    assert arm["status"] == "draft"
-    assert "approved_pipeline" not in arm["real"]
 
 
-def test_draft_real_parts_never_generate_but_approved_ones_can():
+def test_approved_real_parts_generate_including_the_arm_on_walking_legs():
     catalog = _catalog()
     for skeleton in catalog["skeletons"]:
         skeleton["status"] = "approved"
     pools = [p["pool_id"] for p in catalog["pools"]]
     used = {f["part_id"] for pool in pools for seed in range(1, 41) for f in generate(catalog, pool, seed)["fills"]}
-    assert not used & set(DRAFT_REAL_PARTS)
-    assert {"meshy_insect_leg_a_v1", "meshy_animal_skull_a_v1"} <= used
-    approved = copy.deepcopy(catalog)
-    for part in real_parts(approved):
-        part["status"] = "approved"
-    used_all = {f["part_id"] for pool in pools for seed in range(1, 201)
-                for f in generate(approved, pool, seed)["fills"]}
-    assert used_all & set(APPROVED_REAL_PARTS)
+    # Tentacle stays a hole in current pools (dragger belly only; dragger is not in any/biped/quadruped/crawler).
+    assert {"meshy_insect_leg_a_v1", "meshy_animal_skull_a_v1", "meshy_frayed_arm_a_v1"} <= used
 
 
 def test_build_jobs_carry_the_resolved_archive_source(tmp_path, monkeypatch):

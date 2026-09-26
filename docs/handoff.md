@@ -2,7 +2,7 @@
 
 ## Current state (one paragraph)
 
-The v3 skeleton foundation and **runtime foot-placement locomotion** are merged to `main` ([PR #1](https://github.com/9thLevelSoftware/critter-crafter/pull/1)). The library has **13 archetypes × 3 presets = 39 draft skeletons**, all passing QA, and all 39 reach the game's 2.5 m/s. Four Meshy scout meshes are fitted into production parts: an insect leg, a frayed arm, an animal skull and a tentacle. All four are built into the library with their textures and pass deformation QA through every clip against the placeholders they replace (see [M2 status](#m2-status-real-parts)). **`meshy_insect_leg_a_v1`, `meshy_animal_skull_a_v1` and `meshy_tentacle_a_v1` are `approved`.** `meshy_frayed_arm_a_v1` is still `draft` pending its own pull request (walking-on-hands; no `tags_any`). EditMode tests assert the Unity texture bind (`_BaseMap`/`_MainTex`, smoothness 0.25) when a built library is present and skip if none is. **Next:** owner visual review and approve of the frayed arm, then **M5** (Synaptic Sea integration).
+The v3 skeleton foundation and **runtime foot-placement locomotion** are merged to `main` ([PR #1](https://github.com/9thLevelSoftware/critter-crafter/pull/1)). The library has **13 archetypes × 3 presets = 39 draft skeletons**, all passing QA, and all 39 reach the game's 2.5 m/s. Four Meshy scout meshes are fitted into production parts: an insect leg, a frayed arm, an animal skull and a tentacle. All four are built into the library with their textures and pass deformation QA through every clip against the placeholders they replace (see [M2 status](#m2-status-real-parts)). **All four real parts are `approved`** (pipeline pin in `real.approved_pipeline`), including `meshy_frayed_arm_a_v1` as-is: walking-on-hands is the shipped look (no `tags_any`). EditMode tests assert the Unity texture bind (`_BaseMap`/`_MainTex`, smoothness 0.25) when a built library is present and skip if none is. **Next:** **M5** (Synaptic Sea integration).
 
 ## What the project is
 
@@ -146,9 +146,9 @@ The golden, Unity-test and QA steps fail loudly if skipped.
   - the first stride from standing can drag a foot (tests exclude the first second);
   - see `docs/locomotion.md` → Known limitations.
 - **Dragger refinement.** The owner said "refine later". Placeholder parts make the hands read as feet and the head small. The real arm and skull fit dragger branches, so approving them should help. Possible tuning: `dragSurge`, `dragHeaveDeg`, `dragRollDeg` on `CreatureGait`, and the arm stance in `_dragger`.
-- **Arms fit leg branches.** A `limb3_plantigrade` part matches arm and leg branches alike (no
-  `tags_any` on any branch), so the real arm also becomes humanoid and quadruped legs, walking on
-  hands. Decide whether that's a feature; if not, tag leg branches and ship leg parts.
+- **Walking-on-hands ships.** A `limb3_plantigrade` part matches arm and leg branches alike (no
+  `tags_any` on any branch), so `meshy_frayed_arm_a_v1` also fills humanoid and quadruped **leg**
+  branches. That look is approved as-is.
 - **Pools** (`data/pools/pools.json`) still list only the biped, quadruped and crawler families. Add the new families when the game needs them; this changes the golden recipes.
 - **All 39 skeletons are still `draft`.** `critter skeleton approve` needs a passing `skeleton qa` bound to the current `content_fingerprint`. The 3×4 HTML review bundle is optional spot-check only; a receipt file is not required.
 - **Variety** is still 13 body plans × 3 presets, well below M4's target of at least 80 skeletons. The earlier review suggested optional branches (tails, dorsal parts, extra arms) and wider seeded proportions.
@@ -175,17 +175,15 @@ Status against acceptance:
 
 - **≥3 parts pass QA:** done. `critter part list` shows the verdicts; the reports are in
   `work/review/parts/<id>/qa.json`.
-- **Owner approval:** insect leg, skull and tentacle are `approved` (pipeline pin in
-  `real.approved_pipeline`). The frayed arm is still `draft` pending its own pull request. Approving a
-  part makes it generatable, which changes the golden recipes: re-run `recipe golden` and copy the
-  goldens into the Unity package.
+- **Owner approval:** all four real parts are `approved` (pipeline pin in `real.approved_pipeline`),
+  including the frayed arm as-is (walking-on-hands). Approved parts are generatable: goldens include
+  arm-on-leg fills. Re-run `recipe golden` and copy the goldens into the Unity package after any
+  further approval.
 - **Unity import and animation:** EditMode tests assert `asset.albedo_png` is copied and bound to
   `_BaseMap`/`_MainTex` (smoothness 0.25) when a built library is present; they skip if none is.
-  Until a part is approved, draft-review assemblies still use the placeholders. To look at a real
-  part in Unity before approval, use the mixed creature `critter part review` exports
-  (`work/review/parts/<id>/<skeleton>_mixed.fbx|.glb`): the first reviewed skeleton, with the real
-  part on every accepting branch and all eight clips. The FBX has no texture path, so assign
-  `<id>_albedo.png` from the built library.
+  Draft-review assemblies still use placeholders; production generation uses the approved Meshy
+  parts. Mixed creature `critter part review` exports remain at
+  `work/review/parts/<id>/<skeleton>_mixed.fbx|.glb`.
 
 Not done in M2, by design or for lack of time:
 
