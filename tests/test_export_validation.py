@@ -4,15 +4,21 @@ import copy
 import json
 import math
 import struct
+import sys
 from pathlib import Path
 
 import pytest
 
+from critter_crafter.config import resolve_gltf_validator
 from critter_crafter.library.export_validation import (
+    export_qa_problems,
     matrix_inverse,
     matrix_multiply,
+    run_gltf_validator,
     transform_error,
+    validate_fbx_skin_contract,
     validate_glb_motion,
+    validate_glb_skin_contract,
     validate_glb_surface,
 )
 
@@ -93,7 +99,10 @@ class _GlbBuilder:
     def write(self, path: Path, *, clip_names: tuple[str, ...] = CLIPS, animate_extra: bool = False,
               omit_child_joint: bool = False, surface_y: float | None = None,
               root_end_y: float = 0.0, surface_weight: float = 1.0,
-              root_end_rotation_deg: float = 90.0, bind_nonfinite: bool = False) -> None:
+              root_end_rotation_deg: float = 90.0, bind_nonfinite: bool = False,
+              omit_weights: bool = False, omit_joints: bool = False, omit_skin: bool = False,
+              joint_index: int = 0, empty_joints: bool = False,
+              joints_without_weights: bool = False) -> None:
         times = self.accessor([[0.0], [2 / 30]], "SCALAR", stride_padding=4)
         root_t = self.accessor([[0.0, 0.0, 0.0], [.2, root_end_y, 0.0]], "VEC3")
         root_r = self.accessor([_qz(0), _qz(root_end_rotation_deg)], "VEC4")
@@ -126,22 +135,29 @@ class _GlbBuilder:
             positions = self.accessor([
                 [-.1, surface_y, 0.0], [.1, surface_y, 0.0], [0.0, surface_y, .1]
             ], "VEC3")
-            joints = self.accessor([[0, 0, 0, 0]] * 3, "VEC4", component_type=5121)
-            weights = self.accessor([[surface_weight, 0.0, 0.0, 0.0]] * 3, "VEC4")
+            attributes = {"POSITION": positions}
+            if not omit_joints:
+                attributes["JOINTS_0"] = self.accessor([[joint_index, 0, 0, 0]] * 3, "VEC4",
+                                                       component_type=5121)
+            if not omit_weights:
+                attributes["WEIGHTS_0"] = self.accessor([[surface_weight, 0.0, 0.0, 0.0]] * 3, "VEC4")
+            if joints_without_weights:
+                attributes["JOINTS_1"] = self.accessor([[0, 0, 0, 0]] * 3, "VEC4", component_type=5121)
             mesh_index = 0
-            meshes = [{"primitives": [{"attributes": {
-                "POSITION": positions, "JOINTS_0": joints, "WEIGHTS_0": weights,
-            }}]}]
-        display_node = {"name": "display_mesh", "skin": 0}
+            meshes = [{"primitives": [{"attributes": attributes}]}]
+        display_node = {"name": "display_mesh"}
+        if not omit_skin:
+            display_node["skin"] = 0
         if mesh_index is not None:
             display_node["mesh"] = mesh_index
+        skin_joints: list[int] = [] if empty_joints else ([0] if omit_child_joint else [0, 1])
         document = {
             "asset": {"version": "2.0"}, "scene": 0,
             "scenes": [{"nodes": [0, 2]}],
             "nodes": [{"name": "root", "children": [1]},
                       {"name": "child", "translation": [0.0, 1.0, 0.0]},
                       display_node],
-            "skins": [{"joints": [0] if omit_child_joint else [0, 1], "inverseBindMatrices": inverse_binds}],
+            "skins": [{"joints": skin_joints, "inverseBindMatrices": inverse_binds}],
             "animations": animations, "bufferViews": self.views, "accessors": self.accessors,
             "buffers": [{"byteLength": len(self.binary)}],
         }
@@ -304,3 +320,287 @@ def test_glb_surface_rejects_nonfinite_inverse_bind_animation_and_weights(tmp_pa
         report = validate_glb_surface(path, skeleton, motion)
         assert not report["passed"]
         assert any(code in diagnostic for diagnostic in report["diagnostics"]), report["diagnostics"]
+
+
+def test_glb_skin_contract_rejects_joints_weights_mismatch(tmp_path: Path) -> None:
+    path = tmp_path / "mismatch.glb"
+    _GlbBuilder().write(path, surface_y=.01, omit_weights=True)
+    report = validate_glb_skin_contract(path)
+    assert not report["passed"]
+    assert any("CC_GLB_SURFACE_ATTRIBUTES" in diagnostic for diagnostic in report["diagnostics"])
+
+
+def test_glb_skin_contract_rejects_unpaired_second_influence_set(tmp_path: Path) -> None:
+    path = tmp_path / "unpaired.glb"
+    _GlbBuilder().write(path, surface_y=.01, joints_without_weights=True)
+    report = validate_glb_skin_contract(path)
+    assert not report["passed"]
+    assert any("CC_GLB_SURFACE_ATTRIBUTES" in diagnostic for diagnostic in report["diagnostics"])
+
+
+def test_glb_skin_contract_rejects_negative_and_non_normalized_weights(tmp_path: Path) -> None:
+    path = tmp_path / "negative.glb"
+    _GlbBuilder().write(path, surface_y=.01, surface_weight=-0.2)
+    report = validate_glb_skin_contract(path)
+    assert not report["passed"]
+    assert any("CC_GLB_SURFACE_WEIGHTS" in diagnostic for diagnostic in report["diagnostics"])
+
+
+def test_glb_skin_contract_rejects_bad_joint_index(tmp_path: Path) -> None:
+    path = tmp_path / "joint_index.glb"
+    _GlbBuilder().write(path, surface_y=.01, joint_index=9)
+    report = validate_glb_skin_contract(path)
+    assert not report["passed"]
+    assert any("CC_GLB_SURFACE_JOINT_INDEX" in diagnostic for diagnostic in report["diagnostics"])
+
+
+def test_glb_skin_contract_rejects_missing_skin_root(tmp_path: Path) -> None:
+    missing_skin = tmp_path / "no_skin.glb"
+    _GlbBuilder().write(missing_skin, surface_y=.01, omit_skin=True)
+    report = validate_glb_skin_contract(missing_skin)
+    assert not report["passed"]
+    assert any("CC_GLB_SKIN_ROOT" in diagnostic for diagnostic in report["diagnostics"])
+
+    empty_joints = tmp_path / "empty_joints.glb"
+    _GlbBuilder().write(empty_joints, surface_y=.01, empty_joints=True)
+    report = validate_glb_skin_contract(empty_joints)
+    assert not report["passed"]
+    assert any("CC_GLB_SKIN_ROOT" in diagnostic or "CC_GLB_SURFACE_SKIN" in diagnostic
+               for diagnostic in report["diagnostics"])
+
+
+def test_glb_skin_contract_accepts_normalized_skinned_mesh(tmp_path: Path) -> None:
+    path = tmp_path / "ok.glb"
+    _GlbBuilder().write(path, surface_y=.01)
+    report = validate_glb_skin_contract(path)
+    assert report["passed"], report["diagnostics"]
+    assert report["vertices_checked"] == 3
+
+
+def _write_fbx_node(buf: bytearray, node: dict) -> None:
+    start = len(buf)
+    buf.extend(b"\0" * 12)
+    name = node["name"].encode("ascii")
+    buf.append(len(name))
+    buf.extend(name)
+    props_start = len(buf)
+    for kind, value in node.get("props") or []:
+        buf.append(ord(kind))
+        if kind == "Y":
+            buf.extend(struct.pack("<h", value))
+        elif kind == "C":
+            buf.append(1 if value else 0)
+        elif kind == "I":
+            buf.extend(struct.pack("<i", value))
+        elif kind == "F":
+            buf.extend(struct.pack("<f", value))
+        elif kind == "D":
+            buf.extend(struct.pack("<d", value))
+        elif kind == "L":
+            buf.extend(struct.pack("<q", value))
+        elif kind == "S":
+            raw = value.encode("utf-8") if isinstance(value, str) else value
+            buf.extend(struct.pack("<I", len(raw)))
+            buf.extend(raw)
+        elif kind in "id":
+            fmt = "i" if kind == "i" else "d"
+            packed = struct.pack("<" + fmt * len(value), *value)
+            buf.extend(struct.pack("<III", len(value), 0, len(packed)))
+            buf.extend(packed)
+        else:
+            raise AssertionError(kind)
+    proplen = len(buf) - props_start
+    for child in node.get("children") or []:
+        _write_fbx_node(buf, child)
+    buf.extend(struct.pack("<III", 0, 0, 0) + b"\0")
+    struct.pack_into("<III", buf, start, len(buf), len(node.get("props") or []), proplen)
+
+
+def _write_fbx(path: Path, *, indexes: list[int] | None = None, weights: list[float] | None = None,
+               include_skin: bool = True, include_bone: bool = True,
+               omit_indexes: bool = False, omit_weights: bool = False) -> None:
+    if indexes is None:
+        indexes = [0, 1, 2]
+    if weights is None:
+        weights = [1.0, 1.0, 1.0]
+    verts = [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0]
+    objects = [
+        {"name": "Geometry", "props": [("L", 100), ("S", "mesh\x00\x01Geometry"), ("S", "Mesh")],
+         "children": [{"name": "Vertices", "props": [("d", verts)]}]},
+        {"name": "Model", "props": [("L", 200), ("S", "mesh\x00\x01Model"), ("S", "Mesh")]},
+    ]
+    connections = [{"name": "C", "props": [("S", "OO"), ("L", 100), ("L", 200)]}]
+    if include_skin:
+        objects.append({"name": "Deformer",
+                        "props": [("L", 400), ("S", "Skin\x00\x01Deformer"), ("S", "Skin")]})
+        cluster_children = []
+        if not omit_indexes:
+            cluster_children.append({"name": "Indexes", "props": [("i", indexes)]})
+        if not omit_weights:
+            cluster_children.append({"name": "Weights", "props": [("d", weights)]})
+        objects.append({"name": "Deformer",
+                        "props": [("L", 500), ("S", "Cluster\x00\x01Deformer"), ("S", "Cluster")],
+                        "children": cluster_children})
+        connections.append({"name": "C", "props": [("S", "OO"), ("L", 400), ("L", 100)]})
+        connections.append({"name": "C", "props": [("S", "OO"), ("L", 500), ("L", 400)]})
+        if include_bone:
+            objects.append({"name": "Model",
+                            "props": [("L", 300), ("S", "b0\x00\x01Model"), ("S", "LimbNode")]})
+            connections.append({"name": "C", "props": [("S", "OO"), ("L", 300), ("L", 500)]})
+    buf = bytearray(b"Kaydara FBX Binary  \x00\x1a\x00")
+    buf.extend(struct.pack("<I", 7400))
+    _write_fbx_node(buf, {"name": "Objects", "props": [], "children": objects})
+    _write_fbx_node(buf, {"name": "Connections", "props": [], "children": connections})
+    buf.extend(struct.pack("<III", 0, 0, 0) + b"\0")
+    path.write_bytes(buf)
+
+
+def test_fbx_skin_contract_accepts_normalized_clusters(tmp_path: Path) -> None:
+    path = tmp_path / "ok.fbx"
+    _write_fbx(path)
+    report = validate_fbx_skin_contract(path)
+    assert report["passed"], report["diagnostics"]
+    assert report["vertices_checked"] == 3
+
+
+def test_fbx_skin_contract_rejects_index_weight_mismatch(tmp_path: Path) -> None:
+    path = tmp_path / "mismatch.fbx"
+    _write_fbx(path, indexes=[0, 1, 2], weights=[1.0, 1.0], omit_weights=False)
+    report = validate_fbx_skin_contract(path)
+    assert not report["passed"]
+    assert any("CC_FBX_SKIN_ATTRIBUTES" in diagnostic for diagnostic in report["diagnostics"])
+
+
+def test_fbx_skin_contract_rejects_missing_weights_array(tmp_path: Path) -> None:
+    path = tmp_path / "no_weights.fbx"
+    _write_fbx(path, omit_weights=True)
+    report = validate_fbx_skin_contract(path)
+    assert not report["passed"]
+    assert any("CC_FBX_SKIN_ATTRIBUTES" in diagnostic for diagnostic in report["diagnostics"])
+
+
+def test_fbx_skin_contract_rejects_negative_and_non_normalized_weights(tmp_path: Path) -> None:
+    negative = tmp_path / "negative.fbx"
+    _write_fbx(negative, weights=[-1.0, 1.0, 1.0])
+    report = validate_fbx_skin_contract(negative)
+    assert not report["passed"]
+    assert any("CC_FBX_SKIN_WEIGHTS" in diagnostic for diagnostic in report["diagnostics"])
+
+    denorm = tmp_path / "denorm.fbx"
+    _write_fbx(denorm, weights=[0.5, 0.5, 0.5])
+    report = validate_fbx_skin_contract(denorm)
+    assert not report["passed"]
+    assert any("CC_FBX_SKIN_WEIGHTS" in diagnostic for diagnostic in report["diagnostics"])
+
+
+def test_fbx_skin_contract_rejects_bad_vertex_index(tmp_path: Path) -> None:
+    path = tmp_path / "index.fbx"
+    _write_fbx(path, indexes=[0, 1, 99], weights=[1.0, 1.0, 1.0])
+    report = validate_fbx_skin_contract(path)
+    assert not report["passed"]
+    assert any("CC_FBX_SKIN_JOINT_INDEX" in diagnostic for diagnostic in report["diagnostics"])
+
+
+def test_fbx_skin_contract_rejects_missing_skin_root(tmp_path: Path) -> None:
+    no_skin = tmp_path / "no_skin.fbx"
+    _write_fbx(no_skin, include_skin=False)
+    report = validate_fbx_skin_contract(no_skin)
+    assert not report["passed"]
+    assert any("CC_FBX_SKIN_ROOT" in diagnostic for diagnostic in report["diagnostics"])
+
+    no_bone = tmp_path / "no_bone.fbx"
+    _write_fbx(no_bone, include_bone=False)
+    report = validate_fbx_skin_contract(no_bone)
+    assert not report["passed"]
+    assert any("CC_FBX_SKIN_ROOT" in diagnostic for diagnostic in report["diagnostics"])
+
+
+def test_export_qa_problems_fails_library_assets_on_skin_contract(tmp_path: Path) -> None:
+    glb = tmp_path / "parts" / "p" / "p.glb"
+    fbx = tmp_path / "parts" / "p" / "p.fbx"
+    glb.parent.mkdir(parents=True)
+    _GlbBuilder().write(glb, surface_y=.01, omit_weights=True)
+    _write_fbx(fbx, include_skin=False)
+    catalog = {"skeletons": [], "parts": [{
+        "part_id": "p", "category": "limb",
+        "asset": {"fbx": "parts/p/p.fbx", "glb": "parts/p/p.glb", "triangles": 1},
+    }]}
+    problems = export_qa_problems(catalog, tmp_path)
+    codes = "\n".join(problems)
+    assert "CC_GLB_SURFACE_ATTRIBUTES" in codes
+    assert "CC_FBX_SKIN_ROOT" in codes
+
+    ok_dir = tmp_path / "parts" / "ok"
+    ok_dir.mkdir(parents=True, exist_ok=True)
+    _GlbBuilder().write(ok_dir / "ok.glb", surface_y=.01)
+    _write_fbx(ok_dir / "ok.fbx")
+    ok_catalog = {"skeletons": [], "parts": [{
+        "part_id": "ok", "category": "limb",
+        "asset": {"fbx": "parts/ok/ok.fbx", "glb": "parts/ok/ok.glb", "triangles": 1},
+    }]}
+    assert export_qa_problems(ok_catalog, tmp_path) == []
+
+
+def test_export_qa_problems_fails_on_validator_errors(tmp_path: Path, monkeypatch) -> None:
+    ok_dir = tmp_path / "parts" / "ok"
+    ok_dir.mkdir(parents=True)
+    _GlbBuilder().write(ok_dir / "ok.glb", surface_y=.01)
+    _write_fbx(ok_dir / "ok.fbx")
+    catalog = {"skeletons": [], "parts": [{
+        "part_id": "ok", "category": "limb",
+        "asset": {"fbx": "parts/ok/ok.fbx", "glb": "parts/ok/ok.glb", "triangles": 1},
+    }]}
+    monkeypatch.setattr(
+        "critter_crafter.library.export_validation.run_gltf_validator",
+        lambda *_args, **_kwargs: {"passed": False, "diagnostics": ["CC_GLTF_VALIDATOR: ACCESSOR_WEIGHT_NEGATIVE"]},
+    )
+    problems = export_qa_problems(catalog, tmp_path, validator="gltf_validator")
+    assert any("CC_GLTF_VALIDATOR" in item for item in problems)
+
+
+def test_gltf_validator_errors_fail_and_missing_tool_is_skipped(tmp_path: Path, monkeypatch) -> None:
+    glb = tmp_path / "ok.glb"
+    _GlbBuilder().write(glb, surface_y=.01)
+    report = run_gltf_validator(sys.executable, glb)
+    assert not report["passed"]
+    assert any("CC_GLTF_VALIDATOR" in diagnostic for diagnostic in report["diagnostics"])
+
+    monkeypatch.setattr("critter_crafter.config.find_gltf_validator", lambda: None)
+    monkeypatch.setattr("critter_crafter.config.gltf_validator_expected_sha256", lambda: None)
+    path, status = resolve_gltf_validator()
+    assert path is None
+    assert status is not None and status.startswith("CC_GLTF_VALIDATOR_MISSING")
+
+
+def test_gltf_validator_parses_khronos_error_report(tmp_path: Path, monkeypatch) -> None:
+    glb = tmp_path / "asset.glb"
+    glb.write_bytes(b"not-a-glb")
+    payload = {
+        "issues": {
+            "numErrors": 1,
+            "messages": [{"severity": 0, "code": "GLB_HEADER", "message": "bad header"}],
+        }
+    }
+
+    def fake_run(args, capture_output, text, timeout):
+        class Result:
+            stdout = json.dumps(payload)
+            stderr = ""
+            returncode = 1
+        return Result()
+
+    monkeypatch.setattr("critter_crafter.library.export_validation.subprocess.run", fake_run)
+    report = run_gltf_validator("gltf_validator", glb)
+    assert not report["passed"]
+    assert any("GLB_HEADER" in diagnostic for diagnostic in report["diagnostics"])
+
+
+def test_gltf_validator_hash_mismatch_is_a_build_error(monkeypatch, tmp_path: Path) -> None:
+    binary = tmp_path / "gltf_validator.exe"
+    binary.write_bytes(b"not-the-pinned-binary")
+    monkeypatch.setattr("critter_crafter.config.find_gltf_validator", lambda: str(binary))
+    monkeypatch.setattr("critter_crafter.config.gltf_validator_expected_sha256",
+                        lambda: "0" * 64)
+    path, status = resolve_gltf_validator()
+    assert path is None
+    assert status is not None and status.startswith("CC_GLTF_VALIDATOR_HASH")

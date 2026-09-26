@@ -132,7 +132,7 @@ namespace CritterCrafter.Editor
                         report.Problems.Add($"triangle mismatch {p.part_id}: unity {CreatureAssembler.TriangleCount(smr.sharedMesh)} catalog {p.asset.triangles}");
                     if (smr.sharedMesh.subMeshCount > 2 || smr.sharedMesh.subMeshCount > p.max_material_slots)
                         report.Problems.Add($"material slots {p.part_id}: {smr.sharedMesh.subMeshCount}>{Math.Min(2, p.max_material_slots)}");
-                    if (p.category == "connector") ValidateConnectorMesh(p, smr, report.Problems);
+                    ValidateSkinnedPartMesh(p, smr, report.Problems);
                 }
                 int materialCount = smr?.sharedMesh == null ? 1 : Math.Max(1, smr.sharedMesh.subMeshCount);
                 var materials = new Material[materialCount];
@@ -201,28 +201,52 @@ namespace CritterCrafter.Editor
             return problems;
         }
 
-        static void ValidateConnectorMesh(PartData part, SkinnedMeshRenderer renderer, List<string> problems)
+        static void ValidateSkinnedPartMesh(PartData part, SkinnedMeshRenderer renderer, List<string> problems)
         {
-            var spec = part.connector_interface;
-            if (spec == null) { problems.Add("connector interface missing " + part.part_id); return; }
-            var names = renderer.bones.Select(b => b.name).ToArray();
-            if (names.Length != 2 || names[0] != "b0" || names[1] != "b1")
+            bool connector = part.category == "connector";
+            if (connector && part.connector_interface == null)
+            { problems.Add("connector interface missing " + part.part_id); return; }
+            var names = renderer.bones == null ? Array.Empty<string>() : renderer.bones.Select(b => b.name).ToArray();
+            bool namedChain = names.Length > 0 && names.SequenceEqual(Enumerable.Range(0, names.Length).Select(i => "b" + i));
+            if (connector && (names.Length != 2 || names[0] != "b0" || names[1] != "b1"))
                 problems.Add($"connector bones {part.part_id}: {string.Join(",", names)}");
+            else if (!connector && !namedChain)
+                problems.Add($"part bones {part.part_id}: {string.Join(",", names)}");
+            int maxInfluences = connector ? part.connector_interface.max_influences : 4;
+            string kind = connector ? "connector" : "part";
             try
             {
-                foreach (var weight in renderer.sharedMesh.boneWeights)
+                var mesh = renderer.sharedMesh;
+                if (mesh == null) { problems.Add($"{kind} mesh missing {part.part_id}"); return; }
+                foreach (var weight in mesh.boneWeights)
                 {
+                    if (weight.weight0 < 0f || weight.weight1 < 0f || weight.weight2 < 0f || weight.weight3 < 0f)
+                    {
+                        problems.Add($"{kind} weights {part.part_id}: negative");
+                        break;
+                    }
                     int influences = (weight.weight0 > 0f ? 1 : 0) + (weight.weight1 > 0f ? 1 : 0)
                         + (weight.weight2 > 0f ? 1 : 0) + (weight.weight3 > 0f ? 1 : 0);
                     float total = weight.weight0 + weight.weight1 + weight.weight2 + weight.weight3;
-                    if (influences > spec.max_influences || Mathf.Abs(total - 1f) > 1e-4f)
+                    int[] indices = { weight.boneIndex0, weight.boneIndex1, weight.boneIndex2, weight.boneIndex3 };
+                    float[] values = { weight.weight0, weight.weight1, weight.weight2, weight.weight3 };
+                    bool badIndex = false;
+                    for (int i = 0; i < 4; i++)
+                        if (values[i] > 0f && (indices[i] < 0 || indices[i] >= names.Length))
+                        { badIndex = true; break; }
+                    if (badIndex)
                     {
-                        problems.Add($"connector weights {part.part_id}: influences={influences} sum={total:F6}");
+                        problems.Add($"{kind} weights {part.part_id}: joint index");
+                        break;
+                    }
+                    if (influences > maxInfluences || Mathf.Abs(total - 1f) > 1e-4f)
+                    {
+                        problems.Add($"{kind} weights {part.part_id}: influences={influences} sum={total:F6}");
                         break;
                     }
                 }
             }
-            catch (UnityException e) { problems.Add($"connector weights unreadable {part.part_id}: {e.Message}"); }
+            catch (UnityException e) { problems.Add($"{kind} weights unreadable {part.part_id}: {e.Message}"); }
         }
 
         static void ValidateCatalogContract(CatalogData catalog, List<string> problems, bool requireBuiltAssets)

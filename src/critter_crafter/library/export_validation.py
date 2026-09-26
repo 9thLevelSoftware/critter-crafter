@@ -1,9 +1,11 @@
-"""Read GLB skin rest information independently of node animation poses."""
+"""Read GLB/FBX skin rest information independently of node animation poses."""
 from __future__ import annotations
 import bisect
 import json
 import math
 import struct
+import subprocess
+import zlib
 from pathlib import Path
 from typing import Any
 from .. import mathutil as mu
@@ -832,3 +834,525 @@ def validate_glb_export(path: Path, skeleton: dict, motion: dict | None = None) 
         return {"passed": rest["passed"], "rest": rest}
     animation = validate_glb_motion(path, skeleton, motion)
     return {"passed": rest["passed"] and animation["passed"], "rest": rest, "motion": animation}
+
+
+def _report_once(diagnostics: list[str], code: str, detail: str) -> None:
+    prefix = code + ":"
+    if not any(item == code or item.startswith(prefix) for item in diagnostics):
+        diagnostics.append(f"{code}: {detail}")
+
+
+def _reaches_node(root: int, joint: int, parents: dict[int, int]) -> bool:
+    seen: set[int] = set()
+    index: int | None = joint
+    while index is not None and index not in seen:
+        if index == root:
+            return True
+        seen.add(index)
+        index = parents.get(index)
+    return False
+
+
+def _glb_skin_root_ok(skin: dict[str, Any], nodes: list[dict[str, Any]],
+                      parents: dict[int, int], diagnostics: list[str], label: str) -> None:
+    joints = skin.get("joints")
+    if not isinstance(joints, list) or not joints:
+        _report_once(diagnostics, "CC_GLB_SKIN_ROOT", f"{label}: missing joints")
+        return
+    try:
+        joint_indices = [int(value) for value in joints]
+    except (TypeError, ValueError):
+        _report_once(diagnostics, "CC_GLB_SKIN_ROOT", f"{label}: invalid joints")
+        return
+    if any(not 0 <= joint < len(nodes) for joint in joint_indices):
+        _report_once(diagnostics, "CC_GLB_SKIN_ROOT", f"{label}: joint out of range")
+        return
+    ancestor_sets: list[set[int]] = []
+    for joint in joint_indices:
+        seen: list[int] = []
+        index: int | None = joint
+        while index is not None and index not in seen:
+            seen.append(index)
+            index = parents.get(index)
+        ancestor_sets.append(set(seen))
+    common = set.intersection(*ancestor_sets) if ancestor_sets else set()
+    if "skeleton" in skin:
+        try:
+            root = int(skin["skeleton"])
+        except (TypeError, ValueError):
+            _report_once(diagnostics, "CC_GLB_SKIN_ROOT", f"{label}: {skin.get('skeleton')}")
+            return
+        if not 0 <= root < len(nodes) or not all(_reaches_node(root, joint, parents) for joint in joint_indices):
+            _report_once(diagnostics, "CC_GLB_SKIN_ROOT", f"{label}: {root}")
+        return
+    if not common:
+        _report_once(diagnostics, "CC_GLB_SKIN_ROOT", f"{label}: missing")
+
+
+def validate_glb_skin_contract(path: Path, *, max_influences: int = 4) -> dict:
+    """Always-on GLB skin gate: JOINTS/WEIGHTS pairing, weights, joint indices, skin root."""
+    diagnostics: list[str] = []
+    try:
+        document, binary = read_glb(path)
+    except ValueError as exc:
+        return {"passed": False, "diagnostics": [str(exc)], "max_influences": 0, "vertices_checked": 0}
+    nodes = document.get("nodes", [])
+    meshes = document.get("meshes", [])
+    skins = document.get("skins", [])
+    try:
+        parents = _node_parents(nodes)
+    except ValueError as exc:
+        parents = {}
+        diagnostics.append(str(exc))
+
+    observed_influences = 0
+    vertices_checked = 0
+    skinned_meshes = 0
+    for node_index, node in enumerate(nodes):
+        if "mesh" not in node:
+            continue
+        label = f"node {node_index}"
+        if "skin" not in node:
+            _report_once(diagnostics, "CC_GLB_SKIN_ROOT", f"{label}: mesh without skin")
+            continue
+        try:
+            mesh_index, skin_index = int(node["mesh"]), int(node["skin"])
+            mesh, skin = meshes[mesh_index], skins[skin_index]
+            joints = [int(value) for value in skin["joints"]]
+            if not joints or any(not 0 <= joint < len(nodes) for joint in joints):
+                raise ValueError("CC_GLB_SURFACE_JOINTS")
+        except (KeyError, IndexError, TypeError, ValueError) as exc:
+            diagnostics.append(f"CC_GLB_SURFACE_SKIN: {label}: {exc}")
+            continue
+        skinned_meshes += 1
+        _glb_skin_root_ok(skin, nodes, parents, diagnostics, label)
+
+        for primitive_index, primitive in enumerate(mesh.get("primitives", [])):
+            prim_label = f"{label} primitive {primitive_index}"
+            attributes = primitive.get("attributes", {})
+            try:
+                position_index = int(attributes["POSITION"])
+                positions = _read_accessor(document, binary, position_index)
+                if "indices" in primitive:
+                    used_indices = sorted({int(value[0]) for value in _read_accessor(
+                        document, binary, int(primitive["indices"])
+                    )})
+                else:
+                    used_indices = list(range(len(positions)))
+                if any(not 0 <= index < len(positions) for index in used_indices):
+                    raise ValueError("CC_GLB_SURFACE_INDEX_RANGE")
+            except (KeyError, IndexError, TypeError, ValueError) as exc:
+                diagnostics.append(f"CC_GLB_SURFACE_PRIMITIVE: {prim_label}: {exc}")
+                continue
+
+            influence_sets = []
+            for set_index in (0, 1):
+                joints_key, weights_key = f"JOINTS_{set_index}", f"WEIGHTS_{set_index}"
+                if joints_key not in attributes and weights_key not in attributes:
+                    continue
+                if joints_key not in attributes or weights_key not in attributes:
+                    diagnostics.append(f"CC_GLB_SURFACE_ATTRIBUTES: {prim_label}: {joints_key}/{weights_key}")
+                    influence_sets = []
+                    break
+                try:
+                    joints_index, weights_index = int(attributes[joints_key]), int(attributes[weights_key])
+                    joints_accessor, weights_accessor = (
+                        document["accessors"][joints_index], document["accessors"][weights_index]
+                    )
+                    if (joints_accessor.get("type") != "VEC4" or
+                            joints_accessor.get("componentType") not in {5121, 5123} or
+                            joints_accessor.get("normalized", False)):
+                        raise ValueError("CC_GLB_SURFACE_JOINT_FORMAT")
+                    if (weights_accessor.get("type") != "VEC4" or
+                            weights_accessor.get("componentType") not in {5121, 5123, 5126} or
+                            (weights_accessor.get("componentType") != 5126 and
+                             not weights_accessor.get("normalized", False))):
+                        raise ValueError("CC_GLB_SURFACE_WEIGHT_FORMAT")
+                    joint_values = _read_accessor(document, binary, joints_index)
+                    weight_values = _read_accessor(document, binary, weights_index)
+                    if len(joint_values) != len(positions) or len(weight_values) != len(positions):
+                        raise ValueError("CC_GLB_SURFACE_ATTRIBUTE_COUNT")
+                    influence_sets.append((joint_values, weight_values))
+                except (KeyError, IndexError, TypeError, ValueError) as exc:
+                    diagnostics.append(f"CC_GLB_SURFACE_ATTRIBUTES: {prim_label}: {exc}")
+                    influence_sets = []
+                    break
+            if not influence_sets:
+                _report_once(diagnostics, "CC_GLB_SURFACE_ATTRIBUTES", f"{prim_label}: missing skin influences")
+                continue
+
+            for vertex_index in used_indices:
+                vertices_checked += 1
+                weight_sum = 0.0
+                influences = 0
+                for joint_values, weight_values in influence_sets:
+                    for joint_value, weight_value in zip(
+                        joint_values[vertex_index], weight_values[vertex_index], strict=True
+                    ):
+                        weight = float(weight_value)
+                        if not math.isfinite(weight) or weight < 0:
+                            _report_once(diagnostics, "CC_GLB_SURFACE_WEIGHTS",
+                                         f"{prim_label}: invalid vertex weight")
+                            continue
+                        if weight <= 1e-8:
+                            continue
+                        joint_slot = int(joint_value)
+                        if not 0 <= joint_slot < len(joints):
+                            _report_once(diagnostics, "CC_GLB_SURFACE_JOINT_INDEX",
+                                         f"{prim_label}: {joint_slot}")
+                            continue
+                        influences += 1
+                        weight_sum += weight
+                if influences == 0:
+                    _report_once(diagnostics, "CC_GLB_SURFACE_WEIGHTS", f"{prim_label}: unweighted vertex")
+                if abs(weight_sum - 1.0) > 1e-4:
+                    _report_once(diagnostics, "CC_GLB_SURFACE_WEIGHTS", f"{prim_label}: sum={weight_sum:.7f}")
+                if influences > max_influences:
+                    _report_once(diagnostics, "CC_GLB_SURFACE_INFLUENCES",
+                                 f"{prim_label}: {influences} > {max_influences}")
+                observed_influences = max(observed_influences, influences)
+    if skinned_meshes == 0:
+        _report_once(diagnostics, "CC_GLB_SKIN_ROOT", "no skinned mesh")
+    return {
+        "passed": not diagnostics,
+        "max_influences": observed_influences,
+        "vertices_checked": vertices_checked,
+        "diagnostics": diagnostics,
+    }
+
+
+_FBX_MAGIC = b"Kaydara FBX Binary  \x00\x1a\x00"
+
+
+def _read_fbx_prop(data: bytes, offset: int) -> tuple[Any, int]:
+    if offset >= len(data):
+        raise ValueError("CC_FBX_HEADER")
+    code = chr(data[offset])
+    offset += 1
+    if code == "Y":
+        return struct.unpack_from("<h", data, offset)[0], offset + 2
+    if code == "C":
+        return data[offset] != 0, offset + 1
+    if code == "I":
+        return struct.unpack_from("<i", data, offset)[0], offset + 4
+    if code == "F":
+        return struct.unpack_from("<f", data, offset)[0], offset + 4
+    if code == "D":
+        return struct.unpack_from("<d", data, offset)[0], offset + 8
+    if code == "L":
+        return struct.unpack_from("<q", data, offset)[0], offset + 8
+    if code in "RS":
+        length = struct.unpack_from("<I", data, offset)[0]
+        offset += 4
+        raw = data[offset:offset + length]
+        offset += length
+        if code == "S":
+            return raw.decode("utf-8", "replace"), offset
+        return raw, offset
+    if code in "cdilfb":
+        count, encoding, length = struct.unpack_from("<III", data, offset)
+        offset += 12
+        blob = data[offset:offset + length]
+        offset += length
+        if encoding == 1:
+            blob = zlib.decompress(blob)
+        fmt = {"c": "?", "b": "b", "i": "i", "l": "q", "f": "f", "d": "d"}[code]
+        size = struct.calcsize("<" + fmt)
+        if len(blob) < count * size:
+            raise ValueError("CC_FBX_HEADER")
+        return list(struct.unpack_from("<" + fmt * count, blob)), offset
+    raise ValueError(f"CC_FBX_PROP: {code}")
+
+
+def _read_fbx_node(data: bytes, offset: int, large: bool) -> tuple[dict[str, Any] | None, int]:
+    header = 25 if large else 13
+    if offset + header > len(data):
+        raise ValueError("CC_FBX_HEADER")
+    if large:
+        end, nprops, proplen = struct.unpack_from("<QQQ", data, offset)
+        namelen = data[offset + 24]
+        offset += 25
+    else:
+        end, nprops, proplen = struct.unpack_from("<III", data, offset)
+        namelen = data[offset + 12]
+        offset += 13
+    if end == 0 and nprops == 0 and proplen == 0 and namelen == 0:
+        return None, offset
+    name = data[offset:offset + namelen].decode("ascii", "replace")
+    offset += namelen
+    props_end = offset + proplen
+    props = []
+    for _ in range(nprops):
+        value, offset = _read_fbx_prop(data, offset)
+        props.append(value)
+    offset = props_end
+    children = []
+    while offset < end:
+        child, offset = _read_fbx_node(data, offset, large)
+        if child is None:
+            break
+        children.append(child)
+    return {"name": name, "props": props, "children": children}, end
+
+
+def read_fbx(path: Path) -> list[dict[str, Any]]:
+    data = path.read_bytes()
+    if not data.startswith(_FBX_MAGIC):
+        raise ValueError(f"CC_FBX_HEADER: {path}")
+    version = struct.unpack_from("<I", data, 23)[0]
+    offset = 27
+    large = version >= 7500
+    nodes = []
+    while offset < len(data):
+        node, offset = _read_fbx_node(data, offset, large)
+        if node is None:
+            break
+        nodes.append(node)
+    return nodes
+
+
+def _fbx_child(node: dict[str, Any], name: str) -> dict[str, Any] | None:
+    for child in node.get("children") or []:
+        if child["name"] == name:
+            return child
+    return None
+
+
+def _fbx_id(node: dict[str, Any]) -> int | None:
+    props = node.get("props") or []
+    if props and isinstance(props[0], int):
+        return int(props[0])
+    return None
+
+
+def _fbx_subtype(node: dict[str, Any]) -> str:
+    props = node.get("props") or []
+    if len(props) > 2 and isinstance(props[2], str):
+        return props[2]
+    return ""
+
+
+def validate_fbx_skin_contract(path: Path, *, max_influences: int = 4) -> dict:
+    """Always-on FBX skin gate: cluster Indexes/Weights, weights, joint indices, skin root."""
+    diagnostics: list[str] = []
+    try:
+        roots = read_fbx(path)
+    except ValueError as exc:
+        return {"passed": False, "diagnostics": [str(exc)], "max_influences": 0, "vertices_checked": 0}
+
+    objects = next((node for node in roots if node["name"] == "Objects"), None)
+    connections = next((node for node in roots if node["name"] == "Connections"), None)
+    if objects is None:
+        return {"passed": False, "diagnostics": ["CC_FBX_SKIN_ROOT: missing Objects"],
+                "max_influences": 0, "vertices_checked": 0}
+
+    by_id: dict[int, dict[str, Any]] = {}
+    for node in objects.get("children") or []:
+        identity = _fbx_id(node)
+        if identity is not None:
+            by_id[identity] = node
+
+    child_of: dict[int, list[int]] = {}
+    parent_of: dict[int, list[int]] = {}
+    for node in (connections.get("children") if connections else []) or []:
+        if node["name"] != "C":
+            continue
+        props = node.get("props") or []
+        if len(props) < 3 or not isinstance(props[1], int) or not isinstance(props[2], int):
+            continue
+        child, parent = int(props[1]), int(props[2])
+        child_of.setdefault(parent, []).append(child)
+        parent_of.setdefault(child, []).append(parent)
+
+    def linked(a: int, b: int) -> bool:
+        return b in child_of.get(a, []) or a in child_of.get(b, [])
+
+    geometries = [node for node in objects.get("children") or [] if node["name"] == "Geometry"]
+    skins = [node for node in objects.get("children") or []
+             if node["name"] == "Deformer" and _fbx_subtype(node) == "Skin"]
+    clusters = [node for node in objects.get("children") or []
+                if node["name"] == "Deformer" and _fbx_subtype(node) == "Cluster"]
+    limbs = [node for node in objects.get("children") or []
+             if node["name"] == "Model" and _fbx_subtype(node) == "LimbNode"]
+    limb_ids = {identity for node in limbs if (identity := _fbx_id(node)) is not None}
+
+    observed_influences = 0
+    vertices_checked = 0
+    if not geometries:
+        _report_once(diagnostics, "CC_FBX_SKIN_ROOT", "missing Geometry")
+        return {"passed": False, "diagnostics": diagnostics, "max_influences": 0, "vertices_checked": 0}
+
+    for geometry in geometries:
+        geo_id = _fbx_id(geometry)
+        vertices_node = _fbx_child(geometry, "Vertices")
+        vertex_values = vertices_node["props"][0] if vertices_node and vertices_node.get("props") else []
+        vertex_count = (len(vertex_values) // 3) if isinstance(vertex_values, list) else 0
+        bound_skins = [skin for skin in skins if geo_id is not None and linked(int(_fbx_id(skin) or -1), geo_id)]
+        if not bound_skins:
+            bound_skins = skins if len(geometries) == 1 else []
+        if not bound_skins:
+            _report_once(diagnostics, "CC_FBX_SKIN_ROOT", f"geometry {geo_id}: missing Skin")
+            continue
+        per_vertex: list[list[float]] = [[] for _ in range(vertex_count)] if vertex_count else []
+        bound_limbs = 0
+        for skin in bound_skins:
+            skin_id = _fbx_id(skin)
+            bound_clusters = [cluster for cluster in clusters
+                              if skin_id is not None and linked(int(_fbx_id(cluster) or -1), skin_id)]
+            if not bound_clusters:
+                _report_once(diagnostics, "CC_FBX_SKIN_ROOT", f"skin {skin_id}: missing Cluster")
+                continue
+            for cluster in bound_clusters:
+                cluster_id = _fbx_id(cluster)
+                if cluster_id is not None and limb_ids.intersection(
+                    child_of.get(cluster_id, []) + parent_of.get(cluster_id, [])
+                ):
+                    bound_limbs += 1
+                indexes_node, weights_node = _fbx_child(cluster, "Indexes"), _fbx_child(cluster, "Weights")
+                has_indexes = indexes_node is not None and indexes_node.get("props")
+                has_weights = weights_node is not None and weights_node.get("props")
+                if bool(has_indexes) != bool(has_weights):
+                    _report_once(diagnostics, "CC_FBX_SKIN_ATTRIBUTES",
+                                 f"cluster {cluster_id}: Indexes/Weights")
+                    continue
+                indexes = indexes_node["props"][0] if has_indexes else []
+                weights = weights_node["props"][0] if has_weights else []
+                if not isinstance(indexes, list) or not isinstance(weights, list):
+                    _report_once(diagnostics, "CC_FBX_SKIN_ATTRIBUTES",
+                                 f"cluster {cluster_id}: Indexes/Weights")
+                    continue
+                if len(indexes) != len(weights):
+                    _report_once(diagnostics, "CC_FBX_SKIN_ATTRIBUTES",
+                                 f"cluster {cluster_id}: {len(indexes)} indexes / {len(weights)} weights")
+                    continue
+                if vertex_count == 0 and indexes:
+                    vertex_count = max(int(index) for index in indexes) + 1
+                    per_vertex = [[] for _ in range(vertex_count)]
+                for index_value, weight_value in zip(indexes, weights, strict=True):
+                    index = int(index_value)
+                    weight = float(weight_value)
+                    if not 0 <= index < vertex_count:
+                        _report_once(diagnostics, "CC_FBX_SKIN_JOINT_INDEX",
+                                     f"cluster {cluster_id}: vertex {index}")
+                        continue
+                    if not math.isfinite(weight) or weight < 0:
+                        _report_once(diagnostics, "CC_FBX_SKIN_WEIGHTS",
+                                     f"cluster {cluster_id}: invalid weight")
+                        continue
+                    if weight <= 1e-8:
+                        continue
+                    per_vertex[index].append(weight)
+        if bound_limbs == 0:
+            _report_once(diagnostics, "CC_FBX_SKIN_ROOT", f"geometry {geo_id}: missing LimbNode")
+        if not per_vertex:
+            _report_once(diagnostics, "CC_FBX_SKIN_ROOT", f"geometry {geo_id}: no weighted vertices")
+            continue
+        for weights in per_vertex:
+            vertices_checked += 1
+            influences = len(weights)
+            weight_sum = sum(weights)
+            if influences == 0:
+                _report_once(diagnostics, "CC_FBX_SKIN_WEIGHTS", f"geometry {geo_id}: unweighted vertex")
+            if abs(weight_sum - 1.0) > 1e-4:
+                _report_once(diagnostics, "CC_FBX_SKIN_WEIGHTS",
+                             f"geometry {geo_id}: sum={weight_sum:.7f}")
+            if influences > max_influences:
+                _report_once(diagnostics, "CC_FBX_SKIN_INFLUENCES",
+                             f"geometry {geo_id}: {influences} > {max_influences}")
+            observed_influences = max(observed_influences, influences)
+    return {
+        "passed": not diagnostics,
+        "max_influences": observed_influences,
+        "vertices_checked": vertices_checked,
+        "diagnostics": diagnostics,
+    }
+
+
+def run_gltf_validator(tool: str, path: Path, *, log_dir: Path | None = None) -> dict:
+    """Run the Khronos native CLI. Errors fail; the tool must not be Node/npm."""
+    try:
+        proc = subprocess.run(
+            [tool, "--stdout", "--no-write-timestamp", str(path)],
+            capture_output=True, text=True, timeout=120,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return {"passed": False, "diagnostics": [f"CC_GLTF_VALIDATOR: {path.name}: {exc}"]}
+    try:
+        report = json.loads(proc.stdout)
+    except json.JSONDecodeError:
+        detail = (proc.stderr or proc.stdout or "no JSON report").strip()
+        return {"passed": False, "diagnostics": [f"CC_GLTF_VALIDATOR: {path.name}: {detail[:500]}"]}
+    if log_dir is not None:
+        log_dir.mkdir(parents=True, exist_ok=True)
+        (log_dir / f"{path.stem}.json").write_text(
+            json.dumps(report, indent=2) + "\n", encoding="utf-8", newline="\n"
+        )
+    issues = report.get("issues") or {}
+    diagnostics = []
+    for message in issues.get("messages") or []:
+        if message.get("severity") != 0:
+            continue
+        code = message.get("code") or "ERROR"
+        text = message.get("message") or ""
+        diagnostics.append(f"CC_GLTF_VALIDATOR: {path.name}: {code} {text}".rstrip())
+    if not diagnostics and int(issues.get("numErrors") or 0) > 0:
+        diagnostics.append(f"CC_GLTF_VALIDATOR: {path.name}: {issues['numErrors']} error(s)")
+    return {"passed": not diagnostics, "diagnostics": diagnostics, "report": report}
+
+
+def _attach(asset_id: str, diagnostics: list[str]) -> list[str]:
+    attached = []
+    for item in diagnostics:
+        code, _, rest = item.partition(":")
+        attached.append(f"{code}: {asset_id}:{rest}" if rest else f"{code}: {asset_id}")
+    return attached
+
+
+def _part_max_influences(part: dict[str, Any]) -> int:
+    if part.get("category") == "connector":
+        spec = part.get("connector_interface") or {}
+        try:
+            return int(spec.get("max_influences") or 2)
+        except (TypeError, ValueError):
+            return 2
+    return 4
+
+
+def export_qa_problems(catalog: dict[str, Any], out: Path, *, validator: str | None = None,
+                       log_dir: Path | None = None) -> list[str]:
+    """Fail-closed skin contract for every built FBX/GLB. Validator Errors fail when the tool is present."""
+    problems: list[str] = []
+
+    def check_pair(asset_id: str, asset: dict[str, Any] | None, *, max_influences: int,
+                   assembled: bool = False) -> None:
+        if not isinstance(asset, dict):
+            return
+        fbx_rel, glb_rel = asset.get("fbx"), asset.get("assembled_glb") if assembled else asset.get("glb")
+        if assembled:
+            fbx_rel = None
+        if isinstance(fbx_rel, str) and fbx_rel:
+            fbx_path = out / fbx_rel
+            if not fbx_path.is_file():
+                problems.append(f"CC_FBX_SKIN_ROOT: {asset_id}: missing {fbx_rel}")
+            else:
+                report = validate_fbx_skin_contract(fbx_path, max_influences=max_influences)
+                problems.extend(_attach(asset_id, report["diagnostics"]))
+        if isinstance(glb_rel, str) and glb_rel:
+            glb_path = out / glb_rel
+            if not glb_path.is_file():
+                problems.append(f"CC_GLB_SKIN_ROOT: {asset_id}: missing {glb_rel}")
+                return
+            report = validate_glb_skin_contract(glb_path, max_influences=max_influences)
+            problems.extend(_attach(asset_id, report["diagnostics"]))
+            if validator:
+                validated = run_gltf_validator(validator, glb_path, log_dir=log_dir)
+                problems.extend(_attach(asset_id, validated["diagnostics"]))
+
+    for skeleton in catalog.get("skeletons") or []:
+        asset_id = str(skeleton.get("skeleton_id", "skeleton"))
+        check_pair(asset_id, skeleton.get("asset"), max_influences=4)
+        check_pair(asset_id, skeleton.get("asset"), max_influences=4, assembled=True)
+    for part in catalog.get("parts") or []:
+        check_pair(str(part.get("part_id", "part")), part.get("asset"),
+                   max_influences=_part_max_influences(part))
+    return problems

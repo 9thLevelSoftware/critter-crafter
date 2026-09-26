@@ -10,7 +10,7 @@ from pathlib import Path
 import click
 
 from . import __version__
-from .config import find_blender, find_unity, paths
+from .config import find_blender, find_gltf_validator, find_unity, paths
 from .library.catalog import compile_catalog, dumps, load_sources
 from .skeletons.archetypes import is_extras_id
 from .recipes.generator import GenerationError, canonical, generate
@@ -68,6 +68,8 @@ def doctor() -> None:
         ok = False
     unity = find_unity()
     click.echo(f"unity   : {unity or 'not found (optional; set CRITTER_UNITY)'}")
+    validator = find_gltf_validator()
+    click.echo(f"gltf-validator: {validator or 'not found (optional; CC_GLTF_VALIDATOR_MISSING on library build)'}")
     lfs = subprocess.run(["git", "lfs", "version"], capture_output=True, text=True)
     click.echo(f"git-lfs : {lfs.stdout.strip() or 'NOT FOUND'}")
     if not ok:

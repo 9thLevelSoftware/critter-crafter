@@ -14,10 +14,11 @@ from typing import Any
 import click
 
 from ..blender.runner import BlenderError, run_op, snippet
-from ..config import find_asset_archive, paths
+from ..config import find_asset_archive, paths, resolve_gltf_validator
 from ..schema.validate import validate_sources
 from ..recipes.generator import generate_for_skeleton
 from .catalog import dumps
+from .export_validation import export_qa_problems
 from ..skeletons.review import ReviewError, content_fingerprint, resolve_polish, source_fingerprint
 
 
@@ -519,7 +520,14 @@ def library_build(out_root: Path | None, clean: bool) -> None:
     except BlenderError as e:
         raise click.ClickException(str(e))
     require_part_pipelines_unchanged()
+    validator, validator_status = resolve_gltf_validator()
+    validator_logs = paths().work / "logs" / "gltf-validator"
     problems = apply_results(catalog, out, result["results"])
+    if validator_status and validator_status.startswith("CC_GLTF_VALIDATOR_MISSING"):
+        click.echo(validator_status, err=True)
+    elif validator_status:
+        problems.append(validator_status)
+    problems.extend(export_qa_problems(catalog, out, validator=validator, log_dir=validator_logs))
     if problems:
         for problem in problems:
             click.echo(problem, err=True)
@@ -581,6 +589,11 @@ def library_build(out_root: Path | None, clean: bool) -> None:
         state.setdefault("assemblies", {})[sid] = _assembly_state(
             catalog, job["args"]["recipe"], out, skeleton["content_fingerprint"], part_states
         )
+    problems = export_qa_problems(catalog, out, validator=validator, log_dir=validator_logs)
+    if problems:
+        for problem in problems:
+            click.echo(problem, err=True)
+        raise click.ClickException(f"{len(problems)} problem(s)")
     for skeleton in catalog["skeletons"]:
         skeleton["content_fingerprint"] = skeleton_content_hash(catalog, skeleton, out)
     (out / "catalog.json").write_text(dumps(catalog), encoding="utf-8", newline="\n")

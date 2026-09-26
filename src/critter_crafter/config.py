@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import glob
+import hashlib
 import os
 import shutil
 import tomllib
@@ -114,3 +115,54 @@ def find_asset_archive() -> Path | None:
         return Path(cfg)
     sibling = repo_root().parent / ARCHIVE_NAME
     return sibling if sibling.is_dir() else None
+
+
+def _tool_file(value: str | None) -> str | None:
+    if not value:
+        return None
+    path = Path(value)
+    if not path.is_absolute():
+        path = repo_root() / path
+    return str(path) if path.is_file() else None
+
+
+def find_gltf_validator() -> str | None:
+    """CRITTER_GLTF_VALIDATOR -> critter.toml [tools].gltf_validator -> PATH.
+
+    Native Khronos CLI only (gltf_validator.exe). Not the npm package.
+    """
+    found = _tool_file(os.environ.get("CRITTER_GLTF_VALIDATOR"))
+    if found:
+        return found
+    found = _tool_file(_toml().get("tools", {}).get("gltf_validator"))
+    if found:
+        return found
+    return shutil.which("gltf_validator") or shutil.which("gltf_validator.exe")
+
+
+def gltf_validator_expected_sha256() -> str | None:
+    value = _toml().get("tools", {}).get("gltf_validator_sha256")
+    if not value:
+        return None
+    return str(value).strip().lower()
+
+
+def resolve_gltf_validator() -> tuple[str | None, str | None]:
+    """Return (binary, diagnostic).
+
+    Missing tool: (None, CC_GLTF_VALIDATOR_MISSING) — caller warns and still builds.
+    Hash mismatch against [tools].gltf_validator_sha256: (None, CC_GLTF_VALIDATOR_HASH) — fail the build.
+    """
+    path = find_gltf_validator()
+    if path is None:
+        return None, (
+            "CC_GLTF_VALIDATOR_MISSING: Khronos glTF-Validator binary not found; "
+            "GLB Errors are not fail-closed. Pin [tools].gltf_validator in critter.toml "
+            "or set CRITTER_GLTF_VALIDATOR."
+        )
+    expected = gltf_validator_expected_sha256()
+    if expected:
+        digest = hashlib.sha256(Path(path).read_bytes()).hexdigest()
+        if digest != expected:
+            return None, f"CC_GLTF_VALIDATOR_HASH: {path}: {digest} != {expected}"
+    return path, None
