@@ -86,6 +86,13 @@ def test_qa_bound_to_fingerprint_gates_approve_without_a_receipt():
         review.verify_qa(failed, "test", "abc")
     with pytest.raises(review.ReviewError, match="CC_REVIEW_QA"):
         review.verify_qa({}, "test", "abc", require_passing=False)
+    empty_fp = {**qa_result(), "content_fingerprint": ""}
+    with pytest.raises(review.ReviewError, match="CC_REVIEW_STALE"):
+        review.verify_qa(empty_fp, "test", "abc", require_passing=False)
+    bound = {"passed": False, "skeleton_id": "test", "content_fingerprint": "abc"}
+    review.verify_qa(bound, "test", "abc", require_passing=False)
+    with pytest.raises(review.ReviewError, match="CC_REVIEW_QA"):
+        review.verify_qa(bound, "test", "abc")
 
 
 def test_polish_override_requires_matching_source_and_never_overwrites(tmp_path):

@@ -155,6 +155,81 @@ def test_stale_qa_fingerprint_blocks_approve_and_reject(tmp_path, monkeypatch):
     assert json.loads(source.read_text())["status"] == "draft"
 
 
+def test_empty_fingerprint_on_existing_qa_row_is_stale(tmp_path, monkeypatch):
+    sid, source, _fingerprint = _status_fixture(tmp_path, monkeypatch, qa_fingerprint="")
+    with pytest.raises(ClickException, match="CC_REVIEW_STALE"):
+        skeleton_commands._set_status(None, (sid,), "approved")
+    with pytest.raises(ClickException, match="CC_REVIEW_STALE"):
+        skeleton_commands._set_status(None, (sid,), "rejected")
+    assert json.loads(source.read_text())["status"] == "draft"
+
+
+def test_malformed_qa_json_blocks_approve_and_reject(tmp_path, monkeypatch):
+    sid, source, _fingerprint = _status_fixture(tmp_path, monkeypatch, write_qa=False)
+    qa_path = tmp_path / "work" / "review" / "foundation-v3" / "qa.json"
+    qa_path.parent.mkdir(parents=True)
+    qa_path.write_text("{")
+    with pytest.raises(ClickException, match="CC_REVIEW_QA"):
+        skeleton_commands._set_status(None, (sid,), "approved")
+    with pytest.raises(ClickException, match="CC_REVIEW_QA"):
+        skeleton_commands._set_status(None, (sid,), "rejected")
+    assert json.loads(source.read_text())["status"] == "draft"
+
+
+def test_missing_qa_file_differs_from_report_without_this_id(tmp_path, monkeypatch):
+    sid, source, fingerprint = _status_fixture(tmp_path, monkeypatch, write_qa=False)
+    qa_path = tmp_path / "work" / "review" / "foundation-v3" / "qa.json"
+    with pytest.raises(ClickException, match="has no current bound QA result"):
+        skeleton_commands._set_status(None, (sid,), "approved")
+    qa_path.parent.mkdir(parents=True)
+    qa_path.write_text(json.dumps({"schema_version": "3.0.0", "results": [
+        {"passed": True, "skeleton_id": "sibling", "content_fingerprint": fingerprint}
+    ]}))
+    with pytest.raises(ClickException, match="is not in the current QA report"):
+        skeleton_commands._set_status(None, (sid,), "approved")
+    with pytest.raises(ClickException, match="is not in the current QA report"):
+        skeleton_commands._set_status(None, (sid,), "rejected")
+    assert json.loads(source.read_text())["status"] == "draft"
+
+
+def test_reject_allows_fingerprint_bound_row_without_evaluated_blender(tmp_path, monkeypatch):
+    sid, source, fingerprint = _status_fixture(tmp_path, monkeypatch, write_qa=False)
+    qa_path = tmp_path / "work" / "review" / "foundation-v3" / "qa.json"
+    qa_path.parent.mkdir(parents=True)
+    qa_path.write_text(json.dumps({"schema_version": "3.0.0", "results": [
+        {"passed": False, "skeleton_id": sid, "content_fingerprint": fingerprint}
+    ]}))
+    with pytest.raises(ClickException, match="CC_REVIEW_QA"):
+        skeleton_commands._set_status(None, (sid,), "approved")
+    assert json.loads(source.read_text())["status"] == "draft"
+    assert skeleton_commands._set_status(None, (sid,), "rejected") == 1
+    assert json.loads(source.read_text())["status"] == "rejected"
+
+
+def test_skeleton_qa_merges_selected_rows_and_keeps_siblings(tmp_path, monkeypatch):
+    catalog = {"skeletons": [
+        {"skeleton_id": "review_subject", "family": "biped"},
+        {"skeleton_id": "sibling", "family": "biped"},
+    ]}
+    work = tmp_path / "work"
+    qa_path = work / "review" / "foundation-v3" / "qa.json"
+    qa_path.parent.mkdir(parents=True)
+    sibling = {"passed": True, "skeleton_id": "sibling", "content_fingerprint": "keep-me"}
+    qa_path.write_text(json.dumps({"schema_version": "3.0.0", "results": [
+        sibling, {"passed": False, "skeleton_id": "review_subject", "content_fingerprint": "old"},
+    ]}))
+    monkeypatch.setattr(skeleton_commands, "paths", lambda: SimpleNamespace(work=work, data=tmp_path / "data"))
+    monkeypatch.setattr(library_commands, "_built_catalog", lambda: (catalog, tmp_path / "library"))
+    updated = {"passed": True, "skeleton_id": "review_subject", "content_fingerprint": "new",
+               "diagnostics": [], "clips_checked": 8}
+    monkeypatch.setattr(skeleton_commands, "_qa", lambda *_: [updated])
+    result = CliRunner().invoke(skeleton_commands.skeleton, ["qa", "review_subject"])
+    assert result.exit_code == 0, result.output
+    by_id = {row["skeleton_id"]: row for row in json.loads(qa_path.read_text())["results"]}
+    assert by_id["sibling"] == sibling
+    assert by_id["review_subject"] == updated
+
+
 def test_interrupted_assembly_persists_base_catalog_without_assembled_glb(tmp_path, monkeypatch):
     """The resumable base catalog must not advertise the assembly that never completed."""
     catalog = {"schema_version": "3.0.0", "library_id": "review", "version": "1", "gait_profiles": [{"hint": "biped"}],

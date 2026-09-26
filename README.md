@@ -42,11 +42,11 @@ uv run critter library build                   # build the catalog and actual Bl
 uv run critter skeleton qa                     # inspect all 8 built clips and the locomotion block per skeleton
 uv run critter skeleton review                 # 3 modes x 4 views, actual built clips, fresh receipts
 python -m http.server 8765 --directory work/review/foundation-v3
-uv run critter skeleton approve --family biped # human approval after reviewing the local site
-uv run critter skeleton reject <skeleton_id>   # record human rejection of current reviewed content
+uv run critter skeleton approve --family biped # human approval after passing skeleton qa
+uv run critter skeleton reject <skeleton_id>   # record human rejection of current QA-bound content
 ```
 
-The review bundle contains bones, mannequin, and assembled modes; front, side, top, and three-quarter views; and the actual built GLB and `motion.json` artifacts. It is a local site and can be served with Python's standard HTTP server. `approve` requires a current passing review receipt. `reject` requires a current receipt for the same built content, including a fresh receipt whose QA result failed, so visibly bad content can be rejected without weakening the approval gate. Content fingerprints make stale review output invalid.
+The review bundle contains bones, mannequin, and assembled modes; front, side, top, and three-quarter views; and the actual built GLB and `motion.json` artifacts. It is a local site and can be served with Python's standard HTTP server. `approve` requires a current passing `skeleton qa` bound to `content_fingerprint`. `reject` requires a current QA result bound to the same fingerprint; the QA may have failed. The 3×4 HTML bundle is optional spot-check only; a receipt file is not required. Content fingerprints make stale QA invalid.
 
 Authored polish is opt-in and separate from generated masters. An override lives at `work/polish/skeletons/<skeleton_id>/override.json` and records the source fingerprint it targets. A compatible override may be resolved during a rebuild; a changed source fingerprint or changed authored polish invalidates the build and requires rebuilding. Generated files are never overwritten by the override workflow.
 

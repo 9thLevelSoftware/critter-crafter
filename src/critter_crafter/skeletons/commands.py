@@ -149,7 +149,7 @@ def skeleton_qa(families, json_out, skeleton_ids) -> None:
     cat, source = _built_catalog()
     reports = _qa(cat, source, _selection(cat, families, skeleton_ids))
     out = json_out or paths().work / "review" / "foundation-v3" / "qa.json"
-    _write_json(out, {"schema_version": "3.0.0", "passed": all(r["passed"] for r in reports), "results": reports})
+    _write_json(out, _merge_qa_reports(out, reports))
     _print_reports(reports)
     click.echo(f"report: {out}")
     if not all(r["passed"] for r in reports):
@@ -169,7 +169,7 @@ def skeleton_review(families, out, skeleton_ids) -> None:
     directory = out or paths().work / "review" / "foundation-v3"
     reports = _qa(cat, source, selected)
     write_bundle(cat, source, directory, [s["skeleton_id"] for s in selected])
-    _write_json(directory / "qa.json", {"schema_version": "3.0.0", "results": reports})
+    _write_json(directory / "qa.json", _merge_qa_reports(directory / "qa.json", reports))
     shared = [p for p in directory.rglob("*") if p.is_file() and not ({"skeletons", "assets"} & set(p.relative_to(directory).parts))
               and p.name != "qa.json"]
     for report in reports:
@@ -189,22 +189,53 @@ def skeleton_review(families, out, skeleton_ids) -> None:
     click.echo(f"serve with: python -m http.server 8765 --directory \"{directory}\"")
 
 
+def _merge_qa_reports(path: Path, reports: list[dict]) -> dict:
+    updated = {r["skeleton_id"]: r for r in reports}
+    merged: list[dict] = []
+    seen: set[str] = set()
+    if path.is_file():
+        try:
+            doc = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+            doc = {}
+        if isinstance(doc, dict) and isinstance(doc.get("results"), list):
+            for row in doc["results"]:
+                if not isinstance(row, dict):
+                    continue
+                sid = row.get("skeleton_id")
+                if not isinstance(sid, str) or sid in seen:
+                    continue
+                merged.append(updated.get(sid, row))
+                seen.add(sid)
+    for report in reports:
+        sid = report["skeleton_id"]
+        if sid not in seen:
+            merged.append(report)
+            seen.add(sid)
+    return {"schema_version": "3.0.0", "passed": all(r.get("passed") for r in merged), "results": merged}
+
+
 def _qa_result(skeleton_id: str) -> dict:
     path = paths().work / "review" / "foundation-v3" / "qa.json"
     if not path.is_file():
-        return {}
-    doc = json.loads(path.read_text(encoding="utf-8"))
-    for result in doc.get("results") or []:
+        raise ReviewError(f"CC_REVIEW_QA: {skeleton_id} has no current bound QA result")
+    try:
+        doc = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ReviewError(f"CC_REVIEW_QA: {skeleton_id} has no current bound QA result") from exc
+    if not isinstance(doc, dict) or not isinstance(doc.get("results"), list):
+        raise ReviewError(f"CC_REVIEW_QA: {skeleton_id} has no current bound QA result")
+    for result in doc["results"]:
         if isinstance(result, dict) and result.get("skeleton_id") == skeleton_id:
             return result
-    return {}
+    raise ReviewError(f"CC_REVIEW_QA: {skeleton_id} is not in the current QA report")
 
 
 def _set_status(family: str | None, ids: tuple[str, ...], status: str) -> int:
     from ..library.commands import _built_catalog, skeleton_content_hash
     cat, source = _built_catalog()
     selected = _selection(cat, (family,) if family else (), ids)
-    # Validate the entire request before changing any status. Receipt files are optional spot-checks.
+    # Validate the entire request before changing any status.
     for skel in selected:
         sid = skel["skeleton_id"]
         try:

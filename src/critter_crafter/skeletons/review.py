@@ -65,13 +65,15 @@ def _verify_qa(qa: dict, skeleton_id: str, fingerprint: str) -> None:
 
 
 def verify_qa(qa: dict, skeleton_id: str, fingerprint: str, require_passing: bool = True) -> None:
-    """Approve from passing skeleton QA bound to content_fingerprint; reject may use a failing result."""
-    recorded = qa.get("content_fingerprint") if isinstance(qa, dict) else None
-    if recorded and recorded != fingerprint:
+    """Approve from passing evaluated QA; reject needs only a per-id row bound to content_fingerprint."""
+    if not isinstance(qa, dict) or qa.get("skeleton_id") != skeleton_id:
+        raise ReviewError(f"CC_REVIEW_QA: {skeleton_id} has no current bound QA result")
+    if qa.get("content_fingerprint") != fingerprint:
         raise ReviewError(f"CC_REVIEW_STALE: {skeleton_id}; rebuild and run skeleton qa again")
-    bound = qa if isinstance(qa, dict) else {}
-    _verify_qa(bound, skeleton_id, fingerprint)
-    if require_passing and bound.get("passed") is not True:
+    if not require_passing:
+        return
+    _verify_qa(qa, skeleton_id, fingerprint)
+    if qa.get("passed") is not True:
         raise ReviewError(f"CC_REVIEW_QA: {skeleton_id}")
 
 
