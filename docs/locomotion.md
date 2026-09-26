@@ -53,7 +53,7 @@ The package depends on **Animation Rigging** (a core package in Unity 6). `Critt
   - advances the gait clock;
   - schedules steps, and forces early steps when a foot overruns its reach (turns);
   - raycasts the ground (`AssemblyOptions.groundMask`); plants from raycast height only (no foot-to-normal tilt);
-  - on slopes, shifts stance downslope (`hip_height * tan(slope) * SlopeStanceK`) and scales landing lead by `cos(slope)`;
+  - on slopes, shifts stance downslope (`hip_height * tan(slope) * SlopeStanceK`) and scales uphill landing lead by `cos(slope)` (downhill lead is not shortened);
   - sets body height, pitch and roll from the planted feet, plus the drag lurch;
   - smooths the visible body yaw after instant turns (`bodyTurnRateDeg`);
   - drives the Animator's `Speed`, `Gait` (0 = walk, 1 = run) and `GaitPhase`.
@@ -79,10 +79,9 @@ Game integration: put `NavMeshAgent` on `Threat_{id}` (`updatePosition = true`) 
 
 - **`critter skeleton qa`** checks every skeleton's locomotion block: speed bands, support at the walk and run duty factors, step rate and stance stroke at the published speeds.
 - **`critter recipe golden`** writes `tests/golden_v3/locomotion.json`. The Unity `StepPlannerGoldenTests` requires the C# `StepPlanner` to match the Python reference (`src/critter_crafter/locomotion/stepper.py`) within 1e-6.
-- **The Unity `RuntimeLegsPlantFeetAtGameSpeed` Play Mode test** runs one skeleton per legged family at 2.5 m/s and checks IK residual, planted slip (after five warmup frames), support, step rate and the overlay state. `RuntimeInstantTurnSettlesWithoutShuffle` covers a moving 180 on a two-bone quadruped trot (window from heading change through yaw ease; snap/replant frame excluded from slip). `RuntimeAttackReleasesIkAndKeepsSupport` checks that telegraph/attack releases the attack-branch IK within 0.2 s while other support feet stay planted. `RuntimeRampKeepsPlantedFeetFromSliding` drives the same families up and down the 20° `ReviewCourse` ramp (uniform slope, including downhill frames) and requires planted slip under 0.025 m, except two-bone downhill (see limitations).
+- **The Unity `RuntimeLegsPlantFeetAtGameSpeed` Play Mode test** runs one skeleton per legged family at 2.5 m/s and checks IK residual, planted slip (after five warmup frames), support, step rate and the overlay state. `RuntimeInstantTurnSettlesWithoutShuffle` covers a moving 180 on a two-bone quadruped trot (window from heading change through yaw ease; snap/replant frame excluded from slip). `RuntimeAttackReleasesIkAndKeepsSupport` checks that telegraph/attack releases the attack-branch IK within 0.2 s while other support feet stay planted. `RuntimeRampKeepsPlantedFeetFromSliding` drives the same families up and down the 20° `ReviewCourse` ramp (including downhill frames) and requires planted slip under 0.025 m.
 
 ## Known limitations
 
-- **Two-bone downhill at 2.5 m/s** (biped and quadruped) can still clamp-slide ~10 cm in a frame: `min_support` blocks a lift while `ClampToReach` pulls the planted foot. Stance is shifted downslope and landings are led, but that does not close the one-support deadlock. The 0.025 m slip limit is not raised. Insect, crawler, radial, dragger, and uphill two-bone stay under the limit.
 - **Starting from standing to full speed in one frame** can clamp a foot on the first frame; tests exclude five warmup frames. A `warmup_frames = 0` run may still see that single-frame residual.
 - **Draggers use placeholder parts,** so the hands read as feet and the head is small. Real parts (M2) will improve the read.

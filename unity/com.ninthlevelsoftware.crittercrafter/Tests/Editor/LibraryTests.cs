@@ -325,10 +325,6 @@ namespace CritterCrafter.Tests
                 if (!hasGait) { fails.Add(id + ": runtime-leg skeletons get a CreatureGait"); continue; }
                 if (metrics.ramp_frames < 10)
                     fails.Add($"{id} {dir}: never reached the ramp ({metrics.ramp_frames} frames)");
-                // Two-bone downhill at 2.5 m/s still clamp-slides ~10 cm (min_support deadlock).
-                // Do not raise the 0.025 m limit; that residual is a documented limitation.
-                bool twoBoneDownhill = dir == "downhill" && (id.Contains("quadruped_") || id.StartsWith("biped_plantigrade_"));
-                if (twoBoneDownhill) continue;
                 if (!(metrics.max_ramp_slip_m < 0.025f))
                     fails.Add($"{id} {dir}: planted feet slide on the ramp {metrics.max_ramp_slip_m}");
             }

@@ -96,7 +96,7 @@ namespace CritterCrafter.Locomotion
         float _bodyHeight, _bodyPitch, _bodyRoll, _bodySurge;
         float _lastYaw, _yawLag;
         int _replantCount;
-        Vector3 _heading;
+        float _slopeRad;
         GaitParams _params;
 
         const float InstantTurnDeg = 90f;
@@ -256,17 +256,17 @@ namespace CritterCrafter.Locomotion
             if (moving) _clock += _params.cadenceHz * dt;
 
             Vector3 heading = hipSpeed > 1e-4f ? raw / hipSpeed : PlanarForward();
-            _heading = heading;
             float slopeRad = SlopeRadAlong(heading);
+            _slopeRad = slopeRad;
             Vector3 stanceShift = SlopeStanceShift(heading, slopeRad);
             Quaternion lag = Quaternion.Euler(0f, _yawLag, 0f);
 
             if (instantTurn)
                 ReplantCoordinated(lag, stanceShift);
 
-            // SlopeLeadScale: planar landing lead shrinks by cos(slope) so the foot is not thrown
-            // uphill of mid-stance. Stance itself is shifted downslope separately.
-            float slopeLeadScale = Mathf.Cos(slopeRad);
+            // Uphill: shrink planar lead by cos(slope) so the foot is not thrown uphill of mid-stance.
+            // Downhill: keep the full lead.
+            float slopeLeadScale = slopeRad < 0f ? Mathf.Cos(slopeRad) : 1f;
             float lead = (float)StepPlanner.LandingLead(hipSpeed, _params.cadenceHz, _params.duty) * slopeLeadScale;
             Vector3 predictVel = heading * hipSpeed;
 
@@ -361,6 +361,9 @@ namespace CritterCrafter.Locomotion
                 if (leg.coxaAim == null) yaw = 0f;
                 Quaternion frame = Quaternion.AngleAxis(yaw, up) * bodyRotation;
 
+                Quaternion sole = Quaternion.AngleAxis(yaw, Vector3.up)
+                    * Quaternion.Euler(0f, transform.eulerAngles.y + _yawLag, 0f)
+                    * bodyBaseLocalRotation;
                 Vector3 femur = coxa + frame * leg.femurFromCoxa;
                 Vector3 ankle = leg.position + frame * leg.ankleOffset;
                 Vector3 reach = ankle - femur;
@@ -372,7 +375,11 @@ namespace CritterCrafter.Locomotion
                     leg.position = ankle - frame * leg.ankleOffset;
                     if (leg.planted) leg.plant = leg.position;
                 }
-                leg.target.SetPositionAndRotation(ankle, frame * leg.ankleRotation);
+                // Sole stays height-only: do not pitch/roll the IK target with the body.
+                Quaternion targetRot = Mathf.Abs(_slopeRad) > 5f * Mathf.Deg2Rad
+                    ? sole * leg.ankleRotation
+                    : frame * leg.ankleRotation;
+                leg.target.SetPositionAndRotation(ankle, targetRot);
                 if (leg.coxaAim != null) leg.coxaAim.position = coxa + frame * leg.coxaDirection;
                 if (leg.hint != null) leg.hint.position = coxa + frame * leg.hintFromCoxa;
             }
@@ -412,9 +419,7 @@ namespace CritterCrafter.Locomotion
         }
 
         /// <summary>
-        /// Ground slope along heading, as a signed pitch (rad). Downhill in the heading direction is
-        /// positive, matching Unity Euler X (nose down). A current-frame probe is used because body
-        /// pitch is lagged, clamped to <see cref="maxBodyTiltDeg"/>, and zero for two-leg single support.
+        /// Ground slope along heading (rad). Downhill in the heading direction is positive.
         /// </summary>
         float SlopeRadAlong(Vector3 heading)
         {
@@ -473,7 +478,9 @@ namespace CritterCrafter.Locomotion
             // Instant heading changes (agents with huge angular speed) leave planted feet far from home or
             // out of reach; re-step them early rather than stretching the chain.
             if (leg.clamped) return true;
-            if (!leg.hinge && leg.hip != null && Vector3.Distance(leg.hip.position, leg.plant) > 0.92f * leg.reach) return true;
+            if (leg.hip != null && Vector3.Distance(leg.hip.position, leg.plant) > 0.85f * leg.reach
+                && (!leg.hinge || Mathf.Abs(_slopeRad) > 5f * Mathf.Deg2Rad))
+                return true;
             return Strain(leg, home) > Mathf.Max(0.6f * leg.stroke, 0.35f * leg.reach);
         }
 
@@ -488,6 +495,12 @@ namespace CritterCrafter.Locomotion
         /// <summary>Lifting keeps at least min_support planted supports; early steps also respect a swing cap.</summary>
         bool CanLift(Leg leg, bool early)
         {
+            // Stance/lead keep most slope plants in reach. If this frame's hip-to-plant is already
+            // past remaining reach, lift now (before ApplyTargets drags) — min_support would
+            // otherwise deadlock a biped/trot for a whole downhill frame.
+            if (Mathf.Abs(_slopeRad) > 5f * Mathf.Deg2Rad && leg.hip != null
+                && Vector3.Distance(leg.hip.position, leg.plant) > 0.85f * leg.reach)
+                return true;
             if (leg.support && PlantedSupports(leg) < _block.min_support) return false;
             if (!early) return true;
             int swinging = 0;
@@ -621,13 +634,9 @@ namespace CritterCrafter.Locomotion
                     }
                 }
             }
-            // Trot / biped plant only one pair, so the plane fit never reaches n>=3. Pitch along
-            // heading from the ground probe so the body follows a 20° ramp at game speed.
+            // Same heading probe as the stance shift; trot/biped never reach n>=3.
             if (n < 3)
-            {
-                Vector3 slopeHeading = _heading.sqrMagnitude > 1e-8f ? _heading : PlanarForward();
-                pitch = Mathf.Clamp(SlopeRadAlong(slopeHeading) * Mathf.Rad2Deg, -maxBodyTiltDeg, maxBodyTiltDeg);
-            }
+                pitch = Mathf.Clamp(_slopeRad * Mathf.Rad2Deg, -maxBodyTiltDeg, maxBodyTiltDeg);
             float k = 1f - Mathf.Exp(-dt / 0.12f);
             _bodyHeight = Mathf.Lerp(_bodyHeight, height, k);
             _bodyPitch = Mathf.Lerp(_bodyPitch, pitch, k);
@@ -638,14 +647,14 @@ namespace CritterCrafter.Locomotion
                 ? -0.03f * (float)_block.hip_height_m * (float)_params.weight
                   * (0.5f + 0.5f * Mathf.Cos((float)(_clock * 4.0 * Math.PI)))
                 : 0f;
-            // Pitch/roll about the planted-support centroid so a nose-down downhill tilt does not
-            // lever the trailing hip off the upslope foot.
+            // Pitch about the actual planted contacts (after stance shift), not catalog homeLocal.
             Vector3 footPivot = Vector3.zero;
             int plantedN = 0;
             foreach (var leg in legs)
             {
                 if (!leg.planted || !leg.support) continue;
-                footPivot += new Vector3(leg.homeLocal.x, 0f, leg.homeLocal.z);
+                Vector3 local = transform.InverseTransformPoint(leg.plant);
+                footPivot += new Vector3(local.x, 0f, local.z);
                 plantedN++;
             }
             if (plantedN > 0) footPivot /= plantedN;
