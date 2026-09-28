@@ -27,6 +27,15 @@ namespace CritterCrafter.Review
         public float body_speed_min_mps = float.MaxValue;
         public float body_speed_max_mps;
         public float body_speed_mean_mps;
+        /// <summary>Largest distance the reach clamp moved a planted foot's plant point in one frame (m).</summary>
+        public float max_plant_rewrite_m;
+        /// <summary>Frames after warmup in which a planted leg was being clamped to its reach.</summary>
+        public int clamped_planted_frames;
+        /// <summary>Frames after warmup in which a strained leg wanted to re-step but was not allowed to.</summary>
+        public int lift_blocked_frames;
+        /// <summary>The leg and frame of the largest planted slip.</summary>
+        public string max_slip_leg = "";
+        public int max_slip_frame = -1;
     }
 
     /// <summary>
@@ -50,10 +59,10 @@ namespace CritterCrafter.Review
         int _cell;
         readonly Dictionary<string, Transform> _tips = new Dictionary<string, Transform>();
         readonly Dictionary<string, Vector3> _lastPlanted = new Dictionary<string, Vector3>();
-        readonly StringBuilder _csv = new StringBuilder("frame,time,speed,body_speed,residual,slip,planted_supports\n");
+        readonly StringBuilder _csv = new StringBuilder("frame,time,speed,body_speed,residual,slip,planted_supports,yaw_lag_deg,surge_m\n");
         Vector3 _lastBody;
         float _bodyTravel, _bodyTime;
-        readonly StringBuilder _legCsv = new StringBuilder("frame,leg,planted,forced,ankle_reach_frac,hip_y,foot_x,foot_y,foot_z\n");
+        readonly StringBuilder _legCsv = new StringBuilder("frame,leg,planted,forced,ankle_reach_frac,hip_y,foot_x,foot_y,foot_z,clamped,lift_blocked,plant_rewrite_m\n");
 
         /// <param name="outDir">Frame/metrics folder, or null to measure only.</param>
         public void Begin(CreatureGait gait, List<ReviewCourse.Waypoint> path, LocomotionMetrics metrics,
@@ -133,11 +142,16 @@ namespace CritterCrafter.Review
         void Measure()
         {
             var m = Metrics;
-            float residual = 0f, slip = 0f;
+            float residual = 0f, slip = 0f, rewrite = 0f;
+            string slipLeg = "";
+            bool clampedPlanted = false, liftBlocked = false;
             int planted = 0;
             var now = new Dictionary<string, Vector3>();
             foreach (var leg in _gait.Legs)
             {
+                rewrite = Mathf.Max(rewrite, leg.plantRewrite);
+                clampedPlanted |= leg.planted && leg.clamped;
+                liftBlocked |= leg.liftBlocked;
                 if (!_tips.TryGetValue(leg.branchId, out var tip) || leg.weight < 0.999f) continue;
                 Vector3 p = tip.position;
                 residual = Mathf.Max(residual, Vector3.Distance(p, leg.position));
@@ -145,7 +159,11 @@ namespace CritterCrafter.Review
                 if (!leg.planted) continue;
                 if (leg.support) planted++;
                 now[leg.branchId] = p;
-                if (_lastPlanted.TryGetValue(leg.branchId, out var last)) slip = Mathf.Max(slip, Vector3.Distance(last, p));
+                if (_lastPlanted.TryGetValue(leg.branchId, out var last))
+                {
+                    float d = Vector3.Distance(last, p);
+                    if (d > slip) { slip = d; slipLeg = leg.branchId; }
+                }
             }
             foreach (var leg in _gait.Legs)
             {
@@ -156,16 +174,24 @@ namespace CritterCrafter.Review
                     Transform root = leg.coxaAim != null ? leg.hip.GetChild(0) : leg.hip;
                     frac = Vector3.Distance(root.position, leg.target.position) / leg.hingeReach;
                 }
-                _legCsv.AppendLine(string.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4:F3},{5:F3},{6:F3},{7:F3},{8:F3}",
+                _legCsv.AppendLine(string.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3},{4:F3},{5:F3},{6:F3},{7:F3},{8:F3},{9},{10},{11:F3}",
                     _frame, leg.branchId, leg.planted ? 1 : 0, leg.forced ? 1 : 0, frac,
-                    leg.hip != null ? leg.hip.position.y : 0f, leg.position.x, leg.position.y, leg.position.z));
+                    leg.hip != null ? leg.hip.position.y : 0f, leg.position.x, leg.position.y, leg.position.z,
+                    leg.clamped ? 1 : 0, leg.liftBlocked ? 1 : 0, leg.plantRewrite));
             }
             _lastPlanted.Clear();
             foreach (var kv in now) _lastPlanted[kv.Key] = kv.Value;
             if (_frame > 0)
             {
                 m.max_ik_residual_m = Mathf.Max(m.max_ik_residual_m, residual);
-                if (_frame >= m.warmup_frames) m.max_planted_slip_m = Mathf.Max(m.max_planted_slip_m, slip);
+                if (_frame >= m.warmup_frames)
+                {
+                    if (slip > m.max_planted_slip_m) { m.max_slip_leg = slipLeg; m.max_slip_frame = _frame; }
+                    m.max_planted_slip_m = Mathf.Max(m.max_planted_slip_m, slip);
+                    m.max_plant_rewrite_m = Mathf.Max(m.max_plant_rewrite_m, rewrite);
+                    if (clampedPlanted) m.clamped_planted_frames++;
+                    if (liftBlocked) m.lift_blocked_frames++;
+                }
                 m.min_planted_supports = Mathf.Min(m.min_planted_supports, planted);
             }
             m.cadence_hz = Mathf.Max(m.cadence_hz, (float)_gait.Current.cadenceHz);
@@ -188,8 +214,8 @@ namespace CritterCrafter.Review
                 }
             }
             _lastBody = b;
-            _csv.AppendLine(string.Format(CultureInfo.InvariantCulture, "{0},{1:F3},{2:F3},{3:F3},{4:F4},{5:F4},{6}",
-                _frame, _time, _gait.Speed, bodySpeed, residual, slip, planted));
+            _csv.AppendLine(string.Format(CultureInfo.InvariantCulture, "{0},{1:F3},{2:F3},{3:F3},{4:F4},{5:F4},{6},{7:F2},{8:F3}",
+                _frame, _time, _gait.Speed, bodySpeed, residual, slip, planted, _gait.YawLag, _gait.Surge));
         }
 
         void Render()

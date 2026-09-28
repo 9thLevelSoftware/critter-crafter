@@ -91,6 +91,8 @@ The root (the agent) is the travel intent and still moves at an even speed. The 
 - **Stopping:** the torso eases onto the root over `dragStopSettle` (0.3 s).
 - **Arms, not legs:** the dragger arm branches bend with the elbow pointing up, out and back (branch `up` in `_dragger`), and the forearm and wrist twist so the palm lies flat. Before, the elbows pointed straight up and read as knees.
 
+An agent's instant turn can leave a gripping hand out of reach (the torso yaws at a limited rate and lunges along the new heading). The hand must then re-grip by stepping. For bodies that lie on the ground (`body_on_ground`) the torso carries the weight, so a strained hand may re-step at once even while the other hand is in the air: the swing cap in `CanLift` and the one-group-at-a-time rule in `LiftGroup` do not apply. Both hands may be off the ground for a few frames after a sharp turn. Without this the re-step was refused, the reach clamp rewrote the plant point every frame and the hand slid. `LibraryTests.DraggerHandsHoldThroughInstantTurns` sweeps four haul phases at walk, run and 2.5 m/s and fails on any refused re-step. The recorder reports `max_plant_rewrite_m`, `clamped_planted_frames`, `lift_blocked_frames` and the slipping leg and frame, and `legs.csv`/`frames.csv` carry `clamped`, `lift_blocked`, `plant_rewrite_m`, `yaw_lag_deg` and `surge_m`.
+
 The torso is at most about 0.2 of one haul (≈ 0.12 m at walk, ≈ 0.14 m at 2.5 m/s) ahead of or behind the root, so colliders on the root sit slightly off the torso.
 
 The grip-pull-stop rhythm reads best at walk speed, about one haul per arm per second. At 2.5 m/s a dragger hauls almost twice as often and it reads as a scramble. If the crawl should look deliberate in the game, use the dragger's own `v_walk_mps` or `v_run_mps` as its move speed rather than the shared threat speed.
@@ -98,7 +100,7 @@ The grip-pull-stop rhythm reads best at walk speed, about one haul per arm per s
 ## Known limitations
 
 - **Instant agent turns** cause a brief shuffle while re-stepping groups catch up with the smoothed body yaw.
-- **Dragger hand slip at instant turns.** Shortly after an instant 90° turn (measured at walk speed), a planted dragger hand slips about 14 cm: the torso lunges away from the gripping hand, the wrist reaches the 0.970 reach clamp, `ApplyTargets` rewrites the plant point, and `CanLift` refuses the re-step because the other arm is already swinging. Whether it appears depends on where in the haul the turn lands. Being fixed on `feature/locomotion-thread`.
+- **Dragger hands after instant turns** can still be dragged for one frame (a centimetre or two; at most 3 cm in the test sweep) between the reach clamp and the re-step, because the clamp is only seen after the body has moved. Before the fix in "Dragging" below they slid 4–20 cm.
 - **On a 20° ramp,** downhill feet can reach the end of their reach and slide a few centimetres.
 - **Starting from standing to full speed in one frame** can drag a foot during the first stride. Tests allow a one-second warmup.
 - **Draggers use placeholder parts,** so the hands read as feet and the head is small. Real parts (M2) will improve the read.

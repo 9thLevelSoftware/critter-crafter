@@ -279,6 +279,71 @@ namespace CritterCrafter.Tests
             }
         }
 
+        static readonly string[] DraggersForTurns =
+        {
+            "dragger_forelimb_puller_balanced_v3", "dragger_belly_hauler_balanced_v3",
+        };
+
+        [UnityTest]
+        public IEnumerator DraggerHandsHoldThroughInstantTurns()
+        {
+            // An agent turns instantly, so the torso (which follows at a limited turn rate and lunges with
+            // each haul) can leave a gripping hand out of reach. The hand must re-grip by stepping, not
+            // slide. Whether it slides depends on where in the haul the turn lands, so sweep four phases of
+            // a haul, at walk, run and 2.5 m/s, for a 90 degree turn.
+            // The reach clamp is only seen after the body has moved, so a hand can be dragged for the one
+            // frame before it re-steps (a few centimetres at 2 m/s). The bug this pins slid 4-20 cm over
+            // several frames because the re-step was refused, so 3 cm separates the two.
+            const float OneFrameDrag = 0.03f;
+            EditorSettings.enterPlayModeOptionsEnabled = true;
+            EditorSettings.enterPlayModeOptions = EnterPlayModeOptions.DisableDomainReload | EnterPlayModeOptions.DisableSceneReload;
+            yield return new EnterPlayMode();
+            Time.captureFramerate = 30;
+            var failures = new List<string>();
+            foreach (var id in DraggersForTurns)
+            {
+                var holder = new GameObject("DraggerTurnTest");
+                var ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
+                ground.transform.SetParent(holder.transform, false);
+                ground.transform.localScale = Vector3.one * 10f;
+                Physics.SyncTransforms();
+                var c = LocomotionCapture.Spawn(Lib, id, holder.transform, out var restore);
+                var gait = c.GetComponent<CritterCrafter.Locomotion.CreatureGait>();
+                var block = c.Skeleton.locomotion;
+                Assert.IsNotNull(gait, id + ": a CreatureGait");
+                var speeds = new[] { (float)block.v_walk_mps, (float)block.v_run_mps, Mathf.Min(2.5f, 0.9f * (float)block.v_max_mps) };
+                foreach (float speed in speeds)
+                {
+                    // One haul per arm: half a gait cycle.
+                    float haul = 0.5f / (float)CritterCrafter.Locomotion.StepPlanner.Params(block, speed).cadenceHz;
+                    for (int k = 0; k < 4; k++)
+                    {
+                        float before = 1.2f + k * haul / 4f;
+                        var recorder = holder.AddComponent<LocomotionRecorder>();
+                        recorder.Begin(gait, ReviewCourse.TurnAt(speed, before, 90f),
+                            new LocomotionMetrics { skeleton_id = id, speed_mps = speed, warmup_frames = 30 });
+                        while (!recorder.Done) yield return null;
+                        var m = recorder.Metrics;
+                        Object.Destroy(recorder);
+                        yield return null;
+                        string label = $"{id} @ {speed:F2} m/s, turn at {before:F2} s";
+                        string detail = $"slip {m.max_planted_slip_m:F3} m ({m.max_slip_leg} frame {m.max_slip_frame}), " +
+                            $"rewrite {m.max_plant_rewrite_m:F3} m, clamped {m.clamped_planted_frames} frames, " +
+                            $"lift blocked {m.lift_blocked_frames} frames, IK residual {m.max_ik_residual_m:F3} m";
+                        if (m.max_planted_slip_m >= OneFrameDrag || m.max_plant_rewrite_m >= OneFrameDrag
+                            || m.max_ik_residual_m >= 0.01f || m.lift_blocked_frames > 0)
+                            failures.Add(label + ": " + detail);
+                    }
+                }
+                Object.Destroy(holder);
+                restore();
+                yield return null;
+            }
+            Time.captureFramerate = 0;
+            yield return new ExitPlayMode();
+            Assert.IsEmpty(failures, "dragger hands slid or missed their targets after an instant turn:\n" + string.Join("\n", failures));
+        }
+
         [Test]
         public void GaitPhaseDrivesTheLocomotionOverlayClock()
         {

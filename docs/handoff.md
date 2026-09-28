@@ -140,7 +140,7 @@ The golden, Unity-test and QA steps fail loudly if skipped.
 ## Open issues and follow-ups
 
 - **Turns and slopes:**
-  - a dragger's planted hand slips about 14 cm shortly after an instant 90° turn at walk speed: the torso lunges away from the gripping hand, the wrist hits the reach clamp, and `CanLift` refuses the re-step while the other arm swings (fix in progress on `feature/locomotion-thread`);
+  - a dragger's planted hand used to slip 4–20 cm after an instant 90° turn, because `CanLift` refused the re-step while the other arm swung. Fixed on `feature/locomotion-thread` (grounded bodies re-step at once; test `DraggerHandsHoldThroughInstantTurns`); a one-frame drag of a centimetre or two remains;
   - a brief shuffle after instant 180° turns;
   - a few centimetres of downhill foot slide on the 20° ramp;
   - the first stride from standing can drag a foot (tests exclude the first second);
