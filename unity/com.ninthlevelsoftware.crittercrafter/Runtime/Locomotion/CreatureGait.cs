@@ -46,6 +46,8 @@ namespace CritterCrafter.Locomotion
             public double runPhase;
             public bool support;
             public bool attack;
+            /// <summary>Drag gaits: a leg that drives the torso from behind (an arm pulls it from ahead).</summary>
+            public bool push;
             /// <summary>Legs sharing a walk phase offset step together (e.g. a hexapod tripod).</summary>
             public int group;
 
@@ -489,6 +491,8 @@ namespace CritterCrafter.Locomotion
         public float dragRollDeg = 8f;
         [Tooltip("Crawl heave: chest lift at mid-pull (degrees).")]
         public float dragHeaveDeg = 6f;
+        [Tooltip("Crawl: chest heave of a pushing leg, as a fraction of a pulling arm's.")]
+        [Range(0f, 1f)] public float dragPushHeave = 0.5f;
         [Tooltip("Crawl: shoulders turn toward the pulling arm (degrees).")]
         public float dragYawDeg = 6f;
         [Tooltip("Crawl: fraction of each haul the torso rests while the new hand grips (at least the hand-over overlap).")]
@@ -504,10 +508,11 @@ namespace CritterCrafter.Locomotion
         /// as the hand grips, lunges through the pull and stops. Returns the torso's lead over the root along
         /// the heading (m), and the pull progress (0..1, or -1 outside the pull) and its side.
         /// </summary>
-        float HaulSurge(float speed, out float pull, out int side)
+        float HaulSurge(float speed, out float pull, out int side, out bool push)
         {
             pull = -1f;
             side = 0;
+            push = false;
             int groups = 0;
             foreach (var leg in legs) groups = Math.Max(groups, leg.group + 1);
             if (groups < 1 || _params.cadenceHz <= 0.0) return 0f;
@@ -520,6 +525,7 @@ namespace CritterCrafter.Locomotion
                 if (phase >= span) continue;
                 w = (float)(phase / span);
                 side = leg.homeLocal.x < 0f ? -1 : 1;
+                push = leg.push;
                 break;
             }
             if (w < 0f) return 0f;
@@ -545,7 +551,8 @@ namespace CritterCrafter.Locomotion
                 bool moving = speed > 0.05f;
                 float pull = -1f, surge = 0f;
                 int side = 0;
-                if (moving) surge = HaulSurge(speed, out pull, out side);
+                bool push = false;
+                if (moving) surge = HaulSurge(speed, out pull, out side, out push);
                 float strength = Mathf.Clamp01(speed / Mathf.Max(0.1f, (float)_block.v_walk_mps));
                 float arc = pull >= 0f ? Mathf.Sin(Mathf.PI * pull) : 0f;
                 float kg = 1f - Mathf.Exp(-dt / 0.06f);
@@ -553,7 +560,9 @@ namespace CritterCrafter.Locomotion
                 float ks = moving ? 1f - Mathf.Exp(-dt / 0.03f) : 1f - Mathf.Exp(-dt / Mathf.Max(0.01f, dragStopSettle));
                 _bodyHeight = Mathf.Lerp(_bodyHeight, 0f, kg);
                 _bodySurge = Mathf.Lerp(_bodySurge, surge, ks);
-                _bodyPitch = Mathf.Lerp(_bodyPitch, -dragHeaveDeg * strength * arc, kg);
+                // A leg shoves the hips forward instead of hauling the chest up to a hand, so it heaves less.
+                float heave = push ? dragPushHeave : 1f;
+                _bodyPitch = Mathf.Lerp(_bodyPitch, -dragHeaveDeg * heave * strength * arc, kg);
                 _bodyRoll = Mathf.Lerp(_bodyRoll, dragRollDeg * side * strength * arc, kg);
                 _bodyYaw = Mathf.Lerp(_bodyYaw, dragYawDeg * side * strength * arc, kg);
                 // Pitch and roll about the rear of the torso so the hips and trailing body stay grounded.

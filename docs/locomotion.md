@@ -22,7 +22,7 @@ Each skeleton publishes `v_walk_mps`, `v_run_mps` and `v_max_mps`:
 - **Drag.** Full-stroke pulls at about 1 pull per second when walking and 1.8 when running.
 - **Slide.** 1 and 2 undulations per second.
 
-Above `v_max_mps` the feet slide, reported as `overspeed`. Use `v_max_mps` or `v_run_mps` as the threat's move speed rather than forcing one speed on every body plan. All 39 current skeletons can reach 2.5 m/s (the current Synaptic Sea threat speed) within `v_max_mps`, but 23 of them have `v_run_mps` below 2.5, so forcing 2.5 m/s runs those bodies above their natural run speed.
+Above `v_max_mps` the feet slide, reported as `overspeed`. Use `v_max_mps` or `v_run_mps` as the threat's move speed rather than forcing one speed on every body plan. All 42 current skeletons can reach 2.5 m/s (the current Synaptic Sea threat speed) within `v_max_mps` (the lowest is 2.53), but 26 of them have `v_run_mps` below 2.5, so forcing 2.5 m/s runs those bodies above their natural run speed.
 
 ## Legs block fields
 
@@ -91,6 +91,8 @@ The root (the agent) is the travel intent and still moves at an even speed. The 
 - **Settle** (`dragSettle`, default 0.15): the torso comes to rest before the next grip.
 - **Stopping:** the torso eases onto the root over `dragStopSettle` (0.3 s).
 - **Arms, not legs:** the dragger arm branches bend with the elbow pointing up, out and back (branch `up` in `_dragger`), and the forearm and wrist twist so the palm lies flat. Before, the elbows pointed straight up and read as knees.
+
+- **One arm, one leg** (`dragger_arm_leg_crawler`, asymmetric): the single arm `arm_L` pulls from ahead of its shoulder and the single leg `leg_R` pushes from behind its hip, half a cycle apart. The catalog marks each drag leg `drag_drive` = `pull` or `push`. A pull stroke runs from the arm's far reach back to the shoulder plane; a push stroke runs from the leg's far reach forward to the hip plane, and a pushing leg lifts less (0.18 of its reach against 0.38 for a reaching arm). The torso lunges on the push too, but heaves the chest less (`dragPushHeave`, 0.5 of a pull). The leg is the shorter stroke, so it sets the creature's speed (the usable stroke is the minimum over the limbs). The leg is a `limb3_digitigrade` limb with a heel-up foot and a `hand` contact, the same clearance and ground band a sloped hand gets: a flat `foot` contact leaves only 7.5 mm of clearance and the foot's rounded tip dipped through the floor (5–36 mm depending on preset, against a 5 mm limit).
 
 An agent's instant turn can leave a gripping hand out of reach (the torso yaws at a limited rate and lunges along the new heading). The hand must then re-grip by stepping. For bodies that lie on the ground (`body_on_ground`) the torso carries the weight, so a strained hand may re-step at once even while the other hand is in the air: the swing cap in `CanLift` and the one-group-at-a-time rule in `LiftGroup` do not apply. Both hands may be off the ground for a few frames after a sharp turn. Without this the re-step was refused, the reach clamp rewrote the plant point every frame and the hand slid. `LibraryTests.DraggerHandsHoldThroughInstantTurns` sweeps four haul phases at walk, run and 2.5 m/s and fails on any refused re-step. The recorder reports `max_plant_rewrite_m`, `clamped_planted_frames`, `lift_blocked_frames` and the slipping leg and frame, and `legs.csv`/`frames.csv` carry `clamped`, `lift_blocked`, `plant_rewrite_m`, `yaw_lag_deg` and `surge_m`.
 

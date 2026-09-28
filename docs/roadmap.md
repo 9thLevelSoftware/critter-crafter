@@ -2,7 +2,7 @@
 
 The milestone list below was restored from the original plan (`git show 6379277:.claude/plans/floating-wiggling-sprout.md`, "Milestones & acceptance"). That plan file was later overwritten by the runtime-locomotion plan, so this page is now the one place that holds the milestones and their status. Live counts (skeletons, parts, tests) belong here too, so other docs can point at this page instead of repeating them.
 
-**Live counts (2026-09-28):** 13 archetypes × 3 presets = 39 draft skeletons, none approved; 4 real parts, all `draft`; pytest collects 304 tests; the Unity EditMode suite has 38 cases (37 passed, 1 skipped for missing env vars).
+**Live counts (2026-09-28):** 14 archetypes × 3 presets = 42 draft skeletons, none approved; 4 real parts, all `draft`; pytest collects 315 tests; the Unity EditMode suite has 39 cases (38 passed, 1 skipped for missing env vars).
 
 ## M0: Scaffold, schemas, placeholders, first Unity assembly — done
 
@@ -13,7 +13,7 @@ The milestone list below was restored from the original plan (`git show 6379277:
 
 - Work: 7 families, `skeleton vary`, the clip generator, review sheets.
 - Accepted when: at least 40 skeletons across the 7 families pass QA, clips play without root motion, and **the owner approves the per-family review GIFs**.
-- Status: 39 skeletons (the tentacle radial archetype was retired), all `draft`. The owner has approved every family visually in locomotion captures, but no skeleton has been formally approved. The `skeleton review` receipt process predates runtime locomotion and may deserve simplifying.
+- Status: 42 skeletons (the tentacle radial archetype was retired; the one-arm-one-leg dragger was added), all `draft`. That meets the "at least 40" target once approved. The owner has approved every family visually in locomotion captures, but no skeleton has been formally approved. The `skeleton review` receipt process predates runtime locomotion and may deserve simplifying.
 
 ## Inserted milestone: runtime locomotion ("option B") — merged
 
@@ -36,7 +36,7 @@ The milestone list below was restored from the original plan (`git show 6379277:
 
 - Work: at least 9 connector variants, at least 24 parts, at least 80 skeletons, species and tag affinity, `CreatureBaker`.
 - Accepted when: each family yields at least 80 distinct creatures per 100 seeds, a baked creature takes at most 2 draw calls, and baked and runtime screenshots match.
-- Status: connectors exist only as generated reference lofts; there are 39 of the 80 skeletons.
+- Status: connectors exist only as generated reference lofts; there are 42 of the 80 skeletons.
 
 ## M5: synaptic-sea-unity integration — not started
 
@@ -48,7 +48,7 @@ The milestone list below was restored from the original plan (`git show 6379277:
 
 1. Docs: this roadmap and the count fixes.
 2. Dragger hand slip at instant turns.
-3. A one-arm-one-leg dragger (a 14th archetype, 42 skeletons).
+3. A one-arm-one-leg dragger (a 14th archetype, 42 skeletons): built, awaiting GIF review.
 4. Per-creature gait and speed derived from the assembled build.
 
 ## Closed pull requests

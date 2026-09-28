@@ -141,3 +141,45 @@ def test_locomotion_golden_matches_current_planner(catalog):
     from critter_crafter.locomotion.qa import golden_rows
     golden = json.loads((paths().root / "tests" / "golden_v3" / "locomotion.json").read_text(encoding="utf-8"))
     assert golden["rows"] == json.loads(json.dumps(golden_rows(catalog))), "run `critter recipe golden`"
+
+
+def _draggers(catalog, archetype):
+    return [s for s in catalog["skeletons"] if s["anatomy"]["archetype_id"] == archetype]
+
+
+def test_arm_leg_dragger_has_one_pulling_arm_and_one_pushing_leg(catalog):
+    skeletons = _draggers(catalog, "dragger_arm_leg_crawler")
+    assert len(skeletons) == 3
+    for skeleton in skeletons:
+        block = skeleton["locomotion"]
+        assert block["mode"] == "legs" and block["gait"] == "drag" and block["body_on_ground"]
+        legs = {leg["branch_id"]: leg for leg in block["legs"]}
+        assert set(legs) == {"arm_L", "leg_R"}, skeleton["skeleton_id"]
+        arm, leg = legs["arm_L"], legs["leg_R"]
+        assert arm["drag_drive"] == "pull" and leg["drag_drive"] == "push"
+        # The hand reaches out ahead of its shoulder; the foot sits behind its hip.
+        assert arm["home_m"][2] > arm["hip_m"][2] and leg["home_m"][2] < leg["hip_m"][2]
+        assert arm["stroke_m"] > 0.2 and leg["stroke_m"] > 0.2
+        assert block["usable_stroke_m"] == min(arm["stroke_m"], leg["stroke_m"])
+        # Half a cycle apart, so the hand grips while the foot drives and the reverse.
+        assert abs(arm["walk_phase"] - leg["walk_phase"]) == pytest.approx(.5, abs=1e-6)
+        assert leg["clearance_m"] < arm["clearance_m"], "a pushing leg does not lift as high as a reaching arm"
+        assert 0 < block["v_walk_mps"] < block["v_run_mps"] < block["v_max_mps"]
+        assert block["attack_branch_id"] == "arm_L"
+        assert skeleton["anatomy"]["symmetry"]["kind"] == "asymmetric"
+
+
+def test_symmetric_draggers_only_pull(catalog):
+    for archetype in ("dragger_forelimb_puller", "dragger_belly_hauler"):
+        for skeleton in _draggers(catalog, archetype):
+            drives = {leg["drag_drive"] for leg in skeleton["locomotion"]["legs"]}
+            assert drives == {"pull"}, skeleton["skeleton_id"]
+
+
+def test_arm_leg_dragger_reaches_game_speed_within_step_rate(catalog):
+    for skeleton in _draggers(catalog, "dragger_arm_leg_crawler"):
+        block = skeleton["locomotion"]
+        params = stepper.gait_params(block, min(GAME_SPEED, .9 * block["v_max_mps"]))
+        assert not params["overspeed"], skeleton["skeleton_id"]
+        assert params["cadence_hz"] <= block["cadence_max_hz"]
+        assert params["stride_m"] * params["duty"] <= .9 * block["usable_stroke_m"] + 1e-9

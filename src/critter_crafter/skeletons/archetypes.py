@@ -45,6 +45,7 @@ ARCHETYPES: dict[str, dict[str, Any]] = {
     "serpentine_segmented_paired_legs": {"family": "serpentine", "plan": "serpentine", "variant": "paired", "height": 0.66, "length": 2.45, "width": 1.08},
     "dragger_forelimb_puller": {"family": "dragger", "plan": "dragger", "variant": "pull", "height": 0.82, "length": 1.46, "width": 0.68},
     "dragger_belly_hauler": {"family": "dragger", "plan": "dragger", "variant": "belly", "height": 0.46, "length": 1.72, "width": 0.82},
+    "dragger_arm_leg_crawler": {"family": "dragger", "plan": "dragger", "variant": "armleg", "height": 0.74, "length": 1.5, "width": 0.7},
 }
 
 _FRACTIONS = {"core1": 1, "spine3": 3, "limb3": 3, "insect_leg4": 4, "tentacle8": 8, "head1": 1, "appendage1": 1}
@@ -395,8 +396,11 @@ def _dragger(a: dict[str, Any], h: float, length: float, width: float) -> tuple[
     """Draggers crawl like a legless zombie: the chest lies on the ground, the head is raised, and the
     arms reach out nearly horizontally, slap down far ahead and haul the sliding body up to the hand
     (runtime "drag" gait). The dragged remains trail flat behind. The puller is long-armed and narrow;
-    the belly hauler is broader and heavier with a longer trailing body."""
-    pull = a["variant"] == "pull"
+    the belly hauler is broader and heavier with a longer trailing body. The arm-leg crawler has one arm
+    that pulls from the front and one leg that pushes from behind, like a crawler that lost a limb of each
+    pair: the arm reaches and hauls while the leg drives from the hip."""
+    armleg = a["variant"] == "armleg"
+    pull = a["variant"] in ("pull", "armleg")
     body_length = length * (.55 if pull else .66)
     radius = body_length * _PROFILE_GIRTH["spine3_axial"] * .5
     rear_z = -body_length * .5
@@ -409,7 +413,7 @@ def _dragger(a: dict[str, Any], h: float, length: float, width: float) -> tuple[
     shoulder_z = rear_z + along
     arm_length = length * (.66 if pull else .52) * a["limb_scale"]
     spread = .3 if pull else .55
-    for side, sx, phase in (("L", 1, 0.0), ("R", -1, math.pi)):
+    for side, sx, phase in (("L", 1, 0.0),) if armleg else (("L", 1, 0.0), ("R", -1, math.pi)):
         arm = _branch(
             f"arm_{side}", "limb3", "core",
             origin=_v(sx * radius * (.95 if pull else 1.1), shoulder_y, shoulder_z),
@@ -427,6 +431,26 @@ def _dragger(a: dict[str, Any], h: float, length: float, width: float) -> tuple[
         arm["_extension_target"] = .72
         arm["_ground_contact"] = True
         branches.append(arm)
+    if armleg:
+        # The leg drives from the hip: attached at the pelvis, it points out and back, the knee flares up,
+        # out and forward, the shin folds down and the clawed foot plants on its toe behind the hip. Half a
+        # cycle behind the arm, so the torso is hauled by the hand and then shoved by the foot. Like the arm
+        # it plants a rounded, steeply sloped tip, so its contact is a "hand" (the dragger family's default
+        # contact): that gives the tip the same ground clearance and proximity band a sloped hand needs,
+        # and the heel-up foot (digitigrade) keeps the toe and the ankle above the floor.
+        sx = -1
+        leg = _branch(
+            "leg_R", "limb3", "core",
+            origin=_v(sx * radius * 1.1, shoulder_y, rear_z + body_length * .04),
+            direction=[sx * .55, -.2, -1.0], up=[sx * .55, .75, .35],
+            length=length * .55 * a["limb_scale"], side="R", attach=0, role="locomotor",
+            phase=math.pi, support=.6, contact="hand", parent_joint="pelvis", profile_id="limb3_digitigrade",
+        )
+        leg["stance_deg"] = [30.0, -75.0, -44.0]
+        leg["stance_z_deg"] = [0.0, 15.0 * sx, 20.0 * sx]
+        leg["_extension_target"] = .72
+        leg["_ground_contact"] = True
+        branches.append(leg)
     # Raised head looking forward, carried off the ground by the neck.
     branches.append(_branch("head", "head1", "core", origin=_v(0, core["origin_m"][1] + radius * .5, rear_z + body_length),
                             direction=[0, .55, 1], up=[0, 1, 0], length=body_length * .3,
@@ -437,6 +461,9 @@ def _dragger(a: dict[str, Any], h: float, length: float, width: float) -> tuple[
         length=length * (.45 if pull else .6), role="locomotor", support=.92, contact="body",
         parent_joint="pelvis",
     ))
+    if armleg:
+        support = ["arm_L", "leg_R", "belly"]
+        return branches, support, support, "asymmetric"
     support = ["arm_L", "arm_R", "belly"]
     return branches, support, support, "bilateral"
 

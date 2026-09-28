@@ -147,18 +147,28 @@ def _drag_block(skeleton: dict[str, Any], legs: list[dict[str, Any]], legs_src: 
     pose = neutral_pose_world(skeleton)
     by_id = {b["branch_id"]: b for b in legs_src}
     for leg in legs:
-        leg["clearance_m"] = mu.r6(max(leg["clearance_m"], DRAG_LIFT_FRACTION * leg["reach_m"]))
-        # A pull is lopsided: from as far ahead as the arm reaches back to the shoulder plane. Use that
-        # whole chord (through the wrist, which the hinge must keep in reach) and centre the stance on it.
+        # A limb ahead of its shoulder pulls (arms reach out and haul the torso up to the hand); a limb
+        # behind its hip pushes (a leg drives the torso forward from behind). Both hinge from the same
+        # neutral chord, clipped at the joint's own plane.
         chain = by_id[leg["branch_id"]]["bone_names"]
         hip = pose[chain[0]]["head"]
         wrist = pose[chain[2]]["head"]
+        ahead = wrist[2] - hip[2]
+        push = ahead < 0.0
+        leg["drag_drive"] = "push" if push else "pull"
+        lift = STEP_LIFT_FRACTION if push else DRAG_LIFT_FRACTION   # the reaching arm lifts high over the head
+        leg["clearance_m"] = mu.r6(max(leg["clearance_m"], lift * leg["reach_m"]))
+        # A pull is lopsided: from as far ahead as the arm reaches back to the shoulder plane; a push runs
+        # from as far back as the leg reaches up to the hip plane. Use that whole chord (through the wrist
+        # or ankle, which the hinge must keep in reach) and centre the stance on it.
         radius2 = (REACH_FRACTION * (pose[chain[0]]["length"] + pose[chain[1]]["length"])) ** 2 - (hip[1] - wrist[1]) ** 2
         disc = radius2 - (wrist[0] - hip[0]) ** 2
-        ahead = wrist[2] - hip[2]
         if disc > 0.0:
             root = math.sqrt(disc)
-            forward, backward = -ahead + root, min(ahead + root, ahead)
+            if push:
+                forward, backward = min(-ahead + root, -ahead), ahead + root
+            else:
+                forward, backward = -ahead + root, min(ahead + root, ahead)
             leg["stroke_m"] = mu.r6(max(0.0, forward + backward))
             leg["stance_shift_m"] = mu.r6((forward - backward) * .5)
     stroke = min(l["stroke_m"] for l in legs)

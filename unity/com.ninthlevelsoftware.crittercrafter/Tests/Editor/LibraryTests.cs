@@ -210,7 +210,7 @@ namespace CritterCrafter.Tests
             "quadruped_lean_digitigrade_balanced_v3", "biped_plantigrade_humanoid_balanced_v3",
             "crawler_bilateral_eight_legged_balanced_v3", "crawler_alien_tripod_balanced_v3",
             "radial_raised_articulated_walker_balanced_v3", "serpentine_segmented_paired_legs_balanced_v3",
-            "dragger_forelimb_puller_balanced_v3",
+            "dragger_forelimb_puller_balanced_v3", "dragger_arm_leg_crawler_balanced_v3",
         };
 
         [UnityTest]
@@ -239,7 +239,12 @@ namespace CritterCrafter.Tests
                 bool sawLocomotionState = false;
                 if (gait != null)
                 {
-                    float speed = Mathf.Min(2.5f, 0.9f * (float)block.v_max_mps);
+                    // Grounded (dragging) bodies move at their own run speed: a hand or foot hauls the torso in
+                    // hauls that are only a few frames long once the creature runs near its v_max, which is
+                    // faster than the game moves it. The turn sweep below covers them at 2.5 m/s.
+                    float speed = block.body_on_ground
+                        ? Mathf.Min(2.5f, (float)block.v_run_mps)
+                        : Mathf.Min(2.5f, 0.9f * (float)block.v_max_mps);
                     var recorder = holder.AddComponent<LocomotionRecorder>();
                     recorder.Begin(gait, ReviewCourse.Straight(speed, 3f), new LocomotionMetrics { skeleton_id = id, speed_mps = speed, warmup_frames = 30 });
                     while (!recorder.Done)
@@ -282,6 +287,7 @@ namespace CritterCrafter.Tests
         static readonly string[] DraggersForTurns =
         {
             "dragger_forelimb_puller_balanced_v3", "dragger_belly_hauler_balanced_v3",
+            "dragger_arm_leg_crawler_balanced_v3",
         };
 
         [UnityTest]

@@ -181,6 +181,7 @@ namespace CritterCrafter.Locomotion
                 built.walkPhase = leg.walk_phase;
                 built.runPhase = leg.run_phase;
                 built.support = leg.support;
+                built.push = leg.drag_drive == "push";
                 built.attack = leg.branch_id == block.attack_branch_id;
                 legs.Add(built);
             }

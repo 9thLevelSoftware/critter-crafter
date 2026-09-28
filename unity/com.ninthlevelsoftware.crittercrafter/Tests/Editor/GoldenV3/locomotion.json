@@ -1457,6 +1457,291 @@
    ]
   },
   {
+   "skeleton_id": "dragger_arm_leg_crawler_balanced_v3",
+   "speed": 0.3,
+   "mode": "legs",
+   "weight": 0.0,
+   "duty": 0.6,
+   "stride_m": 0.868929,
+   "cadence_hz": 0.3452526040677662,
+   "run": false,
+   "overspeed": false,
+   "landings": [
+    0.366095,
+    0.017497,
+    0.9307277,
+    -0.334451,
+    0.017501,
+    -0.5120603000000001
+   ]
+  },
+  {
+   "skeleton_id": "dragger_arm_leg_crawler_balanced_v3",
+   "speed": 0.868929,
+   "mode": "legs",
+   "weight": 0.0,
+   "duty": 0.6,
+   "stride_m": 0.868929,
+   "cadence_hz": 1.0,
+   "run": false,
+   "overspeed": false,
+   "landings": [
+    0.366095,
+    0.017497,
+    0.9307277,
+    -0.334451,
+    0.017501,
+    -0.5120603000000001
+   ]
+  },
+  {
+   "skeleton_id": "dragger_arm_leg_crawler_balanced_v3",
+   "speed": 1.287595,
+   "mode": "legs",
+   "weight": 0.5000000000000001,
+   "duty": 0.575,
+   "stride_m": 0.9067085217391304,
+   "cadence_hz": 1.4200759881800853,
+   "run": true,
+   "overspeed": false,
+   "landings": [
+    0.366095,
+    0.017497,
+    0.9307277,
+    -0.334451,
+    0.017501,
+    -0.5120603000000001
+   ]
+  },
+  {
+   "skeleton_id": "dragger_arm_leg_crawler_balanced_v3",
+   "speed": 1.706261,
+   "mode": "legs",
+   "weight": 1.0,
+   "duty": 0.55,
+   "stride_m": 0.9479225454545454,
+   "cadence_hz": 1.8000004411561055,
+   "run": true,
+   "overspeed": false,
+   "landings": [
+    0.366095,
+    0.017497,
+    0.9307277,
+    -0.334451,
+    0.017501,
+    -0.5120603000000001
+   ]
+  },
+  {
+   "skeleton_id": "dragger_arm_leg_crawler_balanced_v3",
+   "speed": 2.5,
+   "mode": "legs",
+   "weight": 1.0,
+   "duty": 0.55,
+   "stride_m": 0.9479225454545454,
+   "cadence_hz": 2.637346281073214,
+   "run": true,
+   "overspeed": false,
+   "landings": [
+    0.366095,
+    0.017497,
+    0.9307277,
+    -0.334451,
+    0.017501,
+    -0.5120603000000001
+   ]
+  },
+  {
+   "skeleton_id": "dragger_arm_leg_crawler_compact_v3",
+   "speed": 0.3,
+   "mode": "legs",
+   "weight": 0.0,
+   "duty": 0.6,
+   "stride_m": 0.6333825000000001,
+   "cadence_hz": 0.4736474405276432,
+   "run": false,
+   "overspeed": false,
+   "landings": [
+    0.247784,
+    0.017501,
+    0.6861787500000001,
+    -0.238303,
+    0.017499,
+    -0.39578425000000006
+   ]
+  },
+  {
+   "skeleton_id": "dragger_arm_leg_crawler_compact_v3",
+   "speed": 0.633383,
+   "mode": "legs",
+   "weight": 0.0,
+   "duty": 0.6,
+   "stride_m": 0.6333825000000001,
+   "cadence_hz": 1.0000007894124008,
+   "run": false,
+   "overspeed": false,
+   "landings": [
+    0.247784,
+    0.017501,
+    0.6861787500000001,
+    -0.238303,
+    0.017499,
+    -0.39578425000000006
+   ]
+  },
+  {
+   "skeleton_id": "dragger_arm_leg_crawler_compact_v3",
+   "speed": 0.938558,
+   "mode": "legs",
+   "weight": 0.5,
+   "duty": 0.575,
+   "stride_m": 0.6609208695652175,
+   "cadence_hz": 1.4200762046104314,
+   "run": true,
+   "overspeed": false,
+   "landings": [
+    0.247784,
+    0.017501,
+    0.6861787500000001,
+    -0.238303,
+    0.017499,
+    -0.39578425000000006
+   ]
+  },
+  {
+   "skeleton_id": "dragger_arm_leg_crawler_compact_v3",
+   "speed": 1.243733,
+   "mode": "legs",
+   "weight": 1.0,
+   "duty": 0.55,
+   "stride_m": 0.6909627272727272,
+   "cadence_hz": 1.8000001315687335,
+   "run": true,
+   "overspeed": false,
+   "landings": [
+    0.247784,
+    0.017501,
+    0.6861787500000001,
+    -0.238303,
+    0.017499,
+    -0.39578425000000006
+   ]
+  },
+  {
+   "skeleton_id": "dragger_arm_leg_crawler_compact_v3",
+   "speed": 2.5,
+   "mode": "legs",
+   "weight": 1.0,
+   "duty": 0.55,
+   "stride_m": 0.6909627272727272,
+   "cadence_hz": 3.618140170697275,
+   "run": true,
+   "overspeed": false,
+   "landings": [
+    0.247784,
+    0.017501,
+    0.6861787500000001,
+    -0.238303,
+    0.017499,
+    -0.39578425000000006
+   ]
+  },
+  {
+   "skeleton_id": "dragger_arm_leg_crawler_elongated_v3",
+   "speed": 0.3,
+   "mode": "legs",
+   "weight": 0.0,
+   "duty": 0.6,
+   "stride_m": 1.233267,
+   "cadence_hz": 0.24325632648891118,
+   "run": false,
+   "overspeed": false,
+   "landings": [
+    0.546789,
+    0.017506,
+    1.3102150999999997,
+    -0.489351,
+    0.0175,
+    -0.6928249000000001
+   ]
+  },
+  {
+   "skeleton_id": "dragger_arm_leg_crawler_elongated_v3",
+   "speed": 1.233267,
+   "mode": "legs",
+   "weight": 0.0,
+   "duty": 0.6,
+   "stride_m": 1.233267,
+   "cadence_hz": 1.0,
+   "run": false,
+   "overspeed": false,
+   "landings": [
+    0.546789,
+    0.017506,
+    1.3102151,
+    -0.489351,
+    0.0175,
+    -0.6928249
+   ]
+  },
+  {
+   "skeleton_id": "dragger_arm_leg_crawler_elongated_v3",
+   "speed": 1.827478,
+   "mode": "legs",
+   "weight": 0.5000006310894877,
+   "duty": 0.5749999684455256,
+   "stride_m": 1.2868873749687908,
+   "cadence_hz": 1.4200760964372032,
+   "run": true,
+   "overspeed": false,
+   "landings": [
+    0.546789,
+    0.017506,
+    1.3102151,
+    -0.489351,
+    0.0175,
+    -0.6928249
+   ]
+  },
+  {
+   "skeleton_id": "dragger_arm_leg_crawler_elongated_v3",
+   "speed": 2.421688,
+   "mode": "legs",
+   "weight": 1.0,
+   "duty": 0.55,
+   "stride_m": 1.3453821818181817,
+   "cadence_hz": 1.8000000540569616,
+   "run": true,
+   "overspeed": false,
+   "landings": [
+    0.546789,
+    0.017506,
+    1.3102151,
+    -0.489351,
+    0.0175,
+    -0.6928249
+   ]
+  },
+  {
+   "skeleton_id": "dragger_arm_leg_crawler_elongated_v3",
+   "speed": 2.5,
+   "mode": "legs",
+   "weight": 1.0,
+   "duty": 0.55,
+   "stride_m": 1.3453821818181817,
+   "cadence_hz": 1.8582080495680715,
+   "run": true,
+   "overspeed": false,
+   "landings": [
+    0.546789,
+    0.017506,
+    1.3102151,
+    -0.489351,
+    0.0175,
+    -0.6928249
+   ]
+  },
+  {
    "skeleton_id": "dragger_belly_hauler_balanced_v3",
    "speed": 0.3,
    "mode": "legs",

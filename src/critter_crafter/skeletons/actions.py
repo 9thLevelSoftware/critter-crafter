@@ -147,6 +147,12 @@ ATTACK_PROFILES: Mapping[str, AttackProfile] = MappingProxyType({
         (.04, .08, -.09), (-.04, .12, .18), (.31, .54, .67, 1.0),
         release=(0,), minimum_preserved=4, max_reach_n=.24, minimum_displacement_n=.12,
     ),
+    "dragger_arm_leg_crawler": _profile(
+        # The single arm is the striker; the leg only drives the crawl.
+        "lopsided_hammer", "temporary_ik", "arm_L", 2,
+        (.04, .08, -.09), (-.04, .12, .18), (.31, .54, .67, 1.0),
+        release=(0,), minimum_preserved=4, max_reach_n=.24, minimum_displacement_n=.12,
+    ),
     "dragger_belly_hauler": _profile(
         "hauler_shove", "temporary_ik", "arm_L", 2,
         # The hauler's low, compact arm drives upward and forward without

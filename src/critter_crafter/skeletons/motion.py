@@ -39,6 +39,7 @@ ARCHETYPE_PROFILES: dict[str, dict[str, float | str]] = {
     "serpentine_segmented_paired_legs": {"family": "serpentine", "stride": .23, "support": .86, "clearance": .018,"cadence": .74},
     "dragger_forelimb_puller":           {"family": "dragger",    "stride": .43, "support": .73, "clearance": .075,"cadence": .82},
     "dragger_belly_hauler":              {"family": "dragger",    "stride": .25, "support": .84, "clearance": .035,"cadence": .65},
+    "dragger_arm_leg_crawler":           {"family": "dragger",    "stride": .36, "support": .78, "clearance": .06, "cadence": .74},
 }
 
 

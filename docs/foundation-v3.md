@@ -36,7 +36,7 @@ Recipe matching uses one uniform length scale in the inclusive 0.8–1.25 range 
 
 ## Candidate generation
 
-`critter skeleton vary` generates deterministic anatomy archetypes across compact, balanced, and elongated presets (13 archetypes and 39 candidates now; the first delivery had 14 and 42 before the tentacle radial was retired). The families are biped, crawler, dragger, hexapod, quadruped, radial, and serpentine. Newly generated candidates have status `draft`; generation never auto-approves them. `skeleton status` reports the drafts per family, all awaiting human review.
+`critter skeleton vary` generates deterministic anatomy archetypes across compact, balanced, and elongated presets (14 archetypes and 42 candidates now: the first delivery had 14 and 42, the retired tentacle radial took it to 13 and 39, and the one-arm-one-leg dragger brought it back to 14 and 42). The families are biped, crawler, dragger, hexapod, quadruped, radial, and serpentine. Newly generated candidates have status `draft`; generation never auto-approves them. `skeleton status` reports the drafts per family, all awaiting human review.
 
 `tests/golden_v3/` is a parity fixture, not candidate approval. `critter recipe golden` uses an in-memory approved copy so deterministic recipe coverage can be tested without changing candidate status. The old `tests/golden/` files remain untouched.
 

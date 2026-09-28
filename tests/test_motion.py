@@ -24,11 +24,12 @@ def _skeleton():
 
 
 def test_motion_archetypes_cover_every_family():
-    assert len(ARCHETYPE_PROFILES) == 13
+    assert len(ARCHETYPE_PROFILES) == 14
     families = [p["family"] for p in ARCHETYPE_PROFILES.values()]
     assert set(families) == {"biped", "quadruped", "hexapod", "crawler", "radial", "serpentine", "dragger"}
     # The tentacle radial was retired; the radial family keeps its articulated walker.
-    assert all(families.count(family) == (1 if family == "radial" else 2) for family in set(families))
+    # The dragger family also has the one-arm-one-leg crawler.
+    assert all(families.count(family) == {"radial": 1, "dragger": 3}.get(family, 2) for family in set(families))
 
 
 def test_contact_cycle_has_position_and_velocity_continuity():
