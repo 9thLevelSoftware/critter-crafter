@@ -22,7 +22,7 @@ Each skeleton publishes `v_walk_mps`, `v_run_mps` and `v_max_mps`:
 - **Drag.** Full-stroke pulls at about 1 pull per second when walking and 1.8 when running.
 - **Slide.** 1 and 2 undulations per second.
 
-Above `v_max_mps` the feet slide, reported as `overspeed`. Use `v_max_mps` or `v_run_mps` as the threat's move speed rather than forcing one speed on every body plan. All 39 current skeletons reach 2.5 m/s (the current Synaptic Sea threat speed) within their limits.
+Above `v_max_mps` the feet slide, reported as `overspeed`. Use `v_max_mps` or `v_run_mps` as the threat's move speed rather than forcing one speed on every body plan. All 39 current skeletons can reach 2.5 m/s (the current Synaptic Sea threat speed) within `v_max_mps`, but 23 of them have `v_run_mps` below 2.5, so forcing 2.5 m/s runs those bodies above their natural run speed.
 
 ## Legs block fields
 
@@ -98,6 +98,7 @@ The grip-pull-stop rhythm reads best at walk speed, about one haul per arm per s
 ## Known limitations
 
 - **Instant agent turns** cause a brief shuffle while re-stepping groups catch up with the smoothed body yaw.
+- **Dragger hand slip at instant turns.** Shortly after an instant 90° turn (measured at walk speed), a planted dragger hand slips about 14 cm: the torso lunges away from the gripping hand, the wrist reaches the 0.970 reach clamp, `ApplyTargets` rewrites the plant point, and `CanLift` refuses the re-step because the other arm is already swinging. Whether it appears depends on where in the haul the turn lands. Being fixed on `feature/locomotion-thread`.
 - **On a 20° ramp,** downhill feet can reach the end of their reach and slide a few centimetres.
 - **Starting from standing to full speed in one frame** can drag a foot during the first stride. Tests allow a one-second warmup.
 - **Draggers use placeholder parts,** so the hands read as feet and the head is small. Real parts (M2) will improve the read.
