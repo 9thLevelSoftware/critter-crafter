@@ -57,15 +57,18 @@ uv run critter part approve <part_id>           # owner only, after the sheet; p
 Unity, headless (close any open editor on the TestProject first):
 
 ```powershell
-$U = "F:\Unity\6000.6.0f1\Editor\Unity.exe"
-# Tests (~2 min): expect 37 passed + 1 skipped (PrototypeImportTests needs env vars)
-& $U -batchmode -projectPath unity/TestProject -runTests -testPlatform EditMode `
-     -testResults work/unity_results.xml -logFile work/unity_tests.log
+$U = "F:\Unity\6000.6.0f1\Editor\Unity.exe"; $root = (Get-Location).Path   # run from the repo root
+# Unity is a GUI exe: Start-Process -Wait, or PowerShell returns before it finishes. -testResults,
+# -critterLibrary and -critterOut resolve against unity/TestProject, so pass absolute paths.
+# Tests (~2 min): expect 38 passed + 1 skipped (PrototypeImportTests needs env vars).
+# Add '-testFilter','<TestName>' to run one test.
+Start-Process $U -Wait -PassThru -ArgumentList '-batchmode','-projectPath','unity/TestProject','-runTests',
+  '-testPlatform','EditMode','-testResults',"$root/work/unity_results.xml",'-logFile',"$root/work/unity_tests.log"
 # Locomotion review capture (Play Mode, iso camera), then GIFs
-& $U -batchmode -projectPath unity/TestProject `
-     -executeMethod CritterCrafter.Editor.LocomotionCapture.CaptureFromCommandLine `
-     -critterLibrary library/biomass_core-v0.2.0 -critterSkeletons quadruped_stocky_plantigrade_balanced_v3 `
-     -critterOut work/review/locomotion -critterSpeeds walk,run,2.5 -logFile work/unity_capture.log
+Start-Process $U -Wait -PassThru -ArgumentList '-batchmode','-projectPath','unity/TestProject',
+  '-executeMethod','CritterCrafter.Editor.LocomotionCapture.CaptureFromCommandLine',
+  '-critterLibrary',"$root/library/biomass_core-v0.2.0",'-critterSkeletons','quadruped_stocky_plantigrade_balanced_v3',
+  '-critterOut',"$root/work/review/locomotion",'-critterSpeeds','walk,run,2.5','-logFile',"$root/work/unity_capture.log"
 uv run python tools/frames_to_gif.py work/review/locomotion
 ```
 

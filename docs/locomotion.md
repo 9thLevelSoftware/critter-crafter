@@ -70,10 +70,11 @@ Game integration: move the creature root with the agent (`updatePosition = true`
 - **Capture a skeleton on the review course** (flat ground, a 20° ramp, a plateau, an instant 90° turn, a stop, an instant 180° turn in place). This runs in real Play Mode with the game's orthographic isometric camera and writes frames, `metrics.json` and per-frame and per-leg CSVs:
 
   ```powershell
-  Unity.exe -batchmode -projectPath unity/TestProject `
-    -executeMethod CritterCrafter.Editor.LocomotionCapture.CaptureFromCommandLine `
-    -critterLibrary library/biomass_core-v0.2.0 -critterSkeletons hexapod_compact_insect_balanced_v3 `
-    -critterOut work/review/locomotion -critterSpeeds walk,run,2.5
+  $root = (Get-Location).Path   # repo root; -critterLibrary and -critterOut resolve against unity/TestProject
+  Start-Process "F:\Unity\6000.6.0f1\Editor\Unity.exe" -Wait -PassThru -ArgumentList '-batchmode','-projectPath','unity/TestProject',
+    '-executeMethod','CritterCrafter.Editor.LocomotionCapture.CaptureFromCommandLine',
+    '-critterLibrary',"$root/library/biomass_core-v0.2.0",'-critterSkeletons','hexapod_compact_insect_balanced_v3',
+    '-critterOut',"$root/work/review/locomotion",'-critterSpeeds','walk,run,2.5'
   ```
 
 - **`critter skeleton qa`** checks every skeleton's locomotion block: speed bands, support at the walk and run duty factors, step rate and stance stroke at the published speeds.

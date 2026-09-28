@@ -27,11 +27,12 @@ Blender-marked tests skip automatically when no Blender is found (`CRITTER_BLEND
 Unity, headless (close any editor that has `unity/TestProject` open first):
 
 ```powershell
-& "F:\Unity\6000.6.0f1\Editor\Unity.exe" -batchmode -projectPath unity/TestProject -runTests `
-  -testPlatform EditMode -testResults work/unity_results.xml -logFile work/unity_tests.log
+$U = "F:\Unity\6000.6.0f1\Editor\Unity.exe"; $root = (Get-Location).Path   # run from the repo root
+Start-Process $U -Wait -PassThru -ArgumentList '-batchmode','-projectPath','unity/TestProject','-runTests',
+  '-testPlatform','EditMode','-testResults',"$root/work/unity_results.xml",'-logFile',"$root/work/unity_tests.log"
 ```
 
-`docs/handoff.md` has the locomotion capture command. Frames become GIFs with `tools/frames_to_gif.py`, and the owner judges locomotion from those GIFs.
+Unity is a GUI executable, so use `Start-Process -Wait`; a bare `&` returns before it finishes. `-testResults`, `-critterLibrary` and `-critterOut` resolve against `unity/TestProject`, not the repo root, so pass absolute paths (`-logFile` is the exception and resolves against the repo root). Add `-testFilter <TestName>` to run one test. `docs/handoff.md` has the locomotion capture command. Frames become GIFs with `tools/frames_to_gif.py`, and the owner judges locomotion from those GIFs.
 
 **Change loop:** edit sources → `skeleton vary --force` → `recipe golden` and copy the goldens into the Unity package → pytest → `library build` and `skeleton qa` → Unity tests and a capture. The golden, Unity-test and QA steps fail loudly if skipped.
 
