@@ -46,6 +46,8 @@ namespace CritterCrafter.Locomotion
             public double runPhase;
             public bool support;
             public bool attack;
+            /// <summary>Drag gaits: a leg that drives the torso from behind (an arm pulls it from ahead).</summary>
+            public bool push;
             /// <summary>Legs sharing a walk phase offset step together (e.g. a hexapod tripod).</summary>
             public int group;
 
@@ -61,6 +63,14 @@ namespace CritterCrafter.Locomotion
             /// <summary>Last frame's target was beyond reach and had to be pulled in.</summary>
             [NonSerialized] public bool clamped;
             [NonSerialized] public float weight = 1f;
+            /// <summary>
+            /// Review diagnostics: how far the reach clamp dragged a foot that was already gripping last frame
+            /// (m). A foot landing out of reach is pulled in on touchdown; that is not a slide.
+            /// </summary>
+            [NonSerialized] public float plantRewrite;
+            [NonSerialized] public bool gripped;
+            /// <summary>Review diagnostics: the leg was strained but could not re-step this frame.</summary>
+            [NonSerialized] public bool liftBlocked;
         }
 
         [Tooltip("Layers raycast to find the ground under each foot.")]
@@ -106,6 +116,10 @@ namespace CritterCrafter.Locomotion
         /// <summary>Gait clock in cycles (unbounded; the fractional part is the phase).</summary>
         public double Clock => _clock;
         public Vector3 Velocity => _velocity;
+        /// <summary>Visual body yaw behind the root after an instant heading change (degrees).</summary>
+        public float YawLag => _yawLag;
+        /// <summary>Grounded bodies: the torso's lead over the root along the body heading (m).</summary>
+        public float Surge => _bodySurge;
         public float Speed => new Vector3(_velocity.x, 0f, _velocity.z).magnitude;
         public LocomotionData Block => _block;
         /// <summary>The posed torso (grounded bodies travel in hauls relative to the root).</summary>
@@ -161,6 +175,8 @@ namespace CritterCrafter.Locomotion
             _lastYaw = transform.eulerAngles.y;
             _yawLag = 0f;
             _velocity = Vector3.zero;
+            // Standing again: the next move re-seeds the gait clock with every foot mid-stance.
+            _wasMoving = false;
             _initialised = true;
         }
 
@@ -251,6 +267,7 @@ namespace CritterCrafter.Locomotion
             // Pass 2: lift planted feet, on schedule while moving, or early when strained.
             foreach (var leg in legs)
             {
+                leg.liftBlocked = false;
                 if (!leg.planted) continue;
                 leg.position = leg.plant;
                 if (moving)
@@ -267,16 +284,20 @@ namespace CritterCrafter.Locomotion
                             Lift(leg, Mathf.Max(0.08f, duration), false, cycle);
                         }
                     }
-                    else if (Overrun(leg, leg.home) && CanLift(leg, true))
+                    else if (Overrun(leg, leg.home))
                     {
-                        Lift(leg, Mathf.Clamp(swingTime, 0.12f, 0.2f), true,
-                            StepPlanner.InStance(phase, _params.duty) ? cycle - 1 : cycle);
+                        if (CanLift(leg, true))
+                            Lift(leg, Mathf.Clamp(swingTime, 0.12f, 0.2f), true,
+                                StepPlanner.InStance(phase, _params.duty) ? cycle - 1 : cycle);
+                        else
+                            leg.liftBlocked = true;
                     }
                 }
                 else if (Overrun(leg, leg.home)
                          || Strain(leg, leg.home) > Mathf.Max(0.05f, 0.25f * Mathf.Max(leg.stroke, 0.2f * leg.reach)))
                 {
                     LiftGroup(leg, 0.15f);
+                    leg.liftBlocked = leg.planted;
                 }
             }
 
@@ -303,12 +324,19 @@ namespace CritterCrafter.Locomotion
             Vector3 up = bodyRotation * Vector3.up;
             foreach (var leg in legs)
             {
+                leg.plantRewrite = 0f;
+                bool held = leg.planted && leg.gripped;
+                leg.gripped = leg.planted;
                 if (leg.target == null) continue;
                 if (!leg.hinge || leg.coxa == null)
                 {
                     Vector3 reachable = ClampToReach(leg, leg.position);
                     leg.clamped = reachable != leg.position;
-                    if (leg.planted && leg.clamped) leg.plant = reachable;
+                    if (leg.planted && leg.clamped)
+                    {
+                        if (held) leg.plantRewrite = Vector3.Distance(leg.plant, reachable);
+                        leg.plant = reachable;
+                    }
                     leg.position = reachable;
                     leg.target.position = leg.position;
                     continue;
@@ -330,7 +358,11 @@ namespace CritterCrafter.Locomotion
                 {
                     ankle = femur + reach.normalized * max;
                     leg.position = ankle - frame * leg.ankleOffset;
-                    if (leg.planted) leg.plant = leg.position;
+                    if (leg.planted)
+                    {
+                        if (held) leg.plantRewrite = Vector3.Distance(leg.plant, leg.position);
+                        leg.plant = leg.position;
+                    }
                 }
                 leg.target.SetPositionAndRotation(ankle, frame * leg.ankleRotation);
                 if (leg.coxaAim != null) leg.coxaAim.position = coxa + frame * leg.coxaDirection;
@@ -389,11 +421,15 @@ namespace CritterCrafter.Locomotion
             return n;
         }
 
-        /// <summary>Lifting keeps at least min_support planted supports; early steps also respect a swing cap.</summary>
+        /// <summary>
+        /// Lifting keeps at least min_support planted supports; early steps also respect a swing cap. A body
+        /// that lies on the ground carries its own weight, so a strained hand may re-grip at once even while
+        /// the other hand is in the air; capping it drags the clamped hand along the ground instead.
+        /// </summary>
         bool CanLift(Leg leg, bool early)
         {
             if (leg.support && PlantedSupports(leg) < _block.min_support) return false;
-            if (!early) return true;
+            if (!early || _block.body_on_ground) return true;
             int swinging = 0;
             foreach (var other in legs) if (!other.planted) swinging++;
             return swinging < Mathf.Max(1, legs.Count / 2);
@@ -415,7 +451,9 @@ namespace CritterCrafter.Locomotion
         /// </summary>
         void LiftGroup(Leg leg, float duration)
         {
-            foreach (var other in legs) if (!other.planted) return;   // one group at a time
+            // One group at a time, unless the torso lies on the ground and carries its own weight.
+            if (!_block.body_on_ground)
+                foreach (var other in legs) if (!other.planted) return;
             if (PlantedSupports(null, leg.group) >= _block.min_support)
             {
                 foreach (var other in legs)
@@ -453,6 +491,8 @@ namespace CritterCrafter.Locomotion
         public float dragRollDeg = 8f;
         [Tooltip("Crawl heave: chest lift at mid-pull (degrees).")]
         public float dragHeaveDeg = 6f;
+        [Tooltip("Crawl: chest heave of a pushing leg, as a fraction of a pulling arm's.")]
+        [Range(0f, 1f)] public float dragPushHeave = 0.5f;
         [Tooltip("Crawl: shoulders turn toward the pulling arm (degrees).")]
         public float dragYawDeg = 6f;
         [Tooltip("Crawl: fraction of each haul the torso rests while the new hand grips (at least the hand-over overlap).")]
@@ -468,10 +508,11 @@ namespace CritterCrafter.Locomotion
         /// as the hand grips, lunges through the pull and stops. Returns the torso's lead over the root along
         /// the heading (m), and the pull progress (0..1, or -1 outside the pull) and its side.
         /// </summary>
-        float HaulSurge(float speed, out float pull, out int side)
+        float HaulSurge(float speed, out float pull, out int side, out bool push)
         {
             pull = -1f;
             side = 0;
+            push = false;
             int groups = 0;
             foreach (var leg in legs) groups = Math.Max(groups, leg.group + 1);
             if (groups < 1 || _params.cadenceHz <= 0.0) return 0f;
@@ -484,6 +525,7 @@ namespace CritterCrafter.Locomotion
                 if (phase >= span) continue;
                 w = (float)(phase / span);
                 side = leg.homeLocal.x < 0f ? -1 : 1;
+                push = leg.push;
                 break;
             }
             if (w < 0f) return 0f;
@@ -509,7 +551,8 @@ namespace CritterCrafter.Locomotion
                 bool moving = speed > 0.05f;
                 float pull = -1f, surge = 0f;
                 int side = 0;
-                if (moving) surge = HaulSurge(speed, out pull, out side);
+                bool push = false;
+                if (moving) surge = HaulSurge(speed, out pull, out side, out push);
                 float strength = Mathf.Clamp01(speed / Mathf.Max(0.1f, (float)_block.v_walk_mps));
                 float arc = pull >= 0f ? Mathf.Sin(Mathf.PI * pull) : 0f;
                 float kg = 1f - Mathf.Exp(-dt / 0.06f);
@@ -517,7 +560,9 @@ namespace CritterCrafter.Locomotion
                 float ks = moving ? 1f - Mathf.Exp(-dt / 0.03f) : 1f - Mathf.Exp(-dt / Mathf.Max(0.01f, dragStopSettle));
                 _bodyHeight = Mathf.Lerp(_bodyHeight, 0f, kg);
                 _bodySurge = Mathf.Lerp(_bodySurge, surge, ks);
-                _bodyPitch = Mathf.Lerp(_bodyPitch, -dragHeaveDeg * strength * arc, kg);
+                // A leg shoves the hips forward instead of hauling the chest up to a hand, so it heaves less.
+                float heave = push ? dragPushHeave : 1f;
+                _bodyPitch = Mathf.Lerp(_bodyPitch, -dragHeaveDeg * heave * strength * arc, kg);
                 _bodyRoll = Mathf.Lerp(_bodyRoll, dragRollDeg * side * strength * arc, kg);
                 _bodyYaw = Mathf.Lerp(_bodyYaw, dragYawDeg * side * strength * arc, kg);
                 // Pitch and roll about the rear of the torso so the hips and trailing body stay grounded.

@@ -181,6 +181,8 @@ namespace CritterCrafter
         public double clearance_m;
         /// <summary>Drag gaits: forward shift (m) of the stance centre from the neutral contact.</summary>
         public double stance_shift_m;
+        /// <summary>Drag gaits: "pull" (an arm reaching ahead of its shoulder) or "push" (a leg driving from behind its hip).</summary>
+        public string drag_drive;
         public double walk_phase;
         public double run_phase;
         public bool support;

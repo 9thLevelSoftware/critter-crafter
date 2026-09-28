@@ -22,7 +22,7 @@ Each skeleton publishes `v_walk_mps`, `v_run_mps` and `v_max_mps`:
 - **Drag.** Full-stroke pulls at about 1 pull per second when walking and 1.8 when running.
 - **Slide.** 1 and 2 undulations per second.
 
-Above `v_max_mps` the feet slide, reported as `overspeed`. Use `v_max_mps` or `v_run_mps` as the threat's move speed rather than forcing one speed on every body plan. All 39 current skeletons reach 2.5 m/s (the current Synaptic Sea threat speed) within their limits.
+Above `v_max_mps` the feet slide, reported as `overspeed`. Use `v_max_mps` or `v_run_mps` as the threat's move speed rather than forcing one speed on every body plan. All 42 current skeletons can reach 2.5 m/s (the current Synaptic Sea threat speed) within `v_max_mps` (the lowest is 2.53), but 26 of them have `v_run_mps` below 2.5, so forcing 2.5 m/s runs those bodies above their natural run speed.
 
 ## Legs block fields
 
@@ -70,10 +70,11 @@ Game integration: move the creature root with the agent (`updatePosition = true`
 - **Capture a skeleton on the review course** (flat ground, a 20° ramp, a plateau, an instant 90° turn, a stop, an instant 180° turn in place). This runs in real Play Mode with the game's orthographic isometric camera and writes frames, `metrics.json` and per-frame and per-leg CSVs:
 
   ```powershell
-  Unity.exe -batchmode -projectPath unity/TestProject `
-    -executeMethod CritterCrafter.Editor.LocomotionCapture.CaptureFromCommandLine `
-    -critterLibrary library/biomass_core-v0.2.0 -critterSkeletons hexapod_compact_insect_balanced_v3 `
-    -critterOut work/review/locomotion -critterSpeeds walk,run,2.5
+  $root = (Get-Location).Path   # repo root; -critterLibrary and -critterOut resolve against unity/TestProject
+  Start-Process "F:\Unity\6000.6.0f1\Editor\Unity.exe" -Wait -PassThru -ArgumentList '-batchmode','-projectPath','unity/TestProject',
+    '-executeMethod','CritterCrafter.Editor.LocomotionCapture.CaptureFromCommandLine',
+    '-critterLibrary',"$root/library/biomass_core-v0.2.0",'-critterSkeletons','hexapod_compact_insect_balanced_v3',
+    '-critterOut',"$root/work/review/locomotion",'-critterSpeeds','walk,run,2.5'
   ```
 
 - **`critter skeleton qa`** checks every skeleton's locomotion block: speed bands, support at the walk and run duty factors, step rate and stance stroke at the published speeds.
@@ -91,6 +92,10 @@ The root (the agent) is the travel intent and still moves at an even speed. The 
 - **Stopping:** the torso eases onto the root over `dragStopSettle` (0.3 s).
 - **Arms, not legs:** the dragger arm branches bend with the elbow pointing up, out and back (branch `up` in `_dragger`), and the forearm and wrist twist so the palm lies flat. Before, the elbows pointed straight up and read as knees.
 
+- **One arm, one leg** (`dragger_arm_leg_crawler`, asymmetric): the single arm `arm_L` pulls from ahead of its shoulder and the single leg `leg_R` pushes from behind its hip, half a cycle apart. The catalog marks each drag leg `drag_drive` = `pull` or `push`. A pull stroke runs from the arm's far reach back to the shoulder plane; a push stroke runs from the leg's far reach forward to the hip plane, and a pushing leg lifts less (0.18 of its reach against 0.38 for a reaching arm). The torso lunges on the push too, but heaves the chest less (`dragPushHeave`, 0.5 of a pull). The leg is the shorter stroke, so it sets the creature's speed (the usable stroke is the minimum over the limbs). The leg is a `limb3_digitigrade` limb with a heel-up foot and a `hand` contact, the same clearance and ground band a sloped hand gets: a flat `foot` contact leaves only 7.5 mm of clearance and the foot's rounded tip dipped through the floor (5–36 mm depending on preset, against a 5 mm limit).
+
+An agent's instant turn can leave a gripping hand out of reach (the torso yaws at a limited rate and lunges along the new heading). The hand must then re-grip by stepping. For bodies that lie on the ground (`body_on_ground`) the torso carries the weight, so a strained hand may re-step at once even while the other hand is in the air: the swing cap in `CanLift` and the one-group-at-a-time rule in `LiftGroup` do not apply. Both hands may be off the ground for a few frames after a sharp turn. Without this the re-step was refused, the reach clamp rewrote the plant point every frame and the hand slid. `LibraryTests.DraggerHandsHoldThroughInstantTurns` sweeps four haul phases at walk, run and 2.5 m/s and fails on any refused re-step. The recorder reports `max_plant_rewrite_m`, `clamped_planted_frames`, `lift_blocked_frames` and the slipping leg and frame, and `legs.csv`/`frames.csv` carry `clamped`, `lift_blocked`, `plant_rewrite_m`, `yaw_lag_deg` and `surge_m`.
+
 The torso is at most about 0.2 of one haul (≈ 0.12 m at walk, ≈ 0.14 m at 2.5 m/s) ahead of or behind the root, so colliders on the root sit slightly off the torso.
 
 The grip-pull-stop rhythm reads best at walk speed, about one haul per arm per second. At 2.5 m/s a dragger hauls almost twice as often and it reads as a scramble. If the crawl should look deliberate in the game, use the dragger's own `v_walk_mps` or `v_run_mps` as its move speed rather than the shared threat speed.
@@ -98,6 +103,7 @@ The grip-pull-stop rhythm reads best at walk speed, about one haul per arm per s
 ## Known limitations
 
 - **Instant agent turns** cause a brief shuffle while re-stepping groups catch up with the smoothed body yaw.
+- **Dragger hands after instant turns** can still be dragged for one frame (a centimetre or two; at most 3 cm in the test sweep) between the reach clamp and the re-step, because the clamp is only seen after the body has moved. Before the fix in "Dragging" below they slid 4–20 cm.
 - **On a 20° ramp,** downhill feet can reach the end of their reach and slide a few centimetres.
 - **Starting from standing to full speed in one frame** can drag a foot during the first stride. Tests allow a one-second warmup.
 - **Draggers use placeholder parts,** so the hands read as feet and the head is small. Real parts (M2) will improve the read.

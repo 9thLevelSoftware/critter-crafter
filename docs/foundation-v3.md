@@ -1,6 +1,6 @@
 # Foundation v3
 
-This document describes the implemented v3 foundation contract and its current verification state. It is package/library version `0.2.0`, schema version `3.0.0`, and generator `cc-gen-3`. The 42 v3 candidates remain drafts pending visual approval.
+This document describes the implemented v3 foundation contract and its current verification state. It is package/library version `0.2.0`, schema version `3.0.0`, and generator `cc-gen-3`. The v3 candidates remain drafts pending visual approval (live counts are in [roadmap.md](roadmap.md); the delivery notes below were written when there were 42).
 
 ## Source dispatch and identity
 
@@ -36,7 +36,7 @@ Recipe matching uses one uniform length scale in the inclusive 0.8–1.25 range 
 
 ## Candidate generation
 
-`critter skeleton vary` generates 14 deterministic anatomy archetypes across compact, balanced, and elongated presets: 42 candidates total. The families are biped, crawler, dragger, hexapod, quadruped, radial, and serpentine. Newly generated candidates have status `draft`; generation never auto-approves them. `skeleton status` currently reports six drafts per family, all 42 awaiting human review.
+`critter skeleton vary` generates deterministic anatomy archetypes across compact, balanced, and elongated presets (14 archetypes and 42 candidates now: the first delivery had 14 and 42, the retired tentacle radial took it to 13 and 39, and the one-arm-one-leg dragger brought it back to 14 and 42). The families are biped, crawler, dragger, hexapod, quadruped, radial, and serpentine. Newly generated candidates have status `draft`; generation never auto-approves them. `skeleton status` reports the drafts per family, all awaiting human review.
 
 `tests/golden_v3/` is a parity fixture, not candidate approval. `critter recipe golden` uses an in-memory approved copy so deterministic recipe coverage can be tested without changing candidate status. The old `tests/golden/` files remain untouched.
 
@@ -62,6 +62,15 @@ Generated masters and authored polish are separate. A non-destructive override i
 
 QA treats contact geometry and locomotion drift separately. Planted foot and hand tips may be within a 10 mm anatomical ground-proximity band, while body contacts use a 5 mm band; planted drift remains `max(5 mm, 1% of chain length)`, and penetration remains 5 mm. These bands do not waive drift, support, limit, loop, or transition checks.
 
-## Delivery state
+## Binding profile releases
+
+Two registries guard profile identity (`index_profiles` in `binding/profiles.py`):
+
+- `data/binding_profiles/registry.json` locks the hash of every profile in the working tree. Editing a profile without updating its registry entry fails with `CC_BINDING_PROFILE_IMMUTABLE`.
+- `data/binding_profiles/released_registry.json` is the released baseline. A profile listed there can never be removed (`CC_BINDING_PROFILE_BASELINE`), and any new version of the same profile id must have a higher semver (`CC_BINDING_PROFILE_VERSION`).
+
+`limb3_brachial` is in `registry.json` but not yet in the released baseline, which is intentional: it has not shipped to a consumer. Add it to the baseline at the next `critter library pack` or M5 shipment.
+
+## Delivery state (historical: the first foundation delivery, 42 candidates)
 
 Automated foundation delivery is verified in [delivery-verification.json](../work/rebuild-foundation/delivery-verification.json). The final catalog SHA is `677733d508d911ce3a556d18e904dbd53cd88fe7669d9cf451963ecab93a9745`; all 42 candidates have fresh passing receipts and 336 clips, with 462 reference parts/connectors. Maximum observed planted drift is 0.1485 mm, surface penetration 3.7848 mm, export position error 0.013126 mm, and export angle error 0.0009622°. Actual maxima are 66 bones, 16 parts, 11,664 triangles, and 2 vertex influences. The byte-verified packages are [`critter-library-biomass_core-v0.2.0.zip`](../dist/critter-library-biomass_core-v0.2.0.zip) and [`com.ninthlevelsoftware.crittercrafter-0.2.0.tgz`](../dist/com.ninthlevelsoftware.crittercrafter-0.2.0.tgz); the pack command now refuses stale catalogs or assets. The unique Python test inventory is 245 (`241` existing suite tests plus `4` focused status-predicate regressions; no full-suite rerun followed those focused checks), with the existing Python/Unity reference approval pairs kept exact. Static review rendering produced 103 outputs and motion previews produced 145 outputs including 42 GIFs; serve the final bundle with `python -m http.server 8765 --directory work/review/foundation-v3` and open the verified local review URL. Automated delivery passed, while independent human visual approval remains pending and browser UI automation was unavailable.

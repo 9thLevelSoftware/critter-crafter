@@ -18,6 +18,7 @@ unity/TestProject/[Oo]bj/
 unity/TestProject/[Ll]ogs/
 unity/TestProject/[Uu]ser[Ss]ettings/
 unity/TestProject/Assets/CritterLibraries/
+unity/TestProject/work/
 unity/TestProject/Assets/CritterLibraries.meta
 unity/TestProject/*.csproj
 unity/TestProject/*.sln

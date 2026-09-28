@@ -37,8 +37,8 @@ def _contact_ids(skeleton: dict) -> set[str]:
 
 def test_profiles_cover_all_fourteen_archetypes_with_declared_semantics() -> None:
     assert set(ATTACK_PROFILES) == set(ARCHETYPES)
-    assert len(ATTACK_PROFILES) == 13
-    assert len({profile.attack_id for profile in ATTACK_PROFILES.values()}) == 13
+    assert len(ATTACK_PROFILES) == 14
+    assert len({profile.attack_id for profile in ATTACK_PROFILES.values()}) == 14
     assert all(profile.branch_id and profile.bone_index >= 0 for profile in ATTACK_PROFILES.values())
 
 
@@ -99,6 +99,7 @@ def test_declared_effectors_match_the_intended_anatomical_attacks() -> None:
         "serpentine_segmented_paired_legs": ("body", "segmented_tail_sweep"),
         "dragger_forelimb_puller": ("arm_L", "puller_hammer"),
         "dragger_belly_hauler": ("arm_L", "hauler_shove"),
+        "dragger_arm_leg_crawler": ("arm_L", "lopsided_hammer"),
     }
     assert {
         archetype_id: (profile.branch_id, profile.attack_id)

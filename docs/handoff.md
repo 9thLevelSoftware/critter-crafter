@@ -2,7 +2,7 @@
 
 ## Current state (one paragraph)
 
-The v3 skeleton foundation and **runtime foot-placement locomotion** are merged to `main` ([PR #1](https://github.com/9thLevelSoftware/critter-crafter/pull/1)). The library has **13 archetypes × 3 presets = 39 draft skeletons**, all passing QA, and all 39 reach the game's 2.5 m/s. **M2 (real parts) is implemented and waiting on the owner.** Four Meshy scout meshes are fitted into production parts: an insect leg, a frayed arm, an animal skull and a tentacle. All four are built into the library with their textures and pass deformation QA through every clip against the placeholders they replace (see [M2 status](#m2-status-real-parts)). They stay `draft` until the owner reviews the sheets and runs `critter part approve`. The Unity texture binding is written but has **not been run in Unity** yet. **Next:** owner review of M2, a Unity import and EditMode run, then **M5** (Synaptic Sea integration).
+The v3 skeleton foundation and **runtime foot-placement locomotion** are merged to `main` ([PR #1](https://github.com/9thLevelSoftware/critter-crafter/pull/1)). The library has **14 archetypes × 3 presets = 42 draft skeletons**, all passing QA, and all 42 can reach the game's 2.5 m/s within their `v_max_mps` (26 of them have `v_run_mps` below 2.5, so a threat forced to 2.5 m/s runs above its natural run speed). **M2 (real parts) is implemented and waiting on the owner.** Four Meshy scout meshes are fitted into production parts: an insect leg, a frayed arm, an animal skull and a tentacle. All four are built into the library with their textures and pass deformation QA through every clip against the placeholders they replace (see [M2 status](#m2-status-real-parts)). They stay `draft` until the owner reviews the sheets and runs `critter part approve`. The Unity texture binding is written but has **not been run in Unity** yet. **Next:** owner review of M2, a Unity import and EditMode run, then **M5** (Synaptic Sea integration).
 
 ## What the project is
 
@@ -11,7 +11,7 @@ critter-crafter is a standalone tool that builds procedural monsters from three 
 - **Authoring:** Python 3.12 (`uv`) plus headless Blender 5.2.
 - **Runtime:** the Unity UPM package `unity/com.ninthlevelsoftware.crittercrafter`.
 - **First consumer:** `9thLevelSoftware/synaptic-sea-unity`.
-- **The original plan:** `.claude/plans/floating-wiggling-sprout.md`. Its milestone list is still valid, with the locomotion work inserted.
+- **Milestones and live counts:** [roadmap.md](roadmap.md). The original plan file (`.claude/plans/floating-wiggling-sprout.md`) was overwritten by the locomotion plan; the old milestone list is restored in the roadmap.
 
 ## Decisions the owner made (don't relitigate)
 
@@ -41,8 +41,8 @@ critter-crafter is a standalone tool that builds procedural monsters from three 
 ## Everyday commands
 
 ```powershell
-uv run pytest                                   # 279 tests, ~4 min with Blender (-m "not blender": ~15 s)
-uv run critter skeleton vary --force            # regenerate the 39 draft skeletons from archetypes.py
+uv run pytest                                   # 315 tests, ~4 min with Blender (-m "not blender": ~15 s)
+uv run critter skeleton vary --force            # regenerate the 42 draft skeletons from archetypes.py
 uv run critter schema validate
 uv run critter recipe golden                    # writes tests/golden_v3/{catalog,recipes,locomotion}.json
 Copy-Item tests/golden_v3/*.json unity/com.ninthlevelsoftware.crittercrafter/Tests/Editor/GoldenV3/
@@ -57,15 +57,18 @@ uv run critter part approve <part_id>           # owner only, after the sheet; p
 Unity, headless (close any open editor on the TestProject first):
 
 ```powershell
-$U = "F:\Unity\6000.6.0f1\Editor\Unity.exe"
-# Tests (~2 min): expect 34 passed + 1 skipped (PrototypeImportTests needs env vars)
-& $U -batchmode -projectPath unity/TestProject -runTests -testPlatform EditMode `
-     -testResults work/unity_results.xml -logFile work/unity_tests.log
+$U = "F:\Unity\6000.6.0f1\Editor\Unity.exe"; $root = (Get-Location).Path   # run from the repo root
+# Unity is a GUI exe: Start-Process -Wait, or PowerShell returns before it finishes. -testResults,
+# -critterLibrary and -critterOut resolve against unity/TestProject, so pass absolute paths.
+# Tests (~2 min): expect 38 passed + 1 skipped (PrototypeImportTests needs env vars).
+# Add '-testFilter','<TestName>' to run one test.
+Start-Process $U -Wait -PassThru -ArgumentList '-batchmode','-projectPath','unity/TestProject','-runTests',
+  '-testPlatform','EditMode','-testResults',"$root/work/unity_results.xml",'-logFile',"$root/work/unity_tests.log"
 # Locomotion review capture (Play Mode, iso camera), then GIFs
-& $U -batchmode -projectPath unity/TestProject `
-     -executeMethod CritterCrafter.Editor.LocomotionCapture.CaptureFromCommandLine `
-     -critterLibrary library/biomass_core-v0.2.0 -critterSkeletons quadruped_stocky_plantigrade_balanced_v3 `
-     -critterOut work/review/locomotion -critterSpeeds walk,run,2.5 -logFile work/unity_capture.log
+Start-Process $U -Wait -PassThru -ArgumentList '-batchmode','-projectPath','unity/TestProject',
+  '-executeMethod','CritterCrafter.Editor.LocomotionCapture.CaptureFromCommandLine',
+  '-critterLibrary',"$root/library/biomass_core-v0.2.0",'-critterSkeletons','quadruped_stocky_plantigrade_balanced_v3',
+  '-critterOut',"$root/work/review/locomotion",'-critterSpeeds','walk,run,2.5','-logFile',"$root/work/unity_capture.log"
 uv run python tools/frames_to_gif.py work/review/locomotion
 ```
 
@@ -140,14 +143,16 @@ The golden, Unity-test and QA steps fail loudly if skipped.
 ## Open issues and follow-ups
 
 - **Turns and slopes:**
+  - a dragger's planted hand used to slip 4–20 cm after an instant 90° turn, because `CanLift` refused the re-step while the other arm swung. Fixed on `feature/locomotion-thread` (grounded bodies re-step at once; test `DraggerHandsHoldThroughInstantTurns`); a one-frame drag of a centimetre or two remains;
   - a brief shuffle after instant 180° turns;
   - a few centimetres of downhill foot slide on the 20° ramp;
   - the first stride from standing can drag a foot (tests exclude the first second);
   - see `docs/locomotion.md` → Known limitations.
 - **Dragger refinement.** The owner said "refine later". The torso is now hauled by the hands (it rests while a hand grips and lunges through the pull; see `docs/locomotion.md` → Dragging). This awaits the owner's review of the `work/review/dragger-after` GIFs against `work/review/dragger-before`. Placeholder parts still make the hands read as feet and the head small. Tuning: `dragGrip`, `dragSettle`, `dragHeaveDeg`, `dragRollDeg`, `dragYawDeg` on `CreatureGait`, and the arm stance in `_dragger`. At 2.5 m/s the crawl reads as a scramble; a slower dragger move speed in the game would look more deliberate.
 - **Arms are their own limb type.** Biped and dragger arms use `limb3_brachial`: a wide-ranging shoulder, an elbow that points back (bipeds) or up, out and back (draggers), a longer hand, and a wrist that bends both ways. `meshy_frayed_arm_a_v1` is refit to it, so it fits arms only and no longer fills legs. Biped arms rest with the elbow bent about 55–60°; straighter arms left the punch and rake targets out of reach.
+- **`test_committed_v3_sources_are_the_seed_one_candidate_set` fails on this Windows machine.** The three `radial_raised_articulated_walker_*` skeletons differ from `generate_all(seed=1)` by one unit in the last digit of `branches[5].direction[0]` (`-0.8660254037844384` committed, `...385` generated), which looks like a platform `sin`/`cos` difference. `skeleton vary --force` would rewrite those three files. Rounding directions at generation time would make the test platform-proof but touches every skeleton file, so it is left for a separate change.
 - **Pools** (`data/pools/pools.json`) still list only the biped, quadruped and crawler families. Add the new families when the game needs them; this changes the golden recipes.
-- **All 39 skeletons are still `draft`.** `critter skeleton approve` needs a passing review receipt from `critter skeleton review`. This process predates runtime locomotion and may deserve simplifying, given the owner's no-governance preference.
+- **All 42 skeletons are still `draft`.** `critter skeleton approve` needs a passing review receipt from `critter skeleton review`. This process predates runtime locomotion and may deserve simplifying, given the owner's no-governance preference.
 - **Variety** is still 13 body plans × 3 presets, well below M4's target of at least 80 skeletons. The earlier review suggested optional branches (tails, dorsal parts, extra arms) and wider seeded proportions.
 
 ## M2 status (real parts)

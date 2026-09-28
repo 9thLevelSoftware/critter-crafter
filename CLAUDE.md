@@ -15,7 +15,7 @@ uv run pytest                                   # full suite, several minutes (B
 uv run pytest -m "not blender"                  # fast suite (~15 s), no Blender
 uv run pytest tests/test_recipes.py::test_name  # a single test
 uv run critter schema validate                  # v3 sources + cross-record rules
-uv run critter skeleton vary --force            # regenerate the 39 draft skeletons from archetypes.py
+uv run critter skeleton vary --force            # regenerate the 42 draft skeletons from archetypes.py
 uv run critter recipe golden                    # writes tests/golden_v3/{catalog,recipes,locomotion}.json
 Copy-Item tests/golden_v3/*.json unity/com.ninthlevelsoftware.crittercrafter/Tests/Editor/GoldenV3/
 uv run critter library build                    # ~5 min: Blender bakes every skeleton/part -> library/
@@ -27,18 +27,19 @@ Blender-marked tests skip automatically when no Blender is found (`CRITTER_BLEND
 Unity, headless (close any editor that has `unity/TestProject` open first):
 
 ```powershell
-& "F:\Unity\6000.6.0f1\Editor\Unity.exe" -batchmode -projectPath unity/TestProject -runTests `
-  -testPlatform EditMode -testResults work/unity_results.xml -logFile work/unity_tests.log
+$U = "F:\Unity\6000.6.0f1\Editor\Unity.exe"; $root = (Get-Location).Path   # run from the repo root
+Start-Process $U -Wait -PassThru -ArgumentList '-batchmode','-projectPath','unity/TestProject','-runTests',
+  '-testPlatform','EditMode','-testResults',"$root/work/unity_results.xml",'-logFile',"$root/work/unity_tests.log"
 ```
 
-`docs/handoff.md` has the locomotion capture command. Frames become GIFs with `tools/frames_to_gif.py`, and the owner judges locomotion from those GIFs.
+Unity is a GUI executable, so use `Start-Process -Wait`; a bare `&` returns before it finishes. `-testResults`, `-critterLibrary` and `-critterOut` resolve against `unity/TestProject`, not the repo root, so pass absolute paths (`-logFile` is the exception and resolves against the repo root). Add `-testFilter <TestName>` to run one test. `docs/handoff.md` has the locomotion capture command. Frames become GIFs with `tools/frames_to_gif.py`, and the owner judges locomotion from those GIFs.
 
 **Change loop:** edit sources → `skeleton vary --force` → `recipe golden` and copy the goldens into the Unity package → pytest → `library build` and `skeleton qa` → Unity tests and a capture. The golden, Unity-test and QA steps fail loudly if skipped.
 
 ## Architecture
 
 - **Data (`data/`, `schemas/`).**
-  - v3 sources: `data/library.json` (schema `3.0.0`), `data/skeletons/*_v3.skeleton.json` (13 archetypes × 3 presets), `data/parts/`, `data/pools/pools.json`, and `data/binding_profiles/`.
+  - v3 sources: `data/library.json` (schema `3.0.0`), `data/skeletons/*_v3.skeleton.json` (14 archetypes × 3 presets), `data/parts/`, `data/pools/pools.json`, and `data/binding_profiles/`.
   - Binding profiles are immutable chain definitions identified by SHA-256. A branch names a profile, and a part fits a branch through that profile.
   - Branch sockets are local to their parent joint. Neutral pose is a separate delta applied once, after bind.
   - v2 data and `tests/golden/` are frozen historical evidence. v3 loading rejects v2 inputs.

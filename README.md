@@ -11,7 +11,7 @@ The v2 source documents and `tests/golden/` fixtures remain frozen historical co
 ```text
 data/                                      v2 and v3 authoring sources
 data/binding_profiles/                     immutable v3 chain profiles and registry
-data/skeletons/*_v3.skeleton.json          13 archetypes x 3 presets = 39 candidates
+data/skeletons/*_v3.skeleton.json          14 archetypes x 3 presets = 42 candidates
 schemas/                                   v2 and v3 JSON Schema 2020-12 documents
 src/critter_crafter/                       CLI, compiler, generator, Blender and review code
 tests/golden/                              frozen v2 parity fixtures
@@ -35,7 +35,7 @@ uv run pytest
 The skeleton workflow keeps candidates as drafts until a human reviews built output:
 
 ```powershell
-uv run critter skeleton vary                  # write all 39 drafts; reviewed candidates are preserved
+uv run critter skeleton vary                  # write all 42 drafts; reviewed candidates are preserved
 uv run critter skeleton status                 # counts draft/approved/rejected by family
 uv run critter schema validate                 # validate v3 sources and cross-record rules
 uv run critter library build                   # build the catalog and actual Blender assets
@@ -50,7 +50,7 @@ The review bundle contains bones, mannequin, and assembled modes; front, side, t
 
 Authored polish is opt-in and separate from generated masters. An override lives at `work/polish/skeletons/<skeleton_id>/override.json` and records the source fingerprint it targets. A compatible override may be resolved during a rebuild; a changed source fingerprint or changed authored polish invalidates the build and requires rebuilding. Generated files are never overwritten by the override workflow.
 
-Automated motion, export, and Unity verification is complete for the current draft foundation. The final report records 42 fresh passing receipts, 336 clips, byte-verified packages, and the remaining human visual approval gate. No paid generation is used by this foundation work.
+Automated motion, export, and Unity verification is complete for the current draft foundation. The first delivery's final report (written when there were 42 candidates, before the tentacle radial was retired) records 42 fresh passing receipts, 336 clips, byte-verified packages, and the remaining human visual approval gate. No paid generation is used by this foundation work.
 
 Final verification artifacts:
 
@@ -59,7 +59,7 @@ Final verification artifacts:
 - [Unity package](dist/com.ninthlevelsoftware.crittercrafter-0.2.0.tgz)
 - [Review instructions and foundation contract](docs/foundation-v3.md)
 
-Serve the final review bundle with `python -m http.server 8765 --directory work/review/foundation-v3`, then open `http://127.0.0.1:8765/`. Automated HTTP and Node viewer checks pass; browser UI automation was unavailable, and the 42 candidates remain drafts pending human visual approval.
+Serve the final review bundle with `python -m http.server 8765 --directory work/review/foundation-v3`, then open `http://127.0.0.1:8765/`. Automated HTTP and Node viewer checks pass; browser UI automation was unavailable, and the candidates (42 at the first delivery, 39 after the tentacle radial was retired, 42 again with the arm-leg dragger) remain drafts pending human visual approval.
 
 ## Runtime locomotion
 
@@ -79,13 +79,13 @@ every clip on the skeletons that accept it and compares it with the placeholder 
 
 The frozen v2 assets are archival compatibility evidence. Their original recipe, assembly, and packaging commands require the archived v2 package/library version; the active v3 `cc-gen-3` source dispatcher rejects v2 inputs. The v2 workflow is therefore not a way to build the current v0.2.0 package.
 
-Current v3 normal recipe generation only uses approved candidates. The rebuilt 42 candidates remain drafts pending visual approval, so a normal production pool can be empty during this review phase. `critter recipe golden` and `recipe sweep --review-drafts` use an explicitly in-memory approved copy for deterministic fixture and review coverage without changing source status. `critter library pack` also requires a fresh catalog and matching assets before packaging.
+Current v3 normal recipe generation only uses approved candidates. The rebuilt candidates (42 now) remain drafts pending visual approval, so a normal production pool can be empty during this review phase. `critter recipe golden` and `recipe sweep --review-drafts` use an explicitly in-memory approved copy for deterministic fixture and review coverage without changing source status. `critter library pack` also requires a fresh catalog and matching assets before packaging.
 
 When an archived v2 package is available, it is dependency-free at runtime and is imported through **Tools > Critter Crafter > Import Library Zip…**. The game owns world movement; clips move bones and do not apply root motion.
 
 ## Status
 
-The v3 foundation with runtime locomotion covers 13 archetypes (39 draft candidates). Locomotion for every family has been reviewed visually in Unity captures; the tentacle radial archetype was retired. The delivery notes below predate that work.
+The v3 foundation with runtime locomotion covers 14 archetypes (42 draft candidates). Locomotion for every family has been reviewed visually in Unity captures; the tentacle radial archetype was retired. The delivery notes above predate that work. Milestones and live counts are in [docs/roadmap.md](docs/roadmap.md).
 
 For the current state, decisions and next steps, start with [docs/handoff.md](docs/handoff.md).
 

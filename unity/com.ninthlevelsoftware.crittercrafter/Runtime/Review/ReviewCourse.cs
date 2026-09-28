@@ -79,6 +79,26 @@ namespace CritterCrafter.Review
             };
         }
 
+        /// <summary>
+        /// Straight at constant speed, an instant heading change of <paramref name="headingDeltaDeg"/>
+        /// after <paramref name="beforeSeconds"/>, then straight on along the new heading. Sweeping
+        /// <paramref name="beforeSeconds"/> lands the turn on different phases of the gait.
+        /// </summary>
+        public static List<Waypoint> TurnAt(float speed, float beforeSeconds, float headingDeltaDeg, float afterSeconds = 2f)
+        {
+            var a = new Vector3(0f, 0f, -3f);
+            var turn = a + Vector3.forward * speed * beforeSeconds;
+            float rad = headingDeltaDeg * Mathf.Deg2Rad;
+            var onward = turn + new Vector3(Mathf.Sin(rad), 0f, Mathf.Cos(rad)) * speed * afterSeconds;
+            return new List<Waypoint>
+            {
+                new Waypoint { time = 0f, position = a, headingDeg = 0f },
+                new Waypoint { time = beforeSeconds, position = turn, headingDeg = 0f },
+                new Waypoint { time = beforeSeconds + 1e-4f, position = turn, headingDeg = headingDeltaDeg },
+                new Waypoint { time = beforeSeconds + afterSeconds, position = onward, headingDeg = headingDeltaDeg },
+            };
+        }
+
         public static void Sample(List<Waypoint> path, float time, out Vector3 position, out float heading)
         {
             for (int i = 1; i < path.Count; i++)
