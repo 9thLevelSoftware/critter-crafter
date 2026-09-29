@@ -276,10 +276,37 @@ def _sphere_project(anchor: Sequence[float], target: Sequence[float], radius: fl
     return mu.add(anchor, mu.scale(direction, radius / distance))
 
 
+def derive_attack_profile(skeleton: Mapping[str, Any]) -> AttackProfile | None:
+    """An attack for a skeleton with no authored profile (the seeded amalgams): a hammer swing by its striker.
+
+    The striker is the one contactless limb3 arm marked ``manipulator``. The dragger hammer's offsets are
+    turned about the vertical to the direction the arm points, and every support contact stays planted.
+    """
+    striker = next((b for b in skeleton.get("branches", [])
+                    if b.get("template") == "limb3" and not b.get("contacts")
+                    and str(b.get("gait_role", b.get("gait", {}).get("role", ""))) == "manipulator"), None)
+    if striker is None or len(striker.get("bone_names", [])) != 3:
+        return None
+    geometry = _neutral_geometry(skeleton)
+    names = striker["bone_names"]
+    shoulder, tip = geometry[names[0]]["head_m"], geometry[names[2]]["tail_m"]
+    heading = math.atan2(tip[0] - shoulder[0], tip[2] - shoulder[2])
+    sin, cos = math.sin(heading), math.cos(heading)
+
+    def turn(v: tuple[float, float, float]) -> tuple[float, float, float]:
+        return (round(v[0] * cos + v[2] * sin, 6), v[1], round(-v[0] * sin + v[2] * cos, 6))
+
+    return _profile(
+        "derived_hammer", "temporary_ik", striker["branch_id"], 2,
+        turn((.04, .08, -.09)), turn((-.04, .12, .18)), (.31, .54, .67, 1.0),
+        minimum_preserved=len(_support_contacts(skeleton)), max_reach_n=.24, minimum_displacement_n=.12,
+    )
+
+
 def resolve_attack(skeleton: Mapping[str, Any]) -> dict[str, Any]:
-    """Resolve one authored profile to concrete metres and skeleton bone names."""
+    """Resolve one authored (or derived) profile to concrete metres and skeleton bone names."""
     archetype_id = str(skeleton.get("anatomy", {}).get("archetype_id", ""))
-    profile = ATTACK_PROFILES.get(archetype_id)
+    profile = ATTACK_PROFILES.get(archetype_id) or derive_attack_profile(skeleton)
     if profile is None:
         raise AttackPlanError("CC_ACTION_ARCHETYPE", f"no attack profile for {archetype_id or '<missing>'}")
 

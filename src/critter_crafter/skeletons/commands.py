@@ -43,8 +43,10 @@ def skeleton() -> None:
 @click.option("--seed", type=int, default=1, show_default=True)
 @click.option("--count", type=click.IntRange(1, 6), default=None, help="Maximum selected candidates per family")
 @click.option("--force", is_flag=True, help="Regenerate reviewed candidates as drafts")
-def skeleton_vary(families, archetypes, presets, style, seed, count, force) -> None:
-    """Write 14 curated archetypes x 3 presets by default; keep legacy IDs frozen."""
+@click.option("--amalgam-seed", "amalgam_seeds", type=int, multiple=True,
+              help="Write these amalgam seeds instead of the committed ones (to look at a seed; not committed)")
+def skeleton_vary(families, archetypes, presets, style, seed, count, force, amalgam_seeds) -> None:
+    """Write 14 curated archetypes x 3 presets plus the committed amalgams by default; keep legacy IDs frozen."""
     chosen = [a for a in (archetypes or sorted(ARCHETYPES)) if not families or ARCHETYPES[a]["family"] in families]
     written = kept = 0
     per_family: dict[str, int] = {}
@@ -61,7 +63,40 @@ def skeleton_vary(families, archetypes, presets, style, seed, count, force) -> N
                 continue
             _write_json(path, doc)
             written += 1
+    from .amalgam import AMALGAM_SEEDS, build_amalgam
+    if style == "anatomical" and not archetypes and not presets and (not families or "amalgam" in families):
+        for amalgam_seed in amalgam_seeds or AMALGAM_SEEDS:
+            doc = build_amalgam(amalgam_seed)
+            path = paths().data / "skeletons" / f"{doc['skeleton_id']}.skeleton.json"
+            if path.exists() and not force and json.loads(path.read_text(encoding="utf-8")).get("status") != "draft":
+                kept += 1
+                continue
+            _write_json(path, doc)
+            written += 1
     click.echo(f"wrote {written} drafts; preserved {kept} reviewed candidates")
+
+
+@skeleton.command("amalgam-sweep")
+@click.option("--seeds", default="1-100", show_default=True, help="Seed range LO-HI (inclusive)")
+def skeleton_amalgam_sweep(seeds) -> None:
+    """Grow and check amalgam seeds without Blender: mode, branch count, and pass or the reasons it fails.
+
+    A development aid for choosing which seeds to commit in ``amalgam.AMALGAM_SEEDS``, not a gate."""
+    from .amalgam import AmalgamError, build_amalgam, mode_for_seed, validate_amalgam
+    low, _, high = seeds.partition("-")
+    passed: dict[str, list[int]] = {}
+    for amalgam_seed in range(int(low), int(high or low) + 1):
+        mode = mode_for_seed(amalgam_seed)
+        try:
+            doc = build_amalgam(amalgam_seed)
+            problems = validate_amalgam(doc)
+            detail = f"{len(doc['branches'])} branches"
+        except AmalgamError as exc:
+            problems, detail = [str(exc)], "-"
+        if not problems:
+            passed.setdefault(mode, []).append(amalgam_seed)
+        click.echo(f"{amalgam_seed:5d} {mode:8s} {detail:12s} " + ("ok" if not problems else "FAIL " + "; ".join(problems)))
+    click.echo("passing: " + ", ".join(f"{mode} {seeds_}" for mode, seeds_ in sorted(passed.items())))
 
 
 @skeleton.command("status")

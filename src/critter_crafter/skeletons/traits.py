@@ -12,6 +12,8 @@ from typing import Any
 # Families whose bodies are held up by four or more legs and so must always keep two feet planted.
 _MULTI_LEG = ("quadruped", "hexapod", "crawler", "radial")
 _POLE_IK = ("biped", "quadruped", "hexapod", "dragger")
+# "amalgam" is deliberately absent everywhere: each amalgam skeleton writes its own traits (its support
+# minimum depends on how many legs it grew), and pole IK is chosen per limb (``gait.pole_ik``).
 
 
 def family_traits(family: str) -> dict[str, Any]:

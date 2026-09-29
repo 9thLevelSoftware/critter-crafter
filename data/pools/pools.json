@@ -52,6 +52,13 @@
         "crawler"
       ],
       "skeleton_ids": []
+    },
+    {
+      "pool_id": "amalgam",
+      "families": [
+        "amalgam"
+      ],
+      "skeleton_ids": []
     }
   ]
 }
