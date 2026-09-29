@@ -18,7 +18,7 @@ from ..recipes.rng import SplitMix64
 from .traits import family_traits
 
 PRESETS = ("compact", "balanced", "elongated")
-FAMILIES = ("biped", "quadruped", "crawler", "hexapod", "radial", "serpentine", "dragger")
+FAMILIES = ("biped", "quadruped", "crawler", "hexapod", "radial", "serpentine", "dragger", "amalgam")
 _GROUND_CLEARANCE_M = .0075
 # Hands rest a centimetre higher than feet: a forearm sloping down to a planted hand would otherwise
 # dip its rounded volume below the floor.
@@ -700,9 +700,15 @@ def _finalise(branches: list[dict[str, Any]], supports: list[str], contacts: lis
 
 
 def generate_all(seed: int = 1, style: str = "anatomical") -> list[dict[str, Any]]:
-    """Return all 14 curated archetypes in each compact/balanced/elongated preset."""
-    return sorted((build_candidate(archetype, preset, seed=seed, style=style)
-                   for archetype in ARCHETYPES for preset in PRESETS), key=lambda candidate: candidate["skeleton_id"])
+    """Return all 14 curated archetypes in each compact/balanced/elongated preset, plus the committed amalgams.
+
+    The amalgams have their own seeds (``amalgam.AMALGAM_SEEDS``), so *seed* doesn't change them."""
+    candidates = [build_candidate(archetype, preset, seed=seed, style=style)
+                  for archetype in ARCHETYPES for preset in PRESETS]
+    if style == "anatomical":
+        from .amalgam import committed_amalgams
+        candidates += committed_amalgams()
+    return sorted(candidates, key=lambda candidate: candidate["skeleton_id"])
 
 
 def write_profiles(directory: Path) -> list[Path]:

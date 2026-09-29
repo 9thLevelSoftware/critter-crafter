@@ -44,6 +44,9 @@ ARCHETYPE_PROFILES: dict[str, dict[str, float | str]] = {
     "dragger_forelimb_puller":           {"family": "dragger",    "stride": .43, "support": .73, "clearance": .075,"cadence": .82},
     "dragger_belly_hauler":              {"family": "dragger",    "stride": .25, "support": .84, "clearance": .035,"cadence": .65},
     "dragger_arm_leg_crawler":           {"family": "dragger",    "stride": .36, "support": .78, "clearance": .06, "cadence": .74},
+    "amalgam_hauled":                    {"family": "amalgam",    "stride": .40, "support": .76, "clearance": .07, "cadence": .80},
+    "amalgam_walker":                    {"family": "amalgam",    "stride": .30, "support": .68, "clearance": .08, "cadence": 1.00},
+    "amalgam_slither":                   {"family": "amalgam",    "stride": .31, "support": .82, "clearance": .025,"cadence": .92},
 }
 
 
@@ -264,8 +267,8 @@ def _gesture(name: str, role: str, k: int, u: float, phase: float,
         if role == "sway":
             return .42*amp*math.sin(th - k*.42), .3*amp*math.cos(th-k*.42)
         if role == "flail":
-            return (.5*amp*(math.sin(2*th + ph - k*.5) + .5*math.sin(3*th + ph*1.7 - k*.3)),
-                    .35*amp*math.sin(2*th + ph - k*.5 + 1.1))
+            # One cycle per 30-frame walk overlay: more harmonics break the loop seam at this sample rate.
+            return .42*amp*math.sin(th + ph - k*.5), .3*amp*math.cos(th + ph - k*.5)
         if role == "manipulator":
             return (.3 if k == 0 else .1)*amp*math.sin(th + phase - k*.25), 0.0
         if role == "core":
@@ -355,7 +358,7 @@ def _gesture(name: str, role: str, k: int, u: float, phase: float,
         if role == "sliding":
             return 0.0, .07*s                                       # the body curls where it lies
         return ({"manipulator": ((.5 if k == 0 else .07)*s, .05*s), "head": (.45*s, .2*s),
-                 "sway": (.55*s, .15*s), "flail": (.55*s, .15*s), "none": (.15*s, 0)}.get(role, (0, 0)))
+                 "sway": (.55*s, .15*s), "flail": (.35*s, .1*s), "none": (.15*s, 0)}.get(role, (0, 0)))
     return 0.0, 0.0
 
 

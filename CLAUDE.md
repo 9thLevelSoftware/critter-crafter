@@ -15,7 +15,7 @@ uv run pytest                                   # full suite, several minutes (B
 uv run pytest -m "not blender"                  # fast suite (~15 s), no Blender
 uv run pytest tests/test_recipes.py::test_name  # a single test
 uv run critter schema validate                  # v3 sources + cross-record rules
-uv run critter skeleton vary --force            # regenerate the 42 draft skeletons from archetypes.py
+uv run critter skeleton vary --force            # regenerate the 57 draft skeletons (archetypes.py + committed amalgam seeds)
 uv run critter recipe golden                    # writes tests/golden_v3/{catalog,recipes,locomotion}.json
 Copy-Item tests/golden_v3/*.json unity/com.ninthlevelsoftware.crittercrafter/Tests/Editor/GoldenV3/
 uv run critter library build                    # ~5 min: Blender bakes every skeleton/part -> library/
@@ -39,11 +39,11 @@ Unity is a GUI executable, so use `Start-Process -Wait`; a bare `&` returns befo
 ## Architecture
 
 - **Data (`data/`, `schemas/`).**
-  - v3 sources: `data/library.json` (schema `3.0.0`), `data/skeletons/*_v3.skeleton.json` (14 archetypes × 3 presets), `data/parts/`, `data/pools/pools.json`, and `data/binding_profiles/`.
+  - v3 sources: `data/library.json` (schema `3.0.0`), `data/skeletons/*_v3.skeleton.json` (14 archetypes × 3 presets, plus 15 seeded amalgams), `data/parts/`, `data/pools/pools.json`, and `data/binding_profiles/`.
   - Binding profiles are immutable chain definitions identified by SHA-256. A branch names a profile, and a part fits a branch through that profile.
   - Branch sockets are local to their parent joint. Neutral pose is a separate delta applied once, after bind.
   - v2 data and `tests/golden/` are frozen historical evidence. v3 loading rejects v2 inputs.
-- **Skeletons come from code.** `src/critter_crafter/skeletons/archetypes.py` builds every archetype. The JSON files in `data/skeletons/` are its generated output, so change the archetype code, then run `vary`, rather than hand-editing the JSON.
+- **Skeletons come from code.** `src/critter_crafter/skeletons/archetypes.py` builds every archetype, and `skeletons/amalgam.py` grows the asymmetric amalgams from committed seeds. The JSON files in `data/skeletons/` are their generated output, so change the code, then run `vary`, rather than hand-editing the JSON. Behaviour that used to key on `family` reads `anatomy.traits` (`skeletons/traits.py`).
 - **Recipe generator `cc-gen-3` is implemented twice and must match exactly.**
   - The implementations are Python `recipes/generator.py` and C# `Runtime/Generation/RecipeGenerator.cs`.
   - Both use SplitMix64 and integer-millimetre fit rules (`docs/generator.md`).

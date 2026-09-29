@@ -25,12 +25,12 @@ def _skeleton():
 
 def test_motion_archetypes_cover_every_family():
     from critter_crafter.skeletons.archetypes import ARCHETYPES
-    assert set(ARCHETYPE_PROFILES) == set(ARCHETYPES)
+    assert set(ARCHETYPE_PROFILES) == set(ARCHETYPES) | {"amalgam_hauled", "amalgam_walker", "amalgam_slither"}
     families = [p["family"] for p in ARCHETYPE_PROFILES.values()]
-    assert set(families) == {"biped", "quadruped", "hexapod", "crawler", "radial", "serpentine", "dragger"}
+    assert set(families) == {"biped", "quadruped", "hexapod", "crawler", "radial", "serpentine", "dragger", "amalgam"}
     # The tentacle radial was retired; the radial family keeps its articulated walker.
     # The dragger family also has the one-arm-one-leg crawler.
-    assert all(families.count(family) == {"radial": 1, "dragger": 3}.get(family, 2) for family in set(families))
+    assert all(families.count(family) == {"radial": 1, "dragger": 3, "amalgam": 3}.get(family, 2) for family in set(families))
 
 
 def test_contact_cycle_has_position_and_velocity_continuity():

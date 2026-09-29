@@ -29,7 +29,8 @@
         "crawler",
         "serpentine",
         "radial",
-        "dragger"
+        "dragger",
+        "amalgam"
       ]
     },
     "locomotion_hint": {
@@ -432,6 +433,7 @@
                 "manipulator",
                 "head",
                 "sway",
+                "flail",
                 "none"
               ]
             },
@@ -460,6 +462,12 @@
             },
             "run_phase_rad": {
               "type": "number"
+            },
+            "centre_stance": {
+              "type": "boolean"
+            },
+            "pole_ik": {
+              "type": "boolean"
             }
           }
         },

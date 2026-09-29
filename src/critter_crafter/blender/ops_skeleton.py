@@ -137,7 +137,7 @@ def _make_controls(arm: bpy.types.Object, skeleton: dict[str, Any], profiles: li
         # limb plans. Radial/tripod/segmental chains use the same authored pole
         # as a visible verification control, while the solver preserves their
         # neutral bend plane instead of forcing an incompatible two-bone roll.
-        pole_driven = bool(traits_of(skeleton)["pole_ik"])
+        pole_driven = bool(gait.get("pole_ik", traits_of(skeleton)["pole_ik"]))
         ik.pole_target = pole if pole_driven else None
         ik.chain_count = contact["bone_index"] + 1
         ik.pole_angle = -math.pi * .5

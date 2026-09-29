@@ -34,7 +34,8 @@ def test_all_curated_candidates_are_reproducible_distinct_and_within_budget() ->
     candidates = generate_all(seed=9)
 
     assert PRESETS == ("compact", "balanced", "elongated")
-    assert len(candidates) == len(ARCHETYPES) * len(PRESETS)
+    from critter_crafter.skeletons.amalgam import AMALGAM_SEEDS
+    assert len(candidates) == len(ARCHETYPES) * len(PRESETS) + len(AMALGAM_SEEDS)
     assert candidates == generate_all(seed=9)
     assert len({candidate["skeleton_id"] for candidate in candidates}) == len(candidates)
     silhouettes = {
@@ -273,10 +274,12 @@ def test_branch_semantics_and_girth_match_the_exact_binding_profile() -> None:
                 "core" if role == "core" else
                 "head" if role == "head" else
                 "tail" if branch["branch_id"] == "body" else
-                "appendage" if branch["template"] == "tentacle8" else
+                "appendage" if branch["template"] in ("tentacle8", "appendage1") else
                 "limb"
             )
             assert branch["accepts"] == {"categories": [expected_category], "templates": [branch["template"]]}
+            if candidate["family"] == "amalgam" and role == "core":
+                continue                # an amalgam's blob body is deliberately fatter than its profile's ratio
             assert math.isclose(branch["girth_m"], branch["length_m"] * profile["girth_ratio"], abs_tol=1e-4)
 
 

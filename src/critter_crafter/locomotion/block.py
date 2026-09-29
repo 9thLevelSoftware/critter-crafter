@@ -31,18 +31,31 @@ def cadence_max_hz(leg_length_m: float) -> float:
     return round(min(6.0, max(2.0, 3.0 / math.sqrt(max(.05, leg_length_m)))), 6)
 
 
-def _stroke(hip: mu.Vec, home: mu.Vec, reach: float) -> float:
-    """Symmetric forward/back stroke (+Z) through home that stays within reach."""
+def _stroke_bounds(hip: mu.Vec, home: mu.Vec, reach: float) -> tuple[float, float]:
+    """How far (+Z forward, -Z back) the foot can move from home while staying within reach."""
     dy = hip[1] - home[1]
     r2 = (REACH_FRACTION * reach) ** 2 - dy * dy
     dx = home[0] - hip[0]
     disc = r2 - dx * dx
     if disc <= 0.0:
-        return 0.0
+        return 0.0, 0.0
     root = math.sqrt(disc)
     dz = home[2] - hip[2]
-    forward, backward = -dz + root, dz + root   # s+ and -s-
+    return -dz + root, dz + root
+
+
+def _stroke(hip: mu.Vec, home: mu.Vec, reach: float) -> float:
+    """Symmetric forward/back stroke (+Z) through home that stays within reach."""
+    forward, backward = _stroke_bounds(hip, home, reach)
     return max(0.0, 2.0 * min(forward, backward))
+
+
+def _stroke_centred(hip: mu.Vec, home: mu.Vec, reach: float) -> tuple[float, float]:
+    """The whole reachable chord and the shift that centres the stance on it (for a foot well off its hip)."""
+    forward, backward = _stroke_bounds(hip, home, reach)
+    if forward <= 0.0 or backward <= 0.0:
+        return 0.0, 0.0
+    return forward + backward, (forward - backward) * .5
 
 
 MAX_COXA_YAW_DEG = 45.0     # matches CreatureGait.MaxCoxaYawDeg
@@ -245,9 +258,15 @@ def _locomotion_block(skeleton: dict[str, Any]) -> dict[str, Any]:
         # ankle, from the hip, with thigh + shin. The stroke is measured for that point.
         if branch.get("template") == "limb3" and len(chain) == 3:
             ankle = pose[chain[2]]["head"]
-            stroke_m = _stroke(hip, ankle, pose[chain[0]]["length"] + pose[chain[1]]["length"])
+            thigh_shin = pose[chain[0]]["length"] + pose[chain[1]]["length"]
+            if branch.get("gait", {}).get("centre_stance"):
+                stroke_m, shift = _stroke_centred(hip, ankle, thigh_shin)
+            else:
+                stroke_m = _stroke(hip, ankle, thigh_shin)
         elif branch.get("template") == "insect_leg4" and len(chain) == 4:
             stroke_m, shift = _hinge4_stroke(pose, chain, home, strict_yaw=bool(traits["ring"]))
+        elif branch.get("gait", {}).get("centre_stance"):
+            stroke_m, shift = _stroke_centred(hip, home, reach)
         else:
             stroke_m = _stroke(hip, home, reach)
         legs.append({

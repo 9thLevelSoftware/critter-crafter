@@ -116,6 +116,34 @@ The torso is at most about 0.2 of one haul (≈ 0.12 m at walk, ≈ 0.14 m at 2.
 
 The grip-pull-stop rhythm reads best at walk speed, about one haul per arm per second. At 2.5 m/s a dragger hauls almost twice as often and it reads as a scramble. If the crawl should look deliberate in the game, use the dragger's own `v_walk_mps` or `v_run_mps` as its move speed rather than the shared threat speed.
 
+## Amalgams
+
+`skeletons/amalgam.py` grows asymmetric, glued-together creatures from a seed (the family is `amalgam`; ids are
+`amalgam_<mode>_s<seed>_v3`). A blob body (`core1`) gets one or two off-axis heads, a few **working limbs** of mixed
+kinds, one **striker**, and a scatter of **vestigial limbs** on the top and sides that only wave. The mode is drawn
+from the seed and maps onto machinery that already exists:
+
+| Mode | Body | Working limbs | Runtime |
+|---|---|---|---|
+| `hauled` (hint `drag`) | lies on the ground, a `belly` tentacle trails | 1-3 dragger arms/legs: pullers on the front flank, pushers at the rear | the drag gait; `drag_drive` is decided per limb by whether the wrist is ahead of the hip |
+| `walker` (hint `crawl`) | held up at 0.65-1.05 m | 2-4 legs of at least two kinds: mammal, digitigrade, insect, or an arm used as a leg | the legged gait with `centre_stance` on each leg |
+| `slither` (hint `slither`) | lies on the ground | none: one sliding tentacle | the slide model |
+
+- **Only working limbs are locomotors.** Vestigial limbs have role `flail` (or `none` for claws), no contacts and
+  `required: false`, so they never enter the legs block and can't cap the creature's stroke, and the recipe fills
+  them 60-80% of the time. `flail` gestures wave in every clip; they may grow from other vestigial limbs.
+- **`gait.centre_stance`** (per leg) publishes the whole reachable chord with a `stance_shift_m`, the way an insect
+  leg does, instead of a symmetric stroke. The runtime already applies the shift to every solver.
+- **`gait.pole_ik`** (per limb) overrides the skeleton trait: mammal legs and arms keep their IK pole, insect legs
+  don't (a pole on a fanned four-bone chain flips its bend plane).
+- **Every working limb is grounded on its own** (`_ground_arm`, `_fit_leg`), because the neutral pose only lowers the
+  root by the worst limb and a leg that hovers would leave the creature hovering.
+- **The attack is derived** (`actions.derive_attack_profile`): the dragger's hammer swing, turned to the direction
+  the striker points, with every support contact kept planted.
+- `critter skeleton amalgam-sweep --seeds 1-200` grows and checks seeds without Blender. It is a tool for choosing
+  which seeds to commit (`AMALGAM_SEEDS`), not a gate. A seed that passes the sweep can still fail the bake, so
+  every committed seed has been through `library build` and `skeleton qa`.
+
 ## Known limitations
 
 - **Instant agent turns** cause a brief shuffle while re-stepping groups catch up with the smoothed body yaw.
@@ -123,3 +151,10 @@ The grip-pull-stop rhythm reads best at walk speed, about one haul per arm per s
 - **On a 20° ramp,** downhill feet can reach the end of their reach and slide a few centimetres.
 - **Starting from standing to full speed in one frame** can drag a foot during the first stride. Tests allow a one-second warmup.
 - **Draggers use placeholder parts,** so the hands read as feet and the head is small. Real parts (M2) will improve the read.
+- **Amalgam hands are placeholder too:** the reference image's giant splayed hands need a Meshy part (owner cost
+  confirmation first). A hauled amalgam's heave pivots at the rear of the body, as a dragger's does; a body carried
+  mostly by pushers may want the pivot at the front.
+- **Amalgams are slow.** Hauled ones walk at 0.2-0.35 m/s and walkers at about 0.6 m/s (their `v_walk_mps`); none
+  reaches the game's shared 2.5 m/s, so the game should use each creature's own published speeds.
+- **Arms used as legs are the hardest amalgam kit.** About a third of the seeds that use one fail the bake
+  (an IK flip or a twist past the limit), so seeds are vetted by `skeleton qa`.
