@@ -117,6 +117,18 @@
         "style": {
           "type": "string"
         },
+        "traits": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["min_support", "body_on_ground", "ring", "pole_ik", "compact_clip"],
+          "properties": {
+            "min_support": {"type": "integer", "minimum": 0, "maximum": 6},
+            "body_on_ground": {"type": "boolean"},
+            "ring": {"type": "boolean"},
+            "pole_ik": {"type": "boolean"},
+            "compact_clip": {"type": "boolean"}
+          }
+        },
         "support_branches": {
           "type": "array",
           "uniqueItems": true,

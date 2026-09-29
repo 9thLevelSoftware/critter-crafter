@@ -213,7 +213,8 @@ namespace CritterCrafter
         public string drag_drive;
         public double walk_phase;
         public double run_phase;
-        public bool support;
+        /// <summary>Bears weight (counts toward min_support and body height). Defaults to true, like the Python planner.</summary>
+        public bool support = true;
     }
 
     [Serializable]

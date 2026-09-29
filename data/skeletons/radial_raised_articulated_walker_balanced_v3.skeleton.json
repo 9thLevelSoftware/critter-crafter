@@ -852,6 +852,13 @@
     "archetype_id": "radial_raised_articulated_walker",
     "body_plan": "radial",
     "style": "anatomical",
+    "traits": {
+      "min_support": 2,
+      "body_on_ground": false,
+      "ring": true,
+      "pole_ik": false,
+      "compact_clip": true
+    },
     "support_branches": [
       "arm_0",
       "arm_1",

@@ -659,6 +659,13 @@
     "archetype_id": "biped_plantigrade_humanoid",
     "body_plan": "biped",
     "style": "anatomical",
+    "traits": {
+      "min_support": 1,
+      "body_on_ground": false,
+      "ring": false,
+      "pole_ik": true,
+      "compact_clip": false
+    },
     "support_branches": [
       "leg_L",
       "leg_R"

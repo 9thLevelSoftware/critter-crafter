@@ -293,6 +293,13 @@
     "archetype_id": "serpentine_limbless_articulated",
     "body_plan": "serpentine",
     "style": "anatomical",
+    "traits": {
+      "min_support": 1,
+      "body_on_ground": false,
+      "ring": false,
+      "pole_ik": false,
+      "compact_clip": false
+    },
     "support_branches": [
       "body"
     ],

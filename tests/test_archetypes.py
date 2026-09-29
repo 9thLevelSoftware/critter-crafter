@@ -33,11 +33,10 @@ def test_biped_candidate_has_grounded_symmetric_support_and_motion_metadata() ->
 def test_all_curated_candidates_are_reproducible_distinct_and_within_budget() -> None:
     candidates = generate_all(seed=9)
 
-    assert len(ARCHETYPES) == 14
     assert PRESETS == ("compact", "balanced", "elongated")
-    assert len(candidates) == 42
+    assert len(candidates) == len(ARCHETYPES) * len(PRESETS)
     assert candidates == generate_all(seed=9)
-    assert len({candidate["skeleton_id"] for candidate in candidates}) == 42
+    assert len({candidate["skeleton_id"] for candidate in candidates}) == len(candidates)
     silhouettes = {
         (round(candidate["anatomy"]["silhouette"]["width_m"], 3),
          round(candidate["anatomy"]["silhouette"]["height_m"], 3),

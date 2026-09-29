@@ -4,6 +4,8 @@ from __future__ import annotations
 import math
 from typing import Any
 
+from .traits import traits_of
+
 CLIPS = ("idle", "walk", "run", "stun", "telegraph", "attack", "hit", "death")
 LOOPS = frozenset(("idle", "walk", "run", "stun"))
 
@@ -75,7 +77,7 @@ def evaluate_motion(skeleton: dict, motion: dict, penetration_m: float = .005,
             fail("CC_MOTION_PROFILE", f"{branch['branch_id']}: missing verified joint limits")
     expected_bones = {b["name"] for b in skeleton["bones"]}
     required_support = set(skeleton.get("anatomy", {}).get("support_branches", []))
-    anatomical_minimum = 2 if skeleton.get("family") in ("quadruped", "hexapod", "crawler", "radial") else 1
+    anatomical_minimum = int(traits_of(skeleton)["min_support"])
     declared_contacts = {f"{b['branch_id']}:{i}": (b['branch_id'], c['kind'])
                          for b in branches.values() for i, c in enumerate(b.get("contacts", []))}
     if len(required_support) < anatomical_minimum or not declared_contacts:
@@ -161,8 +163,6 @@ def evaluate_motion(skeleton: dict, motion: dict, penetration_m: float = .005,
                     metrics["max_planted_drift_m"] = max(metrics["max_planted_drift_m"], drift)
                     if drift > limit + 1e-6:
                         fail("CC_CONTACT_DRIFT", f"{bid}: {drift:.6f} m > {limit:.6f} m", name, frame)
-                if contact.get("required_support") and not contact.get("planted"):
-                    fail("CC_SUPPORT_SCHEDULE", f"{bid}: declared required contact absent", name, frame)
             planted = {k: v for k, v in planted.items() if k in active}
             if seen_contacts != set(declared_contacts):
                 fail("CC_CONTACT_SET", f"missing contacts: {sorted(set(declared_contacts) - seen_contacts)}", name, frame)

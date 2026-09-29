@@ -12,6 +12,7 @@ import bpy
 from mathutils import Matrix, Quaternion, Vector
 
 from ..skeletons import motion as planner
+from ..skeletons.traits import traits_of
 from . import ops_reference, rigkit
 from .frame import to_blender, to_gltf
 
@@ -131,7 +132,7 @@ def _make_controls(arm: bpy.types.Object, skeleton: dict[str, Any], profiles: li
         # limb plans. Radial/tripod/segmental chains use the same authored pole
         # as a visible verification control, while the solver preserves their
         # neutral bend plane instead of forcing an incompatible two-bone roll.
-        pole_driven = skeleton.get("family") in ("biped", "quadruped", "hexapod", "dragger")
+        pole_driven = bool(traits_of(skeleton)["pole_ik"])
         ik.pole_target = pole if pole_driven else None
         ik.chain_count = contact["bone_index"] + 1
         ik.pole_angle = -math.pi * .5
@@ -422,7 +423,7 @@ def _bake_clips(arm: bpy.types.Object, skeleton: dict[str, Any], gait: dict[str,
     contact_terminals = {record["bone_name"] for branch in skeleton["branches"]
                          if planner.branch_role(branch) == "locomotor"
                          for record in _contact_records(branch, skeleton)}
-    if skeleton.get("family") == "radial":
+    if traits_of(skeleton)["ring"]:
         contact_terminals.update(name for branch in skeleton["branches"]
                                  if planner.branch_role(branch) == "locomotor"
                                  for name in branch["bone_names"])
@@ -542,8 +543,7 @@ def _joint_limit_violations(arm: bpy.types.Object, skeleton: dict[str, Any],
 def _minimum_support(skeleton: dict[str, Any], clip_name: str, desired_sample: dict[str, Any]) -> tuple[int, bool]:
     if clip_name == "death" and float(desired_sample.get("phase", 0.0)) >= .25:
         return 0, False
-    body_plan = skeleton.get("anatomy", {}).get("body_plan", skeleton.get("family", ""))
-    desired_min = 2 if body_plan in ("quadruped", "hexapod", "crawler", "radial") else 1
+    desired_min = int(traits_of(skeleton)["min_support"])
     return desired_min, False
 
 

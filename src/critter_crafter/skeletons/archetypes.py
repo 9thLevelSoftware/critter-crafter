@@ -15,6 +15,7 @@ from typing import Any
 from ..config import paths
 from .. import mathutil as mu
 from ..recipes.rng import SplitMix64
+from .traits import family_traits
 
 PRESETS = ("compact", "balanced", "elongated")
 FAMILIES = ("biped", "quadruped", "crawler", "hexapod", "radial", "serpentine", "dragger")
@@ -659,22 +660,42 @@ def build_candidate(archetype: str, preset: str, seed: int = 1, style: str = "an
         if hip is not None:
             # Presets keep their limb proportion: longer-limbed presets stand taller on the same torso.
             # Grounded torsos (draggers) never rise: their arms only reach further.
-            grounded = a["plan"] == "dragger"
+            grounded = family_traits(a["family"])["body_on_ground"]
             _fit_leg_to_hip(branch, hip if grounded else hip * shape["limb"])
+    locomotion = {"biped": "biped", "quadruped": "quadruped", "crawler": "crawl", "hexapod": "crawl",
+                  "radial": "crawl", "serpentine": "slither", "dragger": "drag"}[a["plan"]]
+    style_suffix = "" if style == "anatomical" else "_horror"
+    return _finalise(branches, supports, contacts, symmetry, archetype=archetype, body_plan=a["plan"], family=a["family"],
+                     style=style, hint=locomotion, skeleton_id=f"{archetype}_{preset}{style_suffix}_v3",
+                     dims=(h, length, width), provenance={"generator": "cc-gen-3", "seed": seed, "preset": preset})
+
+
+def _finalise(branches: list[dict[str, Any]], supports: list[str], contacts: list[str], symmetry: str, *,
+              archetype: str, body_plan: str, family: str, style: str, hint: str, skeleton_id: str,
+              dims: tuple[float, float, float], provenance: dict[str, Any],
+              landmarks: dict[str, str] | None = None, symmetry_pct: int | None = None,
+              traits: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Assemble the finished skeleton record from authored branches (shared by every builder)."""
     _align_distributed_supports(branches, supports)
     _socketize(branches)
     bone_count = 1 + sum(_FRACTIONS[b["template"]] for b in branches)
     symmetry_data = {"kind": "radial", "ring_count": int(symmetry.removeprefix("radial_"))} if symmetry.startswith("radial_") else {"kind": symmetry}
-    anatomy = {"archetype_id": archetype, "body_plan": a["plan"], "style": style, "support_branches": supports, "contact_branches": contacts,
-               "symmetry": symmetry_data, "landmarks": {"pelvis": "core", "shoulder": "core", "neck": "head" if any(b["branch_id"] == "head" for b in branches) else "core"},
+    h, length, width = dims
+    if landmarks is None:
+        landmarks = {"pelvis": "core", "shoulder": "core",
+                     "neck": "head" if any(b["branch_id"] == "head" for b in branches) else "core"}
+    if traits is None:
+        traits = family_traits(family)
+    anatomy = {"archetype_id": archetype, "body_plan": body_plan, "style": style, "traits": traits,
+               "support_branches": supports, "contact_branches": contacts,
+               "symmetry": symmetry_data, "landmarks": landmarks,
                "silhouette": {"height_m": round(h, 4), "length_m": round(length, 4), "width_m": round(width, 4)},
                "budgets": {"bones": bone_count, "parts": len(branches), "triangles": min(30_000, 900 + bone_count * 155)}}
-    style_suffix = "" if style == "anatomical" else "_horror"
-    locomotion = {"biped": "biped", "quadruped": "quadruped", "crawler": "crawl", "hexapod": "crawl",
-                  "radial": "crawl", "serpentine": "slither", "dragger": "drag"}[a["plan"]]
-    return {"schema_version": "3.0.0", "skeleton_id": f"{archetype}_{preset}{style_suffix}_v3", "family": a["family"], "locomotion_hint": locomotion, "status": "draft",
-            "symmetry_pct": 100 if symmetry == "bilateral" else 92, "branches": branches,
-            "neutral_pose": _neutral_pose(branches, supports), "anatomy": anatomy, "provenance": {"generator": "cc-gen-3", "seed": seed, "preset": preset}}
+    if symmetry_pct is None:
+        symmetry_pct = 100 if symmetry == "bilateral" else 92
+    return {"schema_version": "3.0.0", "skeleton_id": skeleton_id, "family": family, "locomotion_hint": hint, "status": "draft",
+            "symmetry_pct": symmetry_pct, "branches": branches,
+            "neutral_pose": _neutral_pose(branches, supports), "anatomy": anatomy, "provenance": provenance}
 
 
 def generate_all(seed: int = 1, style: str = "anatomical") -> list[dict[str, Any]]:

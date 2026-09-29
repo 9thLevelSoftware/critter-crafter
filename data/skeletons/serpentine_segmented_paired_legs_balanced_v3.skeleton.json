@@ -714,6 +714,13 @@
     "archetype_id": "serpentine_segmented_paired_legs",
     "body_plan": "serpentine",
     "style": "anatomical",
+    "traits": {
+      "min_support": 1,
+      "body_on_ground": false,
+      "ring": false,
+      "pole_ik": false,
+      "compact_clip": false
+    },
     "support_branches": [
       "leg0_L",
       "leg0_R",

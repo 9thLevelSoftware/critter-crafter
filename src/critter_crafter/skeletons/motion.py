@@ -16,6 +16,7 @@ import math
 from typing import Any, Iterable, Sequence
 
 from .actions import action_global_phase, attack_target_at, resolve_attack
+from .traits import traits_of
 
 FPS = 30
 TAU = 2.0 * math.pi
@@ -330,7 +331,8 @@ def build_motion(skeleton: dict[str, Any], gait: dict[str, Any]) -> dict[str, An
     grounded_body = False
     locomotor_count = sum(branch_role(branch) == "locomotor" and bool(branch.get("contacts"))
                            for branch in skeleton["branches"])
-    stable_minimum = 2 if skeleton.get("family") in ("quadruped", "hexapod", "crawler", "radial") else 1
+    traits = traits_of(skeleton)
+    stable_minimum = int(traits["min_support"])
     for branch in skeleton["branches"]:
         if branch_role(branch) == "locomotor":
             if _contact_kind(branch, skeleton) in ("body", "sliding"):
@@ -345,7 +347,7 @@ def build_motion(skeleton: dict[str, Any], gait: dict[str, Any]) -> dict[str, An
     for name in CLIP_ORDER:
         phase_driven = overlay and name in ("walk", "run")
         frames = (FPS if phase_driven
-                  else _clip_frames(name, cadence, skeleton.get("family") in ("crawler", "radial")))
+                  else _clip_frames(name, cadence, bool(traits["compact_clip"])))
         cycle_hz = (FPS / frames) if name in ("walk", "run") else 0.0
         speed = (float(profile["stride"]) * cycle_hz if name in ("walk", "run") and not phase_driven else 0.0)
         samples = []
@@ -381,10 +383,10 @@ def build_motion(skeleton: dict[str, Any], gait: dict[str, Any]) -> dict[str, An
                         stride *= 1.25
                         clearance *= 1.35
                         support = max(.51, support - .10)
-                        if skeleton.get("family") == "radial":
+                        if traits["ring"]:
                             support = min(support, .53)
                     support = max(support, min(.92, stable_minimum / max(1, locomotor_count) + .02))
-                    seam_offset = (.265 if skeleton.get("family") == "radial" else .25)
+                    seam_offset = (.265 if traits["ring"] else .25)
                     phase = ((u + phase_rad / TAU + (seam_offset if name in ("walk", "run") else 0.0)) % 1.0
                              if not phase_driven else u)
                     if name in ("walk", "run") and not phase_driven:
@@ -424,7 +426,7 @@ def build_motion(skeleton: dict[str, Any], gait: dict[str, Any]) -> dict[str, An
                         attack_plan, action_global_phase(attack_plan, name, u))}
                    if name in ("telegraph", "attack") and attack_plan else {}),
             })
-        seam_offset = .265 if skeleton.get("family") == "radial" else .25
+        seam_offset = .265 if traits["ring"] else .25
         contact_schedule = []
         for br in skeleton["branches"]:
             if not br.get("contacts"):
@@ -436,7 +438,7 @@ def build_motion(skeleton: dict[str, Any], gait: dict[str, Any]) -> dict[str, An
                 stance = support_fraction(br, float(profile["support"]))
                 if name == "run":
                     stance = max(.51, stance - .10)
-                    if skeleton.get("family") == "radial":
+                    if traits["ring"]:
                         stance = min(stance, .53)
                 stance = max(stance, min(.92, stable_minimum / max(1, locomotor_count) + .02))
             elif branch_role(br) == "locomotor":

@@ -1535,6 +1535,13 @@
         "archetype_id": "biped_digitigrade_creature",
         "body_plan": "biped",
         "style": "anatomical",
+        "traits": {
+          "min_support": 1,
+          "body_on_ground": false,
+          "ring": false,
+          "pole_ik": true,
+          "compact_clip": false
+        },
         "support_branches": [
           "leg_L",
           "leg_R"
@@ -2916,6 +2923,13 @@
         "archetype_id": "biped_digitigrade_creature",
         "body_plan": "biped",
         "style": "anatomical",
+        "traits": {
+          "min_support": 1,
+          "body_on_ground": false,
+          "ring": false,
+          "pole_ik": true,
+          "compact_clip": false
+        },
         "support_branches": [
           "leg_L",
           "leg_R"
@@ -4297,6 +4311,13 @@
         "archetype_id": "biped_digitigrade_creature",
         "body_plan": "biped",
         "style": "anatomical",
+        "traits": {
+          "min_support": 1,
+          "body_on_ground": false,
+          "ring": false,
+          "pole_ik": true,
+          "compact_clip": false
+        },
         "support_branches": [
           "leg_L",
           "leg_R"
@@ -5678,6 +5699,13 @@
         "archetype_id": "biped_plantigrade_humanoid",
         "body_plan": "biped",
         "style": "anatomical",
+        "traits": {
+          "min_support": 1,
+          "body_on_ground": false,
+          "ring": false,
+          "pole_ik": true,
+          "compact_clip": false
+        },
         "support_branches": [
           "leg_L",
           "leg_R"
@@ -7059,6 +7087,13 @@
         "archetype_id": "biped_plantigrade_humanoid",
         "body_plan": "biped",
         "style": "anatomical",
+        "traits": {
+          "min_support": 1,
+          "body_on_ground": false,
+          "ring": false,
+          "pole_ik": true,
+          "compact_clip": false
+        },
         "support_branches": [
           "leg_L",
           "leg_R"
@@ -8440,6 +8475,13 @@
         "archetype_id": "biped_plantigrade_humanoid",
         "body_plan": "biped",
         "style": "anatomical",
+        "traits": {
+          "min_support": 1,
+          "body_on_ground": false,
+          "ring": false,
+          "pole_ik": true,
+          "compact_clip": false
+        },
         "support_branches": [
           "leg_L",
           "leg_R"
@@ -9821,6 +9863,13 @@
         "archetype_id": "crawler_alien_tripod",
         "body_plan": "crawler",
         "style": "anatomical",
+        "traits": {
+          "min_support": 2,
+          "body_on_ground": false,
+          "ring": false,
+          "pole_ik": false,
+          "compact_clip": true
+        },
         "support_branches": [
           "leg_0",
           "leg_1",
@@ -10909,6 +10958,13 @@
         "archetype_id": "crawler_alien_tripod",
         "body_plan": "crawler",
         "style": "anatomical",
+        "traits": {
+          "min_support": 2,
+          "body_on_ground": false,
+          "ring": false,
+          "pole_ik": false,
+          "compact_clip": true
+        },
         "support_branches": [
           "leg_0",
           "leg_1",
@@ -11997,6 +12053,13 @@
         "archetype_id": "crawler_alien_tripod",
         "body_plan": "crawler",
         "style": "anatomical",
+        "traits": {
+          "min_support": 2,
+          "body_on_ground": false,
+          "ring": false,
+          "pole_ik": false,
+          "compact_clip": true
+        },
         "support_branches": [
           "leg_0",
           "leg_1",
@@ -13085,6 +13148,13 @@
         "archetype_id": "crawler_bilateral_eight_legged",
         "body_plan": "crawler",
         "style": "anatomical",
+        "traits": {
+          "min_support": 2,
+          "body_on_ground": false,
+          "ring": false,
+          "pole_ik": false,
+          "compact_clip": true
+        },
         "support_branches": [
           "leg0_L",
           "leg0_R",
@@ -15612,6 +15682,13 @@
         "archetype_id": "crawler_bilateral_eight_legged",
         "body_plan": "crawler",
         "style": "anatomical",
+        "traits": {
+          "min_support": 2,
+          "body_on_ground": false,
+          "ring": false,
+          "pole_ik": false,
+          "compact_clip": true
+        },
         "support_branches": [
           "leg0_L",
           "leg0_R",
@@ -18139,6 +18216,13 @@
         "archetype_id": "crawler_bilateral_eight_legged",
         "body_plan": "crawler",
         "style": "anatomical",
+        "traits": {
+          "min_support": 2,
+          "body_on_ground": false,
+          "ring": false,
+          "pole_ik": false,
+          "compact_clip": true
+        },
         "support_branches": [
           "leg0_L",
           "leg0_R",
@@ -20666,6 +20750,13 @@
         "archetype_id": "dragger_arm_leg_crawler",
         "body_plan": "dragger",
         "style": "anatomical",
+        "traits": {
+          "min_support": 1,
+          "body_on_ground": true,
+          "ring": false,
+          "pole_ik": true,
+          "compact_clip": false
+        },
         "support_branches": [
           "arm_L",
           "leg_R",
@@ -22024,6 +22115,13 @@
         "archetype_id": "dragger_arm_leg_crawler",
         "body_plan": "dragger",
         "style": "anatomical",
+        "traits": {
+          "min_support": 1,
+          "body_on_ground": true,
+          "ring": false,
+          "pole_ik": true,
+          "compact_clip": false
+        },
         "support_branches": [
           "arm_L",
           "leg_R",
@@ -23382,6 +23480,13 @@
         "archetype_id": "dragger_arm_leg_crawler",
         "body_plan": "dragger",
         "style": "anatomical",
+        "traits": {
+          "min_support": 1,
+          "body_on_ground": true,
+          "ring": false,
+          "pole_ik": true,
+          "compact_clip": false
+        },
         "support_branches": [
           "arm_L",
           "leg_R",
@@ -24740,6 +24845,13 @@
         "archetype_id": "dragger_belly_hauler",
         "body_plan": "dragger",
         "style": "anatomical",
+        "traits": {
+          "min_support": 1,
+          "body_on_ground": true,
+          "ring": false,
+          "pole_ik": true,
+          "compact_clip": false
+        },
         "support_branches": [
           "arm_L",
           "arm_R",
@@ -26098,6 +26210,13 @@
         "archetype_id": "dragger_belly_hauler",
         "body_plan": "dragger",
         "style": "anatomical",
+        "traits": {
+          "min_support": 1,
+          "body_on_ground": true,
+          "ring": false,
+          "pole_ik": true,
+          "compact_clip": false
+        },
         "support_branches": [
           "arm_L",
           "arm_R",
@@ -27456,6 +27575,13 @@
         "archetype_id": "dragger_belly_hauler",
         "body_plan": "dragger",
         "style": "anatomical",
+        "traits": {
+          "min_support": 1,
+          "body_on_ground": true,
+          "ring": false,
+          "pole_ik": true,
+          "compact_clip": false
+        },
         "support_branches": [
           "arm_L",
           "arm_R",
@@ -28814,6 +28940,13 @@
         "archetype_id": "dragger_forelimb_puller",
         "body_plan": "dragger",
         "style": "anatomical",
+        "traits": {
+          "min_support": 1,
+          "body_on_ground": true,
+          "ring": false,
+          "pole_ik": true,
+          "compact_clip": false
+        },
         "support_branches": [
           "arm_L",
           "arm_R",
@@ -30172,6 +30305,13 @@
         "archetype_id": "dragger_forelimb_puller",
         "body_plan": "dragger",
         "style": "anatomical",
+        "traits": {
+          "min_support": 1,
+          "body_on_ground": true,
+          "ring": false,
+          "pole_ik": true,
+          "compact_clip": false
+        },
         "support_branches": [
           "arm_L",
           "arm_R",
@@ -31530,6 +31670,13 @@
         "archetype_id": "dragger_forelimb_puller",
         "body_plan": "dragger",
         "style": "anatomical",
+        "traits": {
+          "min_support": 1,
+          "body_on_ground": true,
+          "ring": false,
+          "pole_ik": true,
+          "compact_clip": false
+        },
         "support_branches": [
           "arm_L",
           "arm_R",
@@ -32888,6 +33035,13 @@
         "archetype_id": "hexapod_compact_insect",
         "body_plan": "hexapod",
         "style": "anatomical",
+        "traits": {
+          "min_support": 2,
+          "body_on_ground": false,
+          "ring": false,
+          "pole_ik": true,
+          "compact_clip": false
+        },
         "support_branches": [
           "leg0_L",
           "leg0_R",
@@ -34907,6 +35061,13 @@
         "archetype_id": "hexapod_compact_insect",
         "body_plan": "hexapod",
         "style": "anatomical",
+        "traits": {
+          "min_support": 2,
+          "body_on_ground": false,
+          "ring": false,
+          "pole_ik": true,
+          "compact_clip": false
+        },
         "support_branches": [
           "leg0_L",
           "leg0_R",
@@ -36926,6 +37087,13 @@
         "archetype_id": "hexapod_compact_insect",
         "body_plan": "hexapod",
         "style": "anatomical",
+        "traits": {
+          "min_support": 2,
+          "body_on_ground": false,
+          "ring": false,
+          "pole_ik": true,
+          "compact_clip": false
+        },
         "support_branches": [
           "leg0_L",
           "leg0_R",
@@ -38945,6 +39113,13 @@
         "archetype_id": "hexapod_elongated_insect",
         "body_plan": "hexapod",
         "style": "anatomical",
+        "traits": {
+          "min_support": 2,
+          "body_on_ground": false,
+          "ring": false,
+          "pole_ik": true,
+          "compact_clip": false
+        },
         "support_branches": [
           "leg0_L",
           "leg0_R",
@@ -40964,6 +41139,13 @@
         "archetype_id": "hexapod_elongated_insect",
         "body_plan": "hexapod",
         "style": "anatomical",
+        "traits": {
+          "min_support": 2,
+          "body_on_ground": false,
+          "ring": false,
+          "pole_ik": true,
+          "compact_clip": false
+        },
         "support_branches": [
           "leg0_L",
           "leg0_R",
@@ -42983,6 +43165,13 @@
         "archetype_id": "hexapod_elongated_insect",
         "body_plan": "hexapod",
         "style": "anatomical",
+        "traits": {
+          "min_support": 2,
+          "body_on_ground": false,
+          "ring": false,
+          "pole_ik": true,
+          "compact_clip": false
+        },
         "support_branches": [
           "leg0_L",
           "leg0_R",
@@ -45002,6 +45191,13 @@
         "archetype_id": "quadruped_lean_digitigrade",
         "body_plan": "quadruped",
         "style": "anatomical",
+        "traits": {
+          "min_support": 2,
+          "body_on_ground": false,
+          "ring": false,
+          "pole_ik": true,
+          "compact_clip": false
+        },
         "support_branches": [
           "leg_L0",
           "leg_R0",
@@ -46451,6 +46647,13 @@
         "archetype_id": "quadruped_lean_digitigrade",
         "body_plan": "quadruped",
         "style": "anatomical",
+        "traits": {
+          "min_support": 2,
+          "body_on_ground": false,
+          "ring": false,
+          "pole_ik": true,
+          "compact_clip": false
+        },
         "support_branches": [
           "leg_L0",
           "leg_R0",
@@ -47900,6 +48103,13 @@
         "archetype_id": "quadruped_lean_digitigrade",
         "body_plan": "quadruped",
         "style": "anatomical",
+        "traits": {
+          "min_support": 2,
+          "body_on_ground": false,
+          "ring": false,
+          "pole_ik": true,
+          "compact_clip": false
+        },
         "support_branches": [
           "leg_L0",
           "leg_R0",
@@ -49349,6 +49559,13 @@
         "archetype_id": "quadruped_stocky_plantigrade",
         "body_plan": "quadruped",
         "style": "anatomical",
+        "traits": {
+          "min_support": 2,
+          "body_on_ground": false,
+          "ring": false,
+          "pole_ik": true,
+          "compact_clip": false
+        },
         "support_branches": [
           "leg_L0",
           "leg_R0",
@@ -50798,6 +51015,13 @@
         "archetype_id": "quadruped_stocky_plantigrade",
         "body_plan": "quadruped",
         "style": "anatomical",
+        "traits": {
+          "min_support": 2,
+          "body_on_ground": false,
+          "ring": false,
+          "pole_ik": true,
+          "compact_clip": false
+        },
         "support_branches": [
           "leg_L0",
           "leg_R0",
@@ -52247,6 +52471,13 @@
         "archetype_id": "quadruped_stocky_plantigrade",
         "body_plan": "quadruped",
         "style": "anatomical",
+        "traits": {
+          "min_support": 2,
+          "body_on_ground": false,
+          "ring": false,
+          "pole_ik": true,
+          "compact_clip": false
+        },
         "support_branches": [
           "leg_L0",
           "leg_R0",
@@ -53696,6 +53927,13 @@
         "archetype_id": "radial_raised_articulated_walker",
         "body_plan": "radial",
         "style": "anatomical",
+        "traits": {
+          "min_support": 2,
+          "body_on_ground": false,
+          "ring": true,
+          "pole_ik": false,
+          "compact_clip": true
+        },
         "support_branches": [
           "arm_0",
           "arm_1",
@@ -55654,6 +55892,13 @@
         "archetype_id": "radial_raised_articulated_walker",
         "body_plan": "radial",
         "style": "anatomical",
+        "traits": {
+          "min_support": 2,
+          "body_on_ground": false,
+          "ring": true,
+          "pole_ik": false,
+          "compact_clip": true
+        },
         "support_branches": [
           "arm_0",
           "arm_1",
@@ -57612,6 +57857,13 @@
         "archetype_id": "radial_raised_articulated_walker",
         "body_plan": "radial",
         "style": "anatomical",
+        "traits": {
+          "min_support": 2,
+          "body_on_ground": false,
+          "ring": true,
+          "pole_ik": false,
+          "compact_clip": true
+        },
         "support_branches": [
           "arm_0",
           "arm_1",
@@ -59570,6 +59822,13 @@
         "archetype_id": "serpentine_limbless_articulated",
         "body_plan": "serpentine",
         "style": "anatomical",
+        "traits": {
+          "min_support": 1,
+          "body_on_ground": false,
+          "ring": false,
+          "pole_ik": false,
+          "compact_clip": false
+        },
         "support_branches": [
           "body"
         ],
@@ -60215,6 +60474,13 @@
         "archetype_id": "serpentine_limbless_articulated",
         "body_plan": "serpentine",
         "style": "anatomical",
+        "traits": {
+          "min_support": 1,
+          "body_on_ground": false,
+          "ring": false,
+          "pole_ik": false,
+          "compact_clip": false
+        },
         "support_branches": [
           "body"
         ],
@@ -60860,6 +61126,13 @@
         "archetype_id": "serpentine_limbless_articulated",
         "body_plan": "serpentine",
         "style": "anatomical",
+        "traits": {
+          "min_support": 1,
+          "body_on_ground": false,
+          "ring": false,
+          "pole_ik": false,
+          "compact_clip": false
+        },
         "support_branches": [
           "body"
         ],
@@ -61505,6 +61778,13 @@
         "archetype_id": "serpentine_segmented_paired_legs",
         "body_plan": "serpentine",
         "style": "anatomical",
+        "traits": {
+          "min_support": 1,
+          "body_on_ground": false,
+          "ring": false,
+          "pole_ik": false,
+          "compact_clip": false
+        },
         "support_branches": [
           "leg0_L",
           "leg0_R",
@@ -63138,6 +63418,13 @@
         "archetype_id": "serpentine_segmented_paired_legs",
         "body_plan": "serpentine",
         "style": "anatomical",
+        "traits": {
+          "min_support": 1,
+          "body_on_ground": false,
+          "ring": false,
+          "pole_ik": false,
+          "compact_clip": false
+        },
         "support_branches": [
           "leg0_L",
           "leg0_R",
@@ -64771,6 +65058,13 @@
         "archetype_id": "serpentine_segmented_paired_legs",
         "body_plan": "serpentine",
         "style": "anatomical",
+        "traits": {
+          "min_support": 1,
+          "body_on_ground": false,
+          "ring": false,
+          "pole_ik": false,
+          "compact_clip": false
+        },
         "support_branches": [
           "leg0_L",
           "leg0_R",
