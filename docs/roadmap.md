@@ -42,14 +42,14 @@ The milestone list below was restored from the original plan (`git show 6379277:
 
 - Work: `BiomassThreatVisualFactory : ICreatureVisualFactory` plugged in at `ThreatPlaceholderFactory.Build`, keeping the `Threat_<id>` root and `"Mesh"` child. Event mapping: moved → velocity, attacked → attack, AI state → `SetState`, killed → death. Save recipe and seed; fall back to the old placeholder on failure; `drone_swarm` stays mechanical.
 - Accepted when: the game's tests stay green, a PlayMode test spawns all 6 archetypes, a save/load round trip restores an identical recipe, and iso screenshots pass review.
-- Preconditions not yet met: every skeleton and part is `draft`, so pool + seed generation yields nothing at runtime, and the pools list only the biped, quadruped and crawler families. The game reads `move_speed` from the catalog `locomotion` block (see `docs/locomotion.md`).
+- Preconditions not yet met: every skeleton and part is `draft`, so pool + seed generation yields nothing at runtime, and the pools list only the biped, quadruped and crawler families. The game reads `move_speed_mps` from the creature's own locomotion block (`AssembledCreature.Locomotion`; see `docs/locomotion.md`).
 
 ## In flight: locomotion thread (branch `feature/locomotion-thread`)
 
 1. Docs: this roadmap and the count fixes.
 2. Dragger hand slip at instant turns.
 3. A one-arm-one-leg dragger (a 14th archetype, 42 skeletons): built, awaiting GIF review.
-4. Per-creature gait and speed derived from the assembled build.
+4. Per-creature gait and speed derived from the assembled build (`build-1`, branch `feature/build-speeds`): built, awaiting GIF review (`work/review/build-speeds`). The airborne-run follow-up (3b) is deferred.
 
 ## Closed pull requests
 

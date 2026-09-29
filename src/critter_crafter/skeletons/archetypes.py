@@ -364,12 +364,16 @@ def _radial(a: dict[str, Any], h: float, length: float, width: float) -> tuple[l
     branches = [_branch("core", "core1", None, origin=_v(0, h, 0), direction=[0, 1, 0], up=[0, 0, 1], length=h * .5, role="core")]
     count = 8 if a["variant"] == "low" else 6; supports: list[str] = []
     for i in range(count):
-        angle = 2 * math.pi * i / count; bid = f"arm_{i}"; supports.append(bid)
+        # Half a step off the axes: a leg lying along the travel axis has its stance run through its own hip
+        # (the coxa yaw flips 180 degrees), so no leg may point straight ahead or behind.
+        angle = 2 * math.pi * (i + .5) / count; bid = f"arm_{i}"; supports.append(bid)
         vertical = 0.0 if template == "tentacle8" else -.72
         arm = _branch(bid, template, "core", origin=_v(math.sin(angle) * width * .16, h, math.cos(angle) * length * .16), direction=[math.sin(angle), vertical, math.cos(angle)], up=[0, 1, 0], length=width * .58 * a["limb_scale"], role="locomotor", phase=angle, support=.68, contact="sliding" if template == "tentacle8" else "foot", parent_joint="upper")
         if template == "insect_leg4":
             arm["direction"] = [math.sin(angle), 0.0, math.cos(angle)]
             _insect_leg(arm)
+            # Alternating tripods at walk and run: a wave travelling round the ring reads as tapping.
+            arm["gait"]["phase_rad"] = round((i % 2) * math.pi, 6)
             arm["gait"]["run_phase_rad"] = round((i % 2) * math.pi, 6)
         branches.append(arm)
     return branches, supports, supports, f"radial_{count}"

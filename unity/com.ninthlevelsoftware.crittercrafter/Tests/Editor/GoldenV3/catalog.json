@@ -2853,6 +2853,56 @@
             "run_phase": 0.5,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              1.16975,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg_L",
+            "centroid_m": [
+              0.295615,
+              0.411144,
+              0.043828
+            ]
+          },
+          {
+            "branch_id": "leg_R",
+            "centroid_m": [
+              -0.295615,
+              0.411144,
+              0.043828
+            ]
+          },
+          {
+            "branch_id": "arm_L",
+            "centroid_m": [
+              0.300054,
+              1.087987,
+              0.08147
+            ]
+          },
+          {
+            "branch_id": "arm_R",
+            "centroid_m": [
+              -0.300054,
+              1.087987,
+              0.08147
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              1.615015,
+              0.132643
+            ]
+          }
         ]
       }
     },
@@ -4183,6 +4233,56 @@
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.98885,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg_L",
+            "centroid_m": [
+              0.30095,
+              0.335604,
+              0.038225
+            ]
+          },
+          {
+            "branch_id": "leg_R",
+            "centroid_m": [
+              -0.30095,
+              0.335604,
+              0.038225
+            ]
+          },
+          {
+            "branch_id": "arm_L",
+            "centroid_m": [
+              0.250041,
+              0.95161,
+              0.067223
+            ]
+          },
+          {
+            "branch_id": "arm_R",
+            "centroid_m": [
+              -0.250041,
+              0.95161,
+              0.067223
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              1.398391,
+              0.121999
+            ]
           }
         ]
       }
@@ -5515,6 +5615,56 @@
             "run_phase": 0.5,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              1.3406,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg_L",
+            "centroid_m": [
+              0.294178,
+              0.484986,
+              0.048985
+            ]
+          },
+          {
+            "branch_id": "leg_R",
+            "centroid_m": [
+              -0.294178,
+              0.484986,
+              0.048985
+            ]
+          },
+          {
+            "branch_id": "arm_L",
+            "centroid_m": [
+              0.32333,
+              1.209919,
+              0.093805
+            ]
+          },
+          {
+            "branch_id": "arm_R",
+            "centroid_m": [
+              -0.32333,
+              1.209919,
+              0.093805
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              1.81248,
+              0.140604
+            ]
+          }
         ]
       }
     },
@@ -6845,6 +6995,56 @@
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              1.23435,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg_L",
+            "centroid_m": [
+              0.279273,
+              0.427806,
+              0.112933
+            ]
+          },
+          {
+            "branch_id": "leg_R",
+            "centroid_m": [
+              -0.279273,
+              0.427806,
+              0.112933
+            ]
+          },
+          {
+            "branch_id": "arm_L",
+            "centroid_m": [
+              0.298032,
+              1.148036,
+              0.085967
+            ]
+          },
+          {
+            "branch_id": "arm_R",
+            "centroid_m": [
+              -0.298032,
+              1.148036,
+              0.085967
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              1.704166,
+              0.139933
+            ]
           }
         ]
       }
@@ -8177,6 +8377,56 @@
             "run_phase": 0.5,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              1.04345,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg_L",
+            "centroid_m": [
+              0.280949,
+              0.347403,
+              0.100975
+            ]
+          },
+          {
+            "branch_id": "leg_R",
+            "centroid_m": [
+              -0.280949,
+              0.347403,
+              0.100975
+            ]
+          },
+          {
+            "branch_id": "arm_L",
+            "centroid_m": [
+              0.263799,
+              1.004323,
+              0.070943
+            ]
+          },
+          {
+            "branch_id": "arm_R",
+            "centroid_m": [
+              -0.263799,
+              1.004323,
+              0.070943
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              1.475795,
+              0.128752
+            ]
+          }
         ]
       }
     },
@@ -9508,6 +9758,56 @@
             "run_phase": 0.5,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              1.41465,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg_L",
+            "centroid_m": [
+              0.280885,
+              0.50646,
+              0.122071
+            ]
+          },
+          {
+            "branch_id": "leg_R",
+            "centroid_m": [
+              -0.280885,
+              0.50646,
+              0.122071
+            ]
+          },
+          {
+            "branch_id": "arm_L",
+            "centroid_m": [
+              0.313668,
+              1.276724,
+              0.098989
+            ]
+          },
+          {
+            "branch_id": "arm_R",
+            "centroid_m": [
+              -0.313668,
+              1.276724,
+              0.098989
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              1.91263,
+              0.14834
+            ]
+          }
         ]
       }
     },
@@ -10561,6 +10861,40 @@
             "walk_phase": 0.666667,
             "run_phase": 0.666667,
             "support": true
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.3938,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg_0",
+            "centroid_m": [
+              0.63324,
+              0.362468,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg_1",
+            "centroid_m": [
+              -0.31657,
+              0.362468,
+              -0.491937
+            ]
+          },
+          {
+            "branch_id": "leg_2",
+            "centroid_m": [
+              -0.31657,
+              0.362468,
+              0.491937
+            ]
           }
         ]
       }
@@ -11616,6 +11950,40 @@
             "run_phase": 0.666667,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.3929,
+              5e-05
+            ]
+          },
+          {
+            "branch_id": "leg_0",
+            "centroid_m": [
+              0.645558,
+              0.363554,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg_1",
+            "centroid_m": [
+              -0.322779,
+              0.363554,
+              -0.441885
+            ]
+          },
+          {
+            "branch_id": "leg_2",
+            "centroid_m": [
+              -0.322779,
+              0.363554,
+              0.441885
+            ]
+          }
         ]
       }
     },
@@ -12669,6 +13037,40 @@
             "walk_phase": 0.666667,
             "run_phase": 0.666667,
             "support": true
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.39,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg_0",
+            "centroid_m": [
+              0.622232,
+              0.357453,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg_1",
+            "centroid_m": [
+              -0.311116,
+              0.357453,
+              -0.556346
+            ]
+          },
+          {
+            "branch_id": "leg_2",
+            "centroid_m": [
+              -0.311116,
+              0.357453,
+              0.556346
+            ]
           }
         ]
       }
@@ -15123,6 +15525,80 @@
             "run_phase": 0.0,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.3575,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg0_L",
+            "centroid_m": [
+              0.443559,
+              0.329107,
+              -0.451096
+            ]
+          },
+          {
+            "branch_id": "leg0_R",
+            "centroid_m": [
+              -0.443559,
+              0.329107,
+              -0.451096
+            ]
+          },
+          {
+            "branch_id": "leg1_L",
+            "centroid_m": [
+              0.483775,
+              0.329108,
+              -0.154075
+            ]
+          },
+          {
+            "branch_id": "leg1_R",
+            "centroid_m": [
+              -0.483775,
+              0.329108,
+              -0.154075
+            ]
+          },
+          {
+            "branch_id": "leg2_L",
+            "centroid_m": [
+              0.483775,
+              0.329108,
+              0.166975
+            ]
+          },
+          {
+            "branch_id": "leg2_R",
+            "centroid_m": [
+              -0.483775,
+              0.329108,
+              0.166975
+            ]
+          },
+          {
+            "branch_id": "leg3_L",
+            "centroid_m": [
+              0.443559,
+              0.329107,
+              0.463996
+            ]
+          },
+          {
+            "branch_id": "leg3_R",
+            "centroid_m": [
+              -0.443559,
+              0.329107,
+              0.463996
+            ]
+          }
         ]
       }
     },
@@ -17575,6 +18051,80 @@
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.3568,
+              5e-05
+            ]
+          },
+          {
+            "branch_id": "leg0_L",
+            "centroid_m": [
+              0.447292,
+              0.330213,
+              -0.390675
+            ]
+          },
+          {
+            "branch_id": "leg0_R",
+            "centroid_m": [
+              -0.447292,
+              0.330213,
+              -0.390675
+            ]
+          },
+          {
+            "branch_id": "leg1_L",
+            "centroid_m": [
+              0.485229,
+              0.330213,
+              -0.134246
+            ]
+          },
+          {
+            "branch_id": "leg1_R",
+            "centroid_m": [
+              -0.485229,
+              0.330213,
+              -0.134246
+            ]
+          },
+          {
+            "branch_id": "leg2_L",
+            "centroid_m": [
+              0.485229,
+              0.330213,
+              0.144846
+            ]
+          },
+          {
+            "branch_id": "leg2_R",
+            "centroid_m": [
+              -0.485229,
+              0.330213,
+              0.144846
+            ]
+          },
+          {
+            "branch_id": "leg3_L",
+            "centroid_m": [
+              0.447292,
+              0.330213,
+              0.401175
+            ]
+          },
+          {
+            "branch_id": "leg3_R",
+            "centroid_m": [
+              -0.447292,
+              0.330213,
+              0.401175
+            ]
           }
         ]
       }
@@ -20029,6 +20579,80 @@
             "run_phase": 0.0,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.3541,
+              5e-05
+            ]
+          },
+          {
+            "branch_id": "leg0_L",
+            "centroid_m": [
+              0.439779,
+              0.32461,
+              -0.537867
+            ]
+          },
+          {
+            "branch_id": "leg0_R",
+            "centroid_m": [
+              -0.439779,
+              0.32461,
+              -0.537867
+            ]
+          },
+          {
+            "branch_id": "leg1_L",
+            "centroid_m": [
+              0.481805,
+              0.32461,
+              -0.182262
+            ]
+          },
+          {
+            "branch_id": "leg1_R",
+            "centroid_m": [
+              -0.481805,
+              0.32461,
+              -0.182262
+            ]
+          },
+          {
+            "branch_id": "leg2_L",
+            "centroid_m": [
+              0.481805,
+              0.32461,
+              0.198662
+            ]
+          },
+          {
+            "branch_id": "leg2_R",
+            "centroid_m": [
+              -0.481805,
+              0.32461,
+              0.198662
+            ]
+          },
+          {
+            "branch_id": "leg3_L",
+            "centroid_m": [
+              0.439779,
+              0.32461,
+              0.554367
+            ]
+          },
+          {
+            "branch_id": "leg3_R",
+            "centroid_m": [
+              -0.439779,
+              0.32461,
+              0.554367
+            ]
+          }
         ]
       }
     },
@@ -21344,6 +21968,48 @@
             "run_phase": 0.5,
             "support": true,
             "drag_drive": "push"
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.1348,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "arm_L",
+            "centroid_m": [
+              0.310337,
+              0.213192,
+              0.46005
+            ]
+          },
+          {
+            "branch_id": "leg_R",
+            "centroid_m": [
+              -0.34627,
+              0.18386,
+              -0.64954
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              0.259873,
+              0.536116
+            ]
+          },
+          {
+            "branch_id": "belly",
+            "centroid_m": [
+              -0.010543,
+              0.0278,
+              -0.768711
+            ]
           }
         ]
       }
@@ -22661,6 +23327,48 @@
             "support": true,
             "drag_drive": "push"
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.1119,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "arm_L",
+            "centroid_m": [
+              0.226309,
+              0.168595,
+              0.338865
+            ]
+          },
+          {
+            "branch_id": "leg_R",
+            "centroid_m": [
+              -0.258888,
+              0.146653,
+              -0.500632
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              0.214436,
+              0.439575
+            ]
+          },
+          {
+            "branch_id": "belly",
+            "centroid_m": [
+              -0.009838,
+              0.0228,
+              -0.62961
+            ]
+          }
         ]
       }
     },
@@ -23976,6 +24684,48 @@
             "run_phase": 0.5,
             "support": true,
             "drag_drive": "push"
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.1705,
+              -5e-05
+            ]
+          },
+          {
+            "branch_id": "arm_L",
+            "centroid_m": [
+              0.439699,
+              0.28068,
+              0.652193
+            ]
+          },
+          {
+            "branch_id": "leg_R",
+            "centroid_m": [
+              -0.48327,
+              0.240785,
+              -0.882236
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              0.330553,
+              0.686212
+            ]
+          },
+          {
+            "branch_id": "belly",
+            "centroid_m": [
+              -0.011892,
+              0.0356,
+              -0.984887
+            ]
           }
         ]
       }
@@ -25293,6 +26043,48 @@
             "support": true,
             "drag_drive": "pull"
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.1827,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "arm_L",
+            "centroid_m": [
+              0.396814,
+              0.226593,
+              0.466078
+            ]
+          },
+          {
+            "branch_id": "arm_R",
+            "centroid_m": [
+              -0.396814,
+              0.226593,
+              0.466078
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              0.354757,
+              0.737651
+            ]
+          },
+          {
+            "branch_id": "belly",
+            "centroid_m": [
+              -0.01612,
+              0.0425,
+              -1.110377
+            ]
+          }
         ]
       }
     },
@@ -26608,6 +27400,48 @@
             "run_phase": 0.5,
             "support": true,
             "drag_drive": "pull"
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.1512,
+              -5e-05
+            ]
+          },
+          {
+            "branch_id": "arm_L",
+            "centroid_m": [
+              0.292312,
+              0.179614,
+              0.353071
+            ]
+          },
+          {
+            "branch_id": "arm_R",
+            "centroid_m": [
+              -0.292312,
+              0.179614,
+              0.353071
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              0.292252,
+              0.604905
+            ]
+          },
+          {
+            "branch_id": "belly",
+            "centroid_m": [
+              -0.015041,
+              0.0348,
+              -0.90937
+            ]
           }
         ]
       }
@@ -27925,6 +28759,48 @@
             "support": true,
             "drag_drive": "pull"
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.2318,
+              -5e-05
+            ]
+          },
+          {
+            "branch_id": "arm_L",
+            "centroid_m": [
+              0.557936,
+              0.297385,
+              0.644931
+            ]
+          },
+          {
+            "branch_id": "arm_R",
+            "centroid_m": [
+              -0.557936,
+              0.297385,
+              0.644931
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              0.451995,
+              0.944186
+            ]
+          },
+          {
+            "branch_id": "belly",
+            "centroid_m": [
+              -0.018183,
+              0.0544,
+              -1.422717
+            ]
+          }
         ]
       }
     },
@@ -29240,6 +30116,48 @@
             "run_phase": 0.5,
             "support": true,
             "drag_drive": "pull"
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.1315,
+              -5e-05
+            ]
+          },
+          {
+            "branch_id": "arm_L",
+            "centroid_m": [
+              0.302139,
+              0.207886,
+              0.44777
+            ]
+          },
+          {
+            "branch_id": "arm_R",
+            "centroid_m": [
+              -0.302139,
+              0.207886,
+              0.44777
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              0.253234,
+              0.521828
+            ]
+          },
+          {
+            "branch_id": "belly",
+            "centroid_m": [
+              -0.010263,
+              0.027,
+              -0.748243
+            ]
           }
         ]
       }
@@ -30557,6 +31475,48 @@
             "support": true,
             "drag_drive": "pull"
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.1091,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "arm_L",
+            "centroid_m": [
+              0.220446,
+              0.164402,
+              0.329795
+            ]
+          },
+          {
+            "branch_id": "arm_R",
+            "centroid_m": [
+              -0.220446,
+              0.164402,
+              0.329795
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              0.208887,
+              0.42786
+            ]
+          },
+          {
+            "branch_id": "belly",
+            "centroid_m": [
+              -0.009576,
+              0.0222,
+              -0.612798
+            ]
+          }
         ]
       }
     },
@@ -31872,6 +32832,48 @@
             "run_phase": 0.5,
             "support": true,
             "drag_drive": "pull"
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.1662,
+              -5e-05
+            ]
+          },
+          {
+            "branch_id": "arm_L",
+            "centroid_m": [
+              0.428001,
+              0.273536,
+              0.634724
+            ]
+          },
+          {
+            "branch_id": "arm_R",
+            "centroid_m": [
+              -0.428001,
+              0.273536,
+              0.634724
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              0.321957,
+              0.66787
+            ]
+          },
+          {
+            "branch_id": "belly",
+            "centroid_m": [
+              -0.011575,
+              0.0346,
+              -0.958619
+            ]
           }
         ]
       }
@@ -33834,6 +34836,64 @@
             "run_phase": 0.5,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.3281,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg0_L",
+            "centroid_m": [
+              0.426487,
+              0.302091,
+              -0.353727
+            ]
+          },
+          {
+            "branch_id": "leg0_R",
+            "centroid_m": [
+              -0.426487,
+              0.302091,
+              -0.353727
+            ]
+          },
+          {
+            "branch_id": "leg1_L",
+            "centroid_m": [
+              0.452844,
+              0.302091,
+              -2.8e-05
+            ]
+          },
+          {
+            "branch_id": "leg1_R",
+            "centroid_m": [
+              -0.452844,
+              0.302091,
+              -2.8e-05
+            ]
+          },
+          {
+            "branch_id": "leg2_L",
+            "centroid_m": [
+              0.426487,
+              0.302091,
+              0.353671
+            ]
+          },
+          {
+            "branch_id": "leg2_R",
+            "centroid_m": [
+              -0.426487,
+              0.302091,
+              0.353671
+            ]
+          }
         ]
       }
     },
@@ -35794,6 +36854,64 @@
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.3274,
+              -5e-05
+            ]
+          },
+          {
+            "branch_id": "leg0_L",
+            "centroid_m": [
+              0.429435,
+              0.303044,
+              -0.305247
+            ]
+          },
+          {
+            "branch_id": "leg0_R",
+            "centroid_m": [
+              -0.429435,
+              0.303044,
+              -0.305247
+            ]
+          },
+          {
+            "branch_id": "leg1_L",
+            "centroid_m": [
+              0.454299,
+              0.303044,
+              -2e-06
+            ]
+          },
+          {
+            "branch_id": "leg1_R",
+            "centroid_m": [
+              -0.454299,
+              0.303044,
+              -2e-06
+            ]
+          },
+          {
+            "branch_id": "leg2_L",
+            "centroid_m": [
+              0.429435,
+              0.303044,
+              0.305243
+            ]
+          },
+          {
+            "branch_id": "leg2_R",
+            "centroid_m": [
+              -0.429435,
+              0.303044,
+              0.305243
+            ]
           }
         ]
       }
@@ -37756,6 +38874,64 @@
             "run_phase": 0.5,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.325,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg0_L",
+            "centroid_m": [
+              0.423394,
+              0.29799,
+              -0.423922
+            ]
+          },
+          {
+            "branch_id": "leg0_R",
+            "centroid_m": [
+              -0.423394,
+              0.29799,
+              -0.423922
+            ]
+          },
+          {
+            "branch_id": "leg1_L",
+            "centroid_m": [
+              0.45094,
+              0.29799,
+              1.6e-05
+            ]
+          },
+          {
+            "branch_id": "leg1_R",
+            "centroid_m": [
+              -0.45094,
+              0.29799,
+              1.6e-05
+            ]
+          },
+          {
+            "branch_id": "leg2_L",
+            "centroid_m": [
+              0.423394,
+              0.29799,
+              0.423954
+            ]
+          },
+          {
+            "branch_id": "leg2_R",
+            "centroid_m": [
+              -0.423394,
+              0.29799,
+              0.423954
+            ]
+          }
         ]
       }
     },
@@ -39716,6 +40892,64 @@
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.3934,
+              -5e-05
+            ]
+          },
+          {
+            "branch_id": "leg0_L",
+            "centroid_m": [
+              0.513353,
+              0.362099,
+              -0.568949
+            ]
+          },
+          {
+            "branch_id": "leg0_R",
+            "centroid_m": [
+              -0.513353,
+              0.362099,
+              -0.568949
+            ]
+          },
+          {
+            "branch_id": "leg1_L",
+            "centroid_m": [
+              0.545076,
+              0.362099,
+              -4.6e-05
+            ]
+          },
+          {
+            "branch_id": "leg1_R",
+            "centroid_m": [
+              -0.545076,
+              0.362099,
+              -4.6e-05
+            ]
+          },
+          {
+            "branch_id": "leg2_L",
+            "centroid_m": [
+              0.513353,
+              0.362099,
+              0.568857
+            ]
+          },
+          {
+            "branch_id": "leg2_R",
+            "centroid_m": [
+              -0.513353,
+              0.362099,
+              0.568857
+            ]
           }
         ]
       }
@@ -41678,6 +42912,64 @@
             "run_phase": 0.5,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.3926,
+              5e-05
+            ]
+          },
+          {
+            "branch_id": "leg0_L",
+            "centroid_m": [
+              0.51698,
+              0.363285,
+              -0.484712
+            ]
+          },
+          {
+            "branch_id": "leg0_R",
+            "centroid_m": [
+              -0.51698,
+              0.363285,
+              -0.484712
+            ]
+          },
+          {
+            "branch_id": "leg1_L",
+            "centroid_m": [
+              0.54691,
+              0.363284,
+              3.4e-05
+            ]
+          },
+          {
+            "branch_id": "leg1_R",
+            "centroid_m": [
+              -0.54691,
+              0.363284,
+              3.4e-05
+            ]
+          },
+          {
+            "branch_id": "leg2_L",
+            "centroid_m": [
+              0.51698,
+              0.363285,
+              0.48478
+            ]
+          },
+          {
+            "branch_id": "leg2_R",
+            "centroid_m": [
+              -0.51698,
+              0.363285,
+              0.48478
+            ]
+          }
         ]
       }
     },
@@ -43639,6 +44931,64 @@
             "run_phase": 0.5,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.3896,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg0_L",
+            "centroid_m": [
+              0.509697,
+              0.357086,
+              -0.693524
+            ]
+          },
+          {
+            "branch_id": "leg0_R",
+            "centroid_m": [
+              -0.509697,
+              0.357086,
+              -0.693524
+            ]
+          },
+          {
+            "branch_id": "leg1_L",
+            "centroid_m": [
+              0.542855,
+              0.357086,
+              -4e-05
+            ]
+          },
+          {
+            "branch_id": "leg1_R",
+            "centroid_m": [
+              -0.542855,
+              0.357086,
+              -4e-05
+            ]
+          },
+          {
+            "branch_id": "leg2_L",
+            "centroid_m": [
+              0.509697,
+              0.357086,
+              0.693444
+            ]
+          },
+          {
+            "branch_id": "leg2_R",
+            "centroid_m": [
+              -0.509697,
+              0.357086,
+              0.693444
+            ]
+          }
         ]
       }
     },
@@ -45037,6 +46387,56 @@
             "walk_phase": 0.5,
             "run_phase": 0.0,
             "support": true
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              1.0916,
+              -5e-05
+            ]
+          },
+          {
+            "branch_id": "leg_L0",
+            "centroid_m": [
+              0.389168,
+              0.549328,
+              0.543954
+            ]
+          },
+          {
+            "branch_id": "leg_R0",
+            "centroid_m": [
+              -0.389168,
+              0.549328,
+              0.543954
+            ]
+          },
+          {
+            "branch_id": "leg_L1",
+            "centroid_m": [
+              0.384961,
+              0.566155,
+              -0.459052
+            ]
+          },
+          {
+            "branch_id": "leg_R1",
+            "centroid_m": [
+              -0.384961,
+              0.566155,
+              -0.459052
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              1.100944,
+              0.976811
+            ]
           }
         ]
       }
@@ -46437,6 +47837,56 @@
             "run_phase": 0.0,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.8838,
+              -5e-05
+            ]
+          },
+          {
+            "branch_id": "leg_L0",
+            "centroid_m": [
+              0.393331,
+              0.446475,
+              0.441314
+            ]
+          },
+          {
+            "branch_id": "leg_R0",
+            "centroid_m": [
+              -0.393331,
+              0.446475,
+              0.441314
+            ]
+          },
+          {
+            "branch_id": "leg_L1",
+            "centroid_m": [
+              0.389453,
+              0.46199,
+              -0.373166
+            ]
+          },
+          {
+            "branch_id": "leg_R1",
+            "centroid_m": [
+              -0.389453,
+              0.46199,
+              -0.373166
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              0.89146,
+              0.800905
+            ]
+          }
         ]
       }
     },
@@ -47835,6 +49285,56 @@
             "walk_phase": 0.5,
             "run_phase": 0.0,
             "support": true
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              1.2959,
+              -5e-05
+            ]
+          },
+          {
+            "branch_id": "leg_L0",
+            "centroid_m": [
+              0.389555,
+              0.650477,
+              0.698854
+            ]
+          },
+          {
+            "branch_id": "leg_R0",
+            "centroid_m": [
+              -0.389555,
+              0.650477,
+              0.698854
+            ]
+          },
+          {
+            "branch_id": "leg_L1",
+            "centroid_m": [
+              0.385172,
+              0.668014,
+              -0.59748
+            ]
+          },
+          {
+            "branch_id": "leg_R1",
+            "centroid_m": [
+              -0.385172,
+              0.668014,
+              -0.59748
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              1.307857,
+              1.250282
+            ]
           }
         ]
       }
@@ -49235,6 +50735,56 @@
             "run_phase": 0.0,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.9602,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg_L0",
+            "centroid_m": [
+              0.483146,
+              0.470814,
+              0.362026
+            ]
+          },
+          {
+            "branch_id": "leg_R0",
+            "centroid_m": [
+              -0.483146,
+              0.470814,
+              0.362026
+            ]
+          },
+          {
+            "branch_id": "leg_L1",
+            "centroid_m": [
+              0.477938,
+              0.491649,
+              -0.286682
+            ]
+          },
+          {
+            "branch_id": "leg_R1",
+            "centroid_m": [
+              -0.477938,
+              0.491649,
+              -0.286682
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              0.967693,
+              0.783375
+            ]
+          }
         ]
       }
     },
@@ -50633,6 +52183,56 @@
             "walk_phase": 0.5,
             "run_phase": 0.0,
             "support": true
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.7774,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg_L0",
+            "centroid_m": [
+              0.503558,
+              0.379567,
+              0.286007
+            ]
+          },
+          {
+            "branch_id": "leg_R0",
+            "centroid_m": [
+              -0.503558,
+              0.379567,
+              0.286007
+            ]
+          },
+          {
+            "branch_id": "leg_L1",
+            "centroid_m": [
+              0.498651,
+              0.399195,
+              -0.225481
+            ]
+          },
+          {
+            "branch_id": "leg_R1",
+            "centroid_m": [
+              -0.498651,
+              0.399195,
+              -0.225481
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              0.783545,
+              0.642429
+            ]
           }
         ]
       }
@@ -52033,6 +53633,56 @@
             "run_phase": 0.0,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              1.14,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg_L0",
+            "centroid_m": [
+              0.469556,
+              0.560974,
+              0.482743
+            ]
+          },
+          {
+            "branch_id": "leg_R0",
+            "centroid_m": [
+              -0.469556,
+              0.560974,
+              0.482743
+            ]
+          },
+          {
+            "branch_id": "leg_L1",
+            "centroid_m": [
+              0.464259,
+              0.582163,
+              -0.392859
+            ]
+          },
+          {
+            "branch_id": "leg_R1",
+            "centroid_m": [
+              -0.464259,
+              0.582163,
+              -0.392859
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              1.149591,
+              1.00268
+            ]
+          }
         ]
       }
     },
@@ -52370,14 +54020,14 @@
           "parent": "core_b0",
           "joint_id": "upper",
           "head_m": [
-            0.0,
+            0.1169,
             1.031,
-            0.2338
+            0.2025
           ],
           "tail_m": [
-            0.0,
+            0.20165,
             1.031,
-            0.4033
+            0.349291
           ],
           "up_m": [
             0.0,
@@ -52390,14 +54040,14 @@
           "parent": "arm_0_b0",
           "joint_id": "femur",
           "head_m": [
-            0.0,
+            0.20165,
             1.031,
-            0.4033
+            0.349291
           ],
           "tail_m": [
-            0.0,
+            0.349963,
             1.031,
-            0.699925
+            0.606176
           ],
           "up_m": [
             0.0,
@@ -52410,14 +54060,14 @@
           "parent": "arm_0_b1",
           "joint_id": "tibia",
           "head_m": [
-            0.0,
+            0.349963,
             1.031,
-            0.699925
+            0.606176
           ],
           "tail_m": [
-            0.0,
+            0.498275,
             1.031,
-            0.99655
+            0.863061
           ],
           "up_m": [
             0.0,
@@ -52430,14 +54080,14 @@
           "parent": "arm_0_b2",
           "joint_id": "end",
           "head_m": [
-            0.0,
+            0.498275,
             1.031,
-            0.99655
+            0.863061
           ],
           "tail_m": [
-            0.0,
+            0.54065,
             1.031,
-            1.0813
+            0.936457
           ],
           "up_m": [
             0.0,
@@ -52450,14 +54100,14 @@
           "parent": "core_b0",
           "joint_id": "upper",
           "head_m": [
-            0.2025,
+            0.2338,
             1.031,
-            0.1169
+            0.0
           ],
           "tail_m": [
-            0.349292,
+            0.4033,
             1.031,
-            0.20165
+            0.0
           ],
           "up_m": [
             0.0,
@@ -52470,14 +54120,14 @@
           "parent": "arm_1_b0",
           "joint_id": "femur",
           "head_m": [
-            0.349292,
+            0.4033,
             1.031,
-            0.20165
+            0.0
           ],
           "tail_m": [
-            0.606177,
+            0.699926,
             1.031,
-            0.349962
+            0.0
           ],
           "up_m": [
             0.0,
@@ -52490,14 +54140,14 @@
           "parent": "arm_1_b1",
           "joint_id": "tibia",
           "head_m": [
-            0.606177,
+            0.699926,
             1.031,
-            0.349962
+            0.0
           ],
           "tail_m": [
-            0.863062,
+            0.996551,
             1.031,
-            0.498275
+            0.0
           ],
           "up_m": [
             0.0,
@@ -52510,14 +54160,14 @@
           "parent": "arm_1_b2",
           "joint_id": "end",
           "head_m": [
-            0.863062,
+            0.996551,
             1.031,
-            0.498275
+            0.0
           ],
           "tail_m": [
-            0.936457,
+            1.081301,
             1.031,
-            0.54065
+            -1e-06
           ],
           "up_m": [
             0.0,
@@ -52530,14 +54180,14 @@
           "parent": "core_b0",
           "joint_id": "upper",
           "head_m": [
-            0.2025,
+            0.1169,
             1.031,
-            -0.1169
+            -0.2025
           ],
           "tail_m": [
-            0.349292,
+            0.20165,
             1.031,
-            -0.20165
+            -0.349292
           ],
           "up_m": [
             0.0,
@@ -52550,14 +54200,14 @@
           "parent": "arm_2_b0",
           "joint_id": "femur",
           "head_m": [
-            0.349292,
+            0.20165,
             1.031,
-            -0.20165
+            -0.349292
           ],
           "tail_m": [
-            0.606177,
+            0.349963,
             1.031,
-            -0.349963
+            -0.606177
           ],
           "up_m": [
             0.0,
@@ -52570,14 +54220,14 @@
           "parent": "arm_2_b1",
           "joint_id": "tibia",
           "head_m": [
-            0.606177,
+            0.349963,
             1.031,
-            -0.349963
+            -0.606177
           ],
           "tail_m": [
-            0.863062,
+            0.498275,
             1.031,
-            -0.498276
+            -0.863062
           ],
           "up_m": [
             0.0,
@@ -52590,14 +54240,14 @@
           "parent": "arm_2_b2",
           "joint_id": "end",
           "head_m": [
-            0.863062,
+            0.498275,
             1.031,
-            -0.498276
+            -0.863062
           ],
           "tail_m": [
-            0.936457,
+            0.54065,
             1.031,
-            -0.540651
+            -0.936458
           ],
           "up_m": [
             0.0,
@@ -52610,14 +54260,14 @@
           "parent": "core_b0",
           "joint_id": "upper",
           "head_m": [
-            0.0,
+            -0.1169,
             1.031,
-            -0.2338
+            -0.2025
           ],
           "tail_m": [
-            0.0,
+            -0.20165,
             1.031,
-            -0.4033
+            -0.349292
           ],
           "up_m": [
             0.0,
@@ -52630,14 +54280,14 @@
           "parent": "arm_3_b0",
           "joint_id": "femur",
           "head_m": [
-            0.0,
+            -0.20165,
             1.031,
-            -0.4033
+            -0.349292
           ],
           "tail_m": [
-            0.0,
+            -0.349963,
             1.031,
-            -0.699926
+            -0.606177
           ],
           "up_m": [
             0.0,
@@ -52650,14 +54300,14 @@
           "parent": "arm_3_b1",
           "joint_id": "tibia",
           "head_m": [
-            0.0,
+            -0.349963,
             1.031,
-            -0.699926
+            -0.606177
           ],
           "tail_m": [
-            0.0,
+            -0.498275,
             1.031,
-            -0.996551
+            -0.863062
           ],
           "up_m": [
             0.0,
@@ -52670,14 +54320,14 @@
           "parent": "arm_3_b2",
           "joint_id": "end",
           "head_m": [
-            0.0,
+            -0.498275,
             1.031,
-            -0.996551
+            -0.863062
           ],
           "tail_m": [
-            0.0,
+            -0.54065,
             1.031,
-            -1.081301
+            -0.936458
           ],
           "up_m": [
             0.0,
@@ -52690,14 +54340,14 @@
           "parent": "core_b0",
           "joint_id": "upper",
           "head_m": [
-            -0.2025,
+            -0.2338,
             1.031,
-            -0.1169
+            0.0
           ],
           "tail_m": [
-            -0.349292,
+            -0.4033,
             1.031,
-            -0.20165
+            0.0
           ],
           "up_m": [
             0.0,
@@ -52710,14 +54360,14 @@
           "parent": "arm_4_b0",
           "joint_id": "femur",
           "head_m": [
-            -0.349292,
+            -0.4033,
             1.031,
-            -0.20165
+            0.0
           ],
           "tail_m": [
-            -0.606177,
+            -0.699926,
             1.031,
-            -0.349963
+            0.0
           ],
           "up_m": [
             0.0,
@@ -52730,14 +54380,14 @@
           "parent": "arm_4_b1",
           "joint_id": "tibia",
           "head_m": [
-            -0.606177,
+            -0.699926,
             1.031,
-            -0.349963
+            0.0
           ],
           "tail_m": [
-            -0.863062,
+            -0.996551,
             1.031,
-            -0.498276
+            0.0
           ],
           "up_m": [
             0.0,
@@ -52750,14 +54400,14 @@
           "parent": "arm_4_b2",
           "joint_id": "end",
           "head_m": [
-            -0.863062,
+            -0.996551,
             1.031,
-            -0.498276
+            0.0
           ],
           "tail_m": [
-            -0.936457,
+            -1.081301,
             1.031,
-            -0.540651
+            -1e-06
           ],
           "up_m": [
             0.0,
@@ -52770,14 +54420,14 @@
           "parent": "core_b0",
           "joint_id": "upper",
           "head_m": [
-            -0.2025,
+            -0.1169,
             1.031,
-            0.1169
+            0.2025
           ],
           "tail_m": [
-            -0.349292,
+            -0.20165,
             1.031,
-            0.20165
+            0.349291
           ],
           "up_m": [
             0.0,
@@ -52790,14 +54440,14 @@
           "parent": "arm_5_b0",
           "joint_id": "femur",
           "head_m": [
-            -0.349292,
+            -0.20165,
             1.031,
-            0.20165
+            0.349291
           ],
           "tail_m": [
-            -0.606177,
+            -0.349963,
             1.031,
-            0.349962
+            0.606176
           ],
           "up_m": [
             0.0,
@@ -52810,14 +54460,14 @@
           "parent": "arm_5_b1",
           "joint_id": "tibia",
           "head_m": [
-            -0.606177,
+            -0.349963,
             1.031,
-            0.349962
+            0.606176
           ],
           "tail_m": [
-            -0.863062,
+            -0.498275,
             1.031,
-            0.498275
+            0.863061
           ],
           "up_m": [
             0.0,
@@ -52830,14 +54480,14 @@
           "parent": "arm_5_b2",
           "joint_id": "end",
           "head_m": [
-            -0.863062,
+            -0.498275,
             1.031,
-            0.498275
+            0.863061
           ],
           "tail_m": [
-            -0.936457,
+            -0.54065,
             1.031,
-            0.54065
+            0.936457
           ],
           "up_m": [
             0.0,
@@ -53005,9 +54655,9 @@
             "phase_rad": 0.0,
             "support_phase": 0.68,
             "bend_pole_m": [
-              0.0,
+              0.1169,
               1.231,
-              -0.0162
+              -0.0475
             ],
             "stride_m": 0.3559,
             "clearance_m": 0.1017,
@@ -53028,15 +54678,15 @@
           "socket": {
             "parent_joint": "upper",
             "position_m": [
-              0.0,
-              0.2338,
+              -0.1169,
+              0.2025,
               0.0
             ],
             "rotation_xyzw": [
-              0.0,
-              -0.707107,
-              -0.707107,
-              0.0
+              0.183013,
+              -0.683013,
+              -0.683013,
+              0.183013
             ]
           },
           "stance_deg": [
@@ -53053,15 +54703,15 @@
           ],
           "snap": {
             "position_m": [
-              0.0,
+              0.1169,
               1.031,
-              0.2338
+              0.2025
             ],
             "rotation_xyzw": [
               0.0,
+              0.258819,
               0.0,
-              0.0,
-              1.0
+              0.965926
             ]
           }
         },
@@ -53130,15 +54780,15 @@
             ]
           },
           "gait_role": "locomotor",
-          "gait_phase_rad": 1.047198,
+          "gait_phase_rad": 3.141593,
           "gait": {
             "role": "locomotor",
-            "phase_rad": 1.047198,
+            "phase_rad": 3.141593,
             "support_phase": 0.68,
             "bend_pole_m": [
-              0.2025,
+              0.2338,
               1.231,
-              -0.1331
+              -0.25
             ],
             "stride_m": 0.3559,
             "clearance_m": 0.1017,
@@ -53159,15 +54809,15 @@
           "socket": {
             "parent_joint": "upper",
             "position_m": [
-              -0.2025,
-              0.1169,
+              -0.2338,
+              0.0,
               0.0
             ],
             "rotation_xyzw": [
-              0.353553,
-              -0.612372,
-              -0.612372,
-              0.353553
+              0.5,
+              -0.5,
+              -0.5,
+              0.5
             ]
           },
           "stance_deg": [
@@ -53184,15 +54834,15 @@
           ],
           "snap": {
             "position_m": [
-              0.2025,
+              0.2338,
               1.031,
-              0.1169
+              0.0
             ],
             "rotation_xyzw": [
               0.0,
-              0.5,
+              0.707107,
               0.0,
-              0.866026
+              0.707107
             ]
           }
         },
@@ -53261,15 +54911,15 @@
             ]
           },
           "gait_role": "locomotor",
-          "gait_phase_rad": 2.094395,
+          "gait_phase_rad": 0.0,
           "gait": {
             "role": "locomotor",
-            "phase_rad": 2.094395,
+            "phase_rad": 0.0,
             "support_phase": 0.68,
             "bend_pole_m": [
-              0.2025,
+              0.1169,
               1.231,
-              -0.3669
+              -0.4525
             ],
             "stride_m": 0.3559,
             "clearance_m": 0.1017,
@@ -53290,15 +54940,15 @@
           "socket": {
             "parent_joint": "upper",
             "position_m": [
-              -0.2025,
               -0.1169,
+              -0.2025,
               0.0
             ],
             "rotation_xyzw": [
-              0.612372,
-              -0.353553,
-              -0.353553,
-              0.612372
+              0.683013,
+              -0.183013,
+              -0.183013,
+              0.683013
             ]
           },
           "stance_deg": [
@@ -53315,15 +54965,15 @@
           ],
           "snap": {
             "position_m": [
-              0.2025,
+              0.1169,
               1.031,
-              -0.1169
+              -0.2025
             ],
             "rotation_xyzw": [
               0.0,
-              0.866026,
+              0.965926,
               0.0,
-              0.5
+              0.258819
             ]
           }
         },
@@ -53398,9 +55048,9 @@
             "phase_rad": 3.141593,
             "support_phase": 0.68,
             "bend_pole_m": [
-              0.0,
+              -0.1169,
               1.231,
-              -0.4838
+              -0.4525
             ],
             "stride_m": 0.3559,
             "clearance_m": 0.1017,
@@ -53421,15 +55071,15 @@
           "socket": {
             "parent_joint": "upper",
             "position_m": [
-              0.0,
-              -0.2338,
+              0.1169,
+              -0.2025,
               0.0
             ],
             "rotation_xyzw": [
-              0.707107,
-              0.0,
-              0.0,
-              0.707107
+              -0.683013,
+              -0.183013,
+              -0.183013,
+              -0.683013
             ]
           },
           "stance_deg": [
@@ -53446,15 +55096,15 @@
           ],
           "snap": {
             "position_m": [
-              0.0,
+              -0.1169,
               1.031,
-              -0.2338
+              -0.2025
             ],
             "rotation_xyzw": [
               0.0,
-              1.0,
+              -0.965926,
               0.0,
-              0.0
+              0.258819
             ]
           }
         },
@@ -53523,15 +55173,15 @@
             ]
           },
           "gait_role": "locomotor",
-          "gait_phase_rad": 4.18879,
+          "gait_phase_rad": 0.0,
           "gait": {
             "role": "locomotor",
-            "phase_rad": 4.18879,
+            "phase_rad": 0.0,
             "support_phase": 0.68,
             "bend_pole_m": [
-              -0.2025,
+              -0.2338,
               1.231,
-              -0.3669
+              -0.25
             ],
             "stride_m": 0.3559,
             "clearance_m": 0.1017,
@@ -53552,15 +55202,15 @@
           "socket": {
             "parent_joint": "upper",
             "position_m": [
-              0.2025,
-              -0.1169,
+              0.2338,
+              0.0,
               0.0
             ],
             "rotation_xyzw": [
-              -0.612372,
-              -0.353553,
-              -0.353553,
-              -0.612372
+              -0.5,
+              -0.5,
+              -0.5,
+              -0.5
             ]
           },
           "stance_deg": [
@@ -53577,15 +55227,15 @@
           ],
           "snap": {
             "position_m": [
-              -0.2025,
+              -0.2338,
               1.031,
-              -0.1169
+              0.0
             ],
             "rotation_xyzw": [
               0.0,
-              -0.866026,
+              -0.707107,
               0.0,
-              0.5
+              0.707107
             ]
           }
         },
@@ -53654,15 +55304,15 @@
             ]
           },
           "gait_role": "locomotor",
-          "gait_phase_rad": 5.235988,
+          "gait_phase_rad": 3.141593,
           "gait": {
             "role": "locomotor",
-            "phase_rad": 5.235988,
+            "phase_rad": 3.141593,
             "support_phase": 0.68,
             "bend_pole_m": [
-              -0.2025,
+              -0.1169,
               1.231,
-              -0.1331
+              -0.0475
             ],
             "stride_m": 0.3559,
             "clearance_m": 0.1017,
@@ -53683,15 +55333,15 @@
           "socket": {
             "parent_joint": "upper",
             "position_m": [
-              0.2025,
               0.1169,
+              0.2025,
               0.0
             ],
             "rotation_xyzw": [
-              -0.353553,
-              -0.612372,
-              -0.612372,
-              -0.353553
+              -0.183013,
+              -0.683013,
+              -0.683013,
+              -0.183013
             ]
           },
           "stance_deg": [
@@ -53708,15 +55358,15 @@
           ],
           "snap": {
             "position_m": [
-              -0.2025,
+              -0.1169,
               1.031,
-              0.1169
+              0.2025
             ],
             "rotation_xyzw": [
               0.0,
-              -0.5,
+              -0.258819,
               0.0,
-              0.866026
+              0.965926
             ]
           }
         }
@@ -53732,14 +55382,14 @@
         "attack_branch_id": "arm_0",
         "hip_height_m": 0.330231,
         "leg_length_m": 0.847501,
-        "usable_stroke_m": 0.76,
+        "usable_stroke_m": 0.46,
         "min_support": 2,
         "duty_walk": 0.68,
         "duty_run": 0.5,
-        "cadence_max_hz": 3.258752,
-        "v_walk_mps": 0.89994,
+        "cadence_max_hz": 3.258751,
+        "v_walk_mps": 0.899939,
         "v_run_mps": 1.799879,
-        "v_max_mps": 4.457973,
+        "v_max_mps": 2.698246,
         "legs": [
           {
             "branch_id": "arm_0",
@@ -53756,18 +55406,18 @@
               0.0
             ],
             "hip_m": [
-              0.0,
+              0.1169,
               0.3377,
-              0.2338
+              0.2025
             ],
             "home_m": [
-              0.0,
+              0.36332,
               0.007469,
-              0.726641
+              0.629313
             ],
             "reach_m": 0.8475,
-            "stroke_m": 0.89,
-            "stance_shift_m": -0.355,
+            "stroke_m": 0.46,
+            "stance_shift_m": -0.13,
             "clearance_m": 0.15255,
             "walk_phase": 0.0,
             "run_phase": 0.0,
@@ -53788,20 +55438,20 @@
               0.0
             ],
             "hip_m": [
-              0.2025,
+              0.2338,
               0.3377,
-              0.1169
+              0.0
             ],
             "home_m": [
-              0.629313,
+              0.726642,
               0.007469,
-              0.36332
+              -1e-06
             ],
-            "reach_m": 0.8475,
-            "stroke_m": 0.76,
-            "stance_shift_m": -0.23,
+            "reach_m": 0.847501,
+            "stroke_m": 0.62,
+            "stance_shift_m": 0.0,
             "clearance_m": 0.15255,
-            "walk_phase": 0.166667,
+            "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
           },
@@ -53820,20 +55470,20 @@
               0.0
             ],
             "hip_m": [
-              0.2025,
+              0.1169,
               0.3377,
-              -0.1169
+              -0.2025
             ],
             "home_m": [
-              0.629314,
-              0.007469,
-              -0.36332
+              0.363319,
+              0.00747,
+              -0.629314
             ],
             "reach_m": 0.847501,
-            "stroke_m": 0.76,
-            "stance_shift_m": 0.23,
+            "stroke_m": 0.46,
+            "stance_shift_m": 0.13,
             "clearance_m": 0.15255,
-            "walk_phase": 0.333333,
+            "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
@@ -53852,18 +55502,18 @@
               0.0
             ],
             "hip_m": [
-              0.0,
+              -0.1169,
               0.3377,
-              -0.2338
+              -0.2025
             ],
             "home_m": [
-              0.0,
-              0.007469,
-              -0.726642
+              -0.363319,
+              0.00747,
+              -0.629314
             ],
             "reach_m": 0.847501,
-            "stroke_m": 0.89,
-            "stance_shift_m": 0.355,
+            "stroke_m": 0.46,
+            "stance_shift_m": 0.13,
             "clearance_m": 0.15255,
             "walk_phase": 0.5,
             "run_phase": 0.5,
@@ -53884,20 +55534,20 @@
               0.0
             ],
             "hip_m": [
-              -0.2025,
+              -0.2338,
               0.3377,
-              -0.1169
+              0.0
             ],
             "home_m": [
-              -0.629314,
+              -0.726642,
               0.007469,
-              -0.36332
+              -1e-06
             ],
             "reach_m": 0.847501,
-            "stroke_m": 0.76,
-            "stance_shift_m": 0.23,
+            "stroke_m": 0.62,
+            "stance_shift_m": 0.0,
             "clearance_m": 0.15255,
-            "walk_phase": 0.666667,
+            "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
@@ -53916,22 +55566,80 @@
               0.0
             ],
             "hip_m": [
-              -0.2025,
+              -0.1169,
               0.3377,
-              0.1169
+              0.2025
             ],
             "home_m": [
-              -0.629313,
+              -0.36332,
               0.007469,
-              0.36332
+              0.629313
             ],
             "reach_m": 0.8475,
-            "stroke_m": 0.76,
-            "stance_shift_m": -0.23,
+            "stroke_m": 0.46,
+            "stance_shift_m": -0.13,
             "clearance_m": 0.15255,
-            "walk_phase": 0.833333,
+            "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.59545,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "arm_0",
+            "centroid_m": [
+              0.270988,
+              0.310914,
+              0.469387
+            ]
+          },
+          {
+            "branch_id": "arm_1",
+            "centroid_m": [
+              0.541975,
+              0.310915,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "arm_2",
+            "centroid_m": [
+              0.270987,
+              0.310915,
+              -0.469388
+            ]
+          },
+          {
+            "branch_id": "arm_3",
+            "centroid_m": [
+              -0.270987,
+              0.310915,
+              -0.469388
+            ]
+          },
+          {
+            "branch_id": "arm_4",
+            "centroid_m": [
+              -0.541975,
+              0.310915,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "arm_5",
+            "centroid_m": [
+              -0.270988,
+              0.310914,
+              0.469387
+            ]
           }
         ]
       }
@@ -54270,14 +55978,14 @@
           "parent": "core_b0",
           "joint_id": "upper",
           "head_m": [
-            0.0,
+            0.1052,
             0.9485,
-            0.2104
+            0.1822
           ],
           "tail_m": [
-            0.0,
+            0.17233,
             0.9485,
-            0.34466
+            0.298473
           ],
           "up_m": [
             0.0,
@@ -54290,14 +55998,14 @@
           "parent": "arm_0_b0",
           "joint_id": "femur",
           "head_m": [
-            0.0,
+            0.17233,
             0.9485,
-            0.34466
+            0.298473
           ],
           "tail_m": [
-            0.0,
+            0.289808,
             0.9485,
-            0.579615
+            0.50195
           ],
           "up_m": [
             0.0,
@@ -54310,14 +56018,14 @@
           "parent": "arm_0_b1",
           "joint_id": "tibia",
           "head_m": [
-            0.0,
+            0.289808,
             0.9485,
-            0.579615
+            0.50195
           ],
           "tail_m": [
-            0.0,
+            0.407285,
             0.9485,
-            0.81457
+            0.705427
           ],
           "up_m": [
             0.0,
@@ -54330,14 +56038,14 @@
           "parent": "arm_0_b2",
           "joint_id": "end",
           "head_m": [
-            0.0,
+            0.407285,
             0.9485,
-            0.81457
+            0.705427
           ],
           "tail_m": [
-            0.0,
+            0.44085,
             0.9485,
-            0.8817
+            0.763563
           ],
           "up_m": [
             0.0,
@@ -54350,14 +56058,14 @@
           "parent": "core_b0",
           "joint_id": "upper",
           "head_m": [
-            0.1822,
+            0.2104,
             0.9485,
-            0.1052
+            0.0
           ],
           "tail_m": [
-            0.298473,
+            0.34466,
             0.9485,
-            0.17233
+            0.0
           ],
           "up_m": [
             0.0,
@@ -54370,14 +56078,14 @@
           "parent": "arm_1_b0",
           "joint_id": "femur",
           "head_m": [
-            0.298473,
+            0.34466,
             0.9485,
-            0.17233
+            0.0
           ],
           "tail_m": [
-            0.50195,
+            0.579615,
             0.9485,
-            0.289807
+            0.0
           ],
           "up_m": [
             0.0,
@@ -54390,14 +56098,14 @@
           "parent": "arm_1_b1",
           "joint_id": "tibia",
           "head_m": [
-            0.50195,
+            0.579615,
             0.9485,
-            0.289807
+            0.0
           ],
           "tail_m": [
-            0.705427,
+            0.814571,
             0.9485,
-            0.407285
+            0.0
           ],
           "up_m": [
             0.0,
@@ -54410,14 +56118,14 @@
           "parent": "arm_1_b2",
           "joint_id": "end",
           "head_m": [
-            0.705427,
+            0.814571,
             0.9485,
-            0.407285
+            0.0
           ],
           "tail_m": [
-            0.763563,
+            0.881701,
             0.9485,
-            0.44085
+            0.0
           ],
           "up_m": [
             0.0,
@@ -54430,14 +56138,14 @@
           "parent": "core_b0",
           "joint_id": "upper",
           "head_m": [
-            0.1822,
+            0.1052,
             0.9485,
-            -0.1052
+            -0.1822
           ],
           "tail_m": [
-            0.298473,
+            0.17233,
             0.9485,
-            -0.17233
+            -0.298473
           ],
           "up_m": [
             0.0,
@@ -54450,14 +56158,14 @@
           "parent": "arm_2_b0",
           "joint_id": "femur",
           "head_m": [
-            0.298473,
+            0.17233,
             0.9485,
-            -0.17233
+            -0.298473
           ],
           "tail_m": [
-            0.50195,
+            0.289808,
             0.9485,
-            -0.289808
+            -0.50195
           ],
           "up_m": [
             0.0,
@@ -54470,14 +56178,14 @@
           "parent": "arm_2_b1",
           "joint_id": "tibia",
           "head_m": [
-            0.50195,
+            0.289808,
             0.9485,
-            -0.289808
+            -0.50195
           ],
           "tail_m": [
-            0.705427,
+            0.407285,
             0.9485,
-            -0.407286
+            -0.705427
           ],
           "up_m": [
             0.0,
@@ -54490,14 +56198,14 @@
           "parent": "arm_2_b2",
           "joint_id": "end",
           "head_m": [
-            0.705427,
+            0.407285,
             0.9485,
-            -0.407286
+            -0.705427
           ],
           "tail_m": [
-            0.763563,
+            0.44085,
             0.9485,
-            -0.440851
+            -0.763564
           ],
           "up_m": [
             0.0,
@@ -54510,14 +56218,14 @@
           "parent": "core_b0",
           "joint_id": "upper",
           "head_m": [
-            0.0,
+            -0.1052,
             0.9485,
-            -0.2104
+            -0.1822
           ],
           "tail_m": [
-            0.0,
+            -0.17233,
             0.9485,
-            -0.34466
+            -0.298473
           ],
           "up_m": [
             0.0,
@@ -54530,14 +56238,14 @@
           "parent": "arm_3_b0",
           "joint_id": "femur",
           "head_m": [
-            0.0,
+            -0.17233,
             0.9485,
-            -0.34466
+            -0.298473
           ],
           "tail_m": [
-            0.0,
+            -0.289808,
             0.9485,
-            -0.579616
+            -0.50195
           ],
           "up_m": [
             0.0,
@@ -54550,14 +56258,14 @@
           "parent": "arm_3_b1",
           "joint_id": "tibia",
           "head_m": [
-            0.0,
+            -0.289808,
             0.9485,
-            -0.579616
+            -0.50195
           ],
           "tail_m": [
-            0.0,
+            -0.407285,
             0.9485,
-            -0.814571
+            -0.705427
           ],
           "up_m": [
             0.0,
@@ -54570,14 +56278,14 @@
           "parent": "arm_3_b2",
           "joint_id": "end",
           "head_m": [
-            0.0,
+            -0.407285,
             0.9485,
-            -0.814571
+            -0.705427
           ],
           "tail_m": [
-            0.0,
+            -0.44085,
             0.9485,
-            -0.881701
+            -0.763564
           ],
           "up_m": [
             0.0,
@@ -54590,14 +56298,14 @@
           "parent": "core_b0",
           "joint_id": "upper",
           "head_m": [
-            -0.1822,
+            -0.2104,
             0.9485,
-            -0.1052
+            0.0
           ],
           "tail_m": [
-            -0.298473,
+            -0.34466,
             0.9485,
-            -0.17233
+            0.0
           ],
           "up_m": [
             0.0,
@@ -54610,14 +56318,14 @@
           "parent": "arm_4_b0",
           "joint_id": "femur",
           "head_m": [
-            -0.298473,
+            -0.34466,
             0.9485,
-            -0.17233
+            0.0
           ],
           "tail_m": [
-            -0.50195,
+            -0.579615,
             0.9485,
-            -0.289808
+            0.0
           ],
           "up_m": [
             0.0,
@@ -54630,14 +56338,14 @@
           "parent": "arm_4_b1",
           "joint_id": "tibia",
           "head_m": [
-            -0.50195,
+            -0.579615,
             0.9485,
-            -0.289808
+            0.0
           ],
           "tail_m": [
-            -0.705427,
+            -0.814571,
             0.9485,
-            -0.407286
+            0.0
           ],
           "up_m": [
             0.0,
@@ -54650,14 +56358,14 @@
           "parent": "arm_4_b2",
           "joint_id": "end",
           "head_m": [
-            -0.705427,
+            -0.814571,
             0.9485,
-            -0.407286
+            0.0
           ],
           "tail_m": [
-            -0.763563,
+            -0.881701,
             0.9485,
-            -0.440851
+            0.0
           ],
           "up_m": [
             0.0,
@@ -54670,14 +56378,14 @@
           "parent": "core_b0",
           "joint_id": "upper",
           "head_m": [
-            -0.1822,
+            -0.1052,
             0.9485,
-            0.1052
+            0.1822
           ],
           "tail_m": [
-            -0.298473,
+            -0.17233,
             0.9485,
-            0.17233
+            0.298473
           ],
           "up_m": [
             0.0,
@@ -54690,14 +56398,14 @@
           "parent": "arm_5_b0",
           "joint_id": "femur",
           "head_m": [
-            -0.298473,
+            -0.17233,
             0.9485,
-            0.17233
+            0.298473
           ],
           "tail_m": [
-            -0.50195,
+            -0.289808,
             0.9485,
-            0.289807
+            0.50195
           ],
           "up_m": [
             0.0,
@@ -54710,14 +56418,14 @@
           "parent": "arm_5_b1",
           "joint_id": "tibia",
           "head_m": [
-            -0.50195,
+            -0.289808,
             0.9485,
-            0.289807
+            0.50195
           ],
           "tail_m": [
-            -0.705427,
+            -0.407285,
             0.9485,
-            0.407285
+            0.705427
           ],
           "up_m": [
             0.0,
@@ -54730,14 +56438,14 @@
           "parent": "arm_5_b2",
           "joint_id": "end",
           "head_m": [
-            -0.705427,
+            -0.407285,
             0.9485,
-            0.407285
+            0.705427
           ],
           "tail_m": [
-            -0.763563,
+            -0.44085,
             0.9485,
-            0.44085
+            0.763563
           ],
           "up_m": [
             0.0,
@@ -54905,9 +56613,9 @@
             "phase_rad": 0.0,
             "support_phase": 0.68,
             "bend_pole_m": [
-              0.0,
+              0.1052,
               1.1485,
-              -0.0396
+              -0.0678
             ],
             "stride_m": 0.2819,
             "clearance_m": 0.0806,
@@ -54928,15 +56636,15 @@
           "socket": {
             "parent_joint": "upper",
             "position_m": [
-              0.0,
-              0.2104,
+              -0.1052,
+              0.1822,
               0.0
             ],
             "rotation_xyzw": [
-              0.0,
-              -0.707107,
-              -0.707107,
-              0.0
+              0.183013,
+              -0.683013,
+              -0.683013,
+              0.183013
             ]
           },
           "stance_deg": [
@@ -54953,15 +56661,15 @@
           ],
           "snap": {
             "position_m": [
-              0.0,
+              0.1052,
               0.9485,
-              0.2104
+              0.1822
             ],
             "rotation_xyzw": [
               0.0,
+              0.258819,
               0.0,
-              0.0,
-              1.0
+              0.965926
             ]
           }
         },
@@ -55030,15 +56738,15 @@
             ]
           },
           "gait_role": "locomotor",
-          "gait_phase_rad": 1.047198,
+          "gait_phase_rad": 3.141593,
           "gait": {
             "role": "locomotor",
-            "phase_rad": 1.047198,
+            "phase_rad": 3.141593,
             "support_phase": 0.68,
             "bend_pole_m": [
-              0.1822,
+              0.2104,
               1.1485,
-              -0.1448
+              -0.25
             ],
             "stride_m": 0.2819,
             "clearance_m": 0.0806,
@@ -55059,15 +56767,15 @@
           "socket": {
             "parent_joint": "upper",
             "position_m": [
-              -0.1822,
-              0.1052,
+              -0.2104,
+              0.0,
               0.0
             ],
             "rotation_xyzw": [
-              0.353553,
-              -0.612372,
-              -0.612372,
-              0.353553
+              0.5,
+              -0.5,
+              -0.5,
+              0.5
             ]
           },
           "stance_deg": [
@@ -55084,15 +56792,15 @@
           ],
           "snap": {
             "position_m": [
-              0.1822,
+              0.2104,
               0.9485,
-              0.1052
+              0.0
             ],
             "rotation_xyzw": [
               0.0,
-              0.5,
+              0.707107,
               0.0,
-              0.866026
+              0.707107
             ]
           }
         },
@@ -55161,15 +56869,15 @@
             ]
           },
           "gait_role": "locomotor",
-          "gait_phase_rad": 2.094395,
+          "gait_phase_rad": 0.0,
           "gait": {
             "role": "locomotor",
-            "phase_rad": 2.094395,
+            "phase_rad": 0.0,
             "support_phase": 0.68,
             "bend_pole_m": [
-              0.1822,
+              0.1052,
               1.1485,
-              -0.3552
+              -0.4322
             ],
             "stride_m": 0.2819,
             "clearance_m": 0.0806,
@@ -55190,15 +56898,15 @@
           "socket": {
             "parent_joint": "upper",
             "position_m": [
-              -0.1822,
               -0.1052,
+              -0.1822,
               0.0
             ],
             "rotation_xyzw": [
-              0.612372,
-              -0.353553,
-              -0.353553,
-              0.612372
+              0.683013,
+              -0.183013,
+              -0.183013,
+              0.683013
             ]
           },
           "stance_deg": [
@@ -55215,15 +56923,15 @@
           ],
           "snap": {
             "position_m": [
-              0.1822,
+              0.1052,
               0.9485,
-              -0.1052
+              -0.1822
             ],
             "rotation_xyzw": [
               0.0,
-              0.866026,
+              0.965926,
               0.0,
-              0.5
+              0.258819
             ]
           }
         },
@@ -55298,9 +57006,9 @@
             "phase_rad": 3.141593,
             "support_phase": 0.68,
             "bend_pole_m": [
-              0.0,
+              -0.1052,
               1.1485,
-              -0.4604
+              -0.4322
             ],
             "stride_m": 0.2819,
             "clearance_m": 0.0806,
@@ -55321,15 +57029,15 @@
           "socket": {
             "parent_joint": "upper",
             "position_m": [
-              0.0,
-              -0.2104,
+              0.1052,
+              -0.1822,
               0.0
             ],
             "rotation_xyzw": [
-              0.707107,
-              0.0,
-              0.0,
-              0.707107
+              -0.683013,
+              -0.183013,
+              -0.183013,
+              -0.683013
             ]
           },
           "stance_deg": [
@@ -55346,15 +57054,15 @@
           ],
           "snap": {
             "position_m": [
-              0.0,
+              -0.1052,
               0.9485,
-              -0.2104
+              -0.1822
             ],
             "rotation_xyzw": [
               0.0,
-              1.0,
+              -0.965926,
               0.0,
-              0.0
+              0.258819
             ]
           }
         },
@@ -55423,15 +57131,15 @@
             ]
           },
           "gait_role": "locomotor",
-          "gait_phase_rad": 4.18879,
+          "gait_phase_rad": 0.0,
           "gait": {
             "role": "locomotor",
-            "phase_rad": 4.18879,
+            "phase_rad": 0.0,
             "support_phase": 0.68,
             "bend_pole_m": [
-              -0.1822,
+              -0.2104,
               1.1485,
-              -0.3552
+              -0.25
             ],
             "stride_m": 0.2819,
             "clearance_m": 0.0806,
@@ -55452,15 +57160,15 @@
           "socket": {
             "parent_joint": "upper",
             "position_m": [
-              0.1822,
-              -0.1052,
+              0.2104,
+              0.0,
               0.0
             ],
             "rotation_xyzw": [
-              -0.612372,
-              -0.353553,
-              -0.353553,
-              -0.612372
+              -0.5,
+              -0.5,
+              -0.5,
+              -0.5
             ]
           },
           "stance_deg": [
@@ -55477,15 +57185,15 @@
           ],
           "snap": {
             "position_m": [
-              -0.1822,
+              -0.2104,
               0.9485,
-              -0.1052
+              0.0
             ],
             "rotation_xyzw": [
               0.0,
-              -0.866026,
+              -0.707107,
               0.0,
-              0.5
+              0.707107
             ]
           }
         },
@@ -55554,15 +57262,15 @@
             ]
           },
           "gait_role": "locomotor",
-          "gait_phase_rad": 5.235988,
+          "gait_phase_rad": 3.141593,
           "gait": {
             "role": "locomotor",
-            "phase_rad": 5.235988,
+            "phase_rad": 3.141593,
             "support_phase": 0.68,
             "bend_pole_m": [
-              -0.1822,
+              -0.1052,
               1.1485,
-              -0.1448
+              -0.0678
             ],
             "stride_m": 0.2819,
             "clearance_m": 0.0806,
@@ -55583,15 +57291,15 @@
           "socket": {
             "parent_joint": "upper",
             "position_m": [
-              0.1822,
               0.1052,
+              0.1822,
               0.0
             ],
             "rotation_xyzw": [
-              -0.353553,
-              -0.612372,
-              -0.612372,
-              -0.353553
+              -0.183013,
+              -0.683013,
+              -0.683013,
+              -0.183013
             ]
           },
           "stance_deg": [
@@ -55608,15 +57316,15 @@
           ],
           "snap": {
             "position_m": [
-              -0.1822,
+              -0.1052,
               0.9485,
-              0.1052
+              0.1822
             ],
             "rotation_xyzw": [
               0.0,
-              -0.5,
+              -0.258819,
               0.0,
-              0.866026
+              0.965926
             ]
           }
         }
@@ -55632,14 +57340,14 @@
         "attack_branch_id": "arm_0",
         "hip_height_m": 0.264772,
         "leg_length_m": 0.671301,
-        "usable_stroke_m": 0.615,
+        "usable_stroke_m": 0.355,
         "min_support": 2,
         "duty_walk": 0.68,
         "duty_run": 0.5,
         "cadence_max_hz": 3.661531,
-        "v_walk_mps": 0.805825,
-        "v_run_mps": 1.611649,
-        "v_max_mps": 4.053315,
+        "v_walk_mps": 0.805824,
+        "v_run_mps": 1.611648,
+        "v_max_mps": 2.339718,
         "legs": [
           {
             "branch_id": "arm_0",
@@ -55656,18 +57364,18 @@
               0.0
             ],
             "hip_m": [
-              0.0,
+              0.1052,
               0.2723,
-              0.2104
+              0.1822
             ],
             "home_m": [
-              0.0,
-              0.007528,
-              0.569816
+              0.284907,
+              0.007529,
+              0.493464
             ],
             "reach_m": 0.6713,
-            "stroke_m": 0.69,
-            "stance_shift_m": -0.26,
+            "stroke_m": 0.355,
+            "stance_shift_m": -0.0825,
             "clearance_m": 0.120834,
             "walk_phase": 0.0,
             "run_phase": 0.0,
@@ -55688,20 +57396,20 @@
               0.0
             ],
             "hip_m": [
-              0.1822,
+              0.2104,
               0.2723,
-              0.1052
+              0.0
             ],
             "home_m": [
-              0.493464,
-              0.007528,
-              0.284908
+              0.569816,
+              0.007527,
+              0.0
             ],
-            "reach_m": 0.6713,
-            "stroke_m": 0.615,
-            "stance_shift_m": -0.1675,
+            "reach_m": 0.671301,
+            "stroke_m": 0.53,
+            "stance_shift_m": 0.0,
             "clearance_m": 0.120834,
-            "walk_phase": 0.166667,
+            "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
           },
@@ -55720,20 +57428,20 @@
               0.0
             ],
             "hip_m": [
-              0.1822,
+              0.1052,
               0.2723,
-              -0.1052
+              -0.1822
             ],
             "home_m": [
-              0.493464,
-              0.007528,
-              -0.284908
+              0.284907,
+              0.007529,
+              -0.493465
             ],
             "reach_m": 0.671301,
-            "stroke_m": 0.615,
-            "stance_shift_m": 0.1675,
+            "stroke_m": 0.355,
+            "stance_shift_m": 0.0825,
             "clearance_m": 0.120834,
-            "walk_phase": 0.333333,
+            "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
@@ -55752,18 +57460,18 @@
               0.0
             ],
             "hip_m": [
-              0.0,
+              -0.1052,
               0.2723,
-              -0.2104
+              -0.1822
             ],
             "home_m": [
-              0.0,
-              0.007528,
-              -0.569817
+              -0.284907,
+              0.007529,
+              -0.493465
             ],
             "reach_m": 0.671301,
-            "stroke_m": 0.69,
-            "stance_shift_m": 0.26,
+            "stroke_m": 0.355,
+            "stance_shift_m": 0.0825,
             "clearance_m": 0.120834,
             "walk_phase": 0.5,
             "run_phase": 0.5,
@@ -55784,20 +57492,20 @@
               0.0
             ],
             "hip_m": [
-              -0.1822,
+              -0.2104,
               0.2723,
-              -0.1052
+              0.0
             ],
             "home_m": [
-              -0.493464,
-              0.007528,
-              -0.284908
+              -0.569816,
+              0.007527,
+              0.0
             ],
             "reach_m": 0.671301,
-            "stroke_m": 0.615,
-            "stance_shift_m": 0.1675,
+            "stroke_m": 0.53,
+            "stance_shift_m": 0.0,
             "clearance_m": 0.120834,
-            "walk_phase": 0.666667,
+            "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
@@ -55816,22 +57524,80 @@
               0.0
             ],
             "hip_m": [
-              -0.1822,
+              -0.1052,
               0.2723,
-              0.1052
+              0.1822
             ],
             "home_m": [
-              -0.493464,
-              0.007528,
-              0.284908
+              -0.284907,
+              0.007529,
+              0.493464
             ],
             "reach_m": 0.6713,
-            "stroke_m": 0.615,
-            "stance_shift_m": -0.1675,
+            "stroke_m": 0.355,
+            "stance_shift_m": -0.0825,
             "clearance_m": 0.120834,
-            "walk_phase": 0.833333,
+            "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.50945,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "arm_0",
+            "centroid_m": [
+              0.22204,
+              0.25214,
+              0.384573
+            ]
+          },
+          {
+            "branch_id": "arm_1",
+            "centroid_m": [
+              0.44408,
+              0.252139,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "arm_2",
+            "centroid_m": [
+              0.22204,
+              0.252139,
+              -0.384573
+            ]
+          },
+          {
+            "branch_id": "arm_3",
+            "centroid_m": [
+              -0.22204,
+              0.252139,
+              -0.384573
+            ]
+          },
+          {
+            "branch_id": "arm_4",
+            "centroid_m": [
+              -0.44408,
+              0.252139,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "arm_5",
+            "centroid_m": [
+              -0.22204,
+              0.25214,
+              0.384573
+            ]
           }
         ]
       }
@@ -56170,14 +57936,14 @@
           "parent": "core_b0",
           "joint_id": "upper",
           "head_m": [
-            0.0,
+            0.1356,
             1.0929,
-            0.2712
+            0.2349
           ],
           "tail_m": [
-            0.0,
+            0.24571,
             1.0929,
-            0.49142
+            0.425616
           ],
           "up_m": [
             0.0,
@@ -56190,14 +57956,14 @@
           "parent": "arm_0_b0",
           "joint_id": "femur",
           "head_m": [
-            0.0,
+            0.24571,
             1.0929,
-            0.49142
+            0.425616
           ],
           "tail_m": [
-            0.0,
+            0.438403,
             1.0929,
-            0.876805
+            0.759369
           ],
           "up_m": [
             0.0,
@@ -56210,14 +57976,14 @@
           "parent": "arm_0_b1",
           "joint_id": "tibia",
           "head_m": [
-            0.0,
+            0.438403,
             1.0929,
-            0.876805
+            0.759369
           ],
           "tail_m": [
-            0.0,
+            0.631095,
             1.0929,
-            1.26219
+            1.093123
           ],
           "up_m": [
             0.0,
@@ -56230,14 +57996,14 @@
           "parent": "arm_0_b2",
           "joint_id": "end",
           "head_m": [
-            0.0,
+            0.631095,
             1.0929,
-            1.26219
+            1.093123
           ],
           "tail_m": [
-            0.0,
+            0.686151,
             1.0929,
-            1.3723
+            1.188481
           ],
           "up_m": [
             0.0,
@@ -56250,14 +58016,14 @@
           "parent": "core_b0",
           "joint_id": "upper",
           "head_m": [
-            0.2349,
+            0.2712,
             1.0929,
-            0.1356
+            0.0
           ],
           "tail_m": [
-            0.425617,
+            0.49142,
             1.0929,
-            0.24571
+            0.0
           ],
           "up_m": [
             0.0,
@@ -56270,14 +58036,14 @@
           "parent": "arm_1_b0",
           "joint_id": "femur",
           "head_m": [
-            0.425617,
+            0.49142,
             1.0929,
-            0.24571
+            0.0
           ],
           "tail_m": [
-            0.75937,
+            0.876806,
             1.0929,
-            0.438402
+            0.0
           ],
           "up_m": [
             0.0,
@@ -56290,14 +58056,14 @@
           "parent": "arm_1_b1",
           "joint_id": "tibia",
           "head_m": [
-            0.75937,
+            0.876806,
             1.0929,
-            0.438402
+            0.0
           ],
           "tail_m": [
-            1.093123,
+            1.262191,
             1.0929,
-            0.631095
+            -1e-06
           ],
           "up_m": [
             0.0,
@@ -56310,14 +58076,14 @@
           "parent": "arm_1_b2",
           "joint_id": "end",
           "head_m": [
-            1.093123,
+            1.262191,
             1.0929,
-            0.631095
+            -1e-06
           ],
           "tail_m": [
-            1.188481,
+            1.372301,
             1.0929,
-            0.68615
+            -1e-06
           ],
           "up_m": [
             0.0,
@@ -56330,14 +58096,14 @@
           "parent": "core_b0",
           "joint_id": "upper",
           "head_m": [
-            0.2349,
+            0.1356,
             1.0929,
-            -0.1356
+            -0.2349
           ],
           "tail_m": [
-            0.425617,
+            0.24571,
             1.0929,
-            -0.24571
+            -0.425617
           ],
           "up_m": [
             0.0,
@@ -56350,14 +58116,14 @@
           "parent": "arm_2_b0",
           "joint_id": "femur",
           "head_m": [
-            0.425617,
+            0.24571,
             1.0929,
-            -0.24571
+            -0.425617
           ],
           "tail_m": [
-            0.75937,
+            0.438403,
             1.0929,
-            -0.438403
+            -0.75937
           ],
           "up_m": [
             0.0,
@@ -56370,14 +58136,14 @@
           "parent": "arm_2_b1",
           "joint_id": "tibia",
           "head_m": [
-            0.75937,
+            0.438403,
             1.0929,
-            -0.438403
+            -0.75937
           ],
           "tail_m": [
-            1.093123,
+            0.631095,
             1.0929,
-            -0.631096
+            -1.093124
           ],
           "up_m": [
             0.0,
@@ -56390,14 +58156,14 @@
           "parent": "arm_2_b2",
           "joint_id": "end",
           "head_m": [
-            1.093123,
+            0.631095,
             1.0929,
-            -0.631096
+            -1.093124
           ],
           "tail_m": [
-            1.188481,
+            0.686151,
             1.0929,
-            -0.686151
+            -1.188482
           ],
           "up_m": [
             0.0,
@@ -56410,14 +58176,14 @@
           "parent": "core_b0",
           "joint_id": "upper",
           "head_m": [
-            0.0,
+            -0.1356,
             1.0929,
-            -0.2712
+            -0.2349
           ],
           "tail_m": [
-            0.0,
+            -0.24571,
             1.0929,
-            -0.49142
+            -0.425617
           ],
           "up_m": [
             0.0,
@@ -56430,14 +58196,14 @@
           "parent": "arm_3_b0",
           "joint_id": "femur",
           "head_m": [
-            0.0,
+            -0.24571,
             1.0929,
-            -0.49142
+            -0.425617
           ],
           "tail_m": [
-            0.0,
+            -0.438403,
             1.0929,
-            -0.876806
+            -0.75937
           ],
           "up_m": [
             0.0,
@@ -56450,14 +58216,14 @@
           "parent": "arm_3_b1",
           "joint_id": "tibia",
           "head_m": [
-            0.0,
+            -0.438403,
             1.0929,
-            -0.876806
+            -0.75937
           ],
           "tail_m": [
-            0.0,
+            -0.631095,
             1.0929,
-            -1.262191
+            -1.093124
           ],
           "up_m": [
             0.0,
@@ -56470,14 +58236,14 @@
           "parent": "arm_3_b2",
           "joint_id": "end",
           "head_m": [
-            0.0,
+            -0.631095,
             1.0929,
-            -1.262191
+            -1.093124
           ],
           "tail_m": [
-            0.0,
+            -0.686151,
             1.0929,
-            -1.372302
+            -1.188482
           ],
           "up_m": [
             0.0,
@@ -56490,14 +58256,14 @@
           "parent": "core_b0",
           "joint_id": "upper",
           "head_m": [
-            -0.2349,
+            -0.2712,
             1.0929,
-            -0.1356
+            0.0
           ],
           "tail_m": [
-            -0.425617,
+            -0.49142,
             1.0929,
-            -0.24571
+            0.0
           ],
           "up_m": [
             0.0,
@@ -56510,14 +58276,14 @@
           "parent": "arm_4_b0",
           "joint_id": "femur",
           "head_m": [
-            -0.425617,
+            -0.49142,
             1.0929,
-            -0.24571
+            0.0
           ],
           "tail_m": [
-            -0.75937,
+            -0.876806,
             1.0929,
-            -0.438403
+            0.0
           ],
           "up_m": [
             0.0,
@@ -56530,14 +58296,14 @@
           "parent": "arm_4_b1",
           "joint_id": "tibia",
           "head_m": [
-            -0.75937,
+            -0.876806,
             1.0929,
-            -0.438403
+            0.0
           ],
           "tail_m": [
-            -1.093123,
+            -1.262191,
             1.0929,
-            -0.631096
+            -1e-06
           ],
           "up_m": [
             0.0,
@@ -56550,14 +58316,14 @@
           "parent": "arm_4_b2",
           "joint_id": "end",
           "head_m": [
-            -1.093123,
+            -1.262191,
             1.0929,
-            -0.631096
+            -1e-06
           ],
           "tail_m": [
-            -1.188481,
+            -1.372301,
             1.0929,
-            -0.686151
+            -1e-06
           ],
           "up_m": [
             0.0,
@@ -56570,14 +58336,14 @@
           "parent": "core_b0",
           "joint_id": "upper",
           "head_m": [
-            -0.2349,
+            -0.1356,
             1.0929,
-            0.1356
+            0.2349
           ],
           "tail_m": [
-            -0.425617,
+            -0.24571,
             1.0929,
-            0.24571
+            0.425616
           ],
           "up_m": [
             0.0,
@@ -56590,14 +58356,14 @@
           "parent": "arm_5_b0",
           "joint_id": "femur",
           "head_m": [
-            -0.425617,
+            -0.24571,
             1.0929,
-            0.24571
+            0.425616
           ],
           "tail_m": [
-            -0.75937,
+            -0.438403,
             1.0929,
-            0.438402
+            0.759369
           ],
           "up_m": [
             0.0,
@@ -56610,14 +58376,14 @@
           "parent": "arm_5_b1",
           "joint_id": "tibia",
           "head_m": [
-            -0.75937,
+            -0.438403,
             1.0929,
-            0.438402
+            0.759369
           ],
           "tail_m": [
-            -1.093123,
+            -0.631095,
             1.0929,
-            0.631095
+            1.093123
           ],
           "up_m": [
             0.0,
@@ -56630,14 +58396,14 @@
           "parent": "arm_5_b2",
           "joint_id": "end",
           "head_m": [
-            -1.093123,
+            -0.631095,
             1.0929,
-            0.631095
+            1.093123
           ],
           "tail_m": [
-            -1.188481,
+            -0.686151,
             1.0929,
-            0.68615
+            1.188481
           ],
           "up_m": [
             0.0,
@@ -56805,9 +58571,9 @@
             "phase_rad": 0.0,
             "support_phase": 0.68,
             "bend_pole_m": [
-              0.0,
+              0.1356,
               1.2929,
-              0.0212
+              -0.0151
             ],
             "stride_m": 0.4625,
             "clearance_m": 0.1321,
@@ -56828,15 +58594,15 @@
           "socket": {
             "parent_joint": "upper",
             "position_m": [
-              0.0,
-              0.2712,
+              -0.1356,
+              0.2349,
               0.0
             ],
             "rotation_xyzw": [
-              0.0,
-              -0.707107,
-              -0.707107,
-              0.0
+              0.183013,
+              -0.683013,
+              -0.683013,
+              0.183013
             ]
           },
           "stance_deg": [
@@ -56853,15 +58619,15 @@
           ],
           "snap": {
             "position_m": [
-              0.0,
+              0.1356,
               1.0929,
-              0.2712
+              0.2349
             ],
             "rotation_xyzw": [
               0.0,
+              0.258819,
               0.0,
-              0.0,
-              1.0
+              0.965926
             ]
           }
         },
@@ -56930,15 +58696,15 @@
             ]
           },
           "gait_role": "locomotor",
-          "gait_phase_rad": 1.047198,
+          "gait_phase_rad": 3.141593,
           "gait": {
             "role": "locomotor",
-            "phase_rad": 1.047198,
+            "phase_rad": 3.141593,
             "support_phase": 0.68,
             "bend_pole_m": [
-              0.2349,
+              0.2712,
               1.2929,
-              -0.1144
+              -0.25
             ],
             "stride_m": 0.4625,
             "clearance_m": 0.1321,
@@ -56959,15 +58725,15 @@
           "socket": {
             "parent_joint": "upper",
             "position_m": [
-              -0.2349,
-              0.1356,
+              -0.2712,
+              0.0,
               0.0
             ],
             "rotation_xyzw": [
-              0.353553,
-              -0.612372,
-              -0.612372,
-              0.353553
+              0.5,
+              -0.5,
+              -0.5,
+              0.5
             ]
           },
           "stance_deg": [
@@ -56984,15 +58750,15 @@
           ],
           "snap": {
             "position_m": [
-              0.2349,
+              0.2712,
               1.0929,
-              0.1356
+              0.0
             ],
             "rotation_xyzw": [
               0.0,
-              0.5,
+              0.707107,
               0.0,
-              0.866026
+              0.707107
             ]
           }
         },
@@ -57061,15 +58827,15 @@
             ]
           },
           "gait_role": "locomotor",
-          "gait_phase_rad": 2.094395,
+          "gait_phase_rad": 0.0,
           "gait": {
             "role": "locomotor",
-            "phase_rad": 2.094395,
+            "phase_rad": 0.0,
             "support_phase": 0.68,
             "bend_pole_m": [
-              0.2349,
+              0.1356,
               1.2929,
-              -0.3856
+              -0.4849
             ],
             "stride_m": 0.4625,
             "clearance_m": 0.1321,
@@ -57090,15 +58856,15 @@
           "socket": {
             "parent_joint": "upper",
             "position_m": [
-              -0.2349,
               -0.1356,
+              -0.2349,
               0.0
             ],
             "rotation_xyzw": [
-              0.612372,
-              -0.353553,
-              -0.353553,
-              0.612372
+              0.683013,
+              -0.183013,
+              -0.183013,
+              0.683013
             ]
           },
           "stance_deg": [
@@ -57115,15 +58881,15 @@
           ],
           "snap": {
             "position_m": [
-              0.2349,
+              0.1356,
               1.0929,
-              -0.1356
+              -0.2349
             ],
             "rotation_xyzw": [
               0.0,
-              0.866026,
+              0.965926,
               0.0,
-              0.5
+              0.258819
             ]
           }
         },
@@ -57198,9 +58964,9 @@
             "phase_rad": 3.141593,
             "support_phase": 0.68,
             "bend_pole_m": [
-              0.0,
+              -0.1356,
               1.2929,
-              -0.5212
+              -0.4849
             ],
             "stride_m": 0.4625,
             "clearance_m": 0.1321,
@@ -57221,15 +58987,15 @@
           "socket": {
             "parent_joint": "upper",
             "position_m": [
-              0.0,
-              -0.2712,
+              0.1356,
+              -0.2349,
               0.0
             ],
             "rotation_xyzw": [
-              0.707107,
-              0.0,
-              0.0,
-              0.707107
+              -0.683013,
+              -0.183013,
+              -0.183013,
+              -0.683013
             ]
           },
           "stance_deg": [
@@ -57246,15 +59012,15 @@
           ],
           "snap": {
             "position_m": [
-              0.0,
+              -0.1356,
               1.0929,
-              -0.2712
+              -0.2349
             ],
             "rotation_xyzw": [
               0.0,
-              1.0,
+              -0.965926,
               0.0,
-              0.0
+              0.258819
             ]
           }
         },
@@ -57323,15 +59089,15 @@
             ]
           },
           "gait_role": "locomotor",
-          "gait_phase_rad": 4.18879,
+          "gait_phase_rad": 0.0,
           "gait": {
             "role": "locomotor",
-            "phase_rad": 4.18879,
+            "phase_rad": 0.0,
             "support_phase": 0.68,
             "bend_pole_m": [
-              -0.2349,
+              -0.2712,
               1.2929,
-              -0.3856
+              -0.25
             ],
             "stride_m": 0.4625,
             "clearance_m": 0.1321,
@@ -57352,15 +59118,15 @@
           "socket": {
             "parent_joint": "upper",
             "position_m": [
-              0.2349,
-              -0.1356,
+              0.2712,
+              0.0,
               0.0
             ],
             "rotation_xyzw": [
-              -0.612372,
-              -0.353553,
-              -0.353553,
-              -0.612372
+              -0.5,
+              -0.5,
+              -0.5,
+              -0.5
             ]
           },
           "stance_deg": [
@@ -57377,15 +59143,15 @@
           ],
           "snap": {
             "position_m": [
-              -0.2349,
+              -0.2712,
               1.0929,
-              -0.1356
+              0.0
             ],
             "rotation_xyzw": [
               0.0,
-              -0.866026,
+              -0.707107,
               0.0,
-              0.5
+              0.707107
             ]
           }
         },
@@ -57454,15 +59220,15 @@
             ]
           },
           "gait_role": "locomotor",
-          "gait_phase_rad": 5.235988,
+          "gait_phase_rad": 3.141593,
           "gait": {
             "role": "locomotor",
-            "phase_rad": 5.235988,
+            "phase_rad": 3.141593,
             "support_phase": 0.68,
             "bend_pole_m": [
-              -0.2349,
+              -0.1356,
               1.2929,
-              -0.1144
+              -0.0151
             ],
             "stride_m": 0.4625,
             "clearance_m": 0.1321,
@@ -57483,15 +59249,15 @@
           "socket": {
             "parent_joint": "upper",
             "position_m": [
-              0.2349,
               0.1356,
+              0.2349,
               0.0
             ],
             "rotation_xyzw": [
-              -0.353553,
-              -0.612372,
-              -0.612372,
-              -0.353553
+              -0.183013,
+              -0.683013,
+              -0.683013,
+              -0.183013
             ]
           },
           "stance_deg": [
@@ -57508,15 +59274,15 @@
           ],
           "snap": {
             "position_m": [
-              -0.2349,
+              -0.1356,
               1.0929,
-              0.1356
+              0.2349
             ],
             "rotation_xyzw": [
               0.0,
-              -0.5,
+              -0.258819,
               0.0,
-              0.866026
+              0.965926
             ]
           }
         }
@@ -57530,16 +59296,16 @@
         "version": "1.0.0",
         "mode": "legs",
         "attack_branch_id": "arm_0",
-        "hip_height_m": 0.421417,
+        "hip_height_m": 0.421418,
         "leg_length_m": 1.101101,
-        "usable_stroke_m": 0.975,
+        "usable_stroke_m": 0.605,
         "min_support": 2,
         "duty_walk": 0.68,
         "duty_run": 0.5,
-        "cadence_max_hz": 2.858958,
+        "cadence_max_hz": 2.858957,
         "v_walk_mps": 1.016625,
-        "v_run_mps": 2.033249,
-        "v_max_mps": 5.017471,
+        "v_run_mps": 2.03325,
+        "v_max_mps": 3.113404,
         "legs": [
           {
             "branch_id": "arm_0",
@@ -57556,18 +59322,18 @@
               0.0
             ],
             "hip_m": [
-              0.0,
+              0.1356,
               0.4289,
-              0.2712
+              0.2349
             ],
             "home_m": [
-              0.0,
-              0.007483,
-              0.955673
+              0.477837,
+              0.007482,
+              0.827671
             ],
-            "reach_m": 1.1011,
-            "stroke_m": 1.175,
-            "stance_shift_m": -0.4925,
+            "reach_m": 1.101101,
+            "stroke_m": 0.605,
+            "stance_shift_m": -0.1975,
             "clearance_m": 0.198198,
             "walk_phase": 0.0,
             "run_phase": 0.0,
@@ -57588,20 +59354,20 @@
               0.0
             ],
             "hip_m": [
-              0.2349,
+              0.2712,
               0.4289,
-              0.1356
+              0.0
             ],
             "home_m": [
-              0.827672,
-              0.007483,
-              0.477836
+              0.955674,
+              0.007482,
+              0.0
             ],
-            "reach_m": 1.1011,
-            "stroke_m": 0.975,
-            "stance_shift_m": -0.3225,
+            "reach_m": 1.101101,
+            "stroke_m": 0.75,
+            "stance_shift_m": 0.0,
             "clearance_m": 0.198198,
-            "walk_phase": 0.166667,
+            "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
           },
@@ -57620,20 +59386,20 @@
               0.0
             ],
             "hip_m": [
-              0.2349,
+              0.1356,
               0.4289,
-              -0.1356
+              -0.2349
             ],
             "home_m": [
-              0.827673,
+              0.477836,
               0.007483,
-              -0.477836
+              -0.827673
             ],
-            "reach_m": 1.101101,
-            "stroke_m": 0.975,
-            "stance_shift_m": 0.3225,
+            "reach_m": 1.101102,
+            "stroke_m": 0.605,
+            "stance_shift_m": 0.1975,
             "clearance_m": 0.198198,
-            "walk_phase": 0.333333,
+            "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
@@ -57652,18 +59418,18 @@
               0.0
             ],
             "hip_m": [
-              0.0,
+              -0.1356,
               0.4289,
-              -0.2712
+              -0.2349
             ],
             "home_m": [
-              0.0,
-              0.007482,
-              -0.955674
+              -0.477836,
+              0.007483,
+              -0.827673
             ],
             "reach_m": 1.101102,
-            "stroke_m": 1.175,
-            "stance_shift_m": 0.4925,
+            "stroke_m": 0.605,
+            "stance_shift_m": 0.1975,
             "clearance_m": 0.198198,
             "walk_phase": 0.5,
             "run_phase": 0.5,
@@ -57684,20 +59450,20 @@
               0.0
             ],
             "hip_m": [
-              -0.2349,
+              -0.2712,
               0.4289,
-              -0.1356
+              0.0
             ],
             "home_m": [
-              -0.827673,
-              0.007483,
-              -0.477836
+              -0.955674,
+              0.007482,
+              0.0
             ],
             "reach_m": 1.101101,
-            "stroke_m": 0.975,
-            "stance_shift_m": 0.3225,
+            "stroke_m": 0.75,
+            "stance_shift_m": 0.0,
             "clearance_m": 0.198198,
-            "walk_phase": 0.666667,
+            "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
           },
@@ -57716,22 +59482,80 @@
               0.0
             ],
             "hip_m": [
-              -0.2349,
+              -0.1356,
               0.4289,
-              0.1356
+              0.2349
             ],
             "home_m": [
-              -0.827672,
-              0.007483,
-              0.477836
+              -0.477837,
+              0.007482,
+              0.827671
             ],
-            "reach_m": 1.1011,
-            "stroke_m": 0.975,
-            "stance_shift_m": -0.3225,
+            "reach_m": 1.101101,
+            "stroke_m": 0.605,
+            "stance_shift_m": -0.1975,
             "clearance_m": 0.198198,
-            "walk_phase": 0.833333,
+            "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.7021,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "arm_0",
+            "centroid_m": [
+              0.343183,
+              0.39304,
+              0.594444
+            ]
+          },
+          {
+            "branch_id": "arm_1",
+            "centroid_m": [
+              0.686366,
+              0.39304,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "arm_2",
+            "centroid_m": [
+              0.343183,
+              0.393041,
+              -0.594445
+            ]
+          },
+          {
+            "branch_id": "arm_3",
+            "centroid_m": [
+              -0.343183,
+              0.393041,
+              -0.594445
+            ]
+          },
+          {
+            "branch_id": "arm_4",
+            "centroid_m": [
+              -0.686366,
+              0.39304,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "arm_5",
+            "centroid_m": [
+              -0.343183,
+              0.39304,
+              0.594444
+            ]
           }
         ]
       }
@@ -58360,7 +60184,25 @@
         "v_walk_mps": 1.5282,
         "v_run_mps": 3.0564,
         "v_max_mps": 4.5846,
-        "legs": []
+        "legs": [],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.524628,
+              1.442176
+            ]
+          },
+          {
+            "branch_id": "body",
+            "centroid_m": [
+              -0.038661,
+              0.101885,
+              -0.271677
+            ]
+          }
+        ]
       }
     },
     {
@@ -58987,7 +60829,25 @@
         "v_walk_mps": 1.2531,
         "v_run_mps": 2.5062,
         "v_max_mps": 3.7593,
-        "legs": []
+        "legs": [],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.470273,
+              1.182529
+            ]
+          },
+          {
+            "branch_id": "body",
+            "centroid_m": [
+              -0.036074,
+              0.083506,
+              -0.219963
+            ]
+          }
+        ]
       }
     },
     {
@@ -59614,7 +61474,25 @@
         "v_walk_mps": 1.95606,
         "v_run_mps": 3.91212,
         "v_max_mps": 5.86818,
-        "legs": []
+        "legs": [],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.583536,
+              1.845962
+            ]
+          },
+          {
+            "branch_id": "body",
+            "centroid_m": [
+              -0.043607,
+              0.130355,
+              -0.351036
+            ]
+          }
+        ]
       }
     },
     {
@@ -61196,6 +63074,56 @@
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.68717,
+              1.284799
+            ]
+          },
+          {
+            "branch_id": "body",
+            "centroid_m": [
+              -0.034443,
+              0.366936,
+              -0.242096
+            ]
+          },
+          {
+            "branch_id": "leg0_L",
+            "centroid_m": [
+              0.266759,
+              0.190159,
+              0.396337
+            ]
+          },
+          {
+            "branch_id": "leg0_R",
+            "centroid_m": [
+              -0.43218,
+              0.19016,
+              0.322876
+            ]
+          },
+          {
+            "branch_id": "leg1_L",
+            "centroid_m": [
+              0.329999,
+              0.190159,
+              -0.205349
+            ]
+          },
+          {
+            "branch_id": "leg1_R",
+            "centroid_m": [
+              -0.368941,
+              0.19016,
+              -0.27881
+            ]
           }
         ]
       }
@@ -62780,6 +64708,56 @@
             "run_phase": 0.5,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.589658,
+              1.053579
+            ]
+          },
+          {
+            "branch_id": "body",
+            "centroid_m": [
+              -0.032139,
+              0.297067,
+              -0.196049
+            ]
+          },
+          {
+            "branch_id": "leg0_L",
+            "centroid_m": [
+              0.299301,
+              0.154809,
+              0.345654
+            ]
+          },
+          {
+            "branch_id": "leg0_R",
+            "centroid_m": [
+              -0.454623,
+              0.154809,
+              0.25522
+            ]
+          },
+          {
+            "branch_id": "leg1_L",
+            "centroid_m": [
+              0.358397,
+              0.154809,
+              -0.147015
+            ]
+          },
+          {
+            "branch_id": "leg1_R",
+            "centroid_m": [
+              -0.395527,
+              0.154809,
+              -0.237448
+            ]
+          }
         ]
       }
     },
@@ -64362,6 +66340,56 @@
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.779487,
+              1.644569
+            ]
+          },
+          {
+            "branch_id": "body",
+            "centroid_m": [
+              -0.03885,
+              0.435626,
+              -0.312769
+            ]
+          },
+          {
+            "branch_id": "leg0_L",
+            "centroid_m": [
+              0.235452,
+              0.224765,
+              0.478783
+            ]
+          },
+          {
+            "branch_id": "leg0_R",
+            "centroid_m": [
+              -0.420185,
+              0.224765,
+              0.418192
+            ]
+          },
+          {
+            "branch_id": "leg1_L",
+            "centroid_m": [
+              0.306733,
+              0.224765,
+              -0.29253
+            ]
+          },
+          {
+            "branch_id": "leg1_R",
+            "centroid_m": [
+              -0.348904,
+              0.224764,
+              -0.353121
+            ]
           }
         ]
       }

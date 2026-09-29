@@ -106,9 +106,10 @@ def test_legged_bands_are_consistent_and_most_reach_game_speed(catalog):
         assert 0 < block["v_walk_mps"] < block["v_run_mps"] <= block["v_max_mps"], skeleton["skeleton_id"]
         if stepper.gait_params(block, GAME_SPEED)["overspeed"]:
             slow.add(skeleton["anatomy"]["archetype_id"])
-    # Belly haulers and three-legged tripods (long duty to keep two feet down) are slower; the game
-    # reads v_max from the catalog rather than forcing a uniform speed.
-    assert slow <= {"dragger_belly_hauler", "crawler_alien_tripod"}
+    # Belly haulers and three-legged tripods (long duty to keep two feet down) are slower, and the compact
+    # radial's stance is confined to the coxa yaw cone; the game reads v_max from the catalog rather than
+    # forcing a uniform speed.
+    assert slow <= {"dragger_belly_hauler", "crawler_alien_tripod", "radial_raised_articulated_walker"}
 
 
 def test_quadrupeds_walk_in_lateral_sequence_and_trot_when_running(catalog):
@@ -183,3 +184,27 @@ def test_arm_leg_dragger_reaches_game_speed_within_step_rate(catalog):
         assert not params["overspeed"], skeleton["skeleton_id"]
         assert params["cadence_hz"] <= block["cadence_max_hz"]
         assert params["stride_m"] * params["duty"] <= .9 * block["usable_stroke_m"] + 1e-9
+
+
+def test_radial_stances_stay_inside_the_coxa_yaw_cone(catalog):
+    import math
+    from critter_crafter.locomotion.block import MAX_COXA_YAW_DEG
+    radials = [s for s in catalog["skeletons"] if s["family"] == "radial"]
+    assert len(radials) == 3
+    for skeleton in radials:
+        for leg in skeleton["locomotion"]["legs"]:
+            hip, home = leg["hip_m"], leg["home_m"]
+            neutral = math.atan2(home[0] - hip[0], home[2] - hip[2])
+            # No leg lies along the travel axis: its stance would run through its own hip.
+            assert abs(math.sin(neutral)) > .3, (skeleton["skeleton_id"], leg["branch_id"])
+            for dz in (leg["stance_shift_m"] - leg["stroke_m"] / 2, leg["stance_shift_m"] + leg["stroke_m"] / 2):
+                bearing = math.atan2(home[0] - hip[0], home[2] + dz - hip[2])
+                yaw = math.degrees((bearing - neutral + math.pi) % (2 * math.pi) - math.pi)
+                assert abs(yaw) <= MAX_COXA_YAW_DEG + .5, (skeleton["skeleton_id"], leg["branch_id"], yaw)
+
+
+def test_radial_walks_in_alternating_tripods(catalog):
+    for skeleton in (s for s in catalog["skeletons"] if s["family"] == "radial"):
+        legs = skeleton["locomotion"]["legs"]
+        assert {round(l["walk_phase"], 3) for l in legs} == {0.0, .5}
+        assert [l["walk_phase"] for l in legs] == [l["run_phase"] for l in legs]

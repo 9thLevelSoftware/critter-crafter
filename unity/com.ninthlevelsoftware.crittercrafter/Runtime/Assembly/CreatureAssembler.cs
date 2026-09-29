@@ -118,6 +118,7 @@ namespace CritterCrafter
 
             var creature = root.AddComponent<AssembledCreature>();
             creature.Init(recipe, animator, skeleton, skelEntry.model);
+            creature.Locomotion = CreatureLocomotion.Build(catalog, recipe);
 
             // The catalog frame is the creature root's space: the skeleton model keeps whatever root rotation
             // the FBX importer gave it, which is part of the asset, not of the catalog (docs/frame.md).

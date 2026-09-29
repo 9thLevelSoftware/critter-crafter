@@ -120,6 +120,8 @@ def recipe_generate(pool_id: str, seed: int) -> None:
 @click.option("--review-drafts", is_flag=True, help="Test drafts using an in-memory approved copy")
 def recipe_sweep(pool_ids: tuple[str, ...], seeds: str, review_drafts: bool) -> None:
     """Generate across a seed range; report validity and distinct creature count."""
+    from .locomotion.build import creature_locomotion
+    from .locomotion.qa import evaluate_locomotion
     cat = _compiled_catalog()
     if review_drafts:
         for skeleton in cat["skeletons"]:
@@ -141,6 +143,11 @@ def recipe_sweep(pool_ids: tuple[str, ...], seeds: str, review_drafts: bool) -> 
                 continue
             if validate_recipe(cat, r):
                 errors += 1
+            else:
+                diags = evaluate_locomotion({"locomotion": creature_locomotion(cat, r)})
+                for d in diags:
+                    click.echo(f"  {pid} seed {s}: {d['code']} {d['detail']}", err=True)
+                errors += bool(diags)
             forms.add(canonical(r))
         bad += errors
         click.echo(f"{pid:16s} seeds={n:4d} distinct={len(forms):4d} invalid={errors}")
@@ -171,7 +178,14 @@ def recipe_golden(seeds: str, out: Path | None) -> None:
     from .locomotion.qa import golden_rows
     locomotion = {"planner": "stepper-1", "rows": golden_rows(cat)}
     (gdir / "locomotion.json").write_text(json.dumps(locomotion, indent=1) + "\n", encoding="utf-8", newline="\n")
-    click.echo(f"wrote {len(rows)} golden rows and {len(locomotion['rows'])} locomotion rows to {gdir}")
+    from .locomotion.build import MODEL, golden_rows as creature_rows
+    for part in cat["parts"]:   # fixture-only: exercise the real Meshy parts too; records stay draft
+        if part["inventory_kind"] == "production" and part["status"] == "draft":
+            part["status"] = "approved"
+    creatures = {"model": MODEL, "rows": creature_rows(cat)}
+    (gdir / "creatures.json").write_text(json.dumps(creatures, indent=1) + "\n", encoding="utf-8", newline="\n")
+    click.echo(f"wrote {len(rows)} golden rows, {len(locomotion['rows'])} locomotion rows and "
+               f"{len(creatures['rows'])} creature rows to {gdir}")
 
 
 from .library import commands as _library_commands  # noqa: E402

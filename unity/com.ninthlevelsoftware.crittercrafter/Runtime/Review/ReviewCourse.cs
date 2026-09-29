@@ -68,6 +68,41 @@ namespace CritterCrafter.Review
             };
         }
 
+        /// <summary>
+        /// Turns only, on the flat: instant heading changes of +90, -135 and +45 degrees with 1.2 s of straight
+        /// travel between them, then a stop and an instant 180 degree turn in place.
+        /// </summary>
+        public static List<Waypoint> Turns(float speed)
+        {
+            var path = new List<Waypoint>();
+            var p = new Vector3(0f, 0f, -3f);
+            float t = 0f, heading = 0f;
+            path.Add(new Waypoint { time = t, position = p, headingDeg = heading });
+            void Leg(float seconds)
+            {
+                float rad = heading * Mathf.Deg2Rad;
+                p += new Vector3(Mathf.Sin(rad), 0f, Mathf.Cos(rad)) * speed * seconds;
+                t += seconds;
+                path.Add(new Waypoint { time = t, position = p, headingDeg = heading });
+            }
+            void Turn(float delta)
+            {
+                heading += delta;
+                t += 1e-4f;
+                path.Add(new Waypoint { time = t, position = p, headingDeg = heading });
+            }
+            Leg(1.2f);
+            Turn(90f); Leg(1.2f);
+            Turn(-135f); Leg(1.2f);
+            Turn(45f); Leg(1.2f);
+            path.Add(new Waypoint { time = t + 1.0f, position = p, headingDeg = heading });   // stop
+            t += 1.0f;
+            Turn(180f);
+            t += 1.5f;
+            path.Add(new Waypoint { time = t, position = p, headingDeg = heading });
+            return path;
+        }
+
         /// <summary>A straight line at constant speed (used by tests).</summary>
         public static List<Waypoint> Straight(float speed, float seconds)
         {

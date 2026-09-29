@@ -159,11 +159,39 @@ namespace CritterCrafter
         /// <summary>Slide mode: ground travel per undulation cycle of the phase-driven walk/run clips.</summary>
         public double travel_per_cycle_m;
         public LocomotionLeg[] legs;
+        /// <summary>Neutral-pose centroid of every branch (catalog frame); the build model's mass positions.</summary>
+        public LocomotionSegment[] segments;
+        /// <summary>Per-creature blocks only (see CreatureLocomotion): the speed a threat should chase at.</summary>
+        public double move_speed_mps;
+        /// <summary>Per-creature blocks only: the mass, balance and performance the speeds were derived from.</summary>
+        public LocomotionBuild build;
+
+        /// <summary>Scalar-field copy; legs and segments are shared and must be treated as read-only.</summary>
+        public LocomotionData ShallowCopy() => (LocomotionData)MemberwiseClone();
 
         public bool HasLegs => mode == "legs" && legs != null && legs.Length > 0;
         public bool Slides => mode == "slide" && travel_per_cycle_m > 0.0;
         /// <summary>Walk/run clips are one-cycle overlays driven by CreatureGait's GaitPhase.</summary>
         public bool IsPhaseDriven => HasLegs || Slides;
+    }
+
+    [Serializable]
+    public class LocomotionSegment
+    {
+        public string branch_id;
+        public double[] centroid_m;
+    }
+
+    [Serializable]
+    public class LocomotionBuild
+    {
+        public string model;
+        public double mass_kg;
+        public double[] com_m;
+        public double muscle_fraction;
+        public double load_imbalance;
+        public double arm_fraction;
+        public double performance;
     }
 
     [Serializable]

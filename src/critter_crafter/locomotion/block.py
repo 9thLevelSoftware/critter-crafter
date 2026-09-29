@@ -48,11 +48,12 @@ def _stroke(hip: mu.Vec, home: mu.Vec, reach: float) -> float:
 MAX_COXA_YAW_DEG = 45.0     # matches CreatureGait.MaxCoxaYawDeg
 
 
-def _hinge4_stroke(pose: dict[str, Any], chain: list[str], home: mu.Vec) -> tuple[float, float]:
+def _hinge4_stroke(pose: dict[str, Any], chain: list[str], home: mu.Vec, strict_yaw: bool = False) -> tuple[float, float]:
     """Forward/back reachable chord for an insect leg as the runtime solves it: the coxa yaws toward
     the foot (clamped), the ankle keeps its neutral offset in that yawed frame, and femur + tibia must
     reach the ankle from the (yawed) femur root. Returns (stroke, stance shift): fanned legs have more
-    room on one side of their neutral foot, so the stance is centred in the chord."""
+    room on one side of their neutral foot, so the stance is centred in the chord. ``strict_yaw`` also
+    rejects feet beyond the coxa yaw limit (the runtime clamps there and the leg folds under the body)."""
     coxa, femur0, ankle0 = pose[chain[0]]["head"], pose[chain[1]]["head"], pose[chain[3]]["head"]
     reach = REACH_FRACTION * (pose[chain[1]]["length"] + pose[chain[2]]["length"])
     ankle_offset = mu.sub(ankle0, home)
@@ -68,6 +69,8 @@ def _hinge4_stroke(pose: dict[str, Any], chain: list[str], home: mu.Vec) -> tupl
         foot = (home[0], home[1], home[2] + shift)
         yaw = math.atan2(foot[0] - coxa[0], foot[2] - coxa[2]) - neutral
         yaw = (yaw + math.pi) % (2 * math.pi) - math.pi
+        if strict_yaw and abs(yaw) > limit:
+            return False
         yaw = max(-limit, min(limit, yaw))
         femur = mu.add(coxa, rot_y(femur_offset, yaw))
         ankle = mu.add(foot, rot_y(ankle_offset, yaw))
@@ -197,7 +200,31 @@ def _drag_block(skeleton: dict[str, Any], legs: list[dict[str, Any]], legs_src: 
     }
 
 
+def _segments(skeleton: dict[str, Any]) -> list[dict[str, Any]]:
+    """Neutral-pose centroid of every branch (bone midpoints weighted by bone length); the build model
+    weights these by each fill's mass to find the centre of mass."""
+    pose = neutral_pose_world(skeleton)
+    out = []
+    for branch in skeleton["branches"]:
+        total = 0.0
+        acc = (0.0, 0.0, 0.0)
+        for name in branch["bone_names"]:
+            bone = pose[name]
+            mid = mu.scale(mu.add(bone["head"], bone["tail"]), .5)
+            acc = mu.add(acc, mu.scale(mid, bone["length"]))
+            total += bone["length"]
+        out.append({"branch_id": branch["branch_id"],
+                    "centroid_m": mu.r6v(mu.scale(acc, 1.0 / total) if total > 0.0 else acc)})
+    return out
+
+
 def locomotion_block(skeleton: dict[str, Any]) -> dict[str, Any]:
+    block = _locomotion_block(skeleton)
+    block["segments"] = _segments(skeleton)
+    return block
+
+
+def _locomotion_block(skeleton: dict[str, Any]) -> dict[str, Any]:
     pose = neutral_pose_world(skeleton)
     legs_src = [b for b in skeleton["branches"]
                 if b.get("gait_role") == "locomotor" and len(b.get("contacts") or []) == 1
@@ -220,7 +247,7 @@ def locomotion_block(skeleton: dict[str, Any]) -> dict[str, Any]:
             ankle = pose[chain[2]]["head"]
             stroke_m = _stroke(hip, ankle, pose[chain[0]]["length"] + pose[chain[1]]["length"])
         elif branch.get("template") == "insect_leg4" and len(chain) == 4:
-            stroke_m, shift = _hinge4_stroke(pose, chain, home)
+            stroke_m, shift = _hinge4_stroke(pose, chain, home, strict_yaw=family == "radial")
         else:
             stroke_m = _stroke(hip, home, reach)
         legs.append({
