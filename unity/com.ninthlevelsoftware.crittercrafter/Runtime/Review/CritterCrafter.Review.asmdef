@@ -5,6 +5,7 @@
   "includePlatforms": [],
   "excludePlatforms": [],
   "allowUnsafeCode": false,
-  "autoReferenced": true,
+  "autoReferenced": false,
+  "defineConstraints": ["UNITY_EDITOR"],
   "noEngineReferences": false
 }
