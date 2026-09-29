@@ -1594,14 +1594,14 @@
    "mass_kg": 60.396686,
    "com_m": [
     0.0,
-    0.351692,
+    0.351691,
     0.0
    ],
-   "performance": 1.378858,
+   "performance": 1.378857,
    "v_walk": 1.056752,
-   "v_run": 5.075673,
-   "v_max": 5.7,
-   "cadence_max": 4.493355
+   "v_run": 3.105,
+   "v_max": 3.45,
+   "cadence_max": 4.493353
   },
   {
    "skeleton_id": "radial_raised_articulated_walker_compact_v3",
@@ -1648,10 +1648,10 @@
     0.305219,
     0.0
    ],
-   "performance": 1.412053,
+   "performance": 1.412052,
    "v_walk": 0.95756,
-   "v_run": 4.15125,
-   "v_max": 4.6125,
+   "v_run": 2.39625,
+   "v_max": 2.6625,
    "cadence_max": 5.170274
   },
   {
@@ -1700,10 +1700,10 @@
     0.0
    ],
    "performance": 1.327827,
-   "v_walk": 1.17147,
-   "v_run": 5.317225,
-   "v_max": 6.662335,
-   "cadence_max": 3.796202
+   "v_walk": 1.171472,
+   "v_run": 3.720656,
+   "v_max": 4.134063,
+   "cadence_max": 3.796201
   },
   {
    "skeleton_id": "serpentine_limbless_articulated_balanced_v3",

@@ -24,7 +24,7 @@ namespace CritterCrafter.Editor
 
         struct Job
         {
-            public string skeletonId, speedLabel, outDir;
+            public string skeletonId, speedLabel, outDir, course;
         }
 
         static CritterLibrary _library;
@@ -52,8 +52,11 @@ namespace CritterCrafter.Editor
             {
                 if (string.IsNullOrWhiteSpace(id)) continue;
                 foreach (var label in Arg("-critterSpeeds", "walk,run,2.5").Split(','))
-                    _jobs.Enqueue(new Job { skeletonId = id.Trim(), speedLabel = label.Trim(),
-                        outDir = Path.Combine(_outRoot, id.Trim() + "_" + label.Trim()) });
+                {
+                    string course = Arg("-critterCourse", "review");   // "turns": instant turns on the flat only
+                    _jobs.Enqueue(new Job { skeletonId = id.Trim(), speedLabel = label.Trim(), course = course,
+                        outDir = Path.Combine(_outRoot, id.Trim() + "_" + label.Trim() + (course == "review" ? "" : "_" + course)) });
+                }
             }
             // Keep static state (library, queue) alive across the Play Mode transition.
             EditorSettings.enterPlayModeOptionsEnabled = true;
@@ -105,7 +108,7 @@ namespace CritterCrafter.Editor
             if (gait == null) throw new System.InvalidOperationException(job.skeletonId + " has no runtime legs");
             float speed = SpeedFor(gait.Block, job.speedLabel);
             _recorder = _holder.AddComponent<LocomotionRecorder>();
-            _recorder.Begin(gait, ReviewCourse.Path(speed),
+            _recorder.Begin(gait, job.course == "turns" ? ReviewCourse.Turns(speed) : ReviewCourse.Path(speed),
                 new LocomotionMetrics { skeleton_id = job.skeletonId, speed_label = job.speedLabel, speed_mps = speed },
                 job.outDir);
         }

@@ -22,7 +22,7 @@ Each skeleton publishes `v_walk_mps`, `v_run_mps` and `v_max_mps`:
 - **Drag.** Full-stroke pulls at about 1 pull per second when walking and 1.8 when running.
 - **Slide.** 1 and 2 undulations per second.
 
-Above `v_max_mps` the feet slide, reported as `overspeed`. Use the creature's `move_speed_mps` (see [Per-creature speeds](#per-creature-speeds-build-1)) as the threat's move speed rather than forcing one speed on every body plan; the skeleton's own `v_run_mps` is the fallback. All 42 current skeletons can reach 2.5 m/s (the current Synaptic Sea threat speed) within `v_max_mps` (the lowest is 2.53), but 26 of them have `v_run_mps` below 2.5, so forcing 2.5 m/s runs those bodies above their natural run speed.
+Above `v_max_mps` the feet slide, reported as `overspeed`. Use the creature's `move_speed_mps` (see [Per-creature speeds](#per-creature-speeds-build-1)) as the threat's move speed rather than forcing one speed on every body plan; the skeleton's own `v_run_mps` is the fallback. 41 of the 42 current skeletons can reach 2.5 m/s (the current Synaptic Sea threat speed) within `v_max_mps`; the compact radial walker tops out at 2.34, because its stance is confined to the coxa yaw cone. Many of them have `v_run_mps` below 2.5, so forcing 2.5 m/s runs those bodies above their natural run speed.
 
 ## Per-creature speeds (`build-1`)
 

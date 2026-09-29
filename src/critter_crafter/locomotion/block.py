@@ -48,11 +48,12 @@ def _stroke(hip: mu.Vec, home: mu.Vec, reach: float) -> float:
 MAX_COXA_YAW_DEG = 45.0     # matches CreatureGait.MaxCoxaYawDeg
 
 
-def _hinge4_stroke(pose: dict[str, Any], chain: list[str], home: mu.Vec) -> tuple[float, float]:
+def _hinge4_stroke(pose: dict[str, Any], chain: list[str], home: mu.Vec, strict_yaw: bool = False) -> tuple[float, float]:
     """Forward/back reachable chord for an insect leg as the runtime solves it: the coxa yaws toward
     the foot (clamped), the ankle keeps its neutral offset in that yawed frame, and femur + tibia must
     reach the ankle from the (yawed) femur root. Returns (stroke, stance shift): fanned legs have more
-    room on one side of their neutral foot, so the stance is centred in the chord."""
+    room on one side of their neutral foot, so the stance is centred in the chord. ``strict_yaw`` also
+    rejects feet beyond the coxa yaw limit (the runtime clamps there and the leg folds under the body)."""
     coxa, femur0, ankle0 = pose[chain[0]]["head"], pose[chain[1]]["head"], pose[chain[3]]["head"]
     reach = REACH_FRACTION * (pose[chain[1]]["length"] + pose[chain[2]]["length"])
     ankle_offset = mu.sub(ankle0, home)
@@ -68,6 +69,8 @@ def _hinge4_stroke(pose: dict[str, Any], chain: list[str], home: mu.Vec) -> tupl
         foot = (home[0], home[1], home[2] + shift)
         yaw = math.atan2(foot[0] - coxa[0], foot[2] - coxa[2]) - neutral
         yaw = (yaw + math.pi) % (2 * math.pi) - math.pi
+        if strict_yaw and abs(yaw) > limit:
+            return False
         yaw = max(-limit, min(limit, yaw))
         femur = mu.add(coxa, rot_y(femur_offset, yaw))
         ankle = mu.add(foot, rot_y(ankle_offset, yaw))
@@ -244,7 +247,7 @@ def _locomotion_block(skeleton: dict[str, Any]) -> dict[str, Any]:
             ankle = pose[chain[2]]["head"]
             stroke_m = _stroke(hip, ankle, pose[chain[0]]["length"] + pose[chain[1]]["length"])
         elif branch.get("template") == "insect_leg4" and len(chain) == 4:
-            stroke_m, shift = _hinge4_stroke(pose, chain, home)
+            stroke_m, shift = _hinge4_stroke(pose, chain, home, strict_yaw=family == "radial")
         else:
             stroke_m = _stroke(hip, home, reach)
         legs.append({
