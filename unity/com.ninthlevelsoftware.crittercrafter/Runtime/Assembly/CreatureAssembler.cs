@@ -89,7 +89,13 @@ namespace CritterCrafter
 
         public static AssembledCreature Assemble(CritterLibrary library, CritterRecipe recipe, AssemblyOptions options)
         {
-            var catalog = library.Catalog ?? throw new AssemblyException("library has no catalog");
+            var catalog = library != null ? library.Catalog : null;
+            if (catalog == null)
+            {
+                const string noCatalog = "CC_NO_CATALOG: library has no catalog";
+                if (!options.fallbackOnInvalid) throw new AssemblyException(noCatalog);
+                return BuildFallback(recipe, options, new List<string> { noCatalog });
+            }
             var diags = RecipeValidator.Validate(catalog, recipe, options.allowReview);
             var skelEntry = recipe == null ? null : library.FindSkeleton(recipe.skeleton_id);
             if (recipe != null && (skelEntry == null || skelEntry.model == null)) diags.Add("CC_MISSING_ASSET: skeleton " + recipe.skeleton_id);
@@ -99,8 +105,33 @@ namespace CritterCrafter
                 return BuildFallback(recipe, options, diags);
             }
 
+            // Binding and rig errors (a missing part asset, an unmapped bone) must not leave a half-built
+            // creature in the game's scene: destroy it, then fall back or rethrow.
+            GameObject root = null;
+            try
+            {
+                return AssembleValidated(library, catalog, recipe, options, skelEntry, created => root = created);
+            }
+            catch (Exception e)
+            {
+                if (root != null) DestroyNow(root);
+                if (!options.fallbackOnInvalid) throw;
+                return BuildFallback(recipe, options, new List<string> { "CC_ASSEMBLY_FAILED: " + e.Message });
+            }
+        }
+
+        static void DestroyNow(GameObject go)
+        {
+            // Immediate, so nothing half-built is visible to the caller's next line (or a scene query) this frame.
+            UnityEngine.Object.DestroyImmediate(go);
+        }
+
+        static AssembledCreature AssembleValidated(CritterLibrary library, CatalogData catalog, CritterRecipe recipe,
+            AssemblyOptions options, CritterLibrary.SkeletonEntry skelEntry, Action<GameObject> onCreated)
+        {
             var skeleton = catalog.FindSkeleton(recipe.skeleton_id);
             var root = new GameObject("Creature_" + recipe.recipe_id);
+            onCreated(root);
             if (options.parent != null) root.transform.SetParent(options.parent, false);
 
             var skelGo = UnityEngine.Object.Instantiate(skelEntry.model, root.transform, false);
@@ -369,6 +400,10 @@ namespace CritterCrafter
             go.layer = layer;
             foreach (Transform c in go.transform) SetLayerRecursive(c.gameObject, layer);
         }
+
+        /// <summary>A grey stand-in carrying <paramref name="diagnostics"/>, for callers that fail before assembly.</summary>
+        public static AssembledCreature CreateFallback(CritterRecipe recipe, AssemblyOptions options, IEnumerable<string> diagnostics) =>
+            BuildFallback(recipe, options, new List<string>(diagnostics));
 
         static AssembledCreature BuildFallback(CritterRecipe recipe, AssemblyOptions options, List<string> diags)
         {

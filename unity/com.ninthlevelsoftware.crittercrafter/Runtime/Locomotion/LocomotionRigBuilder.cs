@@ -69,6 +69,17 @@ namespace CritterCrafter.Locomotion
             foreach (var t in animRoot.GetComponentsInChildren<Transform>(true))
                 if (!bones.ContainsKey(t.name)) bones[t.name] = t;
 
+            // Resolve every leg's bones first: a bad catalog must fail before this builds anything.
+            var chains = new Transform[block.legs.Length][];
+            for (int l = 0; l < chains.Length; l++)
+            {
+                var names = block.legs[l].chain_bones;
+                chains[l] = new Transform[names.Length];
+                for (int i = 0; i < names.Length; i++)
+                    if (!bones.TryGetValue(names[i], out chains[l][i]))
+                        throw new AssemblyException($"locomotion leg {block.legs[l].branch_id}: missing bone {names[i]}");
+            }
+
             Matrix4x4 catalogToWorld = creature.transform.localToWorldMatrix;
             var targets = new GameObject(TargetsName).transform;
             targets.SetParent(creature.transform, false);
@@ -77,12 +88,10 @@ namespace CritterCrafter.Locomotion
             var rig = rigGo.AddComponent<Rig>();
 
             var legs = new List<CreatureGait.Leg>();
-            foreach (var leg in block.legs)
+            for (int legIndex = 0; legIndex < block.legs.Length; legIndex++)
             {
-                var chain = new Transform[leg.chain_bones.Length];
-                for (int i = 0; i < chain.Length; i++)
-                    if (!bones.TryGetValue(leg.chain_bones[i], out chain[i]))
-                        throw new AssemblyException($"locomotion leg {leg.branch_id}: missing bone {leg.chain_bones[i]}");
+                var leg = block.legs[legIndex];
+                var chain = chains[legIndex];
                 Vector3 home = catalogToWorld.MultiplyPoint3x4(CritterFrame.Position(leg.home_m));
 
                 var tip = new GameObject(leg.branch_id + "_ik_tip").transform;

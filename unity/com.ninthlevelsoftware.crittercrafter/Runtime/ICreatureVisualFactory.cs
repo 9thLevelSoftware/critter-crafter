@@ -35,12 +35,30 @@ namespace CritterCrafter
             _options = options;
         }
 
+        /// <summary>
+        /// With <see cref="AssemblyOptions.fallbackOnInvalid"/> (the default) this never throws: a failure to
+        /// generate (nothing approved, unknown pool) or to assemble returns a grey stand-in whose
+        /// <see cref="AssembledCreature.Diagnostics"/> start with the error code (CC_GEN_*, CC_ASSEMBLY_FAILED...).
+        /// </summary>
         public GameObject Build(CreatureSpawnRequest request)
         {
-            var recipe = request.recipe ?? _library.Generate(string.IsNullOrEmpty(request.poolId) ? request.archetypeId : request.poolId, request.seed);
             var opts = _options;
             opts.parent = request.parent;
             opts.layer = request.layer;
+            var recipe = request.recipe;
+            if (recipe == null)
+            {
+                try
+                {
+                    if (_library == null) throw new GenerationException("CC_NO_LIBRARY", "no critter library was given");
+                    recipe = _library.Generate(string.IsNullOrEmpty(request.poolId) ? request.archetypeId : request.poolId, request.seed);
+                }
+                catch (System.Exception e)
+                {
+                    if (!opts.fallbackOnInvalid) throw;
+                    return CreatureAssembler.CreateFallback(null, opts, new[] { e.Message }).gameObject;
+                }
+            }
             var creature = CreatureAssembler.Assemble(_library, recipe, opts);
             if (!creature.IsFallback) creature.gameObject.AddComponent<CreatureMotion>();
             return creature.gameObject;
