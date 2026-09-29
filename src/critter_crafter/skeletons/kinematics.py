@@ -38,6 +38,12 @@ def neutral_pose_world(skeleton: dict[str, Any]) -> dict[str, dict[str, Any]]:
     deltas = {r["bone_name"]: tuple(r["rotation_xyzw"])
               for r in skeleton.get("neutral_pose", {}).get("rotations", [])}
     offset = skeleton.get("neutral_pose", {}).get("root_offset_m", [0.0, 0.0, 0.0])
+    return pose_world(skeleton, deltas, offset)
+
+
+def pose_world(skeleton: dict[str, Any], deltas: dict[str, Sequence[float]],
+               offset: Sequence[float]) -> dict[str, dict[str, Any]]:
+    """World head/tail/rotation of every bone for local delta rotations *deltas* and a root position *offset*."""
     rest = {b["name"]: rest_basis(b) for b in skeleton["bones"]}
     by_name = {b["name"]: b for b in skeleton["bones"]}
     out: dict[str, dict[str, Any]] = {}

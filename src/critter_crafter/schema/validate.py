@@ -11,6 +11,7 @@ from jsonschema import Draft202012Validator
 
 from ..library.catalog import SCHEMA_VERSION, CatalogError, compile_catalog, load_sources
 from ..recipes.generator import connector_accepted, part_accepted
+from ..skeletons.traits import traits_of
 
 SCHEMA_FOR = {
     "templates": "branch_template.v3.schema.json",
@@ -184,7 +185,7 @@ def _skeleton_diags(
     support_branches = set(anatomy.get("support_branches", []))
     if not support_branches <= contact_branches:
         diagnostics.append(f"CC_ANATOMY_SUPPORT_CONTACT: {skeleton_id}")
-    minimum_support = 2 if source.get("family") in {"quadruped", "hexapod", "crawler", "radial"} else 1
+    minimum_support = int(traits_of(source)["min_support"])
     if len(support_branches) < minimum_support:
         diagnostics.append(f"CC_ANATOMY_SUPPORT_COUNT: {skeleton_id}")
     symmetry = anatomy.get("symmetry", {})

@@ -24,7 +24,8 @@ def _skeleton():
 
 
 def test_motion_archetypes_cover_every_family():
-    assert len(ARCHETYPE_PROFILES) == 14
+    from critter_crafter.skeletons.archetypes import ARCHETYPES
+    assert set(ARCHETYPE_PROFILES) == set(ARCHETYPES)
     families = [p["family"] for p in ARCHETYPE_PROFILES.values()]
     assert set(families) == {"biped", "quadruped", "hexapod", "crawler", "radial", "serpentine", "dragger"}
     # The tentacle radial was retired; the radial family keeps its articulated walker.

@@ -1096,6 +1096,13 @@
     "archetype_id": "crawler_bilateral_eight_legged",
     "body_plan": "crawler",
     "style": "anatomical",
+    "traits": {
+      "min_support": 2,
+      "body_on_ground": false,
+      "ring": false,
+      "pole_ik": false,
+      "compact_clip": true
+    },
     "support_branches": [
       "leg0_L",
       "leg0_R",

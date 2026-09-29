@@ -37,8 +37,7 @@ def _contact_ids(skeleton: dict) -> set[str]:
 
 def test_profiles_cover_all_fourteen_archetypes_with_declared_semantics() -> None:
     assert set(ATTACK_PROFILES) == set(ARCHETYPES)
-    assert len(ATTACK_PROFILES) == 14
-    assert len({profile.attack_id for profile in ATTACK_PROFILES.values()}) == 14
+    assert len({profile.attack_id for profile in ATTACK_PROFILES.values()}) == len(ATTACK_PROFILES)
     assert all(profile.branch_id and profile.bone_index >= 0 for profile in ATTACK_PROFILES.values())
 
 

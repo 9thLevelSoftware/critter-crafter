@@ -14,6 +14,7 @@ from typing import Any
 from .. import mathutil as mu
 from ..skeletons.actions import AttackPlanError, resolve_attack
 from ..skeletons.kinematics import contact_world, neutral_pose_world
+from ..skeletons.traits import traits_of
 
 LOCOMOTION_VERSION = "1.0.0"
 G = 9.81
@@ -23,7 +24,6 @@ REACH_FRACTION = .95      # never plan targets past 95% of straight chain reach
 STROKE_FRACTION = .9      # stance stroke may use 90% of the usable stroke
 MIN_DUTY_RUN = .45
 STEP_LIFT_FRACTION = .18
-FOUR_LEG_FAMILIES = ("quadruped", "hexapod", "crawler", "radial")
 
 
 def cadence_max_hz(leg_length_m: float) -> float:
@@ -86,8 +86,8 @@ def _hinge4_stroke(pose: dict[str, Any], chain: list[str], home: mu.Vec, strict_
     return forward + backward, (forward - backward) * .5
 
 
-def minimum_support(family: str) -> int:
-    return 2 if family in FOUR_LEG_FAMILIES else 1
+def minimum_support(skeleton: dict[str, Any]) -> int:
+    return int(traits_of(skeleton)["min_support"])
 
 
 def support_holds(phases: list[float], duty: float, minimum: int, samples: int = 400) -> bool:
@@ -229,8 +229,8 @@ def _locomotion_block(skeleton: dict[str, Any]) -> dict[str, Any]:
     legs_src = [b for b in skeleton["branches"]
                 if b.get("gait_role") == "locomotor" and len(b.get("contacts") or []) == 1
                 and b["contacts"][0].get("kind") in ("foot", "hand")]
-    family = skeleton.get("family", "")
-    minimum = minimum_support(family)
+    traits = traits_of(skeleton)
+    minimum = minimum_support(skeleton)
     walk_phases, run_phases = _patterns(skeleton, legs_src)
     legs: list[dict[str, Any]] = []
     for branch, walk_phase, run_phase in zip(legs_src, walk_phases, run_phases):
@@ -247,7 +247,7 @@ def _locomotion_block(skeleton: dict[str, Any]) -> dict[str, Any]:
             ankle = pose[chain[2]]["head"]
             stroke_m = _stroke(hip, ankle, pose[chain[0]]["length"] + pose[chain[1]]["length"])
         elif branch.get("template") == "insect_leg4" and len(chain) == 4:
-            stroke_m, shift = _hinge4_stroke(pose, chain, home, strict_yaw=family == "radial")
+            stroke_m, shift = _hinge4_stroke(pose, chain, home, strict_yaw=bool(traits["ring"]))
         else:
             stroke_m = _stroke(hip, home, reach)
         legs.append({
@@ -273,12 +273,13 @@ def _locomotion_block(skeleton: dict[str, Any]) -> dict[str, Any]:
         return _slide_block(skeleton)
     # Legs present: any sliding/body contacts (a dragger's belly) are passive and ride along.
     # Degenerate fixtures (hip at or below the contact) still compile; they simply cannot walk.
-    hip_height = max(0.0, sum(l["hip_m"][1] - l["home_m"][1] for l in legs) / len(legs))
-    leg_length = sum(l["reach_m"] for l in legs) / len(legs)
-    stroke = min(l["stroke_m"] for l in legs)
     supports = [l for l in legs if l["support"]] or legs
-    if family == "dragger":
+    if skeleton.get("locomotion_hint") == "drag":
         return _drag_block(skeleton, legs, legs_src)
+    # Only weight-bearing legs set the body's height, stride and speed: a vestigial leg mustn't cap them.
+    hip_height = max(0.0, sum(l["hip_m"][1] - l["home_m"][1] for l in supports) / len(supports))
+    leg_length = sum(l["reach_m"] for l in supports) / len(supports)
+    stroke = min(l["stroke_m"] for l in supports)
     walk_support = sum(float(next(b for b in legs_src if b["branch_id"] == l["branch_id"])
                              .get("gait", {}).get("support_phase", .6)) for l in legs) / len(legs)
     duty_walk = _min_duty([l["walk_phase"] for l in supports], max(.55, min(.85, walk_support)), minimum)

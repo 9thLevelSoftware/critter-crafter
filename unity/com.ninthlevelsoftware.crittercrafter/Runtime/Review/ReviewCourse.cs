@@ -72,6 +72,13 @@ namespace CritterCrafter.Review
         /// Turns only, on the flat: instant heading changes of +90, -135 and +45 degrees with 1.2 s of straight
         /// travel between them, then a stop and an instant 180 degree turn in place.
         /// </summary>
+        /// <summary>Stand at the origin for <paramref name="seconds"/> (reaction captures: idle, hit, stun, death).</summary>
+        public static List<Waypoint> Still(float seconds) => new List<Waypoint>
+        {
+            new Waypoint { time = 0f, position = Vector3.zero, headingDeg = 0f },
+            new Waypoint { time = seconds, position = Vector3.zero, headingDeg = 0f },
+        };
+
         public static List<Waypoint> Turns(float speed)
         {
             var path = new List<Waypoint>();

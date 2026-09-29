@@ -84,7 +84,7 @@
       "branch_id": "leg0_L",
       "template": "insect_leg4",
       "parent_branch": "core",
-      "attach_bone_index": 1,
+      "attach_bone_index": 0,
       "origin_m": [
         0.1849,
         0.5863,
@@ -117,11 +117,11 @@
       "binding_profile_id": "insect_leg4_articulated",
       "binding_profile_version": "1.0.0",
       "socket": {
-        "parent_joint": "lower",
+        "parent_joint": "pelvis",
         "position_m": [
           0.1849,
           0.0,
-          -0.2006
+          0.268
         ],
         "rotation_xyzw": [
           0.0,
@@ -171,7 +171,7 @@
       "branch_id": "leg0_R",
       "template": "insect_leg4",
       "parent_branch": "core",
-      "attach_bone_index": 1,
+      "attach_bone_index": 0,
       "origin_m": [
         -0.1849,
         0.5863,
@@ -204,11 +204,11 @@
       "binding_profile_id": "insect_leg4_articulated",
       "binding_profile_version": "1.0.0",
       "socket": {
-        "parent_joint": "lower",
+        "parent_joint": "pelvis",
         "position_m": [
           -0.1849,
           0.0,
-          -0.2006
+          0.268
         ],
         "rotation_xyzw": [
           0.0,
@@ -434,7 +434,7 @@
       "branch_id": "leg2_L",
       "template": "insect_leg4",
       "parent_branch": "core",
-      "attach_bone_index": 1,
+      "attach_bone_index": 2,
       "origin_m": [
         0.1849,
         0.5863,
@@ -467,11 +467,11 @@
       "binding_profile_id": "insect_leg4_articulated",
       "binding_profile_version": "1.0.0",
       "socket": {
-        "parent_joint": "lower",
+        "parent_joint": "end",
         "position_m": [
           0.1849,
           0.0,
-          0.6416
+          0.1869
         ],
         "rotation_xyzw": [
           0.0,
@@ -521,7 +521,7 @@
       "branch_id": "leg2_R",
       "template": "insect_leg4",
       "parent_branch": "core",
-      "attach_bone_index": 1,
+      "attach_bone_index": 2,
       "origin_m": [
         -0.1849,
         0.5863,
@@ -554,11 +554,11 @@
       "binding_profile_id": "insect_leg4_articulated",
       "binding_profile_version": "1.0.0",
       "socket": {
-        "parent_joint": "lower",
+        "parent_joint": "end",
         "position_m": [
           -0.1849,
           0.0,
-          0.6416
+          0.1869
         ],
         "rotation_xyzw": [
           0.0,
@@ -871,6 +871,13 @@
     "archetype_id": "hexapod_elongated_insect",
     "body_plan": "hexapod",
     "style": "anatomical",
+    "traits": {
+      "min_support": 2,
+      "body_on_ground": false,
+      "ring": false,
+      "pole_ik": true,
+      "compact_clip": false
+    },
     "support_branches": [
       "leg0_L",
       "leg0_R",

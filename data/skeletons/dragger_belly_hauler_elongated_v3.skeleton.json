@@ -619,6 +619,13 @@
     "archetype_id": "dragger_belly_hauler",
     "body_plan": "dragger",
     "style": "anatomical",
+    "traits": {
+      "min_support": 1,
+      "body_on_ground": true,
+      "ring": false,
+      "pole_ik": true,
+      "compact_clip": false
+    },
     "support_branches": [
       "arm_L",
       "arm_R",

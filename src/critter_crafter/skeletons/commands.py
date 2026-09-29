@@ -88,6 +88,8 @@ def _qa(cat: dict, source: Path, selected: list[dict]) -> list[dict]:
             motion = json.loads((source / skel["asset"]["motion"]).read_text(encoding="utf-8"))
             report = evaluate_motion(skel, motion, profiles=cat.get("binding_profiles", []))
             report["content_fingerprint"] = fingerprint
+            from .motion_metrics import motion_ranges
+            report["motion_ranges"] = motion_ranges(skel, motion)
             report["attack"] = evaluate_actions(skel, motion)
             report["diagnostics"].extend(report["attack"]["diagnostics"])
             # Runtime locomotion: speed bands, support and step rate at the published speeds.

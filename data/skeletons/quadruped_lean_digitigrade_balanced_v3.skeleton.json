@@ -84,7 +84,7 @@
       "branch_id": "leg_L0",
       "template": "limb3",
       "parent_branch": "core",
-      "attach_bone_index": 1,
+      "attach_bone_index": 2,
       "origin_m": [
         0.2536,
         1.0916,
@@ -117,11 +117,11 @@
       "binding_profile_id": "limb3_digitigrade",
       "binding_profile_version": "1.0.0",
       "socket": {
-        "parent_joint": "lower",
+        "parent_joint": "end",
         "position_m": [
           0.2536,
           0.0,
-          0.7459
+          0.2795
         ],
         "rotation_xyzw": [
           -0.08298669,
@@ -170,7 +170,7 @@
       "branch_id": "leg_R0",
       "template": "limb3",
       "parent_branch": "core",
-      "attach_bone_index": 1,
+      "attach_bone_index": 2,
       "origin_m": [
         -0.2536,
         1.0916,
@@ -203,11 +203,11 @@
       "binding_profile_id": "limb3_digitigrade",
       "binding_profile_version": "1.0.0",
       "socket": {
-        "parent_joint": "lower",
+        "parent_joint": "end",
         "position_m": [
           -0.2536,
           0.0,
-          0.7459
+          0.2795
         ],
         "rotation_xyzw": [
           -0.08298669,
@@ -257,7 +257,7 @@
       "branch_id": "leg_L1",
       "template": "limb3",
       "parent_branch": "core",
-      "attach_bone_index": 1,
+      "attach_bone_index": 0,
       "origin_m": [
         0.2536,
         1.0916,
@@ -290,11 +290,11 @@
       "binding_profile_id": "limb3_digitigrade",
       "binding_profile_version": "1.0.0",
       "socket": {
-        "parent_joint": "lower",
+        "parent_joint": "pelvis",
         "position_m": [
           0.2536,
           0.0,
-          -0.2935
+          0.1871
         ],
         "rotation_xyzw": [
           0.67410968,
@@ -343,7 +343,7 @@
       "branch_id": "leg_R1",
       "template": "limb3",
       "parent_branch": "core",
-      "attach_bone_index": 1,
+      "attach_bone_index": 0,
       "origin_m": [
         -0.2536,
         1.0916,
@@ -376,11 +376,11 @@
       "binding_profile_id": "limb3_digitigrade",
       "binding_profile_version": "1.0.0",
       "socket": {
-        "parent_joint": "lower",
+        "parent_joint": "pelvis",
         "position_m": [
           -0.2536,
           0.0,
-          -0.2935
+          0.1871
         ],
         "rotation_xyzw": [
           0.67410968,
@@ -663,6 +663,13 @@
     "archetype_id": "quadruped_lean_digitigrade",
     "body_plan": "quadruped",
     "style": "anatomical",
+    "traits": {
+      "min_support": 2,
+      "body_on_ground": false,
+      "ring": false,
+      "pole_ik": true,
+      "compact_clip": false
+    },
     "support_branches": [
       "leg_L0",
       "leg_R0",

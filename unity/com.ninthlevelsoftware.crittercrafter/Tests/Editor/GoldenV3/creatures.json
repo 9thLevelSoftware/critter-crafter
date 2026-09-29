@@ -1007,13 +1007,13 @@
    "com_m": [
     0.0,
     0.311605,
-    -1.8e-05
+    -9e-06
    ],
-   "performance": 1.161818,
-   "v_walk": 0.955777,
-   "v_run": 3.550629,
-   "v_max": 4.149633,
-   "cadence_max": 3.842253
+   "performance": 1.161821,
+   "v_walk": 0.955779,
+   "v_run": 3.550648,
+   "v_max": 4.149644,
+   "cadence_max": 3.842263
   },
   {
    "skeleton_id": "hexapod_compact_insect_compact_v3",
@@ -1058,7 +1058,7 @@
    "com_m": [
     0.0,
     0.309083,
-    -1.4e-05
+    -1.3e-05
    ],
    "performance": 1.291628,
    "v_walk": 1.006672,
@@ -1109,13 +1109,13 @@
    "com_m": [
     0.0,
     0.312594,
-    7e-06
+    -4e-06
    ],
-   "performance": 0.954994,
-   "v_walk": 0.862377,
-   "v_run": 2.387478,
-   "v_max": 3.170839,
-   "cadence_max": 3.145674
+   "performance": 0.954996,
+   "v_walk": 0.862378,
+   "v_run": 2.387487,
+   "v_max": 3.170845,
+   "cadence_max": 3.14568
   },
   {
    "skeleton_id": "hexapod_elongated_insect_balanced_v3",
@@ -1160,13 +1160,13 @@
    "com_m": [
     0.0,
     0.382916,
-    -4.9e-05
+    -3.5e-05
    ],
-   "performance": 0.748704,
-   "v_walk": 0.841815,
-   "v_run": 1.617794,
-   "v_max": 2.924887,
-   "cadence_max": 2.256858
+   "performance": 0.748696,
+   "v_walk": 0.841811,
+   "v_run": 1.617761,
+   "v_max": 2.924857,
+   "cadence_max": 2.256834
   },
   {
    "skeleton_id": "hexapod_elongated_insect_compact_v3",
@@ -1211,13 +1211,13 @@
    "com_m": [
     0.0,
     0.378982,
-    4.3e-05
+    2.7e-05
    ],
-   "performance": 0.915642,
-   "v_walk": 0.929879,
-   "v_run": 2.416889,
-   "v_max": 3.853372,
-   "cadence_max": 2.780211
+   "performance": 0.915635,
+   "v_walk": 0.929876,
+   "v_run": 2.416852,
+   "v_max": 3.853342,
+   "cadence_max": 2.780189
   },
   {
    "skeleton_id": "hexapod_elongated_insect_elongated_v3",
@@ -1262,9 +1262,9 @@
    "com_m": [
     0.0,
     0.383197,
-    -8e-06
+    -4e-06
    ],
-   "performance": 0.543208,
+   "performance": 0.543211,
    "v_walk": 0.6,
    "v_run": 1.0,
    "v_max": 2.448,
@@ -1309,13 +1309,13 @@
    "com_m": [
     0.0,
     0.809112,
-    0.039159
+    0.039177
    ],
-   "performance": 0.881429,
-   "v_walk": 1.481963,
-   "v_run": 2.667533,
-   "v_max": 2.963926,
-   "cadence_max": 2.272938
+   "performance": 0.881424,
+   "v_walk": 1.481954,
+   "v_run": 2.667517,
+   "v_max": 2.963908,
+   "cadence_max": 2.272924
   },
   {
    "skeleton_id": "quadruped_lean_digitigrade_compact_v3",
@@ -1356,13 +1356,13 @@
    "com_m": [
     0.0,
     0.646415,
-    0.033255
+    0.033257
    ],
-   "performance": 0.953498,
+   "performance": 0.953497,
    "v_walk": 1.431483,
-   "v_run": 3.085856,
-   "v_max": 3.428729,
-   "cadence_max": 2.672542
+   "v_run": 3.085852,
+   "v_max": 3.428725,
+   "cadence_max": 2.67254
   },
   {
    "skeleton_id": "quadruped_lean_digitigrade_elongated_v3",
@@ -1403,9 +1403,9 @@
    "com_m": [
     0.0,
     1.012287,
-    0.041398
+    0.041422
    ],
-   "performance": 0.761666,
+   "performance": 0.761657,
    "v_walk": 1.252537,
    "v_run": 2.254567,
    "v_max": 2.505074,
@@ -1450,13 +1450,13 @@
    "com_m": [
     0.0,
     0.633592,
-    0.033807
+    0.033795
    ],
-   "performance": 1.028903,
-   "v_walk": 1.550513,
-   "v_run": 3.541744,
-   "v_max": 3.935271,
-   "cadence_max": 2.84438
+   "performance": 1.028906,
+   "v_walk": 1.550515,
+   "v_run": 3.541754,
+   "v_max": 3.935282,
+   "cadence_max": 2.844388
   },
   {
    "skeleton_id": "quadruped_stocky_plantigrade_compact_v3",
@@ -1497,13 +1497,13 @@
    "com_m": [
     0.0,
     0.505371,
-    0.028393
+    0.028429
    ],
-   "performance": 1.104023,
-   "v_walk": 1.443815,
-   "v_run": 4.062966,
-   "v_max": 4.514406,
-   "cadence_max": 3.320715
+   "performance": 1.104015,
+   "v_walk": 1.44381,
+   "v_run": 4.062934,
+   "v_max": 4.514372,
+   "cadence_max": 3.32069
   },
   {
    "skeleton_id": "quadruped_stocky_plantigrade_elongated_v3",
@@ -1544,13 +1544,13 @@
    "com_m": [
     0.0,
     0.79531,
-    0.037337
+    0.037303
    ],
-   "performance": 0.917917,
-   "v_walk": 1.571107,
-   "v_run": 2.827993,
-   "v_max": 3.142214,
-   "cadence_max": 2.370227
+   "performance": 0.917926,
+   "v_walk": 1.571122,
+   "v_run": 2.828019,
+   "v_max": 3.142243,
+   "cadence_max": 2.370249
   },
   {
    "skeleton_id": "radial_raised_articulated_walker_balanced_v3",
@@ -1601,7 +1601,7 @@
    "v_walk": 1.056752,
    "v_run": 3.105,
    "v_max": 3.45,
-   "cadence_max": 4.493353
+   "cadence_max": 4.493352
   },
   {
    "skeleton_id": "radial_raised_articulated_walker_compact_v3",
@@ -1701,7 +1701,7 @@
    ],
    "performance": 1.327827,
    "v_walk": 1.171472,
-   "v_run": 3.720656,
+   "v_run": 3.720657,
    "v_max": 4.134063,
    "cadence_max": 3.796201
   },
@@ -1978,9 +1978,9 @@
    "com_m": [
     0.0,
     1.012357,
-    0.041135
+    0.04116
    ],
-   "performance": 0.761554,
+   "performance": 0.761546,
    "v_walk": 1.252537,
    "v_run": 2.254567,
    "v_max": 2.505074,
@@ -2225,9 +2225,9 @@
    "com_m": [
     0.0003,
     1.012272,
-    0.041097
+    0.041121
    ],
-   "performance": 0.761547,
+   "performance": 0.761539,
    "v_walk": 1.252537,
    "v_run": 2.254567,
    "v_max": 2.505074,
@@ -4404,9 +4404,9 @@
    "com_m": [
     0.0,
     1.012357,
-    0.041135
+    0.04116
    ],
-   "performance": 0.761554,
+   "performance": 0.761546,
    "v_walk": 1.252537,
    "v_run": 2.254567,
    "v_max": 2.505074,
@@ -4451,13 +4451,13 @@
    "com_m": [
     -0.000123,
     0.795243,
-    0.037698
+    0.037664
    ],
-   "performance": 0.918115,
-   "v_walk": 1.571445,
-   "v_run": 2.828601,
-   "v_max": 3.14289,
-   "cadence_max": 2.370737
+   "performance": 0.918123,
+   "v_walk": 1.57146,
+   "v_run": 2.828628,
+   "v_max": 3.14292,
+   "cadence_max": 2.370759
   },
   {
    "skeleton_id": "quadruped_lean_digitigrade_balanced_v3",
@@ -4498,13 +4498,13 @@
    "com_m": [
     -0.000162,
     0.809006,
-    0.039401
+    0.039418
    ],
-   "performance": 0.881721,
-   "v_walk": 1.482454,
-   "v_run": 2.668416,
-   "v_max": 2.964907,
-   "cadence_max": 2.273691
+   "performance": 0.881716,
+   "v_walk": 1.482445,
+   "v_run": 2.6684,
+   "v_max": 2.964889,
+   "cadence_max": 2.273677
   },
   {
    "skeleton_id": "quadruped_lean_digitigrade_compact_v3",
@@ -4545,13 +4545,13 @@
    "com_m": [
     8.6e-05,
     0.64655,
-    0.033145
+    0.033148
    ],
-   "performance": 0.953299,
+   "performance": 0.953298,
    "v_walk": 1.431334,
-   "v_run": 3.085213,
-   "v_max": 3.428015,
-   "cadence_max": 2.671986
+   "v_run": 3.08521,
+   "v_max": 3.428011,
+   "cadence_max": 2.671983
   },
   {
    "skeleton_id": "quadruped_stocky_plantigrade_compact_v3",
@@ -4592,13 +4592,13 @@
    "com_m": [
     5.1e-05,
     0.505137,
-    0.028512
+    0.028549
    ],
-   "performance": 1.104451,
-   "v_walk": 1.444095,
-   "v_run": 4.06454,
-   "v_max": 4.516156,
-   "cadence_max": 3.322002
+   "performance": 1.104443,
+   "v_walk": 1.444089,
+   "v_run": 4.064509,
+   "v_max": 4.516121,
+   "cadence_max": 3.321977
   },
   {
    "skeleton_id": "quadruped_lean_digitigrade_elongated_v3",
@@ -4639,9 +4639,9 @@
    "com_m": [
     0.0003,
     1.012272,
-    0.041097
+    0.041121
    ],
-   "performance": 0.761547,
+   "performance": 0.761539,
    "v_walk": 1.252537,
    "v_run": 2.254567,
    "v_max": 2.505074,
@@ -4686,13 +4686,13 @@
    "com_m": [
     8.1e-05,
     0.505207,
-    0.028587
+    0.028624
    ],
-   "performance": 1.104359,
-   "v_walk": 1.444035,
-   "v_run": 4.0642,
-   "v_max": 4.515778,
-   "cadence_max": 3.321724
+   "performance": 1.10435,
+   "v_walk": 1.444029,
+   "v_run": 4.064169,
+   "v_max": 4.515743,
+   "cadence_max": 3.321699
   },
   {
    "skeleton_id": "quadruped_lean_digitigrade_balanced_v3",
@@ -4733,13 +4733,13 @@
    "com_m": [
     4e-06,
     0.809152,
-    0.039471
+    0.039488
    ],
-   "performance": 0.881412,
-   "v_walk": 1.481934,
-   "v_run": 2.667481,
-   "v_max": 2.963867,
-   "cadence_max": 2.272893
+   "performance": 0.881407,
+   "v_walk": 1.481925,
+   "v_run": 2.667465,
+   "v_max": 2.96385,
+   "cadence_max": 2.27288
   },
   {
    "skeleton_id": "quadruped_stocky_plantigrade_elongated_v3",
@@ -4780,13 +4780,13 @@
    "com_m": [
     0.000114,
     0.79524,
-    0.037608
+    0.037574
    ],
-   "performance": 0.918061,
-   "v_walk": 1.571353,
-   "v_run": 2.828435,
-   "v_max": 3.142706,
-   "cadence_max": 2.370598
+   "performance": 0.918069,
+   "v_walk": 1.571368,
+   "v_run": 2.828462,
+   "v_max": 3.142735,
+   "cadence_max": 2.37062
   },
   {
    "skeleton_id": "quadruped_stocky_plantigrade_balanced_v3",
@@ -4827,13 +4827,13 @@
    "com_m": [
     -0.000134,
     0.633498,
-    0.033967
+    0.033955
    ],
-   "performance": 1.02918,
-   "v_walk": 1.550721,
-   "v_run": 3.542698,
-   "v_max": 3.936331,
-   "cadence_max": 2.845146
+   "performance": 1.029183,
+   "v_walk": 1.550724,
+   "v_run": 3.542708,
+   "v_max": 3.936342,
+   "cadence_max": 2.845154
   },
   {
    "skeleton_id": "crawler_alien_tripod_elongated_v3",
@@ -4913,13 +4913,13 @@
    "com_m": [
     -0.000123,
     0.795243,
-    0.037698
+    0.037664
    ],
-   "performance": 0.918115,
-   "v_walk": 1.571445,
-   "v_run": 2.828601,
-   "v_max": 3.14289,
-   "cadence_max": 2.370737
+   "performance": 0.918123,
+   "v_walk": 1.57146,
+   "v_run": 2.828628,
+   "v_max": 3.14292,
+   "cadence_max": 2.370759
   },
   {
    "skeleton_id": "quadruped_lean_digitigrade_balanced_v3",
@@ -4960,13 +4960,13 @@
    "com_m": [
     -0.000162,
     0.809006,
-    0.039401
+    0.039418
    ],
-   "performance": 0.881721,
-   "v_walk": 1.482454,
-   "v_run": 2.668416,
-   "v_max": 2.964907,
-   "cadence_max": 2.273691
+   "performance": 0.881716,
+   "v_walk": 1.482445,
+   "v_run": 2.6684,
+   "v_max": 2.964889,
+   "cadence_max": 2.273677
   },
   {
    "skeleton_id": "crawler_alien_tripod_compact_v3",
@@ -5046,13 +5046,13 @@
    "com_m": [
     5.1e-05,
     0.505137,
-    0.028512
+    0.028549
    ],
-   "performance": 1.104451,
-   "v_walk": 1.444095,
-   "v_run": 4.06454,
-   "v_max": 4.516156,
-   "cadence_max": 3.322002
+   "performance": 1.104443,
+   "v_walk": 1.444089,
+   "v_run": 4.064509,
+   "v_max": 4.516121,
+   "cadence_max": 3.321977
   },
   {
    "skeleton_id": "quadruped_lean_digitigrade_elongated_v3",
@@ -5093,9 +5093,9 @@
    "com_m": [
     0.0003,
     1.012272,
-    0.041097
+    0.041121
    ],
-   "performance": 0.761547,
+   "performance": 0.761539,
    "v_walk": 1.252537,
    "v_run": 2.254567,
    "v_max": 2.505074,
@@ -5140,13 +5140,13 @@
    "com_m": [
     8.1e-05,
     0.505207,
-    0.028587
+    0.028624
    ],
-   "performance": 1.104359,
-   "v_walk": 1.444035,
-   "v_run": 4.0642,
-   "v_max": 4.515778,
-   "cadence_max": 3.321724
+   "performance": 1.10435,
+   "v_walk": 1.444029,
+   "v_run": 4.064169,
+   "v_max": 4.515743,
+   "cadence_max": 3.321699
   },
   {
    "skeleton_id": "crawler_alien_tripod_balanced_v3",
@@ -5226,13 +5226,13 @@
    "com_m": [
     0.000114,
     0.79524,
-    0.037608
+    0.037574
    ],
-   "performance": 0.918061,
-   "v_walk": 1.571353,
-   "v_run": 2.828435,
-   "v_max": 3.142706,
-   "cadence_max": 2.370598
+   "performance": 0.918069,
+   "v_walk": 1.571368,
+   "v_run": 2.828462,
+   "v_max": 3.142735,
+   "cadence_max": 2.37062
   },
   {
    "skeleton_id": "crawler_bilateral_eight_legged_balanced_v3",
