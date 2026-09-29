@@ -11,21 +11,32 @@ def evaluate_motion(skeleton, motion):
     return _evaluate_motion(skeleton, motion, profiles=[PROFILE])
 
 
+def _rotation(clip, frame, count):
+    """Loops swing 3 degrees on a sine (so the seam is smooth); telegraph ends where attack starts; the rest move 5."""
+    if clip in ("idle", "walk", "run", "stun"):
+        degrees = 3.0 * math.sin(math.tau * frame / count)
+    else:
+        degrees = {"telegraph": 5.0, "attack": 5.0}.get(clip, 5.0 if frame else 0.0)
+    half = math.radians(degrees) / 2
+    return [math.sin(half), 0, 0, math.cos(half)]
+
+
 def make_motion():
     clips = []
     for name in ("idle", "walk", "run", "stun", "telegraph", "attack", "hit", "death"):
         samples = []
-        for frame in range(4):
+        count = 12 if name in ("idle", "walk", "run", "stun") else 3
+        for frame in range(count + 1):
             z = -frame * .01 if name in ("walk", "run") else 0.0
             samples.append({"frame": frame, "root_position_m": [0, 0, 0],
                             "simulated_forward_m": -z,
                             "bones": [{"name": "leg_b0", "head_m": [0, 1, 0], "tail_m": [0, 0, 0],
-                                       "rotation_xyzw": [0, 0, 0, 1]}],
+                                       "rotation_xyzw": _rotation(name, frame, count)}],
                             "minimum_support": 0 if name == "death" and frame >= 1 else 1,
                             "airborne": False, "mesh_bounds_min_m": [-.1, 0, -.1], "mesh_bounds_max_m": [.1, 1, .1],
                             "contacts": [{"branch_id": "leg", "kind": "foot", "planted": True,
                                           "position_m": [0, 0, z], "target_m": [0, 0, z]}]})
-        clips.append({"name": name, "frames": 3, "fps": 30,
+        clips.append({"name": name, "frames": count, "fps": 30,
                       "loop": name in ("idle", "walk", "run", "stun"), "samples": samples})
     return {"skeleton_id": "test", "bones": [{"name": "leg_b0"}],
             "anatomy": {"support_branches": ["leg"]},
@@ -113,3 +124,21 @@ def test_multiple_contacts_on_one_leg_do_not_substitute_other_supporting_limbs()
         for sample in clip["samples"]:
             sample["contacts"].append(copy.deepcopy(sample["contacts"][0]))
     assert "CC_SUPPORT_SCHEDULE" in {d["code"] for d in evaluate_motion(skeleton, motion)["diagnostics"]}
+
+
+def test_qa_flags_a_clip_in_which_nothing_moves():
+    skeleton, motion = make_motion()
+    for sample in motion["clips"][0]["samples"]:                       # idle
+        sample["bones"][0]["rotation_xyzw"] = [0, 0, 0, 1]
+    result = evaluate_motion(skeleton, motion)
+    still = [d for d in result["diagnostics"] if d["code"] == "CC_MOTION_STILL"]
+    assert [d["clip"] for d in still] == ["idle"]
+
+
+def test_qa_wants_a_legged_body_to_sink_when_it_dies():
+    skeleton, motion = make_motion()
+    skeleton["locomotion"] = {"mode": "legs", "hip_height_m": 1.0}
+    assert any(d["code"] == "CC_DEATH_DROP" for d in evaluate_motion(skeleton, motion)["diagnostics"])
+    for sample in motion["clips"][7]["samples"]:                       # death
+        sample["root_position_m"] = [0, -.2 * sample["frame"] / 3, 0]
+    assert not any(d["code"] == "CC_DEATH_DROP" for d in evaluate_motion(skeleton, motion)["diagnostics"])

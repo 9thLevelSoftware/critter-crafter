@@ -88,9 +88,8 @@ def _qa(cat: dict, source: Path, selected: list[dict]) -> list[dict]:
             motion = json.loads((source / skel["asset"]["motion"]).read_text(encoding="utf-8"))
             report = evaluate_motion(skel, motion, profiles=cat.get("binding_profiles", []))
             report["content_fingerprint"] = fingerprint
-            from .motion_metrics import motion_ranges, still_clips
+            from .motion_metrics import motion_ranges
             report["motion_ranges"] = motion_ranges(skel, motion)
-            report["still_clips"] = still_clips(report["motion_ranges"])
             report["attack"] = evaluate_actions(skel, motion)
             report["diagnostics"].extend(report["attack"]["diagnostics"])
             # Runtime locomotion: speed bands, support and step rate at the published speeds.
@@ -135,8 +134,6 @@ def _print_reports(reports: list[dict]) -> None:
     for report in reports:
         status = "PASS" if report["passed"] else "FAIL"
         click.echo(f"{status} {report['skeleton_id']}: {report.get('clips_checked', 0)} clips, {len(report['diagnostics'])} diagnostics")
-        if report.get("still_clips"):
-            click.echo(f"  WARN still clips (no bone moves 1 degree): {', '.join(report['still_clips'])}")
         seen = set()
         for diagnostic in report["diagnostics"]:
             if diagnostic["code"] not in seen:

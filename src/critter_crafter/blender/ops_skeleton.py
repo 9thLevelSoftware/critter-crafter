@@ -87,6 +87,11 @@ def _apply_ik_limits(pb: bpy.types.PoseBone, limits: dict[str, Any] | None,
         inset = float(inset_deg.get(axis, 0.0) if isinstance(inset_deg, dict) else inset_deg)
         pair = [float(pair[0]) + inset, float(pair[1]) - inset]
         angle = math.degrees(neutral[index])
+        if inset and float(pair[0]) - 1e-4 <= angle <= float(pair[1]) + 1e-4:
+            pass
+        elif inset:
+            # Too close to the limit to inset any further: keep the full range on this axis.
+            pair = [float(pair[0]) - inset, float(pair[1]) + inset]
         if angle < float(pair[0]) - 1e-4 or angle > float(pair[1]) + 1e-4:
             raise ValueError(f"{pb.name}: neutral {axis}={angle:.3f} outside joint limit {pair}")
         setattr(pb, f"use_ik_limit_{axis}", True)
@@ -140,7 +145,8 @@ def _make_controls(arm: bpy.types.Object, skeleton: dict[str, Any], profiles: li
         profile = pindex.get((branch.get("binding_profile_id", ""), branch.get("binding_profile_version", "")), {})
         joints = profile.get("joints", [])
         for i, name in enumerate(branch["bone_names"][:contact["bone_index"] + 1]):
-            _apply_ik_limits(arm.pose.bones[name], joints[i].get("limits_deg") if i < len(joints) else None)
+            _apply_ik_limits(arm.pose.bones[name], joints[i].get("limits_deg") if i < len(joints) else None,
+                             inset_deg=1.0)   # a degree inside the limit, so the solved pose can't overshoot it
         controls[branch["branch_id"]] = {"branch": branch, "contact": contact, "target": target,
                                            "pole": pole, "constraint": ik, "base": base.copy()}
         root = arm.pose.bones[branch["bone_names"][0]].head
@@ -161,12 +167,23 @@ def _make_controls(arm: bpy.types.Object, skeleton: dict[str, Any], profiles: li
         names = control["branch"]["bone_names"][:control["contact"]["bone_index"] + 1]
         constraint.influence = 1.0
         best_angle, best_score = constraint.pole_angle, math.inf
-        for step in range(24):
-            angle = -math.pi + step * math.tau / 24.0
+
+        def score_of(angle: float) -> float:
             constraint.pole_angle = angle; bpy.context.view_layer.update()
             evaluated = arm.evaluated_get(bpy.context.evaluated_depsgraph_get())
-            score = sum(original[name].rotation_difference(
+            return sum(original[name].rotation_difference(
                 evaluated.pose.bones[name].matrix.to_quaternion()).angle for name in names)
+
+        for step in range(24):
+            angle = -math.pi + step * math.tau / 24.0
+            score = score_of(angle)
+            if score < best_score:
+                best_angle, best_score = angle, score
+        # A 15 degree grid leaves the knee up to 7.5 degrees off neutral, enough to tip a sole through the floor.
+        coarse = best_angle
+        for step in range(-12, 13):
+            angle = coarse + step * math.radians(1.25)
+            score = score_of(angle)
             if score < best_score:
                 best_angle, best_score = angle, score
         constraint.pole_angle = best_angle
@@ -182,7 +199,7 @@ def _set_targets(arm: bpy.types.Object, controls: dict[str, dict[str, Any]], sam
     paths = {c["branch_id"]: c for c in sample["contacts"]}
     for branch_id, control in controls.items():
         path = paths.get(branch_id)
-        driven = path and bool(path.get("drive_ik", False))
+        driven = path and (bool(path.get("drive_ik", False)) or path.get("ik") in ("pin", "drive"))
         control["constraint"].influence = 1.0 if enabled and driven else 0.0
         if path:
             delta = Vector(to_blender((0.0, float(path["height_m"]), float(path["forward_m"]))))
@@ -410,8 +427,9 @@ def _clip_result(clip: dict[str, Any], lift: float) -> dict[str, Any]:
 def _bake_clips(arm: bpy.types.Object, skeleton: dict[str, Any], gait: dict[str, Any],
                 binding_profiles: list[dict[str, Any]] | None = None) -> list[dict[str, Any]]:
     arm.animation_data_create(); plan = planner.build_motion(skeleton, gait)
-    lift = _legacy_ground_lift(arm, skeleton, plan["clips"][0]["samples"][0])
-    _apply_sample(arm, plan["clips"][0]["samples"][0], lift); bpy.context.view_layer.update()
+    neutral_sample = _neutral_sample(skeleton)
+    lift = _legacy_ground_lift(arm, skeleton, neutral_sample)
+    _apply_sample(arm, neutral_sample, lift); bpy.context.view_layer.update()
     controls = _make_controls(arm, skeleton, binding_profiles or [])
     action_control = _make_action_control(arm, skeleton, plan, binding_profiles or [])
     _fit_motion_to_reach(plan, controls)
@@ -518,8 +536,14 @@ def add_bind_proxy(arm: bpy.types.Object) -> bpy.types.Object:
     return obj
 
 
+def _neutral_sample(skeleton: dict[str, Any]) -> dict[str, Any]:
+    """The true neutral pose as a sample. Clip frame 0 is already displaced by gestures, so it can't stand in."""
+    return {"rotations_xyzw": {k: list(q) for k, q in planner.neutral_quaternions(skeleton).items()},
+            "root_position_m": list(skeleton.get("neutral_pose", {}).get("root_offset_m", (0.0, 0.0, 0.0)))}
+
+
 def _neutral_contact_bases(arm: bpy.types.Object, skeleton: dict[str, Any], plan: dict[str, Any], lift: float) -> dict[tuple[str, int], Vector]:
-    clear_pose(arm); _apply_sample(arm, plan["clips"][0]["samples"][0], lift); bpy.context.view_layer.update()
+    clear_pose(arm); _apply_sample(arm, _neutral_sample(skeleton), lift); bpy.context.view_layer.update()
     return {(br["branch_id"], c["contact_index"]): _contact_position(arm.pose.bones[c["bone_name"]], c)
             for br in skeleton["branches"] if planner.branch_role(br) == "locomotor"
             for c in _contact_records(br, skeleton)}

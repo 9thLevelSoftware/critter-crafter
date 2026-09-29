@@ -9,6 +9,12 @@ from .traits import traits_of
 CLIPS = ("idle", "walk", "run", "stun", "telegraph", "attack", "hit", "death")
 LOOPS = frozenset(("idle", "walk", "run", "stun"))
 
+# Least motion (degrees: the largest any bone strays from the clip's first frame) each clip must show. Nothing else
+# fails a clip that doesn't move: a static idle passes every other check. walk/run are overlays on the runtime gait.
+MIN_MOTION_DEG = {"idle": 1.0, "walk": .5, "run": .5, "stun": 1.5, "hit": 4.0, "death": 3.0}
+# A legged body that isn't dragged along the floor must sink at least this share of its hip height when it dies.
+MIN_DEATH_DROP = .15
+
 
 def _vector(value, size=3) -> bool:
     return (isinstance(value, (list, tuple)) and len(value) == size
@@ -46,6 +52,21 @@ def _rotation_delta(a, b) -> list[float]:
 def _bones(sample: dict) -> dict:
     value = sample.get("bones", [])
     return value if isinstance(value, dict) else {b["name"]: b for b in value}
+
+
+def _check_motion_amount(skeleton: dict, motion: dict, fail) -> None:
+    from .motion_metrics import motion_ranges
+    if not all("bone_names" in b for b in skeleton.get("branches", [])):
+        return
+    ranges = motion_ranges(skeleton, motion)
+    for clip, floor in MIN_MOTION_DEG.items():
+        if clip in ranges and ranges[clip]["max_deg"] < floor:
+            fail("CC_MOTION_STILL", f"largest bone excursion {ranges[clip]['max_deg']:.2f} deg < {floor} deg", clip)
+    hip = float(skeleton.get("locomotion", {}).get("hip_height_m", 0.0))
+    if ("death" in ranges and hip > 0 and skeleton.get("locomotion", {}).get("mode") == "legs"
+            and not traits_of(skeleton)["body_on_ground"]
+            and ranges["death"]["root_vertical_m"] < MIN_DEATH_DROP * hip):
+        fail("CC_DEATH_DROP", f"root sinks {ranges['death']['root_vertical_m']:.3f} m < {MIN_DEATH_DROP:.0%} of hip height", "death")
 
 
 def evaluate_motion(skeleton: dict, motion: dict, penetration_m: float = .005,
@@ -221,6 +242,7 @@ def evaluate_motion(skeleton: dict, motion: dict, penetration_m: float = .005,
             qa, qb = end[name].get("rotation_xyzw"), start[name].get("rotation_xyzw")
             if _vector(qa, 4) and _vector(qb, 4) and _distance(_rotation_delta(qa,qb), [0,0,0]) > .1:
                 fail("CC_ATTACK_TRANSITION", f"{name}: telegraph/attack orientation differs")
+    _check_motion_amount(skeleton, motion, fail)
     return {"skeleton_id": skeleton["skeleton_id"], "passed": not diagnostics,
             "qa_version": verification_version(), "sample_source": motion.get("sample_source"),
             "clips_checked": len(clips), "samples_checked": sum(len(c.get("samples", [])) for c in clips.values()),

@@ -13,9 +13,12 @@ Quaternions are stored [x, y, z, w].
 from __future__ import annotations
 
 import math
+import zlib
 from typing import Any, Iterable, Sequence
 
 from .actions import action_global_phase, attack_target_at, resolve_attack
+from .. import mathutil as mu
+from .kinematics import contact_world, neutral_pose_world, pose_world
 from .traits import traits_of
 
 FPS = 30
@@ -197,34 +200,58 @@ def _clip_frames(name: str, cadence_hz: float, complex_gait: bool = False) -> in
     # estimate, while run remains the shorter/faster cycle.
     locomotion = max(60 if complex_gait else 48, round(FPS / cadence_hz))
     return {
-        "idle": 60, "walk": locomotion,
+        "idle": 120, "walk": locomotion,
         "run": max(40 if complex_gait else 36, round(locomotion / 1.55)),
-        "stun": 30, "telegraph": 18, "attack": 18, "hit": 10, "death": 36,
+        "stun": 60, "telegraph": 18, "attack": 18, "hit": 18, "death": 54,
     }[name]
 
 
-def _root_vertical(name: str, u: float, bob: float, drop: float) -> float:
+def _root_vertical(name: str, u: float, bob: float, drop: float, hip_height: float = 0.0) -> float:
+    """Root offset from the neutral height (never above it: raising the hips costs a planted foot its reach)."""
     if name == "idle":
-        return 0.0
+        return -.004 * hip_height * (.5 - .5 * math.cos(2.0 * TAU * u))     # breath: two dips per loop
     if name in ("walk", "run"):
         scale = .8 if name == "walk" else 1.1
         return scale * bob * (.5 - .5 * math.cos(TAU * u))
+    if name == "stun":
+        return -.01 * hip_height * (.5 - .5 * math.cos(TAU * u))
     if name == "hit":
-        return 0.0
+        return -.012 * hip_height * math.sin(math.pi * u) ** 2
     if name == "death":
-        # Collapse is articulated while the body remains supported; sinking
-        # the armature root through the floor would create invalid geometry.
-        return 0.0
+        # Collapse over the planted feet: stagger, buckle, one small bounce, settle.
+        return -_death_drop(u) * hip_height
     return 0.0
 
 
+DEATH_DROP = .2       # of the hip height: the body sinks this far while the feet hold
+
+
+def _death_drop(u: float) -> float:
+    if u < .2:
+        return .02 * math.sin(math.pi * u / .2) ** 2                       # stagger
+    if u < .78:
+        return DEATH_DROP * smoothstep((u - .2) / .58)
+    if u < .88:
+        return DEATH_DROP - .03 * math.sin(math.pi * (u - .78) / .10) ** 2   # bounce
+    return DEATH_DROP
+
+
+def _spring(t: float) -> float:
+    """Damped recoil, peak about 1, exactly zero at t=1."""
+    t = _clamp(t, 0.0, 1.0)
+    return 2.0 * math.exp(-3.5 * t) * math.sin(TAU * 1.25 * t) * (1.0 - smoothstep((t - .8) / .2))
+
+
 def _gesture(name: str, role: str, k: int, u: float, phase: float,
-             amplitude: float, chain_count: int) -> tuple[float, float]:
+             amplitude: float, chain_count: int, *, depth: int = 0, tag: float = 0.0,
+             death_style: str = "collapse") -> tuple[float, float]:
     if role == "stabilizer":
         return 0.0, 0.0
     if role == "locomotor":
         return 0.0, 0.0
     th = TAU * u
+    ph = phase + tag
+    frac = k / max(1, chain_count - 1)
     amp = amplitude * (2.5 / chain_count if chain_count > 4 else 1.0)
     if name in ("walk", "run"):
         amp *= 1.0 if name == "walk" else .72
@@ -236,6 +263,9 @@ def _gesture(name: str, role: str, k: int, u: float, phase: float,
             return 0.0, .24*amp*math.sin(th + phase - k*.62)
         if role == "sway":
             return .42*amp*math.sin(th - k*.42), .3*amp*math.cos(th-k*.42)
+        if role == "flail":
+            return (.5*amp*(math.sin(2*th + ph - k*.5) + .5*math.sin(3*th + ph*1.7 - k*.3)),
+                    .35*amp*math.sin(2*th + ph - k*.5 + 1.1))
         if role == "manipulator":
             return (.3 if k == 0 else .1)*amp*math.sin(th + phase - k*.25), 0.0
         if role == "core":
@@ -244,28 +274,58 @@ def _gesture(name: str, role: str, k: int, u: float, phase: float,
             return .08*amp*math.sin(2*th), 0.0
         return 0.0, 0.0  # locomotors are driven by contact IK
     if name == "idle":
+        # Layers on whole cycles per loop (2, 3, 5, 7, 4) so the loop seam stays exact. The angles are small and
+        # fixed: pinned feet must stay inside their reach (build_motion also budgets them per skeleton).
         if role == "sliding":
-            return 0.0, .035*amp*math.sin(th + phase - k*.35)
-        return ((.10*amp*math.sin(th + phase + k*.3), .05*amp*math.cos(th))
-                if role != "locomotor" else (0.0, 0.0))
+            return 0.0, .2*amp*math.sin(th + phase - k*.35)
+        if role == "core":
+            # A torso lying on the ground can't pitch without sinking one end into it.
+            g = .3 if death_style == "sprawl" else 1.0
+            return (g*math.radians(.8 + .7*frac)*math.sin(2*th + ph + .35*k),
+                    g*math.radians(.5)*math.sin(3*th + ph*1.3))
+        if role == "head":
+            return (math.radians(2.2)*math.sin(5*th + ph) - math.radians(.5)*math.sin(2*th + ph),
+                    math.radians(4.0)*math.sin(7*th + ph*.7))
+        if role in ("sway", "flail"):
+            g = 1.0 + .6*k
+            return (math.radians(2.6)*g*math.sin(4*th + ph - .55*k),
+                    math.radians(1.8)*g*math.sin(4*th + ph - .55*k + 1.3))
+        if role == "manipulator":
+            return (math.radians(1.6)*math.sin(3*th + ph - .3*k),
+                    math.radians(1.0)*math.sin(5*th + ph*1.1 + k))
+        return math.radians(1.2)*math.sin(3*th + ph + .3*k), math.radians(.7)*math.sin(5*th + ph)
     if name == "stun":
         if role == "sliding":
             return 0.0, math.radians(1.0)*math.sin(2*th+2.3*k)
-        return math.radians(1.2)*math.sin(2*th+1.7*k+phase), math.radians(1.0)*math.sin(2*th+2.3*k)
+        if role == "core":
+            g = .3 if death_style == "sprawl" else 1.0
+            return (g*math.radians(2.2)*math.sin(2*th + .9*k + ph), g*math.radians(1.0)*math.sin(3*th + ph))
+        if role == "head":
+            return (math.radians(9.0)*(.5 - .5*math.cos(th)) + math.radians(2.5)*math.sin(3*th + ph),
+                    math.radians(6.0)*math.sin(2*th + ph))
+        if role in ("sway", "flail"):
+            g = 1.0 + .5*k
+            return (math.radians(5.0)*g*math.sin(2*th - .5*k + ph),
+                    math.radians(3.5)*g*math.sin(2*th - .5*k + ph + 1.0))
+        if role == "manipulator":
+            return math.radians(3.5)*math.sin(2*th + k + ph), math.radians(2.0)*math.sin(3*th + ph)
+        return math.radians(2.0)*math.sin(2*th + ph + .3*k), math.radians(1.0)*math.sin(3*th + ph)
     if name == "telegraph":
         s = smoothstep(u / .8)
         return ({"core": (-.14*s, 0), "manipulator": (-.75*s if k == 0 else -.2*s, 0),
                  "head": (-.3*s, 0), "sway": (.3*s*math.sin(2*th-k*.3), 0),
+                 "flail": (.3*s*math.sin(2*th-k*.3), 0),
                  "sliding": (0, .18*s*math.sin(k*.55))}.get(role, (0, 0)))
     if name == "attack":
         # Begin exactly at the held telegraph pose with zero endpoint velocity,
         # strike, then recover to neutral.  This makes telegraph -> attack C1.
         wind = {"core": -.14, "manipulator": (-.75 if k == 0 else -.2),
-                "head": -.3, "sway": .3*math.sin(4*math.pi-k*.3)}.get(role, 0.0)
+                "head": -.3, "sway": .3*math.sin(4*math.pi-k*.3),
+                "flail": .3*math.sin(4*math.pi-k*.3)}.get(role, 0.0)
         if role == "sliding":
             wind = .18 * math.sin(k*.55)
         strike = {"core": .18, "manipulator": (.95 if k == 0 else .07),
-                  "head": .38, "sway": .45*math.cos(k*.4)}.get(role, 0.0)
+                  "head": .38, "sway": .45*math.cos(k*.4), "flail": .45*math.cos(k*.4)}.get(role, 0.0)
         if role == "sliding":
             strike_rz = .16 * math.sin(k*.55)
             if u <= .42:
@@ -278,13 +338,24 @@ def _gesture(name: str, role: str, k: int, u: float, phase: float,
         a = smoothstep((u - .42) / .58)
         return strike * (1.0 - a), 0.0
     if name == "hit":
-        p = math.sin(math.pi*u)
-        return ({"core": (-.20*p, 0), "head": (-.32*p, .16*p),
-                 "manipulator": (-.24*p, 0), "sway": (-.2*p, 0)}.get(role, (0, 0)))
+        # Recoil along -Z that travels: each bone, and each branch further from the core, starts a little later.
+        delay = .06 * (depth + k)
+        sp = _spring((u - delay) / max(.2, 1.0 - delay))
+        per = 2.0 / max(1, chain_count) ** .5
+        if death_style == "sprawl":
+            per *= .25              # a torso lying on the ground can't pitch without sinking one end into it
+        return ({"core": (-.11*sp*per, .02*sp), "head": (-.32*sp, .16*sp),
+                 "manipulator": (-.24*sp, 0), "sway": (-.28*sp, .08*sp), "flail": (-.28*sp, .08*sp),
+                 "sliding": (0, .08*sp), "none": (-.08*sp, 0)}.get(role, (0, 0)))
     if name == "death":
-        s = smoothstep(u)
-        return ({"locomotor": (.7*s if k == 0 else -.35*s, 0), "manipulator": ((.5 if k == 0 else .07)*s, 0),
-                 "sway": (.55*s, .15*s), "head": (.45*s, .2*s), "core": (.08*s, 0)}.get(role, (0, 0)))
+        s = smoothstep((u - .15) / .85)
+        if role == "core":
+            slump = .10 if death_style == "kneel_slump" else .06
+            return (slump*s*(1.0 + .3*frac), 0.0)
+        if role == "sliding":
+            return 0.0, .07*s                                       # the body curls where it lies
+        return ({"manipulator": ((.5 if k == 0 else .07)*s, .05*s), "head": (.45*s, .2*s),
+                 "sway": (.55*s, .15*s), "flail": (.55*s, .15*s), "none": (.15*s, 0)}.get(role, (0, 0)))
     return 0.0, 0.0
 
 
@@ -309,6 +380,71 @@ def runtime_legs(skeleton: dict[str, Any]) -> bool:
     return skeleton.get("locomotion", {}).get("mode") in ("legs", "slide")
 
 
+def is_pinned_locomotor(branch: dict[str, Any], skeleton: dict[str, Any]) -> bool:
+    """A weight-bearing foot or hand the bake can hold at its neutral world point with IK.
+
+    Sliding and body contacts, and chains with several contacts, can't be pinned; they keep the
+    authored axial pose instead (see ``_frozen_bones``). Mirrors ``ops_skeleton._make_controls``.
+    """
+    if branch_role(branch) != "locomotor":
+        return False
+    support = set(skeleton.get("anatomy", {}).get("support_branches", []))
+    if support and branch["branch_id"] not in support:
+        return False
+    if "anatomy" in skeleton and not branch.get("contacts"):
+        return False
+    contacts = branch.get("contacts") or []
+    if len(contacts) > 1:
+        return False
+    return _contact_kind(branch, skeleton) not in ("body", "sliding")
+
+
+def _ancestor_bones(skeleton: dict[str, Any], branch: dict[str, Any]) -> set[str]:
+    """Bones of every ancestor branch from the root down to the bone *branch* is attached to."""
+    by_id = {b["branch_id"]: b for b in skeleton["branches"]}
+    bones: set[str] = set()
+    child = branch
+    while child.get("parent_branch"):
+        parent = by_id[child["parent_branch"]]
+        names = parent["bone_names"]
+        attach = child.get("attach_bone")
+        end = names.index(attach) + 1 if attach in names else len(names)
+        bones.update(names[:end])
+        child = parent
+    return bones
+
+
+def _frozen_bones(skeleton: dict[str, Any]) -> set[str]:
+    """Bones that must not move because an unpinnable contact rides on them.
+
+    A pinned foot lets the torso move (the IK holds the foot), but a sliding or body contact is held by
+    the authored pose, so its ancestors are frozen from the root down to the bone it is attached to.
+    """
+    frozen: set[str] = set()
+    for branch in skeleton["branches"]:
+        if (branch_role(branch) == "locomotor" and branch.get("contacts")
+                and not is_pinned_locomotor(branch, skeleton)):
+            frozen |= _ancestor_bones(skeleton, branch)
+    return frozen
+
+
+def _death_style(skeleton: dict[str, Any], traits: dict[str, Any]) -> str:
+    """How the body dies: sprawl (dragged), coil (slides), kneel_slump (upright torso) or collapse."""
+    if traits["body_on_ground"]:
+        return "sprawl"
+    if skeleton.get("locomotion", {}).get("mode") == "slide":
+        return "coil"
+    core = next((b for b in skeleton["branches"] if branch_role(b) == "core"), None)
+    if core:
+        first = next(b for b in skeleton["bones"] if b["name"] == core["bone_names"][0])
+        if first["tail_m"][1] - first["head_m"][1] > .7 * mu.length(mu.sub(first["tail_m"], first["head_m"])):
+            return "kneel_slump"
+    return "collapse"
+
+
+REACH_BUDGET = .2    # a pinned leg's hip may move toward or away from its foot by this share of the leg's spare reach
+
+
 def build_motion(skeleton: dict[str, Any], gait: dict[str, Any]) -> dict[str, Any]:
     """Create all eight clip plans in a JSON-serializable form.
 
@@ -327,22 +463,47 @@ def build_motion(skeleton: dict[str, Any], gait: dict[str, Any]) -> dict[str, An
     bob = float(gait.get("bob_m", .02))
     neutral = neutral_quaternions(skeleton)
     by_id = {branch["branch_id"]: branch for branch in skeleton["branches"]}
-    stabilized: set[str] = set()
+    frozen = _frozen_bones(skeleton)
+    pinned_branches = {b["branch_id"]: is_pinned_locomotor(b, skeleton) for b in skeleton["branches"]}
+    by_id = {b["branch_id"]: b for b in skeleton["branches"]}
+    depths: dict[str, int] = {}
+    for b in skeleton["branches"]:
+        depth, cursor = 0, b
+        while cursor.get("parent_branch"):
+            depth += 1
+            cursor = by_id[cursor["parent_branch"]]
+        depths[b["branch_id"]] = depth
+    # A stable per-branch phase (not the authored one, which is 0 for many branches) so layers don't march in step.
+    tags = {b["branch_id"]: (zlib.crc32(b["branch_id"].encode()) % 3600) / 3600.0 * TAU for b in skeleton["branches"]}
     grounded_body = False
     locomotor_count = sum(branch_role(branch) == "locomotor" and bool(branch.get("contacts"))
                            for branch in skeleton["branches"])
     traits = traits_of(skeleton)
+    death_style = _death_style(skeleton, traits)
     stable_minimum = int(traits["min_support"])
     for branch in skeleton["branches"]:
-        if branch_role(branch) == "locomotor":
+        if branch_role(branch) == "locomotor" and (branch.get("contacts") or "anatomy" not in skeleton):
             if _contact_kind(branch, skeleton) in ("body", "sliding"):
                 grounded_body = True
-            parent_id = branch.get("parent_branch")
-            while parent_id:
-                stabilized.add(parent_id)
-                parent_id = by_id[parent_id].get("parent_branch")
     root_offset = tuple(skeleton.get("neutral_pose", {}).get("root_offset_m", (0.0, 0.0, 0.0)))
     core_height = max((float(b["head_m"][1]) for b in skeleton["bones"]), default=1.0)
+    # The pinned legs: where each foot is held, how far its hip is, and how much reach it has to spare.
+    neutral_world = neutral_pose_world(skeleton)
+    pins = []
+    driver_bones: set[str] = set()
+    for br in skeleton["branches"]:
+        if not pinned_branches[br["branch_id"]] or not br.get("contacts"):
+            continue
+        contact = br["contacts"][0]
+        target = contact_world(neutral_world, br, contact)
+        hip = neutral_world[br["bone_names"][0]]["head"]
+        reach = sum(neutral_world[n]["length"] for n in br["bone_names"][:int(contact["bone_index"]) + 1])
+        d0 = mu.length(mu.sub(hip, target))
+        pins.append({"branch_id": br["branch_id"], "hip_bone": br["bone_names"][0], "target": target, "d0": d0,
+                     "allowed": REACH_BUDGET * max(0.0, .95 * reach - d0), "hip_y": hip[1] - target[1]})
+        driver_bones |= _ancestor_bones(skeleton, br)
+    hip_height = (sum(pin["hip_y"] for pin in pins) / len(pins)) if pins else .5 * core_height
+    effector_id = attack_plan["effector"]["branch_id"] if attack_plan else None
     clips = []
     for name in CLIP_ORDER:
         phase_driven = overlay and name in ("walk", "run")
@@ -350,28 +511,69 @@ def build_motion(skeleton: dict[str, Any], gait: dict[str, Any]) -> dict[str, An
                   else _clip_frames(name, cadence, bool(traits["compact_clip"])))
         cycle_hz = (FPS / frames) if name in ("walk", "run") else 0.0
         speed = (float(profile["stride"]) * cycle_hz if name in ("walk", "run") and not phase_driven else 0.0)
+        # The semantic attack solver owns the effector chain, and its target is fixed relative to the body:
+        # the chain's ancestors hold still while it works.
+        frozen_clip = set(frozen)
+        released = {effector_id} if effector_id and name in ("telegraph", "attack") else set()
+        if released:
+            frozen_clip |= _ancestor_bones(skeleton, by_id[effector_id])
+        clip_pins = [pin for pin in pins if pin["branch_id"] not in released]
+
+        def pose_for(u: float, scale: float) -> tuple[dict[str, Any], float]:
+            rotations = dict(neutral)
+            for br in skeleton["branches"]:
+                role = branch_role(br)
+                kind = _contact_kind(br, skeleton)
+                motion_role = "sliding" if kind in ("body", "sliding") else role
+                if role == "locomotor" and not br.get("contacts") and "anatomy" in skeleton:
+                    motion_role = "core"          # a body chain that carries legs but is not itself a foot
+                if br["branch_id"] in released:
+                    # Layering a second procedural gesture changes the declared neutral anchor and can push
+                    # the IK solution outside joint limits.
+                    motion_role = "stabilizer"
+                for k, bone_name in enumerate(br["bone_names"]):
+                    if bone_name in frozen_clip:
+                        continue
+                    rx, rz = _gesture(name, motion_role, k, u, branch_phase(br), amplitude, len(br["bone_names"]),
+                                      depth=depths[br["branch_id"]], tag=tags[br["branch_id"]], death_style=death_style)
+                    if bone_name in driver_bones:
+                        rx, rz = rx * scale, rz * scale
+                    if rx or rz:
+                        rotations[bone_name] = quat_mul(neutral[bone_name], quat_xz(rx, rz))
+            dy = 0.0
+            if not (grounded_body or phase_driven):
+                dy = _root_vertical(name, u, bob, .55 * max(.1, core_height), hip_height)
+                if name != "death":
+                    dy *= scale
+            return rotations, dy
+
+        def worst_stretch(scale: float) -> float:
+            worst = 0.0
+            for frame in range(frames + 1):
+                rotations, dy = pose_for(frame / frames, scale)
+                pose = pose_world(skeleton, rotations, (root_offset[0], root_offset[1] + dy, root_offset[2]))
+                for pin in clip_pins:
+                    stretch = abs(mu.length(mu.sub(pose[pin["hip_bone"]]["head"], pin["target"])) - pin["d0"])
+                    if stretch > 1e-5:
+                        worst = max(worst, stretch / pin["allowed"] if pin["allowed"] > 1e-5 else math.inf)
+            return worst
+
+        scale = 1.0
+        if clip_pins and not (grounded_body and not driver_bones):
+            for _ in range(6):
+                worst = worst_stretch(scale)
+                if worst <= 1.0:
+                    break
+                scale *= .5 if math.isinf(worst) else max(0.0, .92 / worst)
         samples = []
         for frame in range(frames + 1):
             u = frame / frames
-            rotations = dict(neutral)
+            rotations, dy = pose_for(u, scale)
             contacts = []
             for br in skeleton["branches"]:
                 role = branch_role(br)
                 phase_rad = branch_phase(br)
                 kind = _contact_kind(br, skeleton)
-                motion_role = "sliding" if kind in ("body", "sliding") else role
-                if (attack_plan and name in ("telegraph", "attack")
-                        and br["branch_id"] == attack_plan["effector"]["branch_id"]):
-                    # The semantic action solver owns this chain.  Layering a
-                    # second procedural gesture changes its declared neutral
-                    # anchor and can push the IK solution outside joint limits.
-                    motion_role = "stabilizer"
-                if br["branch_id"] in stabilized:
-                    motion_role = "stabilizer"
-                for k, bone_name in enumerate(br["bone_names"]):
-                    rx, rz = _gesture(name, motion_role, k, u, phase_rad, amplitude, len(br["bone_names"]))
-                    if rx or rz:
-                        rotations[bone_name] = quat_mul(neutral[bone_name], quat_xz(rx, rz))
                 if role == "locomotor" and (br.get("contacts") or "anatomy" not in skeleton):
                     support = support_fraction(br, float(profile["support"]))
                     authored_stride = float(br.get("stride_m", br.get("gait", {}).get("stride_m", profile["stride"])))
@@ -399,10 +601,17 @@ def build_motion(skeleton: dict[str, Any], gait: dict[str, Any]) -> dict[str, An
                         planted = name != "death" or u < .25
                         path = {"forward_m": 0.0, "height_m": 0.0, "forward_dphase": 0.0,
                                 "height_dphase": 0.0, "support": planted}
+                    driven = name in ("walk", "run") and not phase_driven
+                    # pin: hold the foot at its neutral world point so the body can move over it. Death keeps the
+                    # feet held after the support is released, so the legs buckle instead of sinking through the floor.
+                    ik = ("drive" if driven else
+                          "pin" if (pinned_branches.get(br["branch_id"]) and (path["support"] or name == "death")
+                                    and br["branch_id"] not in released)
+                          else "off")
                     contacts.append({
                         "branch_id": br["branch_id"], "kind": kind,
                         "bone_name": br["bone_names"][-1], "phase": phase,
-                        "drive_ik": name in ("walk", "run") and not phase_driven,
+                        "drive_ik": driven, "ik": ik,
                         "support_fraction": support, "stride_m": stride, "clearance_m": clearance, **path,
                     })
                 elif br.get("contacts"):
@@ -412,13 +621,11 @@ def build_motion(skeleton: dict[str, Any], gait: dict[str, Any]) -> dict[str, An
                     contacts.append({"branch_id":br["branch_id"], "kind":kind,
                                      "bone_name":br["bone_names"][-1], "phase":u,
                                      "support_fraction":0.0, "stride_m":0.0, "clearance_m":0.0,
-                                     "drive_ik":False,
+                                     "drive_ik":False, "ik":"off",
                                      "forward_m":0.0, "height_m":0.0, "forward_dphase":0.0,
                                      "height_dphase":0.0, "support":False})
             samples.append({
-                "frame": frame, "phase": u, "root_position_m": [root_offset[0],
-                    root_offset[1] + (0.0 if grounded_body or phase_driven else _root_vertical(
-                        name, u, bob, .55*max(.1, core_height))), root_offset[2]],
+                "frame": frame, "phase": u, "root_position_m": [root_offset[0], root_offset[1] + dy, root_offset[2]],
                 "simulated_forward_m": speed * (frame / FPS),
                 "rotations_xyzw": {k: [round(v, 8) for v in q] for k, q in rotations.items()},
                 "contacts": contacts,
@@ -455,6 +662,7 @@ def build_motion(skeleton: dict[str, Any], gait: dict[str, Any]) -> dict[str, An
                     "support":br["branch_id"] in set(skeleton.get("anatomy", {}).get("support_branches", []))})
         clips.append({
             "name": name, "loop": name in LOOP_CLIPS, "phase_driven": phase_driven, "frames": frames, "fps": FPS,
+            "driver_scale": round(scale, 4),
             "duration_s": frames / FPS, "cadence_hz": cycle_hz if name in ("walk", "run") else 0.0,
             "speed_mps": speed, "stride_m": float(profile["stride"]) * (1.25 if name == "run" else 1.0),
             "playback": {"wrap": "loop" if name in LOOP_CLIPS else "once", "phase_range": [0.0, 1.0],

@@ -41,7 +41,7 @@ critter-crafter is a standalone tool that builds procedural monsters from three 
 ## Everyday commands
 
 ```powershell
-uv run pytest                                   # 324 tests, ~4 min with Blender (-m "not blender": ~15 s)
+uv run pytest                                   # 340 tests, ~6 min with Blender (-m "not blender": ~20 s)
 uv run critter skeleton vary --force            # regenerate the 42 draft skeletons from archetypes.py
 uv run critter schema validate
 uv run critter recipe golden                    # writes tests/golden_v3/{catalog,recipes,locomotion}.json
@@ -70,6 +70,8 @@ Start-Process $U -Wait -PassThru -ArgumentList '-batchmode','-projectPath','unit
   '-critterLibrary',"$root/library/biomass_core-v0.2.0",'-critterSkeletons','quadruped_stocky_plantigrade_balanced_v3',
   '-critterOut',"$root/work/review/locomotion",'-critterSpeeds','walk,run,2.5','-logFile',"$root/work/unity_capture.log"
 uv run python tools/frames_to_gif.py work/review/locomotion
+# Reaction capture: stands the creature still and plays idle, hit, stun, then death (9 s).
+# Same command with '-critterCourse','reactions' and '-critterSpeeds','walk'.
 ```
 
 The normal change loop:
@@ -91,7 +93,7 @@ The golden, Unity-test and QA steps fail loudly if skipped.
 | Neutral-pose FK | `skeletons/kinematics.py` |
 | Locomotion block (catalog) | `locomotion/block.py`: strokes, duty factors, speeds, drag and slide blocks |
 | Reference planner | `locomotion/stepper.py`. `locomotion/qa.py` holds the static QA and the golden rows. |
-| Baked clips | `skeletons/motion.py`: walk and run are `phase_driven` overlays for legs and slide modes. Blender baking is in `blender/ops_skeleton.py`. |
+| Baked clips | `skeletons/motion.py`: walk and run are `phase_driven` overlays for legs and slide modes. Blender baking is in `blender/ops_skeleton.py`. Traits (`skeletons/traits.py`) replace the old family checks; `skeletons/motion_metrics.py` measures how much each clip moves. |
 | Unity runtime | `Runtime/Locomotion/`: `CreatureGait`, `StepPlanner`, `LocomotionRigBuilder` (the assembler hook) |
 | Unity review | `Runtime/Review/` (`ReviewCourse`, `LocomotionRecorder`), `Editor/LocomotionCapture.cs` |
 | Animator | `Editor/AnimatorBuilder.cs`: an Idle state plus a Locomotion blend on `Gait`, with Motion Time set to `GaitPhase` |
@@ -117,6 +119,26 @@ The golden, Unity-test and QA steps fail loudly if skipped.
 7. **`AnimatorStateInfo.normalizedTime` keeps counting time even under Motion Time.** The pose follows `GaitPhase`, so test the pose, not the reported time.
 8. **The body bob only dips.** Raising the hips costs a trailing foot its reach.
 9. **Grounded (dragger) bodies heave about the rear of the torso** (`body_pivot_m`). Pivoting at the creature origin sank the dragged tail through the floor.
+
+## Hard-won lessons (clips)
+
+1. **Pin the feet, don't freeze the torso.** Legs used to be plain FK in every v3 clip, so any torso motion dragged
+   the feet, and the planner froze every ancestor of a locomotor. Now each planted single-contact foot or hand is
+   IK-pinned at its neutral world point in every clip (`ik: "pin"` on the contact sample), and only bones that carry
+   a sliding or body contact are frozen (`motion._frozen_bones`, up to the attach bone).
+2. **Take pin targets from the true neutral pose, never clip frame 0.** Frame 0 is already displaced by gestures.
+   Targets captured from it put feet 2-4 mm off the ground and gave legs on later spine bones a static error.
+3. **Budget the body motion by reach.** `build_motion` scales the gestures on a leg's ancestor bones (and the root
+   dip) until no pinned hip moves more than `REACH_BUDGET` (20%) of its spare reach. Joint limits aren't in that
+   budget, so QA still catches twist and swing violations.
+4. **Death collapses over pinned feet**: the root sinks `DEATH_DROP` of the hip height while the feet hold, so the
+   legs buckle and nothing sinks through the floor. It reads as a crouch, not yet a full fall. Dragged bodies don't
+   sink; they curl and droop.
+5. **Refine the IK pole angle.** A 15 degree calibration grid left knees up to 7.5 degrees off neutral, enough to tip
+   a sole 6 mm through the floor.
+6. **Loop clips need whole-cycle layers**: idle uses 2, 3, 4, 5 and 7 cycles per 4 s loop, so the seam stays exact.
+   A 30-frame loop with three cycles broke the seam extrapolation; stun is 60 frames for that reason.
+7. **QA enforces a floor of motion per clip** (`qa.MIN_MOTION_DEG`, and `MIN_DEATH_DROP` for legged bodies).
 
 ## Hard-won lessons (real parts)
 

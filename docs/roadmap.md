@@ -2,7 +2,7 @@
 
 The milestone list below was restored from the original plan (`git show 6379277:.claude/plans/floating-wiggling-sprout.md`, "Milestones & acceptance"). That plan file was later overwritten by the runtime-locomotion plan, so this page is now the one place that holds the milestones and their status. Live counts (skeletons, parts, tests) belong here too, so other docs can point at this page instead of repeating them.
 
-**Live counts (2026-09-28):** 14 archetypes × 3 presets = 42 draft skeletons, none approved; 4 real parts, all `draft`; pytest collects 315 tests; the Unity EditMode suite has 39 cases (38 passed, 1 skipped for missing env vars).
+**Live counts (2026-09-29):** 14 archetypes × 3 presets = 42 draft skeletons, none approved; 4 real parts, all `draft`; pytest collects 340 tests; the Unity EditMode suite has 41 cases (40 passed, 1 skipped for missing env vars).
 
 ## M0: Scaffold, schemas, placeholders, first Unity assembly — done
 

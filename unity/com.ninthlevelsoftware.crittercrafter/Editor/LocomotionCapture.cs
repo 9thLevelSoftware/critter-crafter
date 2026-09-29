@@ -108,9 +108,27 @@ namespace CritterCrafter.Editor
             if (gait == null) throw new System.InvalidOperationException(job.skeletonId + " has no runtime legs");
             float speed = SpeedFor(gait.Block, job.speedLabel);
             _recorder = _holder.AddComponent<LocomotionRecorder>();
-            _recorder.Begin(gait, job.course == "turns" ? ReviewCourse.Turns(speed) : ReviewCourse.Path(speed),
+            if (job.course == "reactions") ScriptReactions(_recorder, creature);
+            _recorder.Begin(gait, job.course == "turns" ? ReviewCourse.Turns(speed)
+                : job.course == "reactions" ? ReviewCourse.Still(ReactionSeconds) : ReviewCourse.Path(speed),
                 new LocomotionMetrics { skeleton_id = job.skeletonId, speed_label = job.speedLabel, speed_mps = speed },
                 job.outDir);
+        }
+
+        const float ReactionSeconds = 9f;
+
+        /// <summary>Idle, then a hit, a stun, and death, so the owner can judge the non-locomotion clips.</summary>
+        static void ScriptReactions(LocomotionRecorder recorder, AssembledCreature creature)
+        {
+            var motion = creature.GetComponent<CreatureMotion>() ?? creature.gameObject.AddComponent<CreatureMotion>();
+            bool hit = false, stun = false, calm = false, die = false;
+            recorder.Script = t =>
+            {
+                if (!hit && t >= 2.5f) { hit = true; motion.PlayHit(); }
+                if (!stun && t >= 4f) { stun = true; motion.SetState(CreatureState.Stunned); }
+                if (!calm && t >= 6f) { calm = true; motion.SetState(CreatureState.Idle); }
+                if (!die && t >= 7f) { die = true; motion.SetState(CreatureState.Dead); }
+            };
         }
 
         public static float SpeedFor(LocomotionData block, string label) =>

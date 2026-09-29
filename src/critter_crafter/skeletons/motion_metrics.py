@@ -1,17 +1,13 @@
 """How much each clip actually moves, from a built ``motion.json`` (degrees and metres, pure Python).
 
-Reported by ``skeleton qa`` as warnings only for now. Nothing else measures whether a clip moves at all:
-a fully static idle passes every other QA check.
+``skeleton qa`` reports these ranges and ``qa.MIN_MOTION_DEG`` enforces a floor per clip: nothing else
+notices a clip that doesn't move, since a fully static idle passes every other check.
 """
 
 from __future__ import annotations
 
 import math
 from typing import Any
-
-from .qa import CLIPS
-
-MOVING_DEG = 1.0     # a bone that never leaves 1 degree of its first-frame pose counts as still
 
 
 def _angle_deg(a: list[float], b: list[float]) -> float:
@@ -52,10 +48,3 @@ def motion_ranges(skeleton: dict[str, Any], motion: dict[str, Any]) -> dict[str,
             "root_vertical_m": round(max(heights) - min(heights), 5) if heights else 0.0,
         }
     return result
-
-
-def still_clips(ranges: dict[str, Any]) -> list[str]:
-    """Clips in which no bone moves as much as MOVING_DEG (the death check also looks at the root drop)."""
-    return [name for name in CLIPS if name in ranges
-            and ranges[name]["max_deg"] < MOVING_DEG
-            and not (name == "death" and ranges[name]["root_vertical_m"] > 0.02)]

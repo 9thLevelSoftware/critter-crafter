@@ -48,6 +48,8 @@ namespace CritterCrafter.Review
     {
         public LocomotionMetrics Metrics { get; private set; }
         public bool Done { get; private set; }
+        /// <summary>Called every frame with the elapsed course time (reaction captures trigger states from it).</summary>
+        public System.Action<float> Script;
 
         CreatureGait _gait;
         List<ReviewCourse.Waypoint> _path;
@@ -113,6 +115,7 @@ namespace CritterCrafter.Review
             if (_gait == null || Done) return;
             _time += Time.deltaTime;
             Place(_time);
+            Script?.Invoke(_time);
         }
 
         bool _started;
