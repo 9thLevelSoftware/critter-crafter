@@ -2853,6 +2853,56 @@
             "run_phase": 0.5,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              1.16975,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg_L",
+            "centroid_m": [
+              0.295615,
+              0.411144,
+              0.043828
+            ]
+          },
+          {
+            "branch_id": "leg_R",
+            "centroid_m": [
+              -0.295615,
+              0.411144,
+              0.043828
+            ]
+          },
+          {
+            "branch_id": "arm_L",
+            "centroid_m": [
+              0.300054,
+              1.087987,
+              0.08147
+            ]
+          },
+          {
+            "branch_id": "arm_R",
+            "centroid_m": [
+              -0.300054,
+              1.087987,
+              0.08147
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              1.615015,
+              0.132643
+            ]
+          }
         ]
       }
     },
@@ -4183,6 +4233,56 @@
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.98885,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg_L",
+            "centroid_m": [
+              0.30095,
+              0.335604,
+              0.038225
+            ]
+          },
+          {
+            "branch_id": "leg_R",
+            "centroid_m": [
+              -0.30095,
+              0.335604,
+              0.038225
+            ]
+          },
+          {
+            "branch_id": "arm_L",
+            "centroid_m": [
+              0.250041,
+              0.95161,
+              0.067223
+            ]
+          },
+          {
+            "branch_id": "arm_R",
+            "centroid_m": [
+              -0.250041,
+              0.95161,
+              0.067223
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              1.398391,
+              0.121999
+            ]
           }
         ]
       }
@@ -5515,6 +5615,56 @@
             "run_phase": 0.5,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              1.3406,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg_L",
+            "centroid_m": [
+              0.294178,
+              0.484986,
+              0.048985
+            ]
+          },
+          {
+            "branch_id": "leg_R",
+            "centroid_m": [
+              -0.294178,
+              0.484986,
+              0.048985
+            ]
+          },
+          {
+            "branch_id": "arm_L",
+            "centroid_m": [
+              0.32333,
+              1.209919,
+              0.093805
+            ]
+          },
+          {
+            "branch_id": "arm_R",
+            "centroid_m": [
+              -0.32333,
+              1.209919,
+              0.093805
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              1.81248,
+              0.140604
+            ]
+          }
         ]
       }
     },
@@ -6845,6 +6995,56 @@
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              1.23435,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg_L",
+            "centroid_m": [
+              0.279273,
+              0.427806,
+              0.112933
+            ]
+          },
+          {
+            "branch_id": "leg_R",
+            "centroid_m": [
+              -0.279273,
+              0.427806,
+              0.112933
+            ]
+          },
+          {
+            "branch_id": "arm_L",
+            "centroid_m": [
+              0.298032,
+              1.148036,
+              0.085967
+            ]
+          },
+          {
+            "branch_id": "arm_R",
+            "centroid_m": [
+              -0.298032,
+              1.148036,
+              0.085967
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              1.704166,
+              0.139933
+            ]
           }
         ]
       }
@@ -8177,6 +8377,56 @@
             "run_phase": 0.5,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              1.04345,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg_L",
+            "centroid_m": [
+              0.280949,
+              0.347403,
+              0.100975
+            ]
+          },
+          {
+            "branch_id": "leg_R",
+            "centroid_m": [
+              -0.280949,
+              0.347403,
+              0.100975
+            ]
+          },
+          {
+            "branch_id": "arm_L",
+            "centroid_m": [
+              0.263799,
+              1.004323,
+              0.070943
+            ]
+          },
+          {
+            "branch_id": "arm_R",
+            "centroid_m": [
+              -0.263799,
+              1.004323,
+              0.070943
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              1.475795,
+              0.128752
+            ]
+          }
         ]
       }
     },
@@ -9508,6 +9758,56 @@
             "run_phase": 0.5,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              1.41465,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg_L",
+            "centroid_m": [
+              0.280885,
+              0.50646,
+              0.122071
+            ]
+          },
+          {
+            "branch_id": "leg_R",
+            "centroid_m": [
+              -0.280885,
+              0.50646,
+              0.122071
+            ]
+          },
+          {
+            "branch_id": "arm_L",
+            "centroid_m": [
+              0.313668,
+              1.276724,
+              0.098989
+            ]
+          },
+          {
+            "branch_id": "arm_R",
+            "centroid_m": [
+              -0.313668,
+              1.276724,
+              0.098989
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              1.91263,
+              0.14834
+            ]
+          }
         ]
       }
     },
@@ -10561,6 +10861,40 @@
             "walk_phase": 0.666667,
             "run_phase": 0.666667,
             "support": true
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.3938,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg_0",
+            "centroid_m": [
+              0.63324,
+              0.362468,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg_1",
+            "centroid_m": [
+              -0.31657,
+              0.362468,
+              -0.491937
+            ]
+          },
+          {
+            "branch_id": "leg_2",
+            "centroid_m": [
+              -0.31657,
+              0.362468,
+              0.491937
+            ]
           }
         ]
       }
@@ -11616,6 +11950,40 @@
             "run_phase": 0.666667,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.3929,
+              5e-05
+            ]
+          },
+          {
+            "branch_id": "leg_0",
+            "centroid_m": [
+              0.645558,
+              0.363554,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg_1",
+            "centroid_m": [
+              -0.322779,
+              0.363554,
+              -0.441885
+            ]
+          },
+          {
+            "branch_id": "leg_2",
+            "centroid_m": [
+              -0.322779,
+              0.363554,
+              0.441885
+            ]
+          }
         ]
       }
     },
@@ -12669,6 +13037,40 @@
             "walk_phase": 0.666667,
             "run_phase": 0.666667,
             "support": true
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.39,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg_0",
+            "centroid_m": [
+              0.622232,
+              0.357453,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg_1",
+            "centroid_m": [
+              -0.311116,
+              0.357453,
+              -0.556346
+            ]
+          },
+          {
+            "branch_id": "leg_2",
+            "centroid_m": [
+              -0.311116,
+              0.357453,
+              0.556346
+            ]
           }
         ]
       }
@@ -15123,6 +15525,80 @@
             "run_phase": 0.0,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.3575,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg0_L",
+            "centroid_m": [
+              0.443559,
+              0.329107,
+              -0.451096
+            ]
+          },
+          {
+            "branch_id": "leg0_R",
+            "centroid_m": [
+              -0.443559,
+              0.329107,
+              -0.451096
+            ]
+          },
+          {
+            "branch_id": "leg1_L",
+            "centroid_m": [
+              0.483775,
+              0.329108,
+              -0.154075
+            ]
+          },
+          {
+            "branch_id": "leg1_R",
+            "centroid_m": [
+              -0.483775,
+              0.329108,
+              -0.154075
+            ]
+          },
+          {
+            "branch_id": "leg2_L",
+            "centroid_m": [
+              0.483775,
+              0.329108,
+              0.166975
+            ]
+          },
+          {
+            "branch_id": "leg2_R",
+            "centroid_m": [
+              -0.483775,
+              0.329108,
+              0.166975
+            ]
+          },
+          {
+            "branch_id": "leg3_L",
+            "centroid_m": [
+              0.443559,
+              0.329107,
+              0.463996
+            ]
+          },
+          {
+            "branch_id": "leg3_R",
+            "centroid_m": [
+              -0.443559,
+              0.329107,
+              0.463996
+            ]
+          }
         ]
       }
     },
@@ -17575,6 +18051,80 @@
             "walk_phase": 0.0,
             "run_phase": 0.0,
             "support": true
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.3568,
+              5e-05
+            ]
+          },
+          {
+            "branch_id": "leg0_L",
+            "centroid_m": [
+              0.447292,
+              0.330213,
+              -0.390675
+            ]
+          },
+          {
+            "branch_id": "leg0_R",
+            "centroid_m": [
+              -0.447292,
+              0.330213,
+              -0.390675
+            ]
+          },
+          {
+            "branch_id": "leg1_L",
+            "centroid_m": [
+              0.485229,
+              0.330213,
+              -0.134246
+            ]
+          },
+          {
+            "branch_id": "leg1_R",
+            "centroid_m": [
+              -0.485229,
+              0.330213,
+              -0.134246
+            ]
+          },
+          {
+            "branch_id": "leg2_L",
+            "centroid_m": [
+              0.485229,
+              0.330213,
+              0.144846
+            ]
+          },
+          {
+            "branch_id": "leg2_R",
+            "centroid_m": [
+              -0.485229,
+              0.330213,
+              0.144846
+            ]
+          },
+          {
+            "branch_id": "leg3_L",
+            "centroid_m": [
+              0.447292,
+              0.330213,
+              0.401175
+            ]
+          },
+          {
+            "branch_id": "leg3_R",
+            "centroid_m": [
+              -0.447292,
+              0.330213,
+              0.401175
+            ]
           }
         ]
       }
@@ -20029,6 +20579,80 @@
             "run_phase": 0.0,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.3541,
+              5e-05
+            ]
+          },
+          {
+            "branch_id": "leg0_L",
+            "centroid_m": [
+              0.439779,
+              0.32461,
+              -0.537867
+            ]
+          },
+          {
+            "branch_id": "leg0_R",
+            "centroid_m": [
+              -0.439779,
+              0.32461,
+              -0.537867
+            ]
+          },
+          {
+            "branch_id": "leg1_L",
+            "centroid_m": [
+              0.481805,
+              0.32461,
+              -0.182262
+            ]
+          },
+          {
+            "branch_id": "leg1_R",
+            "centroid_m": [
+              -0.481805,
+              0.32461,
+              -0.182262
+            ]
+          },
+          {
+            "branch_id": "leg2_L",
+            "centroid_m": [
+              0.481805,
+              0.32461,
+              0.198662
+            ]
+          },
+          {
+            "branch_id": "leg2_R",
+            "centroid_m": [
+              -0.481805,
+              0.32461,
+              0.198662
+            ]
+          },
+          {
+            "branch_id": "leg3_L",
+            "centroid_m": [
+              0.439779,
+              0.32461,
+              0.554367
+            ]
+          },
+          {
+            "branch_id": "leg3_R",
+            "centroid_m": [
+              -0.439779,
+              0.32461,
+              0.554367
+            ]
+          }
         ]
       }
     },
@@ -21344,6 +21968,48 @@
             "run_phase": 0.5,
             "support": true,
             "drag_drive": "push"
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.1348,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "arm_L",
+            "centroid_m": [
+              0.310337,
+              0.213192,
+              0.46005
+            ]
+          },
+          {
+            "branch_id": "leg_R",
+            "centroid_m": [
+              -0.34627,
+              0.18386,
+              -0.64954
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              0.259873,
+              0.536116
+            ]
+          },
+          {
+            "branch_id": "belly",
+            "centroid_m": [
+              -0.010543,
+              0.0278,
+              -0.768711
+            ]
           }
         ]
       }
@@ -22661,6 +23327,48 @@
             "support": true,
             "drag_drive": "push"
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.1119,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "arm_L",
+            "centroid_m": [
+              0.226309,
+              0.168595,
+              0.338865
+            ]
+          },
+          {
+            "branch_id": "leg_R",
+            "centroid_m": [
+              -0.258888,
+              0.146653,
+              -0.500632
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              0.214436,
+              0.439575
+            ]
+          },
+          {
+            "branch_id": "belly",
+            "centroid_m": [
+              -0.009838,
+              0.0228,
+              -0.62961
+            ]
+          }
         ]
       }
     },
@@ -23976,6 +24684,48 @@
             "run_phase": 0.5,
             "support": true,
             "drag_drive": "push"
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.1705,
+              -5e-05
+            ]
+          },
+          {
+            "branch_id": "arm_L",
+            "centroid_m": [
+              0.439699,
+              0.28068,
+              0.652193
+            ]
+          },
+          {
+            "branch_id": "leg_R",
+            "centroid_m": [
+              -0.48327,
+              0.240785,
+              -0.882236
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              0.330553,
+              0.686212
+            ]
+          },
+          {
+            "branch_id": "belly",
+            "centroid_m": [
+              -0.011892,
+              0.0356,
+              -0.984887
+            ]
           }
         ]
       }
@@ -25293,6 +26043,48 @@
             "support": true,
             "drag_drive": "pull"
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.1827,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "arm_L",
+            "centroid_m": [
+              0.396814,
+              0.226593,
+              0.466078
+            ]
+          },
+          {
+            "branch_id": "arm_R",
+            "centroid_m": [
+              -0.396814,
+              0.226593,
+              0.466078
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              0.354757,
+              0.737651
+            ]
+          },
+          {
+            "branch_id": "belly",
+            "centroid_m": [
+              -0.01612,
+              0.0425,
+              -1.110377
+            ]
+          }
         ]
       }
     },
@@ -26608,6 +27400,48 @@
             "run_phase": 0.5,
             "support": true,
             "drag_drive": "pull"
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.1512,
+              -5e-05
+            ]
+          },
+          {
+            "branch_id": "arm_L",
+            "centroid_m": [
+              0.292312,
+              0.179614,
+              0.353071
+            ]
+          },
+          {
+            "branch_id": "arm_R",
+            "centroid_m": [
+              -0.292312,
+              0.179614,
+              0.353071
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              0.292252,
+              0.604905
+            ]
+          },
+          {
+            "branch_id": "belly",
+            "centroid_m": [
+              -0.015041,
+              0.0348,
+              -0.90937
+            ]
           }
         ]
       }
@@ -27925,6 +28759,48 @@
             "support": true,
             "drag_drive": "pull"
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.2318,
+              -5e-05
+            ]
+          },
+          {
+            "branch_id": "arm_L",
+            "centroid_m": [
+              0.557936,
+              0.297385,
+              0.644931
+            ]
+          },
+          {
+            "branch_id": "arm_R",
+            "centroid_m": [
+              -0.557936,
+              0.297385,
+              0.644931
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              0.451995,
+              0.944186
+            ]
+          },
+          {
+            "branch_id": "belly",
+            "centroid_m": [
+              -0.018183,
+              0.0544,
+              -1.422717
+            ]
+          }
         ]
       }
     },
@@ -29240,6 +30116,48 @@
             "run_phase": 0.5,
             "support": true,
             "drag_drive": "pull"
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.1315,
+              -5e-05
+            ]
+          },
+          {
+            "branch_id": "arm_L",
+            "centroid_m": [
+              0.302139,
+              0.207886,
+              0.44777
+            ]
+          },
+          {
+            "branch_id": "arm_R",
+            "centroid_m": [
+              -0.302139,
+              0.207886,
+              0.44777
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              0.253234,
+              0.521828
+            ]
+          },
+          {
+            "branch_id": "belly",
+            "centroid_m": [
+              -0.010263,
+              0.027,
+              -0.748243
+            ]
           }
         ]
       }
@@ -30557,6 +31475,48 @@
             "support": true,
             "drag_drive": "pull"
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.1091,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "arm_L",
+            "centroid_m": [
+              0.220446,
+              0.164402,
+              0.329795
+            ]
+          },
+          {
+            "branch_id": "arm_R",
+            "centroid_m": [
+              -0.220446,
+              0.164402,
+              0.329795
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              0.208887,
+              0.42786
+            ]
+          },
+          {
+            "branch_id": "belly",
+            "centroid_m": [
+              -0.009576,
+              0.0222,
+              -0.612798
+            ]
+          }
         ]
       }
     },
@@ -31872,6 +32832,48 @@
             "run_phase": 0.5,
             "support": true,
             "drag_drive": "pull"
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.1662,
+              -5e-05
+            ]
+          },
+          {
+            "branch_id": "arm_L",
+            "centroid_m": [
+              0.428001,
+              0.273536,
+              0.634724
+            ]
+          },
+          {
+            "branch_id": "arm_R",
+            "centroid_m": [
+              -0.428001,
+              0.273536,
+              0.634724
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              0.321957,
+              0.66787
+            ]
+          },
+          {
+            "branch_id": "belly",
+            "centroid_m": [
+              -0.011575,
+              0.0346,
+              -0.958619
+            ]
           }
         ]
       }
@@ -33834,6 +34836,64 @@
             "run_phase": 0.5,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.3281,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg0_L",
+            "centroid_m": [
+              0.426487,
+              0.302091,
+              -0.353727
+            ]
+          },
+          {
+            "branch_id": "leg0_R",
+            "centroid_m": [
+              -0.426487,
+              0.302091,
+              -0.353727
+            ]
+          },
+          {
+            "branch_id": "leg1_L",
+            "centroid_m": [
+              0.452844,
+              0.302091,
+              -2.8e-05
+            ]
+          },
+          {
+            "branch_id": "leg1_R",
+            "centroid_m": [
+              -0.452844,
+              0.302091,
+              -2.8e-05
+            ]
+          },
+          {
+            "branch_id": "leg2_L",
+            "centroid_m": [
+              0.426487,
+              0.302091,
+              0.353671
+            ]
+          },
+          {
+            "branch_id": "leg2_R",
+            "centroid_m": [
+              -0.426487,
+              0.302091,
+              0.353671
+            ]
+          }
         ]
       }
     },
@@ -35794,6 +36854,64 @@
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.3274,
+              -5e-05
+            ]
+          },
+          {
+            "branch_id": "leg0_L",
+            "centroid_m": [
+              0.429435,
+              0.303044,
+              -0.305247
+            ]
+          },
+          {
+            "branch_id": "leg0_R",
+            "centroid_m": [
+              -0.429435,
+              0.303044,
+              -0.305247
+            ]
+          },
+          {
+            "branch_id": "leg1_L",
+            "centroid_m": [
+              0.454299,
+              0.303044,
+              -2e-06
+            ]
+          },
+          {
+            "branch_id": "leg1_R",
+            "centroid_m": [
+              -0.454299,
+              0.303044,
+              -2e-06
+            ]
+          },
+          {
+            "branch_id": "leg2_L",
+            "centroid_m": [
+              0.429435,
+              0.303044,
+              0.305243
+            ]
+          },
+          {
+            "branch_id": "leg2_R",
+            "centroid_m": [
+              -0.429435,
+              0.303044,
+              0.305243
+            ]
           }
         ]
       }
@@ -37756,6 +38874,64 @@
             "run_phase": 0.5,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.325,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg0_L",
+            "centroid_m": [
+              0.423394,
+              0.29799,
+              -0.423922
+            ]
+          },
+          {
+            "branch_id": "leg0_R",
+            "centroid_m": [
+              -0.423394,
+              0.29799,
+              -0.423922
+            ]
+          },
+          {
+            "branch_id": "leg1_L",
+            "centroid_m": [
+              0.45094,
+              0.29799,
+              1.6e-05
+            ]
+          },
+          {
+            "branch_id": "leg1_R",
+            "centroid_m": [
+              -0.45094,
+              0.29799,
+              1.6e-05
+            ]
+          },
+          {
+            "branch_id": "leg2_L",
+            "centroid_m": [
+              0.423394,
+              0.29799,
+              0.423954
+            ]
+          },
+          {
+            "branch_id": "leg2_R",
+            "centroid_m": [
+              -0.423394,
+              0.29799,
+              0.423954
+            ]
+          }
         ]
       }
     },
@@ -39716,6 +40892,64 @@
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.3934,
+              -5e-05
+            ]
+          },
+          {
+            "branch_id": "leg0_L",
+            "centroid_m": [
+              0.513353,
+              0.362099,
+              -0.568949
+            ]
+          },
+          {
+            "branch_id": "leg0_R",
+            "centroid_m": [
+              -0.513353,
+              0.362099,
+              -0.568949
+            ]
+          },
+          {
+            "branch_id": "leg1_L",
+            "centroid_m": [
+              0.545076,
+              0.362099,
+              -4.6e-05
+            ]
+          },
+          {
+            "branch_id": "leg1_R",
+            "centroid_m": [
+              -0.545076,
+              0.362099,
+              -4.6e-05
+            ]
+          },
+          {
+            "branch_id": "leg2_L",
+            "centroid_m": [
+              0.513353,
+              0.362099,
+              0.568857
+            ]
+          },
+          {
+            "branch_id": "leg2_R",
+            "centroid_m": [
+              -0.513353,
+              0.362099,
+              0.568857
+            ]
           }
         ]
       }
@@ -41678,6 +42912,64 @@
             "run_phase": 0.5,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.3926,
+              5e-05
+            ]
+          },
+          {
+            "branch_id": "leg0_L",
+            "centroid_m": [
+              0.51698,
+              0.363285,
+              -0.484712
+            ]
+          },
+          {
+            "branch_id": "leg0_R",
+            "centroid_m": [
+              -0.51698,
+              0.363285,
+              -0.484712
+            ]
+          },
+          {
+            "branch_id": "leg1_L",
+            "centroid_m": [
+              0.54691,
+              0.363284,
+              3.4e-05
+            ]
+          },
+          {
+            "branch_id": "leg1_R",
+            "centroid_m": [
+              -0.54691,
+              0.363284,
+              3.4e-05
+            ]
+          },
+          {
+            "branch_id": "leg2_L",
+            "centroid_m": [
+              0.51698,
+              0.363285,
+              0.48478
+            ]
+          },
+          {
+            "branch_id": "leg2_R",
+            "centroid_m": [
+              -0.51698,
+              0.363285,
+              0.48478
+            ]
+          }
         ]
       }
     },
@@ -43639,6 +44931,64 @@
             "run_phase": 0.5,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.3896,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg0_L",
+            "centroid_m": [
+              0.509697,
+              0.357086,
+              -0.693524
+            ]
+          },
+          {
+            "branch_id": "leg0_R",
+            "centroid_m": [
+              -0.509697,
+              0.357086,
+              -0.693524
+            ]
+          },
+          {
+            "branch_id": "leg1_L",
+            "centroid_m": [
+              0.542855,
+              0.357086,
+              -4e-05
+            ]
+          },
+          {
+            "branch_id": "leg1_R",
+            "centroid_m": [
+              -0.542855,
+              0.357086,
+              -4e-05
+            ]
+          },
+          {
+            "branch_id": "leg2_L",
+            "centroid_m": [
+              0.509697,
+              0.357086,
+              0.693444
+            ]
+          },
+          {
+            "branch_id": "leg2_R",
+            "centroid_m": [
+              -0.509697,
+              0.357086,
+              0.693444
+            ]
+          }
         ]
       }
     },
@@ -45037,6 +46387,56 @@
             "walk_phase": 0.5,
             "run_phase": 0.0,
             "support": true
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              1.0916,
+              -5e-05
+            ]
+          },
+          {
+            "branch_id": "leg_L0",
+            "centroid_m": [
+              0.389168,
+              0.549328,
+              0.543954
+            ]
+          },
+          {
+            "branch_id": "leg_R0",
+            "centroid_m": [
+              -0.389168,
+              0.549328,
+              0.543954
+            ]
+          },
+          {
+            "branch_id": "leg_L1",
+            "centroid_m": [
+              0.384961,
+              0.566155,
+              -0.459052
+            ]
+          },
+          {
+            "branch_id": "leg_R1",
+            "centroid_m": [
+              -0.384961,
+              0.566155,
+              -0.459052
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              1.100944,
+              0.976811
+            ]
           }
         ]
       }
@@ -46437,6 +47837,56 @@
             "run_phase": 0.0,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.8838,
+              -5e-05
+            ]
+          },
+          {
+            "branch_id": "leg_L0",
+            "centroid_m": [
+              0.393331,
+              0.446475,
+              0.441314
+            ]
+          },
+          {
+            "branch_id": "leg_R0",
+            "centroid_m": [
+              -0.393331,
+              0.446475,
+              0.441314
+            ]
+          },
+          {
+            "branch_id": "leg_L1",
+            "centroid_m": [
+              0.389453,
+              0.46199,
+              -0.373166
+            ]
+          },
+          {
+            "branch_id": "leg_R1",
+            "centroid_m": [
+              -0.389453,
+              0.46199,
+              -0.373166
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              0.89146,
+              0.800905
+            ]
+          }
         ]
       }
     },
@@ -47835,6 +49285,56 @@
             "walk_phase": 0.5,
             "run_phase": 0.0,
             "support": true
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              1.2959,
+              -5e-05
+            ]
+          },
+          {
+            "branch_id": "leg_L0",
+            "centroid_m": [
+              0.389555,
+              0.650477,
+              0.698854
+            ]
+          },
+          {
+            "branch_id": "leg_R0",
+            "centroid_m": [
+              -0.389555,
+              0.650477,
+              0.698854
+            ]
+          },
+          {
+            "branch_id": "leg_L1",
+            "centroid_m": [
+              0.385172,
+              0.668014,
+              -0.59748
+            ]
+          },
+          {
+            "branch_id": "leg_R1",
+            "centroid_m": [
+              -0.385172,
+              0.668014,
+              -0.59748
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              1.307857,
+              1.250282
+            ]
           }
         ]
       }
@@ -49235,6 +50735,56 @@
             "run_phase": 0.0,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.9602,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg_L0",
+            "centroid_m": [
+              0.483146,
+              0.470814,
+              0.362026
+            ]
+          },
+          {
+            "branch_id": "leg_R0",
+            "centroid_m": [
+              -0.483146,
+              0.470814,
+              0.362026
+            ]
+          },
+          {
+            "branch_id": "leg_L1",
+            "centroid_m": [
+              0.477938,
+              0.491649,
+              -0.286682
+            ]
+          },
+          {
+            "branch_id": "leg_R1",
+            "centroid_m": [
+              -0.477938,
+              0.491649,
+              -0.286682
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              0.967693,
+              0.783375
+            ]
+          }
         ]
       }
     },
@@ -50634,6 +52184,56 @@
             "run_phase": 0.0,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.7774,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg_L0",
+            "centroid_m": [
+              0.503558,
+              0.379567,
+              0.286007
+            ]
+          },
+          {
+            "branch_id": "leg_R0",
+            "centroid_m": [
+              -0.503558,
+              0.379567,
+              0.286007
+            ]
+          },
+          {
+            "branch_id": "leg_L1",
+            "centroid_m": [
+              0.498651,
+              0.399195,
+              -0.225481
+            ]
+          },
+          {
+            "branch_id": "leg_R1",
+            "centroid_m": [
+              -0.498651,
+              0.399195,
+              -0.225481
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              0.783545,
+              0.642429
+            ]
+          }
         ]
       }
     },
@@ -52032,6 +53632,56 @@
             "walk_phase": 0.5,
             "run_phase": 0.0,
             "support": true
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              1.14,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "leg_L0",
+            "centroid_m": [
+              0.469556,
+              0.560974,
+              0.482743
+            ]
+          },
+          {
+            "branch_id": "leg_R0",
+            "centroid_m": [
+              -0.469556,
+              0.560974,
+              0.482743
+            ]
+          },
+          {
+            "branch_id": "leg_L1",
+            "centroid_m": [
+              0.464259,
+              0.582163,
+              -0.392859
+            ]
+          },
+          {
+            "branch_id": "leg_R1",
+            "centroid_m": [
+              -0.464259,
+              0.582163,
+              -0.392859
+            ]
+          },
+          {
+            "branch_id": "head",
+            "centroid_m": [
+              0.0,
+              1.149591,
+              1.00268
+            ]
           }
         ]
       }
@@ -53933,6 +55583,64 @@
             "run_phase": 0.5,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.59545,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "arm_0",
+            "centroid_m": [
+              0.0,
+              0.310915,
+              0.541975
+            ]
+          },
+          {
+            "branch_id": "arm_1",
+            "centroid_m": [
+              0.469388,
+              0.310915,
+              0.270987
+            ]
+          },
+          {
+            "branch_id": "arm_2",
+            "centroid_m": [
+              0.469388,
+              0.310915,
+              -0.270987
+            ]
+          },
+          {
+            "branch_id": "arm_3",
+            "centroid_m": [
+              0.0,
+              0.310915,
+              -0.541975
+            ]
+          },
+          {
+            "branch_id": "arm_4",
+            "centroid_m": [
+              -0.469388,
+              0.310915,
+              -0.270987
+            ]
+          },
+          {
+            "branch_id": "arm_5",
+            "centroid_m": [
+              -0.469388,
+              0.310915,
+              0.270987
+            ]
+          }
         ]
       }
     },
@@ -55832,6 +57540,64 @@
             "walk_phase": 0.833333,
             "run_phase": 0.5,
             "support": true
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.50945,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "arm_0",
+            "centroid_m": [
+              0.0,
+              0.252139,
+              0.44408
+            ]
+          },
+          {
+            "branch_id": "arm_1",
+            "centroid_m": [
+              0.384573,
+              0.252139,
+              0.22204
+            ]
+          },
+          {
+            "branch_id": "arm_2",
+            "centroid_m": [
+              0.384573,
+              0.252139,
+              -0.22204
+            ]
+          },
+          {
+            "branch_id": "arm_3",
+            "centroid_m": [
+              0.0,
+              0.252139,
+              -0.44408
+            ]
+          },
+          {
+            "branch_id": "arm_4",
+            "centroid_m": [
+              -0.384573,
+              0.252139,
+              -0.22204
+            ]
+          },
+          {
+            "branch_id": "arm_5",
+            "centroid_m": [
+              -0.384573,
+              0.252139,
+              0.22204
+            ]
           }
         ]
       }
@@ -57733,6 +59499,64 @@
             "run_phase": 0.5,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.7021,
+              0.0
+            ]
+          },
+          {
+            "branch_id": "arm_0",
+            "centroid_m": [
+              0.0,
+              0.39304,
+              0.686366
+            ]
+          },
+          {
+            "branch_id": "arm_1",
+            "centroid_m": [
+              0.594444,
+              0.393041,
+              0.343182
+            ]
+          },
+          {
+            "branch_id": "arm_2",
+            "centroid_m": [
+              0.594445,
+              0.393041,
+              -0.343183
+            ]
+          },
+          {
+            "branch_id": "arm_3",
+            "centroid_m": [
+              0.0,
+              0.39304,
+              -0.686367
+            ]
+          },
+          {
+            "branch_id": "arm_4",
+            "centroid_m": [
+              -0.594445,
+              0.393041,
+              -0.343183
+            ]
+          },
+          {
+            "branch_id": "arm_5",
+            "centroid_m": [
+              -0.594444,
+              0.393041,
+              0.343182
+            ]
+          }
         ]
       }
     },
@@ -58360,7 +60184,25 @@
         "v_walk_mps": 1.5282,
         "v_run_mps": 3.0564,
         "v_max_mps": 4.5846,
-        "legs": []
+        "legs": [],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.524628,
+              1.442176
+            ]
+          },
+          {
+            "branch_id": "body",
+            "centroid_m": [
+              -0.038661,
+              0.101885,
+              -0.271677
+            ]
+          }
+        ]
       }
     },
     {
@@ -58987,7 +60829,25 @@
         "v_walk_mps": 1.2531,
         "v_run_mps": 2.5062,
         "v_max_mps": 3.7593,
-        "legs": []
+        "legs": [],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.470273,
+              1.182529
+            ]
+          },
+          {
+            "branch_id": "body",
+            "centroid_m": [
+              -0.036074,
+              0.083506,
+              -0.219963
+            ]
+          }
+        ]
       }
     },
     {
@@ -59614,7 +61474,25 @@
         "v_walk_mps": 1.95606,
         "v_run_mps": 3.91212,
         "v_max_mps": 5.86818,
-        "legs": []
+        "legs": [],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.583536,
+              1.845962
+            ]
+          },
+          {
+            "branch_id": "body",
+            "centroid_m": [
+              -0.043607,
+              0.130355,
+              -0.351036
+            ]
+          }
+        ]
       }
     },
     {
@@ -61196,6 +63074,56 @@
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.68717,
+              1.284799
+            ]
+          },
+          {
+            "branch_id": "body",
+            "centroid_m": [
+              -0.034443,
+              0.366936,
+              -0.242096
+            ]
+          },
+          {
+            "branch_id": "leg0_L",
+            "centroid_m": [
+              0.266759,
+              0.190159,
+              0.396337
+            ]
+          },
+          {
+            "branch_id": "leg0_R",
+            "centroid_m": [
+              -0.43218,
+              0.19016,
+              0.322876
+            ]
+          },
+          {
+            "branch_id": "leg1_L",
+            "centroid_m": [
+              0.329999,
+              0.190159,
+              -0.205349
+            ]
+          },
+          {
+            "branch_id": "leg1_R",
+            "centroid_m": [
+              -0.368941,
+              0.19016,
+              -0.27881
+            ]
           }
         ]
       }
@@ -62780,6 +64708,56 @@
             "run_phase": 0.5,
             "support": true
           }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.589658,
+              1.053579
+            ]
+          },
+          {
+            "branch_id": "body",
+            "centroid_m": [
+              -0.032139,
+              0.297067,
+              -0.196049
+            ]
+          },
+          {
+            "branch_id": "leg0_L",
+            "centroid_m": [
+              0.299301,
+              0.154809,
+              0.345654
+            ]
+          },
+          {
+            "branch_id": "leg0_R",
+            "centroid_m": [
+              -0.454623,
+              0.154809,
+              0.25522
+            ]
+          },
+          {
+            "branch_id": "leg1_L",
+            "centroid_m": [
+              0.358397,
+              0.154809,
+              -0.147015
+            ]
+          },
+          {
+            "branch_id": "leg1_R",
+            "centroid_m": [
+              -0.395527,
+              0.154809,
+              -0.237448
+            ]
+          }
         ]
       }
     },
@@ -64362,6 +66340,56 @@
             "walk_phase": 0.5,
             "run_phase": 0.5,
             "support": true
+          }
+        ],
+        "segments": [
+          {
+            "branch_id": "core",
+            "centroid_m": [
+              0.0,
+              0.779487,
+              1.644569
+            ]
+          },
+          {
+            "branch_id": "body",
+            "centroid_m": [
+              -0.03885,
+              0.435626,
+              -0.312769
+            ]
+          },
+          {
+            "branch_id": "leg0_L",
+            "centroid_m": [
+              0.235452,
+              0.224765,
+              0.478783
+            ]
+          },
+          {
+            "branch_id": "leg0_R",
+            "centroid_m": [
+              -0.420185,
+              0.224765,
+              0.418192
+            ]
+          },
+          {
+            "branch_id": "leg1_L",
+            "centroid_m": [
+              0.306733,
+              0.224765,
+              -0.29253
+            ]
+          },
+          {
+            "branch_id": "leg1_R",
+            "centroid_m": [
+              -0.348904,
+              0.224764,
+              -0.353121
+            ]
           }
         ]
       }

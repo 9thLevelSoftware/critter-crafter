@@ -148,7 +148,7 @@ namespace CritterCrafter.Locomotion
         {
             _creature = GetComponent<AssembledCreature>();
             _motion = GetComponent<CreatureMotion>();
-            _block = _creature != null && _creature.Skeleton != null ? _creature.Skeleton.locomotion : null;
+            _block = _creature != null ? _creature.GaitBlock : null;
             _animator = _creature != null ? _creature.Animator : null;
             if (_animator != null && _animator.runtimeAnimatorController != null)
                 foreach (var p in _animator.parameters)

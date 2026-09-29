@@ -197,7 +197,31 @@ def _drag_block(skeleton: dict[str, Any], legs: list[dict[str, Any]], legs_src: 
     }
 
 
+def _segments(skeleton: dict[str, Any]) -> list[dict[str, Any]]:
+    """Neutral-pose centroid of every branch (bone midpoints weighted by bone length); the build model
+    weights these by each fill's mass to find the centre of mass."""
+    pose = neutral_pose_world(skeleton)
+    out = []
+    for branch in skeleton["branches"]:
+        total = 0.0
+        acc = (0.0, 0.0, 0.0)
+        for name in branch["bone_names"]:
+            bone = pose[name]
+            mid = mu.scale(mu.add(bone["head"], bone["tail"]), .5)
+            acc = mu.add(acc, mu.scale(mid, bone["length"]))
+            total += bone["length"]
+        out.append({"branch_id": branch["branch_id"],
+                    "centroid_m": mu.r6v(mu.scale(acc, 1.0 / total) if total > 0.0 else acc)})
+    return out
+
+
 def locomotion_block(skeleton: dict[str, Any]) -> dict[str, Any]:
+    block = _locomotion_block(skeleton)
+    block["segments"] = _segments(skeleton)
+    return block
+
+
+def _locomotion_block(skeleton: dict[str, Any]) -> dict[str, Any]:
     pose = neutral_pose_world(skeleton)
     legs_src = [b for b in skeleton["branches"]
                 if b.get("gait_role") == "locomotor" and len(b.get("contacts") or []) == 1

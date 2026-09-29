@@ -52,8 +52,7 @@ namespace CritterCrafter.Locomotion
         /// </summary>
         public static CreatureGait Build(AssembledCreature creature, LayerMask groundMask)
         {
-            var skeleton = creature != null ? creature.Skeleton : null;
-            var block = skeleton?.locomotion;
+            var block = creature != null ? creature.GaitBlock : null;
             var animator = creature != null ? creature.Animator : null;
             if (block == null || !block.IsPhaseDriven || animator == null) return null;
 

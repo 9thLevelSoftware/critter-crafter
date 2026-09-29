@@ -22,7 +22,23 @@ Each skeleton publishes `v_walk_mps`, `v_run_mps` and `v_max_mps`:
 - **Drag.** Full-stroke pulls at about 1 pull per second when walking and 1.8 when running.
 - **Slide.** 1 and 2 undulations per second.
 
-Above `v_max_mps` the feet slide, reported as `overspeed`. Use `v_max_mps` or `v_run_mps` as the threat's move speed rather than forcing one speed on every body plan. All 42 current skeletons can reach 2.5 m/s (the current Synaptic Sea threat speed) within `v_max_mps` (the lowest is 2.53), but 26 of them have `v_run_mps` below 2.5, so forcing 2.5 m/s runs those bodies above their natural run speed.
+Above `v_max_mps` the feet slide, reported as `overspeed`. Use the creature's `move_speed_mps` (see [Per-creature speeds](#per-creature-speeds-build-1)) as the threat's move speed rather than forcing one speed on every body plan; the skeleton's own `v_run_mps` is the fallback. All 42 current skeletons can reach 2.5 m/s (the current Synaptic Sea threat speed) within `v_max_mps` (the lowest is 2.53), but 26 of them have `v_run_mps` below 2.5, so forcing 2.5 m/s runs those bodies above their natural run speed.
+
+## Per-creature speeds (`build-1`)
+
+The skeleton's speeds describe a bare body plan. A creature assembled on it gets its own block from
+`locomotion/build.py` (Python) and `Runtime/Generation/CreatureLocomotion.cs` (C#, `AssembledCreature.Locomotion`;
+the gait follows `AssembledCreature.GaitBlock`). Leg geometry, duties, phases and strokes are the skeleton's, so
+the stroke limit still keeps planted feet from sliding. Only the speeds, `cadence_max_hz` and a new `build` object change.
+
+- **Mass** of each fill = density × shape × branch length × branch girth × (part thickness `dimensions_m[1]` × length scale × girth scale). Density (kg/m³) and shape by part category: limb 1050 / .60, core 1000 / .70, head 1100 / .52, tail and appendage 1000 / .55. Connectors add no mass. `_scales` sizes a part to its branch, so a part moves the build only through its thickness and its category; most of the spread comes from the skeleton.
+- **Build factors:** the mass-weighted centre of mass (from the catalog `segments`, each branch's neutral-pose centroid); `muscle_fraction` (locomotor-limb mass ÷ total); `load_imbalance` (distance from the COM's ground point to the centroid of the leg homes, ÷ (largest home distance from that centroid + .05 m); 0 for drag and slide); `arm_fraction` (share of limb fills bound to `limb3_brachial`).
+- **Performance** `P = clamp(sqrt(muscle/.45) · (1 − .4·min(1, imbalance)) · (1 − .25·arm) · (60/mass)^.1, .4, 1.8)`. Slide uses the mass term alone; no locomotion (`none`) keeps P = 1.
+- **Legs:** `cadence' = clamp(cadence_max · P, 2, 6)`, `v_max' = min(cadence', (1 − duty_run) / .12 s) · .9 · stroke / duty_run` (a swing shorter than about 4 frames cannot land its foot, which matters for high-duty gaits such as the tripod), and `v_run' = max(min(1, cap), min(P² · sqrt(2.2 g h), cap))` where `cap = .9 · min(v_max', v_froude)`. `v_froude` is the speed at which the planner's Froude-limited stride reaches that same limited cadence, so the run never overspeeds. `v_walk' = min(.5 · sqrt(g h) · sqrt(P), .5 v_max', .6 v_run')`.
+- **Drag:** `v_max' = stride_run · cadence'`, `v_run' = min(stride_run · 1.8 · P², v_max')`, `v_walk' = min(stride_walk · P, .5 v_max', .6 v_run')`. **Slide:** the same with `travel_per_cycle_m` in place of the stride, at 1 and 2 undulations per second.
+- Output: `build {model, mass_kg, com_m, muscle_fraction, load_imbalance, arm_fraction, performance}` and `move_speed_mps` (= `v_run_mps`). Golden: `tests/golden_v3/creatures.json` (the reference recipe of every skeleton, then every pool at seeds 1–10 with the Meshy parts approved in memory), matched by `tests/test_build.py` and `CreatureLocomotionGoldenTests`.
+
+**Contract for the game (M5).** Chase at `move_speed_mps`, patrol at `v_walk_mps`, never exceed `v_max_mps`. Across the golden the run speeds span about 0.3–5.3 m/s. Quadrupeds and bipeds stay near 2–4 m/s because a trot plants half its feet; a faster, airborne run (lower `duty_run` and a minimum-support setting that `CanLift` respects) is deferred.
 
 ## Legs block fields
 

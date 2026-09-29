@@ -234,7 +234,7 @@ namespace CritterCrafter.Tests
                 Physics.SyncTransforms();
                 var c = LocomotionCapture.Spawn(Lib, id, holder.transform, out var restore);
                 var gait = c.GetComponent<CritterCrafter.Locomotion.CreatureGait>();
-                var block = c.Skeleton.locomotion;
+                var block = c.GaitBlock;
                 LocomotionMetrics metrics = null;
                 bool sawLocomotionState = false;
                 if (gait != null)
@@ -284,6 +284,48 @@ namespace CritterCrafter.Tests
             }
         }
 
+        [UnityTest]
+        public IEnumerator CreaturesRunAtTheirOwnRunSpeed()
+        {
+            // The gait follows the per-creature block (CreatureLocomotion), and running at that creature's own
+            // v_run (its published move_speed_mps) never overspeeds the step rate or slides planted feet.
+            EditorSettings.enterPlayModeOptionsEnabled = true;
+            EditorSettings.enterPlayModeOptions = EnterPlayModeOptions.DisableDomainReload | EnterPlayModeOptions.DisableSceneReload;
+            yield return new EnterPlayMode();
+            Time.captureFramerate = 30;
+            var failures = new List<string>();
+            foreach (var id in OnePerFamily)
+            {
+                var holder = new GameObject("OwnSpeedTest");
+                var ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
+                ground.transform.SetParent(holder.transform, false);
+                ground.transform.localScale = Vector3.one * 10f;
+                Physics.SyncTransforms();
+                var c = LocomotionCapture.Spawn(Lib, id, holder.transform, out var restore);
+                var gait = c.GetComponent<CritterCrafter.Locomotion.CreatureGait>();
+                var expected = CreatureLocomotion.Build(Lib.Catalog, c.Recipe);
+                if (gait == null) failures.Add(id + ": no CreatureGait");
+                else
+                {
+                    if (!ReferenceEquals(gait.Block, c.Locomotion)) failures.Add(id + ": gait does not follow the creature's block");
+                    if (System.Math.Abs(gait.Block.v_run_mps - expected.v_run_mps) > 1e-9) failures.Add(id + ": block differs from CreatureLocomotion.Build");
+                    float speed = (float)c.Locomotion.move_speed_mps;
+                    var recorder = holder.AddComponent<LocomotionRecorder>();
+                    recorder.Begin(gait, ReviewCourse.Straight(speed, 3f), new LocomotionMetrics { skeleton_id = id, speed_mps = speed, warmup_frames = 30 });
+                    while (!recorder.Done) yield return null;
+                    var m = recorder.Metrics;
+                    if (m.overspeed) failures.Add($"{id} @ {speed:F2} m/s: overspeed");
+                    if (m.max_planted_slip_m >= 0.025f) failures.Add($"{id} @ {speed:F2} m/s: planted slip {m.max_planted_slip_m:F3} m");
+                }
+                Object.Destroy(holder);
+                restore();
+                yield return null;
+            }
+            Time.captureFramerate = 0;
+            yield return new ExitPlayMode();
+            Assert.IsEmpty(failures, string.Join("\n", failures));
+        }
+
         static readonly string[] DraggersForTurns =
         {
             "dragger_forelimb_puller_balanced_v3", "dragger_belly_hauler_balanced_v3",
@@ -315,7 +357,7 @@ namespace CritterCrafter.Tests
                 Physics.SyncTransforms();
                 var c = LocomotionCapture.Spawn(Lib, id, holder.transform, out var restore);
                 var gait = c.GetComponent<CritterCrafter.Locomotion.CreatureGait>();
-                var block = c.Skeleton.locomotion;
+                var block = c.GaitBlock;
                 Assert.IsNotNull(gait, id + ": a CreatureGait");
                 var speeds = new[] { (float)block.v_walk_mps, (float)block.v_run_mps, Mathf.Min(2.5f, 0.9f * (float)block.v_max_mps) };
                 foreach (float speed in speeds)
