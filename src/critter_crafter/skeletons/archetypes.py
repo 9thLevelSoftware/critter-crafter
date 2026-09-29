@@ -153,10 +153,11 @@ def _core(height: float, length: float, width: float, *, upright: bool = False) 
 
 
 def _paired_legs(branches: list[dict[str, Any]], *, prefix: str, parent: str, positions: list[tuple[float, float, float]],
-                 length: float, template: str, contact: str = "foot", attach: int = 0,
+                 length: float, template: str, contact: str = "foot", attach: int | list[int] = 0,
                  phases: tuple[float, float] = (0.0, math.pi), profile_id: str | None = None,
                  direction: Any = None, up: list[float] | None = None) -> list[dict[str, Any]]:
-    """Append mirrored leg pairs.  ``direction`` may be a callable ``(sx, index) -> vec``."""
+    """Append mirrored leg pairs.  ``direction`` may be a callable ``(sx, index) -> vec``.
+    ``attach`` is one parent bone index for every pair, or one per position (hips on the pelvis, shoulders on the chest)."""
     added: list[dict[str, Any]] = []
     for index, (_, y, z) in enumerate(positions):
         for side, sx, phase in (("L", 1, phases[0]), ("R", -1, phases[1])):
@@ -165,9 +166,9 @@ def _paired_legs(branches: list[dict[str, Any]], *, prefix: str, parent: str, po
                              direction if direction is not None else [sx * 0.25, -1, 0.08])
             record = _branch(bid, template, parent, origin=_v(sx * positions[index][0], y, z),
                              direction=leg_direction, up=list(up or [0, 0, 1]), length=length, side=side,
-                             attach=attach, mirror_of=f"{prefix}_L{index}" if side == "R" and len(positions) > 1 else (f"{prefix}_L" if side == "R" else ""),
+                             attach=attach[index] if isinstance(attach, list) else attach, mirror_of=f"{prefix}_L{index}" if side == "R" and len(positions) > 1 else (f"{prefix}_L" if side == "R" else ""),
                              role="locomotor", phase=phase, support=0.58, contact=contact,
-                             parent_joint="lower" if attach == 1 else "upper", profile_id=profile_id)
+                             profile_id=profile_id)
             branches.append(record)
             added.append(record)
     return added
@@ -310,7 +311,7 @@ def _quadruped(a: dict[str, Any], h: float, length: float, width: float) -> tupl
     leg_profile = "limb3_digitigrade" if a["variant"] == "lean" else "limb3_plantigrade"
     legs = _paired_legs(branches, prefix="leg", parent="core",
                         positions=[(width * .48, h, length * .25), (width * .48, h, -length * .25)],
-                        length=leg, template="limb3", attach=1, profile_id=leg_profile)
+                        length=leg, template="limb3", attach=[2, 0], profile_id=leg_profile)
     # Lateral-sequence walk (hind L, fore L, hind R, fore R a quarter cycle apart); diagonal trot run.
     walk = {"leg_L1": 0.0, "leg_L0": .25, "leg_R1": .5, "leg_R0": .75}
     trot = {"leg_L0": 0.0, "leg_R1": 0.0, "leg_R0": .5, "leg_L1": .5}
@@ -352,7 +353,7 @@ def _hexapod(a: dict[str, Any], h: float, length: float, width: float) -> tuple[
     for i, z in enumerate((-.22, 0, .22)):
         fan = (-.45, 0.0, .45)[i]
         legs = _paired_legs(branches, prefix=f"leg{i}", parent="core", positions=[(width * .14, h, z * length)],
-                            length=width * .75 * a["limb_scale"], template="insect_leg4", attach=1,
+                            length=width * .75 * a["limb_scale"], template="insect_leg4", attach=i,
                             phases=(0 if i % 2 == 0 else math.pi, math.pi if i % 2 == 0 else 0),
                             direction=lambda sx, _i, fan=fan: [sx * 1.0, 0.0, fan], up=[0, 1, 0])
         for leg in legs:
