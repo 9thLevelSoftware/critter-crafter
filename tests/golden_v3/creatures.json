@@ -1601,7 +1601,7 @@
    "v_walk": 1.056752,
    "v_run": 3.105,
    "v_max": 3.45,
-   "cadence_max": 4.493353
+   "cadence_max": 4.493352
   },
   {
    "skeleton_id": "radial_raised_articulated_walker_compact_v3",
@@ -1701,7 +1701,7 @@
    ],
    "performance": 1.327827,
    "v_walk": 1.171472,
-   "v_run": 3.720656,
+   "v_run": 3.720657,
    "v_max": 4.134063,
    "cadence_max": 3.796201
   },

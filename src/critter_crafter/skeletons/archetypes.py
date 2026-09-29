@@ -95,6 +95,11 @@ def _contact_point(kind: str, length: float, fraction: float, girth_m: float) ->
     return [0.0, round(segment_length, 4), round(ventral, 4)]
 
 
+def _round_vector(vector: list[float]) -> list[float]:
+    """Authored directions come from sin/cos, whose last digit differs between platforms."""
+    return [round(v, 6) for v in vector]
+
+
 def _branch(branch_id: str, template: str, parent: str | None, *, origin: list[float], direction: list[float],
             up: list[float], length: float, side: str = "C", attach: int = 0, mirror_of: str = "",
             role: str = "none", phase: float = 0.0, support: float = 0.5, contact: str | None = None,
@@ -115,7 +120,7 @@ def _branch(branch_id: str, template: str, parent: str | None, *, origin: list[f
                 if profile_id == "tentacle8_flexible" and contact in {"sliding", "body"} else [0.0] * joints)
     record: dict[str, Any] = {
         "branch_id": branch_id, "template": template, "parent_branch": parent, "attach_bone_index": attach,
-        "origin_m": origin, "direction": direction, "up": up, "length_m": length,
+        "origin_m": origin, "direction": _round_vector(direction), "up": _round_vector(up), "length_m": length,
         "girth_m": round(length * _PROFILE_GIRTH[profile_id], 4),
         "size_class": "L" if template in {"core1", "spine3"} else "M", "side": side,
         "required": True, "accepts": {"categories": [category], "templates": [template]},
@@ -370,7 +375,7 @@ def _radial(a: dict[str, Any], h: float, length: float, width: float) -> tuple[l
         vertical = 0.0 if template == "tentacle8" else -.72
         arm = _branch(bid, template, "core", origin=_v(math.sin(angle) * width * .16, h, math.cos(angle) * length * .16), direction=[math.sin(angle), vertical, math.cos(angle)], up=[0, 1, 0], length=width * .58 * a["limb_scale"], role="locomotor", phase=angle, support=.68, contact="sliding" if template == "tentacle8" else "foot", parent_joint="upper")
         if template == "insect_leg4":
-            arm["direction"] = [math.sin(angle), 0.0, math.cos(angle)]
+            arm["direction"] = _round_vector([math.sin(angle), 0.0, math.cos(angle)])
             _insect_leg(arm)
             # Alternating tripods at walk and run: a wave travelling round the ring reads as tapping.
             arm["gait"]["phase_rad"] = round((i % 2) * math.pi, 6)
