@@ -1,6 +1,7 @@
 """Curated anatomy, evaluated motion QA, and fresh review gates."""
 from __future__ import annotations
 import json
+from datetime import date
 from pathlib import Path
 import click
 from ..config import paths
@@ -262,21 +263,45 @@ def _set_status(family: str | None, ids: tuple[str, ...], status: str) -> int:
     return len(selected)
 
 
+def _set_status_owner(family: str | None, ids: tuple[str, ...], status: str) -> int:
+    """The owner's own decision: no review receipt, no built library. Records who decided and when.
+    Status and review are outside the source fingerprint, so built assets and receipts stay valid."""
+    files = _skeleton_files(family)
+    known = {json.loads(f.read_text(encoding="utf-8"))["skeleton_id"] for f in files}
+    unknown = set(ids) - known
+    if unknown:
+        raise click.ClickException(f"unknown skeletons: {', '.join(sorted(unknown))}")
+    docs = [(f, json.loads(f.read_text(encoding="utf-8"))) for f in files]
+    docs = [(f, d) for f, d in docs if not ids or d["skeleton_id"] in ids]
+    if not docs:
+        raise click.ClickException("no skeletons match the selection")
+    stamp = {"by": "owner", "date": date.today().isoformat(), "method": "owner"}
+    for f, doc in docs:
+        doc["status"] = status
+        doc["review"] = stamp
+        _write_json(f, doc)
+    return len(docs)
+
+
 @skeleton.command("approve")
 @click.option("--family", type=click.Choice(FAMILIES), default=None)
+@click.option("--owner", is_flag=True, help="Owner decision: skip the review receipt and record who decided")
 @click.argument("skeleton_ids", nargs=-1)
-def skeleton_approve(family, skeleton_ids) -> None:
-    """Human visual approval, valid only for a current passing review bundle."""
+def skeleton_approve(family, owner, skeleton_ids) -> None:
+    """Human visual approval. Needs a current passing review bundle unless --owner."""
     if not family and not skeleton_ids:
         raise click.ClickException("give --family or skeleton IDs")
-    click.echo(f"approved {_set_status(family, skeleton_ids, 'approved')} skeleton(s)")
+    count = _set_status_owner(family, skeleton_ids, "approved") if owner else _set_status(family, skeleton_ids, "approved")
+    click.echo(f"approved {count} skeleton(s)")
 
 
 @skeleton.command("reject")
 @click.option("--family", type=click.Choice(FAMILIES), default=None)
+@click.option("--owner", is_flag=True, help="Owner decision: skip the review receipt and record who decided")
 @click.argument("skeleton_ids", nargs=-1)
-def skeleton_reject(family, skeleton_ids) -> None:
-    """Record visual rejection of current reviewed content."""
+def skeleton_reject(family, owner, skeleton_ids) -> None:
+    """Record visual rejection. Needs current reviewed content unless --owner."""
     if not family and not skeleton_ids:
         raise click.ClickException("give --family or skeleton IDs")
-    click.echo(f"rejected {_set_status(family, skeleton_ids, 'rejected')} skeleton(s)")
+    count = _set_status_owner(family, skeleton_ids, "rejected") if owner else _set_status(family, skeleton_ids, "rejected")
+    click.echo(f"rejected {count} skeleton(s)")
