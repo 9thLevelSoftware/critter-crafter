@@ -8,7 +8,7 @@
   "properties": {
     "schema_version": {"const": "3.0.0"},
     "library_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
-    "version": {"const": "0.2.0"},
+    "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
     "frame": {"const": "gltf_rh_yup_zfwd_m"},
     "limits": {
       "type": "object",

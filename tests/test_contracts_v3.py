@@ -360,24 +360,45 @@ def test_generation_rejects_v2_catalog_before_record_access():
     assert exc.value.code == "CC_GEN_SCHEMA_VERSION"
 
 
-def test_compilation_and_generation_reject_wrong_library_release_early():
+def test_a_re_released_library_still_compiles_and_generates_but_a_malformed_version_is_rejected():
+    from critter_crafter.recipes.generator import _require_catalog
     sources = _sources()
-    sources["library"]["version"] = "0.1.0"
+    sources["library"]["version"] = "0.2.1"
+    catalog = compile_catalog(sources)
+    assert catalog["version"] == "0.2.1"
+    _require_catalog(catalog)                                         # the release number is not gated
+
+    sources["library"]["version"] = "second"
     with pytest.raises(CatalogError) as compile_error:
         compile_catalog(sources)
     assert compile_error.value.code == "CC_LIBRARY_VERSION"
 
-    unsupported = {
-        "schema_version": "3.0.0",
-        "version": "0.1.0",
-        "generator": {"algorithm": "cc-gen-3"},
-    }
-    with pytest.raises(GenerationError) as generation_error:
-        generate(unsupported, "any", 1)
-    assert generation_error.value.code == "CC_GEN_LIBRARY_VERSION"
-    assert validate_recipe(unsupported, {"schema_version": "3.0.0"}) == [
-        "CC_LIBRARY_VERSION: expected 0.2.0, got 0.1.0"
-    ]
+
+def test_generation_is_gated_on_the_generator_identity_and_schema_major_not_the_release():
+    from critter_crafter.recipes.generator import _require_catalog
+    ok = {"schema_version": "3.1.0", "version": "9.9.9", "generator": {"algorithm": "cc-gen-3", "rng": "splitmix64"}}
+    _require_catalog(ok)                                              # any 3.x.y, any release
+    for bad, code in (
+        ({**ok, "schema_version": "4.0.0"}, "CC_GEN_SCHEMA_VERSION"),
+        ({**ok, "schema_version": "2.0.0"}, "CC_GEN_SCHEMA_VERSION"),
+        ({**ok, "generator": {"algorithm": "cc-gen-4", "rng": "splitmix64"}}, "CC_GEN_ALGORITHM"),
+        ({**ok, "generator": {"algorithm": "cc-gen-3", "rng": "xorshift"}}, "CC_GEN_RNG"),
+        ({**ok, "generator": {"algorithm": "cc-gen-3"}}, "CC_GEN_RNG"),
+    ):
+        with pytest.raises(GenerationError) as error:
+            generate(bad, "any", 1)
+        assert error.value.code == code
+
+
+def test_recipe_validation_gates_the_catalog_the_same_way_and_still_pins_the_recipes_release():
+    catalog = compile_catalog(_sources())
+    wrong_algorithm = {**catalog, "generator": {"algorithm": "cc-gen-4", "rng": "splitmix64"}}
+    assert validate_recipe(wrong_algorithm, {"schema_version": "3.0.0"}) == [
+        "CC_LIBRARY_GENERATOR: expected cc-gen-3/splitmix64, got cc-gen-4/splitmix64"]
+    released_again = {**catalog, "version": "0.2.1"}               # a saved recipe only replays on its own release
+    recipe = {"schema_version": "3.0.0", "library_id": catalog["library_id"], "library_version": "0.2.0"}
+    assert validate_recipe(released_again, recipe) == [
+        "CC_RECIPE_LIBRARY_VERSION: expected 0.2.1, got 0.2.0"]
 
 
 def test_recipe_validation_rejects_versions_before_record_access():
@@ -386,7 +407,7 @@ def test_recipe_validation_rejects_versions_before_record_access():
         "CC_RECIPE_SCHEMA_VERSION: expected 3.0.0, got 2.0.0"
     ]
     assert validate_recipe({"schema_version": "2.0.0"}, {}) == [
-        "CC_LIBRARY_SCHEMA_VERSION: expected 3.0.0, got 2.0.0"
+        "CC_LIBRARY_SCHEMA_VERSION: expected 3.x.y, got 2.0.0"
     ]
 
 

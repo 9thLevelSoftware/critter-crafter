@@ -53,9 +53,10 @@ namespace CritterCrafter.Editor
             var catalogPath = Path.Combine(sourceDir, "catalog.json");
             if (!File.Exists(catalogPath)) throw new FileNotFoundException("catalog.json not found", catalogPath);
             var catalog = JsonUtility.FromJson<CatalogData>(File.ReadAllText(catalogPath));
-            if (catalog.schema_version != RecipeGenerator.SchemaVersion || catalog.document_kind != "critter_library"
-                || catalog.version != RecipeGenerator.LibraryVersion || catalog.frame != "gltf_rh_yup_zfwd_m"
-                || catalog.generator?.algorithm != RecipeGenerator.Algorithm)
+            // The library's content version is not gated (0.2.0 and 0.2.1 both import); the identity of what it
+            // generates is: schema major, document kind, frame and generator.
+            if (!RecipeGenerator.SupportedCatalogSchema(catalog.schema_version) || catalog.document_kind != "critter_library"
+                || catalog.frame != "gltf_rh_yup_zfwd_m" || !RecipeGenerator.SupportedGenerator(catalog.generator))
                 throw new InvalidDataException("not a supported critter library v3 catalog: " + catalogPath);
 
             var report = new Report();

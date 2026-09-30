@@ -8,9 +8,11 @@ from ..binding.profiles import CONNECTOR_INTERFACE_ID, CONNECTOR_INTERFACE_VERSI
 from ..library.catalog import reference_part_id
 from .rng import SplitMix64
 
-SCHEMA_VERSION = "3.0.0"
-LIBRARY_VERSION = "0.2.0"
+SCHEMA_VERSION = "3.0.0"        # the schema this tool writes, and the one recipes carry
+SCHEMA_MAJOR = "3"              # catalogs of any 3.x.y are read: their layout is compatible
 ALGORITHM = "cc-gen-3"
+RNG = "splitmix64"
+SEMVER = r"^[0-9]+\.[0-9]+\.[0-9]+$"
 MIN_SCALE_PCT = 80
 MAX_SCALE_PCT = 125
 GIRTH_TOLERANCE_PCT = 10
@@ -105,16 +107,24 @@ def _skeleton_usable(skeleton: dict[str, Any]) -> bool:
     return skeleton.get("status") == "approved"
 
 
+def schema_major_supported(version: Any) -> bool:
+    return isinstance(version, str) and version.split(".")[0] == SCHEMA_MAJOR
+
+
 def _require_catalog(catalog: dict[str, Any]) -> None:
+    """Gate on what makes a catalog generate the same recipes: its schema major and the generator's identity.
+
+    The library's own content version is deliberately *not* gated: a library may be re-released (0.2.1, 0.3.0) and
+    still generate with cc-gen-3. A saved recipe records the version it was made on and only replays on that one
+    (``CC_RECIPE_LIBRARY_VERSION``)."""
     version = catalog.get("schema_version")
-    if version != SCHEMA_VERSION:
-        raise GenerationError("CC_GEN_SCHEMA_VERSION", f"expected {SCHEMA_VERSION}, got {version}")
-    library_version = catalog.get("version")
-    if library_version != LIBRARY_VERSION:
-        raise GenerationError("CC_GEN_LIBRARY_VERSION", f"expected {LIBRARY_VERSION}, got {library_version}")
-    algorithm = catalog.get("generator", {}).get("algorithm")
-    if algorithm != ALGORITHM:
-        raise GenerationError("CC_GEN_ALGORITHM", f"expected {ALGORITHM}, got {algorithm}")
+    if not schema_major_supported(version):
+        raise GenerationError("CC_GEN_SCHEMA_VERSION", f"expected {SCHEMA_MAJOR}.x.y, got {version}")
+    generator = catalog.get("generator") or {}
+    if generator.get("algorithm") != ALGORITHM:
+        raise GenerationError("CC_GEN_ALGORITHM", f"expected {ALGORITHM}, got {generator.get('algorithm')}")
+    if generator.get("rng") != RNG:
+        raise GenerationError("CC_GEN_RNG", f"expected {RNG}, got {generator.get('rng')}")
 
 
 def generate(catalog: dict[str, Any], pool_id: str, seed: int) -> dict[str, Any]:

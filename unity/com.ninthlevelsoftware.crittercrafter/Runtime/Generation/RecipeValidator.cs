@@ -10,19 +10,14 @@ namespace CritterCrafter
         {
             var diags = new List<string>();
             if (catalog == null) { diags.Add("CC_UNSUPPORTED_CATALOG: null"); return diags; }
-            if (catalog.schema_version != RecipeGenerator.SchemaVersion)
+            if (!RecipeGenerator.SupportedCatalogSchema(catalog.schema_version))
             {
                 diags.Add("CC_UNSUPPORTED_CATALOG: " + (catalog.schema_version ?? ""));
                 return diags;
             }
-            if (catalog.version != RecipeGenerator.LibraryVersion)
+            if (!RecipeGenerator.SupportedGenerator(catalog.generator))
             {
-                diags.Add("CC_UNSUPPORTED_LIBRARY_VERSION: " + (catalog.version ?? ""));
-                return diags;
-            }
-            if (catalog.generator == null || catalog.generator.algorithm != RecipeGenerator.Algorithm)
-            {
-                diags.Add("CC_UNSUPPORTED_GENERATOR: " + (catalog.generator?.algorithm ?? ""));
+                diags.Add("CC_UNSUPPORTED_GENERATOR: " + (catalog.generator?.algorithm ?? "") + "/" + (catalog.generator?.rng ?? ""));
                 return diags;
             }
             if (recipe == null) { diags.Add("CC_INVALID_RECIPE: null"); return diags; }

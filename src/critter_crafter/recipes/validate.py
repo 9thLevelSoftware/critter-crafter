@@ -8,8 +8,10 @@ from jsonschema import Draft202012Validator
 
 from .generator import (
     ALGORITHM,
-    LIBRARY_VERSION,
+    RNG,
     SCHEMA_VERSION,
+    SEMVER,
+    schema_major_supported,
     _part_usable,
     _scales,
     connector_accepted,
@@ -27,7 +29,7 @@ _RECIPE_SCHEMA: dict[str, Any] = {
         "schema_version": {"const": SCHEMA_VERSION},
         "recipe_id": {"type": "string"},
         "library_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
-        "library_version": {"const": LIBRARY_VERSION},
+        "library_version": {"type": "string", "pattern": SEMVER},
         "generator": {"const": ALGORITHM},
         "pool_id": {"type": "string"},
         "seed": {"type": "integer"},
@@ -59,11 +61,11 @@ def validate_recipe(
 ) -> list[str]:
     """Return sorted ``CODE: detail`` diagnostics, rejecting versions first."""
     catalog_version = catalog.get("schema_version")
-    if catalog_version != SCHEMA_VERSION:
-        return [f"CC_LIBRARY_SCHEMA_VERSION: expected {SCHEMA_VERSION}, got {catalog_version}"]
-    catalog_release = catalog.get("version")
-    if catalog_release != LIBRARY_VERSION:
-        return [f"CC_LIBRARY_VERSION: expected {LIBRARY_VERSION}, got {catalog_release}"]
+    if not schema_major_supported(catalog_version):
+        return [f"CC_LIBRARY_SCHEMA_VERSION: expected 3.x.y, got {catalog_version}"]
+    generator = catalog.get("generator") or {}
+    if generator.get("algorithm") != ALGORITHM or generator.get("rng") != RNG:
+        return [f"CC_LIBRARY_GENERATOR: expected {ALGORITHM}/{RNG}, got {generator.get('algorithm')}/{generator.get('rng')}"]
     recipe_version = recipe.get("schema_version")
     if recipe_version != SCHEMA_VERSION:
         return [f"CC_RECIPE_SCHEMA_VERSION: expected {SCHEMA_VERSION}, got {recipe_version}"]
