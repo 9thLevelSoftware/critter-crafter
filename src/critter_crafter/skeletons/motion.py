@@ -358,7 +358,7 @@ def _gesture(name: str, role: str, k: int, u: float, phase: float,
         if role == "sliding":
             return 0.0, .07*s                                       # the body curls where it lies
         return ({"manipulator": ((.5 if k == 0 else .07)*s, .05*s), "head": (.45*s, .2*s),
-                 "sway": (.55*s, .15*s), "flail": (.35*s, .1*s), "none": (.15*s, 0)}.get(role, (0, 0)))
+                 "sway": (.35*s, .1*s), "flail": (.35*s, .1*s), "none": (.15*s, 0)}.get(role, (0, 0)))
     return 0.0, 0.0
 
 

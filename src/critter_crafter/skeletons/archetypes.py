@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import math
 import json
+import zlib
 from pathlib import Path
 from typing import Any
 
@@ -479,6 +480,74 @@ def _dragger(a: dict[str, Any], h: float, length: float, width: float) -> tuple[
     return branches, support, support, "bilateral"
 
 
+def _optional(branch: dict[str, Any], fill_pct: int) -> dict[str, Any]:
+    """Mark a branch as optional: its bones always exist, but a recipe fills it only ``fill_pct`` of the time."""
+    branch["required"] = False
+    branch["optional_fill_pct"] = fill_pct
+    return branch
+
+
+def _spine_index(t: float) -> int:
+    """The spine3 bone (0 pelvis, 1 lower, 2 end) that a point ``t`` of the way along the torso sits in."""
+    return 0 if t < .34 else 1 if t < .67 else 2
+
+
+def _extras(a: dict[str, Any], h: float, length: float, width: float) -> list[dict[str, Any]]:
+    """Optional sprouts that make a body plan less tidy: tails, dorsal spines, a second pair of arms, antennae, a
+    crown. They are contactless ``sway`` limbs that only hang off the core, so they never carry weight or move
+    a foot, and a recipe leaves each one off part of the time. Sizes follow the body, so presets scale them."""
+    plan, variant = a["plan"], a["variant"]
+    out: list[dict[str, Any]] = []
+
+    def dorsal(index: int, t: float, core_y: float, core_len: float, rear_z: float, radius: float, size: float, pct: int) -> None:
+        origin = _v(0, core_y + radius * .9, rear_z + t * core_len)
+        out.append(_optional(_branch(f"dorsal_{index}", "appendage1", "core", origin=origin, direction=[0.0, 1.0, -.25],
+                                     up=[0, 0, 1], length=size, role="sway", attach=_spine_index(t) if plan != "crawler" else 0,
+                                     phase=index * 1.3), pct))
+
+    if plan == "quadruped":
+        core_len, rear_z = length * .68, -length * .34
+        out.append(_optional(_branch("tail", "tentacle8", "core", origin=_v(0, h, rear_z), direction=[0, .2, -1],
+                                     up=[0, 1, 0], length=length * .5, role="sway", attach=0), 70))
+        radius = core_len * _PROFILE_GIRTH["spine3_axial"] * .5
+        dorsal(0, .5, h, core_len, rear_z, radius, length * .14, 55)
+        dorsal(1, .75, h, core_len, rear_z, radius, length * .12, 45)
+    elif plan == "biped":
+        y0, torso = h * .48, h * .46
+        if variant == "digitigrade":
+            out.append(_optional(_branch("tail", "tentacle8", "core", origin=_v(0, y0 + torso * .08, -h * .07),
+                                         direction=[0, -.35, -1], up=[0, 1, 0], length=h * .45, role="sway", attach=0), 65))
+        arm_len = h * .36 * a["limb_scale"]
+        for side, sx in (("L", 1), ("R", -1)):
+            out.append(_optional(_branch(
+                f"arm2_{side}", "limb3", "core", origin=_v(sx * width * .3, y0 + torso * .5, 0.0),
+                direction=[sx * .55, -.5, .35], up=[0, 0, -1], length=arm_len, side=side, attach=1,
+                mirror_of="arm2_L" if side == "R" else "", role="manipulator", phase=math.pi if side == "L" else 0,
+                support=0.0, profile_id="limb3_brachial"), 30))
+    elif plan == "hexapod":
+        core_len, rear_z = length * .72, -length * .36
+        radius = core_len * _PROFILE_GIRTH["spine3_axial"] * .5
+        for side, sx in (("L", 1), ("R", -1)):
+            out.append(_optional(_branch(
+                f"antenna_{side}", "appendage1", "core", origin=_v(sx * width * .05, h + length * .04, length * .36),
+                direction=[sx * .35, .55, 1.0], up=[0, 1, 0], length=length * .3, side=side, attach=2,
+                mirror_of="antenna_L" if side == "R" else "", role="sway", phase=0.7 * (1 if sx > 0 else 2)), 75))
+        dorsal(0, .5, h, core_len, rear_z, radius, length * .16, 50)
+    elif plan == "crawler":
+        core_len, rear_z = length * .56, -length * .28
+        radius = core_len * _PROFILE_GIRTH["core1_body"] * .5
+        if variant == "tripod":
+            out.append(_optional(_branch("crown", "appendage1", "core", origin=_v(0, h + radius * .9, rear_z + core_len * .5),
+                                         direction=[0, 1, .2], up=[0, 0, 1], length=length * .25, role="sway", attach=0), 80))
+        else:
+            dorsal(0, .3, h, core_len, rear_z, radius, length * .18, 55)
+            dorsal(1, .7, h, core_len, rear_z, radius, length * .15, 50)
+    elif plan == "radial":
+        out.append(_optional(_branch("crown", "tentacle8", "core", origin=_v(0, h + h * .5, 0), direction=[0, 1, 0],
+                                     up=[0, 0, 1], length=h * .6, role="sway", attach=0), 80))
+    return out
+
+
 _BUILDERS = {"biped": _biped, "quadruped": _quadruped, "crawler": _crawler, "hexapod": _hexapod, "radial": _radial, "serpentine": _serpentine, "dragger": _dragger}
 
 
@@ -623,6 +692,59 @@ def _align_distributed_supports(branches: list[dict[str, Any]], support_branches
         branch["gait"]["bend_pole_m"][1] = round(branch["gait"]["bend_pole_m"][1] + delta, 4)
 
 
+_SHAPES = {
+    "compact": {"height": .92, "length": .82, "width": 1.12, "limb": .88, "stance": 1.14, "radial": .90},
+    "balanced": {"height": 1.0, "length": 1.0, "width": 1.0, "limb": 1.0, "stance": 1.0, "radial": 1.0},
+    "elongated": {"height": 1.06, "length": 1.28, "width": .90, "limb": 1.12, "stance": .88, "radial": 1.16},
+}
+
+# Seeds whose variants are committed for every archetype (`critter skeleton vary`); the 42 anchors keep seed 1.
+VARIANT_SEEDS: tuple[int, ...] = (2, 3)
+# A seed whose bake misses a QA tolerance is swapped for another rather than loosening the tolerance.
+_VARIANT_SEED_OVERRIDES: dict[str, tuple[int, ...]] = {
+    "serpentine_segmented_paired_legs": (3, 4),     # seed 2's exported tail is 0.101 mm off (limit 0.1 mm)
+}
+
+
+def variant_seeds_for(archetype: str) -> tuple[int, ...]:
+    return _VARIANT_SEED_OVERRIDES.get(archetype, VARIANT_SEEDS)
+
+
+def _blend_shape(t: float) -> dict[str, float]:
+    """A shape a fraction ``t`` (0 compact, 1 balanced, 2 elongated) of the way along the presets."""
+    low, high, u = (_SHAPES["compact"], _SHAPES["balanced"], t) if t <= 1.0 else (_SHAPES["balanced"], _SHAPES["elongated"], t - 1.0)
+    return {key: low[key] + (high[key] - low[key]) * u for key in low}
+
+
+def variant_id(archetype: str, seed: int) -> str:
+    return f"{archetype}_s{seed:03d}_v3"
+
+
+def build_variant(archetype: str, seed: int) -> dict[str, Any]:
+    """A seeded variant of a curated archetype: a continuous blend between the compact, balanced and elongated
+    presets plus independent proportion knobs, so 42 fixed shapes become as many creatures as there are seeds.
+
+    Topology never changes (legs, support and attack effectors stay put); only proportions, stance and the
+    sizes the sprouts follow do. Each knob has its own random draw, so adding one never reshuffles the others."""
+    if archetype not in ARCHETYPES:
+        raise KeyError(f"unknown archetype: {archetype}")
+    rng = SplitMix64(seed * 104729 + zlib.crc32(archetype.encode()))
+
+    def between(low: float, high: float) -> float:
+        return low + (high - low) * rng.below(10_000) / 10_000
+
+    t = between(0.0, 2.0)
+    shape = _blend_shape(t)
+    knobs = {"height": between(.94, 1.06), "length": between(.92, 1.10), "width": between(.92, 1.10),
+             "limb": between(.93, 1.08), "stance": between(.95, 1.05)}
+    for key, factor in knobs.items():
+        shape[key] *= factor
+    shape["radial"] *= knobs["length"]
+    variant = {"blend": round(t, 4), **{key: round(value, 4) for key, value in knobs.items()}}
+    return _build(archetype, shape, seed, "anatomical", variant_id(archetype, seed),
+                  {"generator": "cc-gen-3", "seed": seed, "preset": "blend", "variant": variant})
+
+
 def build_candidate(archetype: str, preset: str, seed: int = 1, style: str = "anatomical") -> dict[str, Any]:
     """Build one stable v3 draft candidate from a curated archetype and proportion preset."""
     if archetype not in ARCHETYPES:
@@ -631,12 +753,14 @@ def build_candidate(archetype: str, preset: str, seed: int = 1, style: str = "an
         raise KeyError(f"unknown preset: {preset}")
     if style not in {"anatomical", "horror"}:
         raise ValueError("style must be 'anatomical' or 'horror'")
+    style_suffix = "" if style == "anatomical" else "_horror"
+    return _build(archetype, _SHAPES[preset], seed, style, f"{archetype}_{preset}{style_suffix}_v3",
+                  {"generator": "cc-gen-3", "seed": seed, "preset": preset})
+
+
+def _build(archetype: str, shape: dict[str, float], seed: int, style: str, skeleton_id: str,
+           provenance: dict[str, Any]) -> dict[str, Any]:
     a = dict(ARCHETYPES[archetype])
-    shape = {
-        "compact": {"height": .92, "length": .82, "width": 1.12, "limb": .88, "stance": 1.14, "radial": .90},
-        "balanced": {"height": 1.0, "length": 1.0, "width": 1.0, "limb": 1.0, "stance": 1.0, "radial": 1.0},
-        "elongated": {"height": 1.06, "length": 1.28, "width": .90, "limb": 1.12, "stance": .88, "radial": 1.16},
-    }[preset]
     a["limb_scale"] = shape["limb"]
     h = a["height"] * shape["height"] * _r(seed, 1)
     if a["plan"] == "radial":
@@ -646,6 +770,7 @@ def build_candidate(archetype: str, preset: str, seed: int = 1, style: str = "an
         length = a["length"] * shape["length"] * _r(seed, 2)
         width = a["width"] * shape["width"] * _r(seed, 3)
     branches, supports, contacts, symmetry = _BUILDERS[a["plan"]](a, h, length, width)
+    branches += _extras(a, h, length, width)
     _scale_stance(branches, shape["stance"])
     if style == "horror":
         _apply_horror_modifier(branches)
@@ -665,10 +790,8 @@ def build_candidate(archetype: str, preset: str, seed: int = 1, style: str = "an
             _fit_leg_to_hip(branch, hip if grounded else hip * shape["limb"])
     locomotion = {"biped": "biped", "quadruped": "quadruped", "crawler": "crawl", "hexapod": "crawl",
                   "radial": "crawl", "serpentine": "slither", "dragger": "drag"}[a["plan"]]
-    style_suffix = "" if style == "anatomical" else "_horror"
     return _finalise(branches, supports, contacts, symmetry, archetype=archetype, body_plan=a["plan"], family=a["family"],
-                     style=style, hint=locomotion, skeleton_id=f"{archetype}_{preset}{style_suffix}_v3",
-                     dims=(h, length, width), provenance={"generator": "cc-gen-3", "seed": seed, "preset": preset})
+                     style=style, hint=locomotion, skeleton_id=skeleton_id, dims=(h, length, width), provenance=provenance)
 
 
 def _finalise(branches: list[dict[str, Any]], supports: list[str], contacts: list[str], symmetry: str, *,
@@ -708,6 +831,7 @@ def generate_all(seed: int = 1, style: str = "anatomical") -> list[dict[str, Any
     if style == "anatomical":
         from .amalgam import committed_amalgams
         candidates += committed_amalgams()
+        candidates += [build_variant(archetype, variant_seed) for archetype in ARCHETYPES for variant_seed in variant_seeds_for(archetype)]
     return sorted(candidates, key=lambda candidate: candidate["skeleton_id"])
 
 

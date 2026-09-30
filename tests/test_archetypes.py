@@ -35,7 +35,8 @@ def test_all_curated_candidates_are_reproducible_distinct_and_within_budget() ->
 
     assert PRESETS == ("compact", "balanced", "elongated")
     from critter_crafter.skeletons.amalgam import AMALGAM_SEEDS
-    assert len(candidates) == len(ARCHETYPES) * len(PRESETS) + len(AMALGAM_SEEDS)
+    from critter_crafter.skeletons.archetypes import VARIANT_SEEDS
+    assert len(candidates) == len(ARCHETYPES) * (len(PRESETS) + len(VARIANT_SEEDS)) + len(AMALGAM_SEEDS)
     assert candidates == generate_all(seed=9)
     assert len({candidate["skeleton_id"] for candidate in candidates}) == len(candidates)
     silhouettes = {

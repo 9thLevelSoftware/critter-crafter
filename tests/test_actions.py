@@ -201,7 +201,7 @@ def test_belly_hauler_shove_fits_its_low_short_arm_and_remains_meaningful() -> N
         item for item in _skeletons()
         if item["anatomy"]["archetype_id"] == "dragger_belly_hauler"
     ]
-    assert len(haulers) == 3
+    assert len(haulers) >= 3          # three presets plus the seeded variants
     for skeleton in haulers:
         plan = resolve_attack(skeleton)
         branch = next(item for item in skeleton["branches"] if item["branch_id"] == "arm_L")
