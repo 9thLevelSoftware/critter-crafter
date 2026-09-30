@@ -161,6 +161,7 @@ from the seed and maps onto machinery that already exists:
   mostly by pushers may want the pivot at the front.
 - **Walker amalgams slip 3-16 cm at instant 90° turns** (and some lifts are refused while they re-step); the
   straight walk and the 20° ramp are clean. This is the general turn limitation, worse on tall legs.
+- **Hauled amalgam s0005** (three limbs, one a pusher) slips 4-7 cm at some instant turns, where the curated draggers and hauled s0004 stay under 3 cm. The dragger turn test keeps s0004 only.
 - **Amalgams are slow.** Hauled ones walk at 0.2-0.35 m/s and walkers at about 0.6 m/s (their `v_walk_mps`); none
   reaches the game's shared 2.5 m/s, so the game should use each creature's own published speeds.
 - **Arms used as legs are the hardest amalgam kit.** About a third of the seeds that use one fail the bake
