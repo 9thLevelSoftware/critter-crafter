@@ -1,0 +1,22 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  fast:
+    # No Blender and no Unity here: the schemas and the pure-Python tests (including the byte-identity of the
+    # Unity golden copies and the platform-stability of the generated skeleton sources on Linux).
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Install
+        run: uv sync
+      - name: Validate schemas and cross-record rules
+        run: uv run critter schema validate
+      - name: Tests without Blender
+        run: uv run pytest -m "not blender" -q

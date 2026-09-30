@@ -397,6 +397,29 @@ namespace CritterCrafter.Tests
         }
 
         [Test]
+        public void RealPartAlbedoTexturesAreBoundToTheirMaterials()
+        {
+            // The importer binds a real part's albedo_png to the material's main texture. The test project has no URP, so
+            // this runs the built-in shader's _MainTex path; the URP _BaseMap path has never been run in Unity.
+            var catalog = RawLib.Catalog;
+            var textured = catalog.parts.Where(p => !string.IsNullOrEmpty(p.asset?.albedo_png)).ToList();
+            Assert.IsNotEmpty(textured, "the built library has no textured part");
+            foreach (var part in textured)
+            {
+                var entry = RawLib.FindPart(part.part_id);
+                Assert.IsNotNull(entry, part.part_id);
+                var material = entry.materials != null && entry.materials.Length > 0 ? entry.materials[0] : entry.material;
+                Assert.IsNotNull(material, part.part_id + ": a material");
+                var expected = AssetDatabase.LoadAssetAtPath<Texture2D>(_report.AssetFolder + "/" + part.asset.albedo_png);
+                Assert.IsNotNull(expected, part.part_id + ": the albedo texture imported");
+                string property = material.HasProperty("_BaseMap") ? "_BaseMap" : "_MainTex";
+                Assert.IsTrue(material.HasProperty(property), part.part_id + ": a texture slot");
+                Assert.AreSame(expected, material.GetTexture(property), part.part_id + " " + property);
+                if (material.HasProperty("_Color")) Assert.AreEqual(Color.white, material.GetColor("_Color"), part.part_id + ": textured parts are not tinted");
+            }
+        }
+
+        [Test]
         public void ARollAboutForwardRaisesTheRightHandSide()
         {
             // CreatureGait's limp and plane-fit roll rely on this convention: a positive roll about +Z raises +X, so

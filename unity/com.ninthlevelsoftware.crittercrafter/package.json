@@ -4,6 +4,8 @@
   "displayName": "Critter Crafter",
   "description": "Imports critter-crafter asset libraries (skeletons, body parts, biomass connectors) and assembles skinned, Animator-driven procedural monsters at runtime from seeded recipes.",
   "unity": "6000.0",
+  "documentationUrl": "https://github.com/9thLevelSoftware/critter-crafter/tree/main/unity/com.ninthlevelsoftware.crittercrafter#readme",
+  "changelogUrl": "https://github.com/9thLevelSoftware/critter-crafter/blob/main/unity/com.ninthlevelsoftware.crittercrafter/CHANGELOG.md",
   "author": { "name": "9th Level Software" },
   "keywords": ["procedural", "creature", "monster", "skinned mesh", "generator"],
   "dependencies": {

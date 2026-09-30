@@ -566,18 +566,31 @@ def library_build(out_root: Path | None, clean: bool) -> None:
     click.echo(f"catalog.json + {len(manifest['files'])} files written")
 
 
+def pack_files(src: Path, slim: bool) -> list[Path]:
+    """The files of a built library to zip. Slim keeps what the Unity importer reads and nothing else: the
+    catalog, every FBX model, the PNG textures and each skeleton's motion.json (the importer validates it). The
+    .blend sources, GLB exports and assembled review GLBs (about 215 of the library's 930 MB on disk) only matter
+    to the authoring side. The motion files stay although they are the largest item (480 MB raw): the importer
+    validates them, and they deflate about 17:1 in the zip."""
+    files = sorted(f for f in src.rglob("*") if f.is_file())
+    if not slim:
+        return files
+    return [f for f in files if f.name == "catalog.json" and f.parent == src
+            or f.suffix in (".fbx", ".png") or f.name == "motion.json"]
+
+
 @library.command("pack")
 @click.option("--out", "out_root", type=click.Path(path_type=Path), default=None)
-def library_pack(out_root: Path | None) -> None:
-    """Zip a built library as critter-library-<id>-v<ver>.zip (release asset)."""
+@click.option("--slim", is_flag=True, help="Only what the Unity importer needs (catalog, FBX, PNG, motion.json)")
+def library_pack(out_root: Path | None, slim: bool) -> None:
+    """Zip a built library as critter-library-<id>-v<ver>[-slim].zip (release asset)."""
     catalog, src = _built_catalog(out_root, require_assemblies=True)
     dist = paths().root / "dist"
     dist.mkdir(exist_ok=True)
-    zpath = dist / f"critter-library-{catalog['library_id']}-v{catalog['version']}.zip"
+    zpath = dist / f"critter-library-{catalog['library_id']}-v{catalog['version']}{'-slim' if slim else ''}.zip"
     with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED) as z:
-        for f in sorted(src.rglob("*")):
-            if f.is_file():
-                z.write(f, f.relative_to(src).as_posix())
+        for f in pack_files(src, slim):
+            z.write(f, f.relative_to(src).as_posix())
     click.echo(f"wrote {zpath}")
 
 
