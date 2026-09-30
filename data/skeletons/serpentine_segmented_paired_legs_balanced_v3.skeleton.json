@@ -3,7 +3,7 @@
   "skeleton_id": "serpentine_segmented_paired_legs_balanced_v3",
   "family": "serpentine",
   "locomotion_hint": "slither",
-  "status": "draft",
+  "status": "approved",
   "symmetry_pct": 100,
   "branches": [
     {
@@ -756,5 +756,10 @@
     "generator": "cc-gen-3",
     "seed": 1,
     "preset": "balanced"
+  },
+  "review": {
+    "by": "owner",
+    "date": "2026-09-30",
+    "method": "owner"
   }
 }

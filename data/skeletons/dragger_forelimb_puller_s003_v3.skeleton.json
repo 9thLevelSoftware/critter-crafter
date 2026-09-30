@@ -3,7 +3,7 @@
   "skeleton_id": "dragger_forelimb_puller_s003_v3",
   "family": "dragger",
   "locomotion_hint": "drag",
-  "status": "draft",
+  "status": "approved",
   "symmetry_pct": 100,
   "branches": [
     {
@@ -667,5 +667,10 @@
       "limb": 0.965,
       "stance": 0.9916
     }
+  },
+  "review": {
+    "by": "owner",
+    "date": "2026-09-30",
+    "method": "owner"
   }
 }

@@ -14,7 +14,7 @@
     "locomotor"
   ],
   "size_class": null,
-  "status": "draft",
+  "status": "approved",
   "style_profile": "flesh_stylized_v1",
   "dimensions_m": [
     0.151019,
@@ -58,6 +58,7 @@
       "strain_max": 1.7193,
       "islands": 1,
       "triangles": 1939
-    }
+    },
+    "approved_pipeline": "9a5c52b98cb8dab9966d1d8f74f04c86ceaf51ad988acf9f0c85bb28ddafcbb5"
   }
 }

@@ -3,7 +3,7 @@
   "skeleton_id": "amalgam_hauled_s0005_v3",
   "family": "amalgam",
   "locomotion_hint": "drag",
-  "status": "draft",
+  "status": "approved",
   "symmetry_pct": 92,
   "branches": [
     {
@@ -1400,5 +1400,10 @@
     "seed": 5,
     "preset": "amalgam",
     "mode": "hauled"
+  },
+  "review": {
+    "by": "owner",
+    "date": "2026-09-30",
+    "method": "owner"
   }
 }

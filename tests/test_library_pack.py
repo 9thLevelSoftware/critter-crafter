@@ -26,3 +26,11 @@ def test_slim_keeps_the_catalog_models_textures_and_motion_files_only(tmp_path):
 def test_the_full_pack_keeps_everything(tmp_path):
     src = _library(tmp_path)
     assert len(pack_files(src, slim=False)) == 13
+
+
+def test_a_part_approval_does_not_change_its_source_state():
+    from critter_crafter.library.commands import _part_source_state
+    draft = {"part_id": "p", "status": "draft", "real": {"sha256": "x"}}
+    approved = {"part_id": "p", "status": "approved", "real": {"sha256": "x", "approved_pipeline": "abc"}}
+    assert _part_source_state(draft) == _part_source_state(approved)
+    assert _part_source_state(draft) != _part_source_state({**draft, "real": {"sha256": "y"}})

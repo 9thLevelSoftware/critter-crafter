@@ -3,7 +3,7 @@
   "skeleton_id": "crawler_alien_tripod_s003_v3",
   "family": "crawler",
   "locomotion_hint": "crawl",
-  "status": "draft",
+  "status": "approved",
   "symmetry_pct": 92,
   "branches": [
     {
@@ -606,5 +606,10 @@
       "limb": 1.0025,
       "stance": 1.0037
     }
+  },
+  "review": {
+    "by": "owner",
+    "date": "2026-09-30",
+    "method": "owner"
   }
 }

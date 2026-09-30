@@ -150,7 +150,25 @@ def assembly_pipeline_fingerprint() -> str:
 
 def _part_source_state(part: dict[str, Any]) -> dict[str, Any]:
     """Stable compiled part input, excluding paths/results written by a build."""
-    return {key: value for key, value in part.items() if key != "asset"}
+    # An approval is a decision, not part of the creature: it must not make the build stale (the next part
+    # approval would refuse with CC_BUILD_STALE), the same way a skeleton approval doesn't.
+    state = {key: value for key, value in part.items() if key not in ("asset", "status")}
+    if isinstance(state.get("real"), dict):
+        state["real"] = {k: v for k, v in state["real"].items() if k != "approved_pipeline"}
+    return state
+
+
+def _normalized_part_state(stored: Any) -> Any:
+    """A stored part build state with its source normalized (states written before approvals were excluded)."""
+    if isinstance(stored, dict) and isinstance(stored.get("source"), dict):
+        return {**stored, "source": _part_source_state(stored["source"])}
+    return stored
+
+
+def _normalized_assembly_state(stored: Any) -> Any:
+    if isinstance(stored, dict) and isinstance(stored.get("parts"), dict):
+        return {**stored, "parts": {k: _normalized_part_state(v) for k, v in stored["parts"].items()}}
+    return stored
 
 
 def _part_artifact_fingerprints(part: dict[str, Any], out: Path,
@@ -567,7 +585,7 @@ def library_build(out_root: Path | None, clean: bool) -> None:
         )
         assembled = out / "skeletons" / sid / "assembled.glb"
         if (not clean and not used.intersection(rebuilt_parts) and assembled.is_file()
-                and state.get("assemblies", {}).get(sid) == assembly_state):
+                and _normalized_assembly_state(state.get("assemblies", {}).get(sid)) == assembly_state):
             skeleton.setdefault("asset", {})["assembled_glb"] = assembled.relative_to(out).as_posix()
             try:
                 actual = skeleton_content_hash(catalog, skeleton, out)
@@ -678,7 +696,7 @@ def _built_catalog(out_root: Path | None = None, *, require_assemblies: bool = F
             actual = part_build_state(current_part, src, asset=built_part.get("asset"))
         except ReviewError as exc:
             raise click.ClickException(str(exc)) from exc
-        if state.get("parts", {}).get(part_id) != actual:
+        if _normalized_part_state(state.get("parts", {}).get(part_id)) != actual:
             raise click.ClickException(f"CC_BUILD_STALE: {part_id}: part pipeline or artifacts changed; rebuild")
     current_by_id = {s["skeleton_id"]: s for s in current["skeletons"]}
     for s in built["skeletons"]:
@@ -697,7 +715,7 @@ def _built_catalog(out_root: Path | None = None, *, require_assemblies: bool = F
                 base_fingerprint = skeleton_content_hash(built, base, src)
                 recipe = _review_recipe(built, s)
                 expected_assembly = _assembly_state(built, recipe, src, base_fingerprint)
-                if state.get("assemblies", {}).get(s["skeleton_id"]) != expected_assembly:
+                if _normalized_assembly_state(state.get("assemblies", {}).get(s["skeleton_id"])) != expected_assembly:
                     raise click.ClickException(
                         f"CC_BUILD_STALE: {s['skeleton_id']}: assembly inputs changed; rebuild"
                     )

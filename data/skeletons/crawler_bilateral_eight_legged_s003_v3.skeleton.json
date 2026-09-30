@@ -3,7 +3,7 @@
   "skeleton_id": "crawler_bilateral_eight_legged_s003_v3",
   "family": "crawler",
   "locomotion_hint": "crawl",
-  "status": "draft",
+  "status": "approved",
   "symmetry_pct": 100,
   "branches": [
     {
@@ -1314,5 +1314,10 @@
       "limb": 0.965,
       "stance": 1.0099
     }
+  },
+  "review": {
+    "by": "owner",
+    "date": "2026-09-30",
+    "method": "owner"
   }
 }

@@ -3,7 +3,7 @@
   "skeleton_id": "dragger_belly_hauler_s002_v3",
   "family": "dragger",
   "locomotion_hint": "drag",
-  "status": "draft",
+  "status": "approved",
   "symmetry_pct": 100,
   "branches": [
     {
@@ -667,5 +667,10 @@
       "limb": 0.9619,
       "stance": 0.9793
     }
+  },
+  "review": {
+    "by": "owner",
+    "date": "2026-09-30",
+    "method": "owner"
   }
 }

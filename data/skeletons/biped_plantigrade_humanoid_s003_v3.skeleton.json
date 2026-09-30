@@ -3,7 +3,7 @@
   "skeleton_id": "biped_plantigrade_humanoid_s003_v3",
   "family": "biped",
   "locomotion_hint": "biped",
-  "status": "draft",
+  "status": "approved",
   "symmetry_pct": 100,
   "branches": [
     {
@@ -912,5 +912,10 @@
       "limb": 1.0758,
       "stance": 1.0444
     }
+  },
+  "review": {
+    "by": "owner",
+    "date": "2026-09-30",
+    "method": "owner"
   }
 }

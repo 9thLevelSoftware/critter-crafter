@@ -56,7 +56,7 @@ def test_sources_validate_clean():
     diags, cat = validate_sources(paths().data, paths().schemas)
     assert cat is not None
     assert diags == []
-    assert {s["status"] for s in cat["skeletons"]} == {"draft"}
+    assert {s["status"] for s in cat["skeletons"]} <= {"draft", "approved", "rejected"}
 
 
 @pytest.mark.parametrize("pool", ["any", "biped", "quadruped", "crawler"])

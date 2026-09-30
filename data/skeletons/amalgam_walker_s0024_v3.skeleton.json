@@ -3,7 +3,7 @@
   "skeleton_id": "amalgam_walker_s0024_v3",
   "family": "amalgam",
   "locomotion_hint": "crawl",
-  "status": "draft",
+  "status": "approved",
   "symmetry_pct": 92,
   "branches": [
     {
@@ -1155,5 +1155,10 @@
     "seed": 24,
     "preset": "amalgam",
     "mode": "walker"
+  },
+  "review": {
+    "by": "owner",
+    "date": "2026-09-30",
+    "method": "owner"
   }
 }
