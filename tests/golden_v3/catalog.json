@@ -240496,7 +240496,11 @@
       "families": [
         "biped",
         "crawler",
-        "quadruped"
+        "dragger",
+        "hexapod",
+        "quadruped",
+        "radial",
+        "serpentine"
       ],
       "skeleton_ids": []
     },
@@ -240522,6 +240526,20 @@
       "skeleton_ids": []
     },
     {
+      "pool_id": "dragger",
+      "families": [
+        "dragger"
+      ],
+      "skeleton_ids": []
+    },
+    {
+      "pool_id": "hexapod",
+      "families": [
+        "hexapod"
+      ],
+      "skeleton_ids": []
+    },
+    {
       "pool_id": "puppet_corpse",
       "families": [
         "biped"
@@ -240532,6 +240550,20 @@
       "pool_id": "quadruped",
       "families": [
         "quadruped"
+      ],
+      "skeleton_ids": []
+    },
+    {
+      "pool_id": "radial",
+      "families": [
+        "radial"
+      ],
+      "skeleton_ids": []
+    },
+    {
+      "pool_id": "serpentine",
+      "families": [
+        "serpentine"
       ],
       "skeleton_ids": []
     },

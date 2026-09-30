@@ -6,7 +6,11 @@
       "families": [
         "biped",
         "quadruped",
-        "crawler"
+        "crawler",
+        "hexapod",
+        "radial",
+        "serpentine",
+        "dragger"
       ],
       "skeleton_ids": []
     },
@@ -28,6 +32,34 @@
       "pool_id": "crawler",
       "families": [
         "crawler"
+      ],
+      "skeleton_ids": []
+    },
+    {
+      "pool_id": "hexapod",
+      "families": [
+        "hexapod"
+      ],
+      "skeleton_ids": []
+    },
+    {
+      "pool_id": "radial",
+      "families": [
+        "radial"
+      ],
+      "skeleton_ids": []
+    },
+    {
+      "pool_id": "serpentine",
+      "families": [
+        "serpentine"
+      ],
+      "skeleton_ids": []
+    },
+    {
+      "pool_id": "dragger",
+      "families": [
+        "dragger"
       ],
       "skeleton_ids": []
     },
