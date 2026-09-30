@@ -392,6 +392,15 @@ namespace CritterCrafter.Tests
             Assert.IsEmpty(failures, "dragger hands slid or missed their targets after an instant turn:\n" + string.Join("\n", failures));
         }
 
+        [Test]
+        public void ARollAboutForwardRaisesTheRightHandSide()
+        {
+            // CreatureGait's limp and plane-fit roll rely on this convention: a positive roll about +Z raises +X, so
+            // rolling toward a limping leg on the right takes a negative angle.
+            Assert.Greater((Quaternion.Euler(0f, 0f, 10f) * Vector3.right).y, 0f);
+            Assert.Less((Quaternion.Euler(0f, 0f, -10f) * Vector3.right).y, 0f);
+        }
+
         static readonly string[] WalkerAmalgams =
         {
             "amalgam_walker_s0008_v3", "amalgam_walker_s0024_v3", "amalgam_walker_s0029_v3",
