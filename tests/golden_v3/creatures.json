@@ -975,7 +975,9 @@
     "leg_R",
     "arm_L",
     "arm_R",
-    "head"
+    "head",
+    "tail",
+    "arm2_L"
    ],
    "part_ids": [
     "reference_biped_digitigrade_creature_balanced_v3_core_v1",
@@ -983,9 +985,13 @@
     "reference_biped_digitigrade_creature_balanced_v3_leg_r_v1",
     "reference_biped_digitigrade_creature_balanced_v3_arm_l_v1",
     "reference_biped_digitigrade_creature_balanced_v3_arm_r_v1",
-    "reference_biped_digitigrade_creature_balanced_v3_head_v1"
+    "reference_biped_digitigrade_creature_balanced_v3_head_v1",
+    "reference_biped_digitigrade_creature_balanced_v3_tail_v1",
+    "reference_biped_digitigrade_creature_balanced_v3_arm2_l_v1"
    ],
    "length_scales": [
+    1.0,
+    1.0,
     1.0,
     1.0,
     1.0,
@@ -999,19 +1005,21 @@
     1.0,
     1.0,
     1.0,
+    1.0,
+    1.0,
     1.0
    ],
-   "mass_kg": 81.96189,
+   "mass_kg": 94.525177,
    "com_m": [
-    0.0,
-    0.81936,
-    0.038098
+    0.017782,
+    0.823813,
+    0.005392
    ],
-   "performance": 0.762517,
-   "v_walk": 1.210301,
-   "v_run": 2.390611,
-   "v_max": 2.682453,
-   "cadence_max": 2.328544
+   "performance": 0.700753,
+   "v_walk": 1.160248,
+   "v_run": 2.019015,
+   "v_max": 2.465173,
+   "cadence_max": 2.139931
   },
   {
    "skeleton_id": "biped_digitigrade_creature_compact_v3",
@@ -1022,7 +1030,9 @@
     "leg_R",
     "arm_L",
     "arm_R",
-    "head"
+    "head",
+    "tail",
+    "arm2_L"
    ],
    "part_ids": [
     "reference_biped_digitigrade_creature_compact_v3_core_v1",
@@ -1030,9 +1040,13 @@
     "reference_biped_digitigrade_creature_compact_v3_leg_r_v1",
     "reference_biped_digitigrade_creature_compact_v3_arm_l_v1",
     "reference_biped_digitigrade_creature_compact_v3_arm_r_v1",
-    "reference_biped_digitigrade_creature_compact_v3_head_v1"
+    "reference_biped_digitigrade_creature_compact_v3_head_v1",
+    "reference_biped_digitigrade_creature_compact_v3_tail_v1",
+    "reference_biped_digitigrade_creature_compact_v3_arm2_l_v1"
    ],
    "length_scales": [
+    1.0,
+    1.0,
     1.0,
     1.0,
     1.0,
@@ -1046,19 +1060,21 @@
     1.0,
     1.0,
     1.0,
+    1.0,
+    1.0,
     1.0
    ],
-   "mass_kg": 53.235101,
+   "mass_kg": 61.687679,
    "com_m": [
-    0.0,
-    0.717893,
-    0.029156
+    0.013597,
+    0.712693,
+    -0.008827
    ],
-   "performance": 0.772191,
-   "v_walk": 1.094653,
-   "v_run": 2.203457,
-   "v_max": 2.795034,
-   "cadence_max": 2.565902
+   "performance": 0.712196,
+   "v_walk": 1.051269,
+   "v_run": 1.874368,
+   "v_max": 2.577878,
+   "cadence_max": 2.366548
   },
   {
    "skeleton_id": "biped_digitigrade_creature_elongated_v3",
@@ -1069,7 +1085,9 @@
     "leg_R",
     "arm_L",
     "arm_R",
-    "head"
+    "head",
+    "tail",
+    "arm2_L"
    ],
    "part_ids": [
     "reference_biped_digitigrade_creature_elongated_v3_core_v1",
@@ -1077,9 +1095,13 @@
     "reference_biped_digitigrade_creature_elongated_v3_leg_r_v1",
     "reference_biped_digitigrade_creature_elongated_v3_arm_l_v1",
     "reference_biped_digitigrade_creature_elongated_v3_arm_r_v1",
-    "reference_biped_digitigrade_creature_elongated_v3_head_v1"
+    "reference_biped_digitigrade_creature_elongated_v3_head_v1",
+    "reference_biped_digitigrade_creature_elongated_v3_tail_v1",
+    "reference_biped_digitigrade_creature_elongated_v3_arm2_l_v1"
    ],
    "length_scales": [
+    1.0,
+    1.0,
     1.0,
     1.0,
     1.0,
@@ -1093,19 +1115,21 @@
     1.0,
     1.0,
     1.0,
+    1.0,
+    1.0,
     1.0
    ],
-   "mass_kg": 117.18773,
+   "mass_kg": 134.679048,
    "com_m": [
-    0.0,
-    0.911747,
-    0.047099
+    0.022261,
+    0.925546,
+    0.020699
    ],
-   "performance": 0.753459,
-   "v_walk": 1.246441,
-   "v_run": 2.243595,
-   "v_max": 2.492883,
-   "cadence_max": 2.148942
+   "performance": 0.688616,
+   "v_walk": 1.160051,
+   "v_run": 2.088093,
+   "v_max": 2.320103,
+   "cadence_max": 2.0
   },
   {
    "skeleton_id": "biped_plantigrade_humanoid_balanced_v3",
@@ -1116,7 +1140,9 @@
     "leg_R",
     "arm_L",
     "arm_R",
-    "head"
+    "head",
+    "arm2_L",
+    "arm2_R"
    ],
    "part_ids": [
     "reference_biped_plantigrade_humanoid_balanced_v3_core_v1",
@@ -1124,9 +1150,13 @@
     "reference_biped_plantigrade_humanoid_balanced_v3_leg_r_v1",
     "reference_biped_plantigrade_humanoid_balanced_v3_arm_l_v1",
     "reference_biped_plantigrade_humanoid_balanced_v3_arm_r_v1",
-    "reference_biped_plantigrade_humanoid_balanced_v3_head_v1"
+    "reference_biped_plantigrade_humanoid_balanced_v3_head_v1",
+    "reference_biped_plantigrade_humanoid_balanced_v3_arm2_l_v1",
+    "reference_biped_plantigrade_humanoid_balanced_v3_arm2_r_v1"
    ],
    "length_scales": [
+    1.0,
+    1.0,
     1.0,
     1.0,
     1.0,
@@ -1140,19 +1170,21 @@
     1.0,
     1.0,
     1.0,
+    1.0,
+    1.0,
     1.0
    ],
-   "mass_kg": 116.913146,
+   "mass_kg": 129.25724,
    "com_m": [
     0.0,
-    0.786087,
-    0.077585
+    0.814216,
+    0.085058
    ],
-   "performance": 0.825894,
-   "v_walk": 1.294223,
-   "v_run": 2.881622,
-   "v_max": 3.787796,
-   "cadence_max": 2.459426
+   "performance": 0.735036,
+   "v_walk": 1.22096,
+   "v_run": 2.282474,
+   "v_max": 3.371095,
+   "cadence_max": 2.188861
   },
   {
    "skeleton_id": "biped_plantigrade_humanoid_compact_v3",
@@ -1163,7 +1195,9 @@
     "leg_R",
     "arm_L",
     "arm_R",
-    "head"
+    "head",
+    "arm2_L",
+    "arm2_R"
    ],
    "part_ids": [
     "reference_biped_plantigrade_humanoid_compact_v3_core_v1",
@@ -1171,9 +1205,13 @@
     "reference_biped_plantigrade_humanoid_compact_v3_leg_r_v1",
     "reference_biped_plantigrade_humanoid_compact_v3_arm_l_v1",
     "reference_biped_plantigrade_humanoid_compact_v3_arm_r_v1",
-    "reference_biped_plantigrade_humanoid_compact_v3_head_v1"
+    "reference_biped_plantigrade_humanoid_compact_v3_head_v1",
+    "reference_biped_plantigrade_humanoid_compact_v3_arm2_l_v1",
+    "reference_biped_plantigrade_humanoid_compact_v3_arm2_r_v1"
    ],
    "length_scales": [
+    1.0,
+    1.0,
     1.0,
     1.0,
     1.0,
@@ -1187,19 +1225,21 @@
     1.0,
     1.0,
     1.0,
+    1.0,
+    1.0,
     1.0
    ],
-   "mass_kg": 74.771896,
+   "mass_kg": 81.307855,
    "com_m": [
     0.0,
-    0.688805,
-    0.063268
+    0.707799,
+    0.068175
    ],
-   "performance": 0.836988,
-   "v_walk": 1.171101,
-   "v_run": 2.6602,
-   "v_max": 3.932262,
-   "cadence_max": 2.714117
+   "performance": 0.754146,
+   "v_walk": 1.111635,
+   "v_run": 2.159665,
+   "v_max": 3.54306,
+   "cadence_max": 2.445483
   },
   {
    "skeleton_id": "biped_plantigrade_humanoid_elongated_v3",
@@ -1210,7 +1250,9 @@
     "leg_R",
     "arm_L",
     "arm_R",
-    "head"
+    "head",
+    "arm2_L",
+    "arm2_R"
    ],
    "part_ids": [
     "reference_biped_plantigrade_humanoid_elongated_v3_core_v1",
@@ -1218,9 +1260,13 @@
     "reference_biped_plantigrade_humanoid_elongated_v3_leg_r_v1",
     "reference_biped_plantigrade_humanoid_elongated_v3_arm_l_v1",
     "reference_biped_plantigrade_humanoid_elongated_v3_arm_r_v1",
-    "reference_biped_plantigrade_humanoid_elongated_v3_head_v1"
+    "reference_biped_plantigrade_humanoid_elongated_v3_head_v1",
+    "reference_biped_plantigrade_humanoid_elongated_v3_arm2_l_v1",
+    "reference_biped_plantigrade_humanoid_elongated_v3_arm2_r_v1"
    ],
    "length_scales": [
+    1.0,
+    1.0,
     1.0,
     1.0,
     1.0,
@@ -1234,19 +1280,21 @@
     1.0,
     1.0,
     1.0,
+    1.0,
+    1.0,
     1.0
    ],
-   "mass_kg": 169.066306,
+   "mass_kg": 189.794642,
    "com_m": [
     0.0,
-    0.875374,
-    0.090168
+    0.913537,
+    0.100623
    ],
-   "performance": 0.818435,
-   "v_walk": 1.404878,
-   "v_run": 3.085716,
-   "v_max": 3.543374,
-   "cadence_max": 2.274795
+   "performance": 0.719969,
+   "v_walk": 1.31766,
+   "v_run": 2.387897,
+   "v_max": 3.117072,
+   "cadence_max": 2.001115
   },
   {
    "skeleton_id": "crawler_alien_tripod_balanced_v3",
@@ -1255,15 +1303,18 @@
     "core",
     "leg_0",
     "leg_1",
-    "leg_2"
+    "leg_2",
+    "crown"
    ],
    "part_ids": [
     "reference_crawler_alien_tripod_balanced_v3_core_v1",
     "reference_crawler_alien_tripod_balanced_v3_leg_0_v1",
     "reference_crawler_alien_tripod_balanced_v3_leg_1_v1",
-    "reference_crawler_alien_tripod_balanced_v3_leg_2_v1"
+    "reference_crawler_alien_tripod_balanced_v3_leg_2_v1",
+    "reference_crawler_alien_tripod_balanced_v3_crown_v1"
    ],
    "length_scales": [
+    1.0,
     1.0,
     1.0,
     1.0,
@@ -1273,19 +1324,20 @@
     1.0,
     1.0,
     1.0,
+    1.0,
     1.0
    ],
-   "mass_kg": 58.498021,
+   "mass_kg": 58.833924,
    "com_m": [
     2.4e-05,
-    0.371551,
-    0.0
+    0.372982,
+    0.000161
    ],
-   "performance": 1.259382,
-   "v_walk": 1.092345,
+   "performance": 1.254979,
+   "v_walk": 1.090433,
    "v_run": 2.426978,
    "v_max": 2.696642,
-   "cadence_max": 3.794308
+   "cadence_max": 3.78104
   },
   {
    "skeleton_id": "crawler_alien_tripod_compact_v3",
@@ -1294,15 +1346,18 @@
     "core",
     "leg_0",
     "leg_1",
-    "leg_2"
+    "leg_2",
+    "crown"
    ],
    "part_ids": [
     "reference_crawler_alien_tripod_compact_v3_core_v1",
     "reference_crawler_alien_tripod_compact_v3_leg_0_v1",
     "reference_crawler_alien_tripod_compact_v3_leg_1_v1",
-    "reference_crawler_alien_tripod_compact_v3_leg_2_v1"
+    "reference_crawler_alien_tripod_compact_v3_leg_2_v1",
+    "reference_crawler_alien_tripod_compact_v3_crown_v1"
    ],
    "length_scales": [
+    1.0,
     1.0,
     1.0,
     1.0,
@@ -1312,19 +1367,20 @@
     1.0,
     1.0,
     1.0,
+    1.0,
     1.0
    ],
-   "mass_kg": 49.14287,
+   "mass_kg": 49.329314,
    "com_m": [
     0.0,
-    0.369137,
-    1e-05
+    0.369935,
+    9.7e-05
    ],
-   "performance": 1.368468,
-   "v_walk": 1.137375,
+   "performance": 1.365307,
+   "v_walk": 1.136061,
    "v_run": 2.559963,
    "v_max": 2.844403,
-   "cadence_max": 4.15302
+   "cadence_max": 4.14343
   },
   {
    "skeleton_id": "crawler_alien_tripod_elongated_v3",
@@ -1333,15 +1389,18 @@
     "core",
     "leg_0",
     "leg_1",
-    "leg_2"
+    "leg_2",
+    "crown"
    ],
    "part_ids": [
     "reference_crawler_alien_tripod_elongated_v3_core_v1",
     "reference_crawler_alien_tripod_elongated_v3_leg_0_v1",
     "reference_crawler_alien_tripod_elongated_v3_leg_1_v1",
-    "reference_crawler_alien_tripod_elongated_v3_leg_2_v1"
+    "reference_crawler_alien_tripod_elongated_v3_leg_2_v1",
+    "reference_crawler_alien_tripod_elongated_v3_crown_v1"
    ],
    "length_scales": [
+    1.0,
     1.0,
     1.0,
     1.0,
@@ -1351,19 +1410,20 @@
     1.0,
     1.0,
     1.0,
+    1.0,
     1.0
    ],
-   "mass_kg": 78.001427,
+   "mass_kg": 78.707896,
    "com_m": [
     0.0,
-    0.372286,
-    0.0
+    0.375068,
+    0.000325
    ],
-   "performance": 1.071291,
-   "v_walk": 1.002418,
+   "performance": 1.065363,
+   "v_walk": 0.999641,
    "v_run": 2.260746,
    "v_max": 2.51194,
-   "cadence_max": 3.214837
+   "cadence_max": 3.197047
   },
   {
    "skeleton_id": "crawler_bilateral_eight_legged_balanced_v3",
@@ -1377,7 +1437,9 @@
     "leg2_L",
     "leg2_R",
     "leg3_L",
-    "leg3_R"
+    "leg3_R",
+    "dorsal_0",
+    "dorsal_1"
    ],
    "part_ids": [
     "reference_crawler_bilateral_eight_legged_balanced_v3_core_v1",
@@ -1388,9 +1450,13 @@
     "reference_crawler_bilateral_eight_legged_balanced_v3_leg2_l_v1",
     "reference_crawler_bilateral_eight_legged_balanced_v3_leg2_r_v1",
     "reference_crawler_bilateral_eight_legged_balanced_v3_leg3_l_v1",
-    "reference_crawler_bilateral_eight_legged_balanced_v3_leg3_r_v1"
+    "reference_crawler_bilateral_eight_legged_balanced_v3_leg3_r_v1",
+    "reference_crawler_bilateral_eight_legged_balanced_v3_dorsal_0_v1",
+    "reference_crawler_bilateral_eight_legged_balanced_v3_dorsal_1_v1"
    ],
    "length_scales": [
+    1.0,
+    1.0,
     1.0,
     1.0,
     1.0,
@@ -1410,19 +1476,21 @@
     1.0,
     1.0,
     1.0,
+    1.0,
+    1.0,
     1.0
    ],
-   "mass_kg": 105.888203,
+   "mass_kg": 106.164568,
    "com_m": [
     0.0,
-    0.335416,
-    0.005017
+    0.336001,
+    0.004836
    ],
-   "performance": 1.241315,
-   "v_walk": 1.032168,
-   "v_run": 4.234622,
-   "v_max": 4.844304,
-   "cadence_max": 3.928876
+   "performance": 1.239273,
+   "v_walk": 1.031319,
+   "v_run": 4.220701,
+   "v_max": 4.836335,
+   "cadence_max": 3.922413
   },
   {
    "skeleton_id": "crawler_bilateral_eight_legged_compact_v3",
@@ -1436,7 +1504,9 @@
     "leg2_L",
     "leg2_R",
     "leg3_L",
-    "leg3_R"
+    "leg3_R",
+    "dorsal_0",
+    "dorsal_1"
    ],
    "part_ids": [
     "reference_crawler_bilateral_eight_legged_compact_v3_core_v1",
@@ -1447,9 +1517,13 @@
     "reference_crawler_bilateral_eight_legged_compact_v3_leg2_l_v1",
     "reference_crawler_bilateral_eight_legged_compact_v3_leg2_r_v1",
     "reference_crawler_bilateral_eight_legged_compact_v3_leg3_l_v1",
-    "reference_crawler_bilateral_eight_legged_compact_v3_leg3_r_v1"
+    "reference_crawler_bilateral_eight_legged_compact_v3_leg3_r_v1",
+    "reference_crawler_bilateral_eight_legged_compact_v3_dorsal_0_v1",
+    "reference_crawler_bilateral_eight_legged_compact_v3_dorsal_1_v1"
    ],
    "length_scales": [
+    1.0,
+    1.0,
     1.0,
     1.0,
     1.0,
@@ -1469,19 +1543,21 @@
     1.0,
     1.0,
     1.0,
+    1.0,
+    1.0,
     1.0
    ],
-   "mass_kg": 91.84584,
+   "mass_kg": 91.996108,
    "com_m": [
     0.0,
-    0.333969,
-    0.004537
+    0.334278,
+    0.004442
    ],
-   "performance": 1.323342,
-   "v_walk": 1.064796,
-   "v_run": 4.80857,
+   "performance": 1.321983,
+   "v_walk": 1.064249,
+   "v_run": 4.798698,
    "v_max": 5.4375,
-   "cadence_max": 4.218898
+   "cadence_max": 4.214566
   },
   {
    "skeleton_id": "crawler_bilateral_eight_legged_elongated_v3",
@@ -1495,7 +1571,9 @@
     "leg2_L",
     "leg2_R",
     "leg3_L",
-    "leg3_R"
+    "leg3_R",
+    "dorsal_0",
+    "dorsal_1"
    ],
    "part_ids": [
     "reference_crawler_bilateral_eight_legged_elongated_v3_core_v1",
@@ -1506,9 +1584,13 @@
     "reference_crawler_bilateral_eight_legged_elongated_v3_leg2_l_v1",
     "reference_crawler_bilateral_eight_legged_elongated_v3_leg2_r_v1",
     "reference_crawler_bilateral_eight_legged_elongated_v3_leg3_l_v1",
-    "reference_crawler_bilateral_eight_legged_elongated_v3_leg3_r_v1"
+    "reference_crawler_bilateral_eight_legged_elongated_v3_leg3_r_v1",
+    "reference_crawler_bilateral_eight_legged_elongated_v3_dorsal_0_v1",
+    "reference_crawler_bilateral_eight_legged_elongated_v3_dorsal_1_v1"
    ],
    "length_scales": [
+    1.0,
+    1.0,
     1.0,
     1.0,
     1.0,
@@ -1528,19 +1610,21 @@
     1.0,
     1.0,
     1.0,
+    1.0,
+    1.0,
     1.0
    ],
-   "mass_kg": 133.78236,
+   "mass_kg": 134.359688,
    "com_m": [
     0.0,
-    0.33551,
-    0.005203
+    0.336704,
+    0.004833
    ],
-   "performance": 1.090994,
-   "v_walk": 0.963072,
-   "v_run": 3.255621,
-   "v_max": 4.024031,
-   "cadence_max": 3.439343
+   "performance": 1.088011,
+   "v_walk": 0.961755,
+   "v_run": 3.237842,
+   "v_max": 4.013029,
+   "cadence_max": 3.429939
   },
   {
    "skeleton_id": "dragger_arm_leg_crawler_balanced_v3",
@@ -1939,7 +2023,10 @@
     "leg1_L",
     "leg1_R",
     "leg2_L",
-    "leg2_R"
+    "leg2_R",
+    "antenna_L",
+    "antenna_R",
+    "dorsal_0"
    ],
    "part_ids": [
     "reference_hexapod_compact_insect_balanced_v3_core_v1",
@@ -1948,9 +2035,15 @@
     "reference_hexapod_compact_insect_balanced_v3_leg1_l_v1",
     "reference_hexapod_compact_insect_balanced_v3_leg1_r_v1",
     "reference_hexapod_compact_insect_balanced_v3_leg2_l_v1",
-    "reference_hexapod_compact_insect_balanced_v3_leg2_r_v1"
+    "reference_hexapod_compact_insect_balanced_v3_leg2_r_v1",
+    "reference_hexapod_compact_insect_balanced_v3_antenna_l_v1",
+    "reference_hexapod_compact_insect_balanced_v3_antenna_r_v1",
+    "reference_hexapod_compact_insect_balanced_v3_dorsal_0_v1"
    ],
    "length_scales": [
+    1.0,
+    1.0,
+    1.0,
     1.0,
     1.0,
     1.0,
@@ -1966,19 +2059,22 @@
     1.0,
     1.0,
     1.0,
+    1.0,
+    1.0,
+    1.0,
     1.0
    ],
-   "mass_kg": 74.451578,
+   "mass_kg": 75.391868,
    "com_m": [
     0.0,
-    0.311605,
-    -9e-06
+    0.3133,
+    0.005877
    ],
-   "performance": 1.161821,
-   "v_walk": 0.955779,
-   "v_run": 3.550648,
-   "v_max": 4.149644,
-   "cadence_max": 3.842263
+   "performance": 1.149618,
+   "v_walk": 0.950746,
+   "v_run": 3.47645,
+   "v_max": 4.106057,
+   "cadence_max": 3.801905
   },
   {
    "skeleton_id": "hexapod_compact_insect_compact_v3",
@@ -1990,7 +2086,10 @@
     "leg1_L",
     "leg1_R",
     "leg2_L",
-    "leg2_R"
+    "leg2_R",
+    "antenna_L",
+    "antenna_R",
+    "dorsal_0"
    ],
    "part_ids": [
     "reference_hexapod_compact_insect_compact_v3_core_v1",
@@ -1999,9 +2098,15 @@
     "reference_hexapod_compact_insect_compact_v3_leg1_l_v1",
     "reference_hexapod_compact_insect_compact_v3_leg1_r_v1",
     "reference_hexapod_compact_insect_compact_v3_leg2_l_v1",
-    "reference_hexapod_compact_insect_compact_v3_leg2_r_v1"
+    "reference_hexapod_compact_insect_compact_v3_leg2_r_v1",
+    "reference_hexapod_compact_insect_compact_v3_antenna_l_v1",
+    "reference_hexapod_compact_insect_compact_v3_antenna_r_v1",
+    "reference_hexapod_compact_insect_compact_v3_dorsal_0_v1"
    ],
    "length_scales": [
+    1.0,
+    1.0,
+    1.0,
     1.0,
     1.0,
     1.0,
@@ -2017,19 +2122,22 @@
     1.0,
     1.0,
     1.0,
+    1.0,
+    1.0,
+    1.0,
     1.0
    ],
-   "mass_kg": 60.522484,
+   "mass_kg": 61.039778,
    "com_m": [
     0.0,
-    0.309083,
-    -1.3e-05
+    0.310068,
+    0.003268
    ],
-   "performance": 1.291628,
-   "v_walk": 1.006672,
+   "performance": 1.282745,
+   "v_walk": 1.003204,
    "v_run": 4.32,
    "v_max": 4.8,
-   "cadence_max": 4.302772
+   "cadence_max": 4.273179
   },
   {
    "skeleton_id": "hexapod_compact_insect_elongated_v3",
@@ -2041,7 +2149,10 @@
     "leg1_L",
     "leg1_R",
     "leg2_L",
-    "leg2_R"
+    "leg2_R",
+    "antenna_L",
+    "antenna_R",
+    "dorsal_0"
    ],
    "part_ids": [
     "reference_hexapod_compact_insect_elongated_v3_core_v1",
@@ -2050,9 +2161,15 @@
     "reference_hexapod_compact_insect_elongated_v3_leg1_l_v1",
     "reference_hexapod_compact_insect_elongated_v3_leg1_r_v1",
     "reference_hexapod_compact_insect_elongated_v3_leg2_l_v1",
-    "reference_hexapod_compact_insect_elongated_v3_leg2_r_v1"
+    "reference_hexapod_compact_insect_elongated_v3_leg2_r_v1",
+    "reference_hexapod_compact_insect_elongated_v3_antenna_l_v1",
+    "reference_hexapod_compact_insect_elongated_v3_antenna_r_v1",
+    "reference_hexapod_compact_insect_elongated_v3_dorsal_0_v1"
    ],
    "length_scales": [
+    1.0,
+    1.0,
+    1.0,
     1.0,
     1.0,
     1.0,
@@ -2068,19 +2185,22 @@
     1.0,
     1.0,
     1.0,
+    1.0,
+    1.0,
+    1.0,
     1.0
    ],
-   "mass_kg": 105.362828,
+   "mass_kg": 107.359668,
    "com_m": [
     0.0,
-    0.312594,
-    -4e-06
+    0.315664,
+    0.011258
    ],
-   "performance": 0.954996,
-   "v_walk": 0.862378,
-   "v_run": 2.387487,
-   "v_max": 3.170845,
-   "cadence_max": 3.14568
+   "performance": 0.939246,
+   "v_walk": 0.855237,
+   "v_run": 2.30939,
+   "v_max": 3.118553,
+   "cadence_max": 3.093803
   },
   {
    "skeleton_id": "hexapod_elongated_insect_balanced_v3",
@@ -2092,7 +2212,10 @@
     "leg1_L",
     "leg1_R",
     "leg2_L",
-    "leg2_R"
+    "leg2_R",
+    "antenna_L",
+    "antenna_R",
+    "dorsal_0"
    ],
    "part_ids": [
     "reference_hexapod_elongated_insect_balanced_v3_core_v1",
@@ -2101,9 +2224,15 @@
     "reference_hexapod_elongated_insect_balanced_v3_leg1_l_v1",
     "reference_hexapod_elongated_insect_balanced_v3_leg1_r_v1",
     "reference_hexapod_elongated_insect_balanced_v3_leg2_l_v1",
-    "reference_hexapod_elongated_insect_balanced_v3_leg2_r_v1"
+    "reference_hexapod_elongated_insect_balanced_v3_leg2_r_v1",
+    "reference_hexapod_elongated_insect_balanced_v3_antenna_l_v1",
+    "reference_hexapod_elongated_insect_balanced_v3_antenna_r_v1",
+    "reference_hexapod_elongated_insect_balanced_v3_dorsal_0_v1"
    ],
    "length_scales": [
+    1.0,
+    1.0,
+    1.0,
     1.0,
     1.0,
     1.0,
@@ -2119,19 +2248,22 @@
     1.0,
     1.0,
     1.0,
+    1.0,
+    1.0,
+    1.0,
     1.0
    ],
-   "mass_kg": 247.631451,
+   "mass_kg": 253.3739,
    "com_m": [
     0.0,
-    0.382916,
-    -3.5e-05
+    0.388086,
+    0.019493
    ],
-   "performance": 0.748696,
-   "v_walk": 0.841811,
-   "v_run": 1.617761,
-   "v_max": 2.924857,
-   "cadence_max": 2.256834
+   "performance": 0.732818,
+   "v_walk": 0.832836,
+   "v_run": 1.54987,
+   "v_max": 2.862827,
+   "cadence_max": 2.208971
   },
   {
    "skeleton_id": "hexapod_elongated_insect_compact_v3",
@@ -2143,7 +2275,10 @@
     "leg1_L",
     "leg1_R",
     "leg2_L",
-    "leg2_R"
+    "leg2_R",
+    "antenna_L",
+    "antenna_R",
+    "dorsal_0"
    ],
    "part_ids": [
     "reference_hexapod_elongated_insect_compact_v3_core_v1",
@@ -2152,9 +2287,15 @@
     "reference_hexapod_elongated_insect_compact_v3_leg1_l_v1",
     "reference_hexapod_elongated_insect_compact_v3_leg1_r_v1",
     "reference_hexapod_elongated_insect_compact_v3_leg2_l_v1",
-    "reference_hexapod_elongated_insect_compact_v3_leg2_r_v1"
+    "reference_hexapod_elongated_insect_compact_v3_leg2_r_v1",
+    "reference_hexapod_elongated_insect_compact_v3_antenna_l_v1",
+    "reference_hexapod_elongated_insect_compact_v3_antenna_r_v1",
+    "reference_hexapod_elongated_insect_compact_v3_dorsal_0_v1"
    ],
    "length_scales": [
+    1.0,
+    1.0,
+    1.0,
     1.0,
     1.0,
     1.0,
@@ -2170,19 +2311,22 @@
     1.0,
     1.0,
     1.0,
+    1.0,
+    1.0,
+    1.0,
     1.0
    ],
-   "mass_kg": 169.758657,
+   "mass_kg": 172.906612,
    "com_m": [
     0.0,
-    0.378982,
-    2.7e-05
+    0.382479,
+    0.012886
    ],
-   "performance": 0.915635,
-   "v_walk": 0.929876,
-   "v_run": 2.416852,
-   "v_max": 3.853342,
-   "cadence_max": 2.780189
+   "performance": 0.900607,
+   "v_walk": 0.922213,
+   "v_run": 2.33817,
+   "v_max": 3.790099,
+   "cadence_max": 2.734559
   },
   {
    "skeleton_id": "hexapod_elongated_insect_elongated_v3",
@@ -2194,7 +2338,10 @@
     "leg1_L",
     "leg1_R",
     "leg2_L",
-    "leg2_R"
+    "leg2_R",
+    "antenna_L",
+    "antenna_R",
+    "dorsal_0"
    ],
    "part_ids": [
     "reference_hexapod_elongated_insect_elongated_v3_core_v1",
@@ -2203,9 +2350,15 @@
     "reference_hexapod_elongated_insect_elongated_v3_leg1_l_v1",
     "reference_hexapod_elongated_insect_elongated_v3_leg1_r_v1",
     "reference_hexapod_elongated_insect_elongated_v3_leg2_l_v1",
-    "reference_hexapod_elongated_insect_elongated_v3_leg2_r_v1"
+    "reference_hexapod_elongated_insect_elongated_v3_leg2_r_v1",
+    "reference_hexapod_elongated_insect_elongated_v3_antenna_l_v1",
+    "reference_hexapod_elongated_insect_elongated_v3_antenna_r_v1",
+    "reference_hexapod_elongated_insect_elongated_v3_dorsal_0_v1"
    ],
    "length_scales": [
+    1.0,
+    1.0,
+    1.0,
     1.0,
     1.0,
     1.0,
@@ -2221,15 +2374,18 @@
     1.0,
     1.0,
     1.0,
+    1.0,
+    1.0,
+    1.0,
     1.0
    ],
-   "mass_kg": 430.445035,
+   "mass_kg": 442.51607,
    "com_m": [
     0.0,
-    0.383197,
-    -4e-06
+    0.390974,
+    0.030071
    ],
-   "performance": 0.543211,
+   "performance": 0.528583,
    "v_walk": 0.6,
    "v_run": 1.0,
    "v_max": 2.448,
@@ -2244,7 +2400,10 @@
     "leg_R0",
     "leg_L1",
     "leg_R1",
-    "head"
+    "head",
+    "tail",
+    "dorsal_0",
+    "dorsal_1"
    ],
    "part_ids": [
     "reference_quadruped_lean_digitigrade_balanced_v3_core_v1",
@@ -2252,9 +2411,15 @@
     "reference_quadruped_lean_digitigrade_balanced_v3_leg_r0_v1",
     "reference_quadruped_lean_digitigrade_balanced_v3_leg_l1_v1",
     "reference_quadruped_lean_digitigrade_balanced_v3_leg_r1_v1",
-    "reference_quadruped_lean_digitigrade_balanced_v3_head_v1"
+    "reference_quadruped_lean_digitigrade_balanced_v3_head_v1",
+    "reference_quadruped_lean_digitigrade_balanced_v3_tail_v1",
+    "reference_quadruped_lean_digitigrade_balanced_v3_dorsal_0_v1",
+    "reference_quadruped_lean_digitigrade_balanced_v3_dorsal_1_v1"
    ],
    "length_scales": [
+    1.0,
+    1.0,
+    1.0,
     1.0,
     1.0,
     1.0,
@@ -2268,19 +2433,22 @@
     1.0,
     1.0,
     1.0,
+    1.0,
+    1.0,
+    1.0,
     1.0
    ],
-   "mass_kg": 382.724758,
+   "mass_kg": 403.287593,
    "com_m": [
     0.0,
-    0.809112,
-    0.039177
+    0.829027,
+    -0.022982
    ],
-   "performance": 0.881424,
-   "v_walk": 1.481954,
-   "v_run": 2.667517,
-   "v_max": 2.963908,
-   "cadence_max": 2.272924
+   "performance": 0.830902,
+   "v_walk": 1.397011,
+   "v_run": 2.514619,
+   "v_max": 2.794021,
+   "cadence_max": 2.142644
   },
   {
    "skeleton_id": "quadruped_lean_digitigrade_compact_v3",
@@ -2291,7 +2459,10 @@
     "leg_R0",
     "leg_L1",
     "leg_R1",
-    "head"
+    "head",
+    "tail",
+    "dorsal_0",
+    "dorsal_1"
    ],
    "part_ids": [
     "reference_quadruped_lean_digitigrade_compact_v3_core_v1",
@@ -2299,9 +2470,15 @@
     "reference_quadruped_lean_digitigrade_compact_v3_leg_r0_v1",
     "reference_quadruped_lean_digitigrade_compact_v3_leg_l1_v1",
     "reference_quadruped_lean_digitigrade_compact_v3_leg_r1_v1",
-    "reference_quadruped_lean_digitigrade_compact_v3_head_v1"
+    "reference_quadruped_lean_digitigrade_compact_v3_head_v1",
+    "reference_quadruped_lean_digitigrade_compact_v3_tail_v1",
+    "reference_quadruped_lean_digitigrade_compact_v3_dorsal_0_v1",
+    "reference_quadruped_lean_digitigrade_compact_v3_dorsal_1_v1"
    ],
    "length_scales": [
+    1.0,
+    1.0,
+    1.0,
     1.0,
     1.0,
     1.0,
@@ -2315,19 +2492,22 @@
     1.0,
     1.0,
     1.0,
+    1.0,
+    1.0,
+    1.0,
     1.0
    ],
-   "mass_kg": 222.158864,
+   "mass_kg": 233.469481,
    "com_m": [
     0.0,
-    0.646415,
-    0.033257
+    0.662208,
+    -0.015228
    ],
-   "performance": 0.953497,
-   "v_walk": 1.431483,
-   "v_run": 3.085852,
-   "v_max": 3.428725,
-   "cadence_max": 2.67254
+   "performance": 0.903498,
+   "v_walk": 1.393446,
+   "v_run": 2.924039,
+   "v_max": 3.248932,
+   "cadence_max": 2.532399
   },
   {
    "skeleton_id": "quadruped_lean_digitigrade_elongated_v3",
@@ -2338,7 +2518,10 @@
     "leg_R0",
     "leg_L1",
     "leg_R1",
-    "head"
+    "head",
+    "tail",
+    "dorsal_0",
+    "dorsal_1"
    ],
    "part_ids": [
     "reference_quadruped_lean_digitigrade_elongated_v3_core_v1",
@@ -2346,9 +2529,15 @@
     "reference_quadruped_lean_digitigrade_elongated_v3_leg_r0_v1",
     "reference_quadruped_lean_digitigrade_elongated_v3_leg_l1_v1",
     "reference_quadruped_lean_digitigrade_elongated_v3_leg_r1_v1",
-    "reference_quadruped_lean_digitigrade_elongated_v3_head_v1"
+    "reference_quadruped_lean_digitigrade_elongated_v3_head_v1",
+    "reference_quadruped_lean_digitigrade_elongated_v3_tail_v1",
+    "reference_quadruped_lean_digitigrade_elongated_v3_dorsal_0_v1",
+    "reference_quadruped_lean_digitigrade_elongated_v3_dorsal_1_v1"
    ],
    "length_scales": [
+    1.0,
+    1.0,
+    1.0,
     1.0,
     1.0,
     1.0,
@@ -2362,15 +2551,18 @@
     1.0,
     1.0,
     1.0,
+    1.0,
+    1.0,
+    1.0,
     1.0
    ],
-   "mass_kg": 681.848809,
+   "mass_kg": 725.086285,
    "com_m": [
     0.0,
-    1.012287,
-    0.041422
+    1.037446,
+    -0.05112
    ],
-   "performance": 0.761657,
+   "performance": 0.708215,
    "v_walk": 1.252537,
    "v_run": 2.254567,
    "v_max": 2.505074,
@@ -2385,7 +2577,10 @@
     "leg_R0",
     "leg_L1",
     "leg_R1",
-    "head"
+    "head",
+    "tail",
+    "dorsal_0",
+    "dorsal_1"
    ],
    "part_ids": [
     "reference_quadruped_stocky_plantigrade_balanced_v3_core_v1",
@@ -2393,9 +2588,15 @@
     "reference_quadruped_stocky_plantigrade_balanced_v3_leg_r0_v1",
     "reference_quadruped_stocky_plantigrade_balanced_v3_leg_l1_v1",
     "reference_quadruped_stocky_plantigrade_balanced_v3_leg_r1_v1",
-    "reference_quadruped_stocky_plantigrade_balanced_v3_head_v1"
+    "reference_quadruped_stocky_plantigrade_balanced_v3_head_v1",
+    "reference_quadruped_stocky_plantigrade_balanced_v3_tail_v1",
+    "reference_quadruped_stocky_plantigrade_balanced_v3_dorsal_0_v1",
+    "reference_quadruped_stocky_plantigrade_balanced_v3_dorsal_1_v1"
    ],
    "length_scales": [
+    1.0,
+    1.0,
+    1.0,
     1.0,
     1.0,
     1.0,
@@ -2409,19 +2610,22 @@
     1.0,
     1.0,
     1.0,
+    1.0,
+    1.0,
+    1.0,
     1.0
    ],
-   "mass_kg": 292.121297,
+   "mass_kg": 302.731547,
    "com_m": [
     0.0,
-    0.633592,
-    0.033795
+    0.648075,
+    -0.000567
    ],
-   "performance": 1.028906,
-   "v_walk": 1.550515,
-   "v_run": 3.541754,
-   "v_max": 3.935282,
-   "cadence_max": 2.844388
+   "performance": 0.990196,
+   "v_walk": 1.521068,
+   "v_run": 3.408504,
+   "v_max": 3.787227,
+   "cadence_max": 2.737375
   },
   {
    "skeleton_id": "quadruped_stocky_plantigrade_compact_v3",
@@ -2432,7 +2636,10 @@
     "leg_R0",
     "leg_L1",
     "leg_R1",
-    "head"
+    "head",
+    "tail",
+    "dorsal_0",
+    "dorsal_1"
    ],
    "part_ids": [
     "reference_quadruped_stocky_plantigrade_compact_v3_core_v1",
@@ -2440,9 +2647,15 @@
     "reference_quadruped_stocky_plantigrade_compact_v3_leg_r0_v1",
     "reference_quadruped_stocky_plantigrade_compact_v3_leg_l1_v1",
     "reference_quadruped_stocky_plantigrade_compact_v3_leg_r1_v1",
-    "reference_quadruped_stocky_plantigrade_compact_v3_head_v1"
+    "reference_quadruped_stocky_plantigrade_compact_v3_head_v1",
+    "reference_quadruped_stocky_plantigrade_compact_v3_tail_v1",
+    "reference_quadruped_stocky_plantigrade_compact_v3_dorsal_0_v1",
+    "reference_quadruped_stocky_plantigrade_compact_v3_dorsal_1_v1"
    ],
    "length_scales": [
+    1.0,
+    1.0,
+    1.0,
     1.0,
     1.0,
     1.0,
@@ -2456,19 +2669,22 @@
     1.0,
     1.0,
     1.0,
+    1.0,
+    1.0,
+    1.0,
     1.0
    ],
-   "mass_kg": 171.467267,
+   "mass_kg": 177.319892,
    "com_m": [
     0.0,
-    0.505371,
-    0.028429
+    0.516695,
+    0.001876
    ],
-   "performance": 1.104015,
-   "v_walk": 1.44381,
-   "v_run": 4.062934,
-   "v_max": 4.514372,
-   "cadence_max": 3.32069
+   "performance": 1.06711,
+   "v_walk": 1.419473,
+   "v_run": 3.92712,
+   "v_max": 4.363466,
+   "cadence_max": 3.209687
   },
   {
    "skeleton_id": "quadruped_stocky_plantigrade_elongated_v3",
@@ -2479,7 +2695,10 @@
     "leg_R0",
     "leg_L1",
     "leg_R1",
-    "head"
+    "head",
+    "tail",
+    "dorsal_0",
+    "dorsal_1"
    ],
    "part_ids": [
     "reference_quadruped_stocky_plantigrade_elongated_v3_core_v1",
@@ -2487,9 +2706,15 @@
     "reference_quadruped_stocky_plantigrade_elongated_v3_leg_r0_v1",
     "reference_quadruped_stocky_plantigrade_elongated_v3_leg_l1_v1",
     "reference_quadruped_stocky_plantigrade_elongated_v3_leg_r1_v1",
-    "reference_quadruped_stocky_plantigrade_elongated_v3_head_v1"
+    "reference_quadruped_stocky_plantigrade_elongated_v3_head_v1",
+    "reference_quadruped_stocky_plantigrade_elongated_v3_tail_v1",
+    "reference_quadruped_stocky_plantigrade_elongated_v3_dorsal_0_v1",
+    "reference_quadruped_stocky_plantigrade_elongated_v3_dorsal_1_v1"
    ],
    "length_scales": [
+    1.0,
+    1.0,
+    1.0,
     1.0,
     1.0,
     1.0,
@@ -2503,19 +2728,22 @@
     1.0,
     1.0,
     1.0,
+    1.0,
+    1.0,
+    1.0,
     1.0
    ],
-   "mass_kg": 494.949351,
+   "mass_kg": 517.196988,
    "com_m": [
     0.0,
-    0.79531,
-    0.037303
+    0.814908,
+    -0.016403
    ],
-   "performance": 0.917926,
-   "v_walk": 1.571122,
-   "v_run": 2.828019,
-   "v_max": 3.142243,
-   "cadence_max": 2.370249
+   "performance": 0.872662,
+   "v_walk": 1.493648,
+   "v_run": 2.688567,
+   "v_max": 2.987296,
+   "cadence_max": 2.25337
   },
   {
    "skeleton_id": "radial_raised_articulated_walker_balanced_v3",
@@ -2527,7 +2755,8 @@
     "arm_2",
     "arm_3",
     "arm_4",
-    "arm_5"
+    "arm_5",
+    "crown"
    ],
    "part_ids": [
     "reference_radial_raised_articulated_walker_balanced_v3_core_v1",
@@ -2536,9 +2765,11 @@
     "reference_radial_raised_articulated_walker_balanced_v3_arm_2_v1",
     "reference_radial_raised_articulated_walker_balanced_v3_arm_3_v1",
     "reference_radial_raised_articulated_walker_balanced_v3_arm_4_v1",
-    "reference_radial_raised_articulated_walker_balanced_v3_arm_5_v1"
+    "reference_radial_raised_articulated_walker_balanced_v3_arm_5_v1",
+    "reference_radial_raised_articulated_walker_balanced_v3_crown_v1"
    ],
    "length_scales": [
+    1.0,
     1.0,
     1.0,
     1.0,
@@ -2554,19 +2785,20 @@
     1.0,
     1.0,
     1.0,
+    1.0,
     1.0
    ],
-   "mass_kg": 60.396686,
+   "mass_kg": 64.602708,
    "com_m": [
     0.0,
-    0.351691,
+    0.40448,
     0.0
    ],
-   "performance": 1.378857,
-   "v_walk": 1.056752,
+   "performance": 1.324271,
+   "v_walk": 1.035623,
    "v_run": 3.105,
    "v_max": 3.45,
-   "cadence_max": 4.493352
+   "cadence_max": 4.315468
   },
   {
    "skeleton_id": "radial_raised_articulated_walker_compact_v3",
@@ -2578,7 +2810,8 @@
     "arm_2",
     "arm_3",
     "arm_4",
-    "arm_5"
+    "arm_5",
+    "crown"
    ],
    "part_ids": [
     "reference_radial_raised_articulated_walker_compact_v3_core_v1",
@@ -2587,9 +2820,11 @@
     "reference_radial_raised_articulated_walker_compact_v3_arm_2_v1",
     "reference_radial_raised_articulated_walker_compact_v3_arm_3_v1",
     "reference_radial_raised_articulated_walker_compact_v3_arm_4_v1",
-    "reference_radial_raised_articulated_walker_compact_v3_arm_5_v1"
+    "reference_radial_raised_articulated_walker_compact_v3_arm_5_v1",
+    "reference_radial_raised_articulated_walker_compact_v3_crown_v1"
    ],
    "length_scales": [
+    1.0,
     1.0,
     1.0,
     1.0,
@@ -2605,19 +2840,20 @@
     1.0,
     1.0,
     1.0,
+    1.0,
     1.0
    ],
-   "mass_kg": 32.50131,
+   "mass_kg": 35.77001,
    "com_m": [
     0.0,
-    0.305219,
+    0.371555,
     0.0
    ],
-   "performance": 1.412052,
-   "v_walk": 0.95756,
+   "performance": 1.333153,
+   "v_walk": 0.930423,
    "v_run": 2.39625,
    "v_max": 2.6625,
-   "cadence_max": 5.170274
+   "cadence_max": 4.88138
   },
   {
    "skeleton_id": "radial_raised_articulated_walker_elongated_v3",
@@ -2629,7 +2865,8 @@
     "arm_2",
     "arm_3",
     "arm_4",
-    "arm_5"
+    "arm_5",
+    "crown"
    ],
    "part_ids": [
     "reference_radial_raised_articulated_walker_elongated_v3_core_v1",
@@ -2638,9 +2875,11 @@
     "reference_radial_raised_articulated_walker_elongated_v3_arm_2_v1",
     "reference_radial_raised_articulated_walker_elongated_v3_arm_3_v1",
     "reference_radial_raised_articulated_walker_elongated_v3_arm_4_v1",
-    "reference_radial_raised_articulated_walker_elongated_v3_arm_5_v1"
+    "reference_radial_raised_articulated_walker_elongated_v3_arm_5_v1",
+    "reference_radial_raised_articulated_walker_elongated_v3_crown_v1"
    ],
    "length_scales": [
+    1.0,
     1.0,
     1.0,
     1.0,
@@ -2656,19 +2895,20 @@
     1.0,
     1.0,
     1.0,
+    1.0,
     1.0
    ],
-   "mass_kg": 123.715182,
+   "mass_kg": 128.738962,
    "com_m": [
     0.0,
-    0.418705,
+    0.453218,
     0.0
    ],
-   "performance": 1.327827,
-   "v_walk": 1.171472,
-   "v_run": 3.720657,
-   "v_max": 4.134063,
-   "cadence_max": 3.796201
+   "performance": 1.296491,
+   "v_walk": 1.157566,
+   "v_run": 3.632849,
+   "v_max": 4.036499,
+   "cadence_max": 3.706611
   },
   {
    "skeleton_id": "serpentine_limbless_articulated_balanced_v3",
@@ -2923,7 +3163,7 @@
     "reference_amalgam_slither_s0018_v3_body_v1",
     "reference_biped_digitigrade_creature_balanced_v3_arm_r_v1",
     "reference_amalgam_slither_s0028_v3_flail1_v1",
-    "reference_amalgam_slither_s0028_v3_flail2_v1",
+    "reference_amalgam_walker_s0024_v3_flail1_v1",
     "reference_amalgam_slither_s0028_v3_flail4_v1",
     "reference_amalgam_slither_s0028_v3_flail6_v1"
    ],
@@ -2933,7 +3173,7 @@
     0.925841,
     1.130058,
     1.0,
-    1.0,
+    1.02952,
     1.0,
     1.0
    ],
@@ -2943,21 +3183,21 @@
     0.998066,
     1.000334,
     1.0,
-    1.0,
+    1.016504,
     1.0,
     1.0
    ],
-   "mass_kg": 1111.921386,
+   "mass_kg": 1111.926348,
    "com_m": [
-    -0.008601,
-    0.509683,
-    -0.034269
+    -0.008603,
+    0.509685,
+    -0.034268
    ],
    "performance": 0.746806,
-   "v_walk": 0.651608,
-   "v_run": 1.086013,
-   "v_max": 2.181315,
-   "cadence_max": 2.240418
+   "v_walk": 0.651607,
+   "v_run": 1.086012,
+   "v_max": 2.181314,
+   "cadence_max": 2.240417
   },
   {
    "skeleton_id": "amalgam_hauled_s0009_v3",
@@ -2978,43 +3218,43 @@
     "reference_amalgam_hauled_s0009_v3_core_v1",
     "reference_amalgam_slither_s0028_v3_head_v1",
     "reference_amalgam_hauled_s0009_v3_arm1_v1",
-    "reference_dragger_forelimb_puller_compact_v3_belly_v1",
-    "reference_biped_digitigrade_creature_elongated_v3_arm_r_v1",
-    "reference_amalgam_hauled_s0009_v3_flail1_v1",
+    "reference_amalgam_hauled_s0013_v3_flail5_v1",
+    "reference_amalgam_slither_s0028_v3_striker_v1",
+    "reference_crawler_bilateral_eight_legged_balanced_v3_dorsal_0_v1",
     "reference_amalgam_slither_s0034_v3_flail7_v1",
     "reference_amalgam_hauled_s0009_v3_flail3_v1",
     "reference_amalgam_hauled_s0009_v3_flail2_v1",
-    "reference_amalgam_walker_s0029_v3_striker_v1"
+    "reference_amalgam_walker_s0039_v3_flail6_v1"
    ],
    "length_scales": [
     1.0,
     1.133017,
     1.0,
-    0.971119,
-    0.883212,
-    1.0,
+    0.827692,
+    0.928389,
+    1.193966,
     1.199275,
     1.0,
     0.809668,
-    0.969565
+    1.158442
    ],
    "girth_scales": [
     1.0,
     1.002274,
     1.0,
-    0.998848,
-    1.001058,
-    1.0,
+    1.001652,
+    1.001183,
+    0.996,
     1.016874,
     1.0,
     0.98806,
     0.997758
    ],
-   "mass_kg": 671.968501,
+   "mass_kg": 673.825069,
    "com_m": [
-    0.020251,
-    0.463017,
-    0.06409
+    0.020167,
+    0.461802,
+    0.061654
    ],
    "performance": 0.4,
    "v_walk": 0.251241,
@@ -3096,11 +3336,11 @@
     "reference_amalgam_walker_s0024_v3_leg1_v1",
     "reference_amalgam_walker_s0037_v3_leg2_v1",
     "reference_amalgam_walker_s0037_v3_leg3_v1",
-    "reference_dragger_forelimb_puller_compact_v3_arm_r_v1",
-    "reference_amalgam_walker_s0037_v3_flail1_v1",
+    "reference_biped_digitigrade_creature_balanced_v3_arm_r_v1",
+    "reference_amalgam_hauled_s0004_v3_belly_v1",
     "reference_amalgam_walker_s0037_v3_flail2_v1",
     "reference_amalgam_walker_s0037_v3_flail3_v1",
-    "reference_amalgam_hauled_s0013_v3_flail5_v1"
+    "reference_dragger_belly_hauler_compact_v3_belly_v1"
    ],
    "length_scales": [
     1.0,
@@ -3109,11 +3349,11 @@
     1.133773,
     1.0,
     1.0,
-    0.885475,
+    0.916185,
+    1.223529,
     1.0,
     1.0,
-    1.0,
-    1.092308
+    0.815155
    ],
    "girth_scales": [
     1.0,
@@ -3122,21 +3362,21 @@
     0.999866,
     1.0,
     1.0,
-    1.002978,
+    1.00448,
+    0.994983,
     1.0,
     1.0,
-    1.0,
-    1.001565
+    1.000161
    ],
-   "mass_kg": 550.575892,
+   "mass_kg": 537.218809,
    "com_m": [
-    0.307412,
-    1.192113,
-    0.104649
+    0.314494,
+    1.170598,
+    0.11305
    ],
-   "performance": 0.576618,
-   "v_walk": 0.983672,
-   "v_run": 1.639454,
+   "performance": 0.586618,
+   "v_walk": 1.018085,
+   "v_run": 1.696808,
    "v_max": 4.7717,
    "cadence_max": 2.0
   },
@@ -3157,37 +3397,37 @@
     "reference_amalgam_hauled_s0014_v3_core_v1",
     "reference_amalgam_walker_s0037_v3_head2_v1",
     "reference_amalgam_walker_s0037_v3_head_v1",
-    "reference_dragger_forelimb_puller_compact_v3_arm_l_v1",
-    "reference_amalgam_hauled_s0009_v3_belly_v1",
-    "reference_amalgam_hauled_s0014_v3_striker_v1",
-    "reference_amalgam_slither_s0006_v3_flail6_v1",
+    "reference_biped_digitigrade_creature_elongated_v3_arm2_l_v1",
+    "reference_amalgam_hauled_s0014_v3_belly_v1",
+    "reference_biped_plantigrade_humanoid_balanced_v3_arm2_l_v1",
+    "reference_amalgam_hauled_s0014_v3_flail1_v1",
     "reference_amalgam_slither_s0034_v3_flail2_v1"
    ],
    "length_scales": [
     1.0,
     0.931751,
     0.940351,
-    1.152235,
-    1.078067,
+    1.171875,
     1.0,
-    1.099057,
+    0.966454,
+    1.0,
     0.976744
    ],
    "girth_scales": [
     1.0,
     1.004743,
     0.996968,
-    1.001399,
-    0.994525,
+    0.998582,
     1.0,
-    0.990154,
+    1.0016,
+    1.0,
     0.997332
    ],
-   "mass_kg": 231.339854,
+   "mass_kg": 231.35356,
    "com_m": [
-    0.039203,
-    0.3106,
-    0.046685
+    0.039173,
+    0.310575,
+    0.046509
    ],
    "performance": 0.4,
    "v_walk": 0.174386,
@@ -3214,45 +3454,45 @@
     "reference_amalgam_hauled_s0004_v3_head_v1",
     "reference_dragger_belly_hauler_balanced_v3_head_v1",
     "reference_amalgam_slither_s0017_v3_body_v1",
-    "reference_biped_digitigrade_creature_elongated_v3_arm_l_v1",
+    "reference_biped_digitigrade_creature_balanced_v3_arm2_l_v1",
     "reference_amalgam_slither_s0018_v3_flail5_v1",
     "reference_amalgam_walker_s0008_v3_flail7_v1",
     "reference_amalgam_slither_s0006_v3_flail5_v1",
-    "reference_amalgam_hauled_s0014_v3_flail1_v1"
+    "reference_amalgam_walker_s0039_v3_flail4_v1"
    ],
    "length_scales": [
     0.956873,
     0.974886,
     1.196581,
     1.006457,
-    0.817518,
+    1.133221,
     0.916129,
     1.209326,
     1.0,
-    0.909871
+    1.15847
    ],
    "girth_scales": [
     0.925802,
     1.000743,
     1.006268,
     0.99804,
-    0.999456,
+    0.993672,
     0.998651,
     0.997991,
     1.0,
-    1.009944
+    1.012036
    ],
-   "mass_kg": 519.856945,
+   "mass_kg": 519.817784,
    "com_m": [
-    -0.024084,
+    -0.02413,
     0.455463,
-    -0.008795
+    -0.008818
    ],
-   "performance": 0.805799,
-   "v_walk": 0.582932,
-   "v_run": 0.971553,
-   "v_max": 1.808551,
-   "cadence_max": 2.417397
+   "performance": 0.805805,
+   "v_walk": 0.58294,
+   "v_run": 0.971567,
+   "v_max": 1.808565,
+   "cadence_max": 2.417415
   },
   {
    "skeleton_id": "amalgam_walker_s0008_v3",
@@ -3276,11 +3516,11 @@
     "reference_amalgam_walker_s0008_v3_leg3_v1",
     "reference_amalgam_walker_s0008_v3_leg2_v1",
     "reference_amalgam_walker_s0008_v3_leg3_v1",
-    "reference_amalgam_walker_s0008_v3_striker_v1",
+    "reference_biped_plantigrade_humanoid_compact_v3_arm_l_v1",
     "reference_amalgam_slither_s0018_v3_flail9_v1",
     "reference_amalgam_slither_s0034_v3_flail5_v1",
     "reference_amalgam_slither_s0028_v3_flail3_v1",
-    "reference_amalgam_walker_s0039_v3_flail6_v1",
+    "reference_amalgam_slither_s0018_v3_flail10_v1",
     "reference_amalgam_slither_s0017_v3_flail2_v1"
    ],
    "length_scales": [
@@ -3289,11 +3529,11 @@
     0.955345,
     1.0,
     1.0,
-    1.0,
+    1.043993,
     0.813239,
     0.824427,
     1.125387,
-    1.241558,
+    0.841549,
     0.995872
    ],
    "girth_scales": [
@@ -3302,18 +3542,18 @@
     0.994405,
     1.0,
     1.0,
-    1.0,
+    0.998448,
     0.998187,
     1.006501,
     1.003486,
-    1.004184,
+    1.000661,
     1.004145
    ],
-   "mass_kg": 122.814125,
+   "mass_kg": 122.798835,
    "com_m": [
-    -0.039851,
-    0.679866,
-    -0.030327
+    -0.039889,
+    0.679855,
+    -0.030349
    ],
    "performance": 0.4,
    "v_walk": 0.6,
@@ -3339,44 +3579,44 @@
    "part_ids": [
     "reference_amalgam_hauled_s0009_v3_core_v1",
     "reference_amalgam_hauled_s0009_v3_head_v1",
-    "reference_biped_digitigrade_creature_elongated_v3_arm_r_v1",
-    "reference_amalgam_hauled_s0013_v3_belly_v1",
-    "reference_biped_plantigrade_humanoid_compact_v3_arm_l_v1",
+    "reference_amalgam_walker_s0039_v3_striker_v1",
+    "reference_biped_digitigrade_creature_elongated_v3_tail_v1",
+    "reference_amalgam_walker_s0039_v3_flail6_v1",
     "reference_amalgam_hauled_s0013_v3_flail1_v1",
     "reference_amalgam_walker_s0039_v3_flail3_v1",
     "reference_amalgam_hauled_s0013_v3_flail3_v1",
     "reference_amalgam_hauled_s0013_v3_flail2_v1",
-    "reference_amalgam_hauled_s0013_v3_flail5_v1"
+    "reference_biped_digitigrade_creature_balanced_v3_tail_v1"
    ],
    "length_scales": [
     0.899371,
     0.937107,
-    1.116788,
-    1.0,
-    0.812183,
+    1.24559,
+    0.820611,
+    1.246753,
     1.0,
     0.827451,
     1.0,
     1.023697,
-    1.0
+    0.877193
    ],
    "girth_scales": [
     1.002584,
     0.995442,
-    1.004623,
+    1.004906,
+    0.99548,
     1.0,
-    1.001695,
     1.0,
     0.995261,
     1.0,
     1.00011,
-    1.0
+    0.995373
    ],
-   "mass_kg": 492.987852,
+   "mass_kg": 496.078961,
    "com_m": [
-    0.001302,
-    0.435886,
-    0.038407
+    0.001211,
+    0.4333,
+    0.033055
    ],
    "performance": 0.4,
    "v_walk": 0.185096,
@@ -3403,45 +3643,45 @@
     "reference_amalgam_slither_s0018_v3_head_v1",
     "reference_amalgam_slither_s0006_v3_head2_v1",
     "reference_amalgam_slither_s0017_v3_body_v1",
-    "reference_biped_plantigrade_humanoid_balanced_v3_arm_l_v1",
+    "reference_biped_plantigrade_humanoid_compact_v3_arm_l_v1",
     "reference_amalgam_walker_s0039_v3_flail1_v1",
     "reference_amalgam_slither_s0018_v3_flail8_v1",
     "reference_amalgam_slither_s0006_v3_flail5_v1",
-    "reference_amalgam_hauled_s0014_v3_flail2_v1"
+    "reference_hexapod_compact_insect_compact_v3_antenna_l_v1"
    ],
    "length_scales": [
     1.0,
     0.827519,
     1.0,
     1.006457,
-    0.920548,
+    1.137056,
     1.029151,
     0.962617,
     1.0,
-    0.8583
+    0.821705
    ],
    "girth_scales": [
     1.0,
     1.000081,
     1.0,
     0.99804,
-    0.997024,
+    0.998714,
     0.999046,
     0.999879,
     1.0,
-    0.99033
+    1.009204
    ],
-   "mass_kg": 502.889653,
+   "mass_kg": 502.904873,
    "com_m": [
-    0.019662,
-    0.42827,
-    -0.013153
+    0.019678,
+    0.428273,
+    -0.013145
    ],
-   "performance": 0.808477,
-   "v_walk": 0.586813,
-   "v_run": 0.978022,
-   "v_max": 1.814563,
-   "cadence_max": 2.425432
+   "performance": 0.808475,
+   "v_walk": 0.58681,
+   "v_run": 0.978016,
+   "v_max": 1.814557,
+   "cadence_max": 2.425425
   },
   {
    "skeleton_id": "amalgam_hauled_s0013_v3",
@@ -3459,9 +3699,9 @@
    "part_ids": [
     "reference_amalgam_hauled_s0009_v3_core_v1",
     "reference_amalgam_hauled_s0005_v3_head_v1",
-    "reference_amalgam_walker_s0039_v3_striker_v1",
-    "reference_amalgam_hauled_s0004_v3_belly_v1",
-    "reference_amalgam_walker_s0008_v3_flail6_v1",
+    "meshy_frayed_arm_a_v1",
+    "reference_amalgam_hauled_s0009_v3_belly_v1",
+    "reference_biped_digitigrade_creature_compact_v3_arm_l_v1",
     "reference_amalgam_walker_s0039_v3_flail3_v1",
     "reference_amalgam_walker_s0029_v3_flail3_v1",
     "reference_amalgam_hauled_s0013_v3_flail2_v1"
@@ -3469,9 +3709,9 @@
    "length_scales": [
     0.899371,
     0.980263,
-    1.24559,
-    0.843137,
-    1.004184,
+    1.08,
+    1.198885,
+    0.857143,
     0.827451,
     1.076628,
     1.023697
@@ -3479,18 +3719,18 @@
    "girth_scales": [
     1.002584,
     0.996225,
-    1.004906,
-    0.996967,
-    0.995833,
+    1.002179,
+    0.997491,
+    1.0,
     0.995261,
     1.000274,
     1.00011
    ],
-   "mass_kg": 477.066711,
+   "mass_kg": 478.165765,
    "com_m": [
-    -0.014756,
-    0.41956,
-    0.028852
+    -0.015741,
+    0.419405,
+    0.030705
    ],
    "performance": 0.4,
    "v_walk": 0.185096,
@@ -3507,7 +3747,10 @@
     "leg_R0",
     "leg_L1",
     "leg_R1",
-    "head"
+    "head",
+    "tail",
+    "dorsal_0",
+    "dorsal_1"
    ],
    "part_ids": [
     "reference_dragger_belly_hauler_elongated_v3_core_v1",
@@ -3515,7 +3758,10 @@
     "reference_quadruped_lean_digitigrade_balanced_v3_leg_r0_v1",
     "reference_quadruped_lean_digitigrade_elongated_v3_leg_l1_v1",
     "reference_quadruped_lean_digitigrade_elongated_v3_leg_r1_v1",
-    "reference_serpentine_limbless_articulated_elongated_v3_core_v1"
+    "reference_serpentine_limbless_articulated_elongated_v3_core_v1",
+    "reference_quadruped_stocky_plantigrade_elongated_v3_tail_v1",
+    "reference_quadruped_lean_digitigrade_elongated_v3_dorsal_1_v1",
+    "reference_amalgam_slither_s0018_v3_flail3_v1"
    ],
    "length_scales": [
     1.210033,
@@ -3523,7 +3769,10 @@
     1.142961,
     1.0,
     1.0,
-    0.825862
+    0.825862,
+    1.246485,
+    1.169279,
+    1.119298
    ],
    "girth_scales": [
     0.999439,
@@ -3531,15 +3780,18 @@
     0.998897,
     1.0,
     1.0,
-    1.001572
+    1.001572,
+    1.00282,
+    1.00615,
+    0.990527
    ],
-   "mass_kg": 681.453372,
+   "mass_kg": 724.780139,
    "com_m": [
-    -4.5e-05,
-    1.012318,
-    0.041245
+    -4.2e-05,
+    1.037537,
+    -0.051522
    ],
-   "performance": 0.761613,
+   "performance": 0.708042,
    "v_walk": 1.252537,
    "v_run": 2.254567,
    "v_max": 2.505074,
@@ -3557,7 +3809,9 @@
     "leg2_L",
     "leg2_R",
     "leg3_L",
-    "leg3_R"
+    "leg3_R",
+    "dorsal_0",
+    "dorsal_1"
    ],
    "part_ids": [
     "reference_crawler_alien_tripod_elongated_v3_core_v1",
@@ -3567,8 +3821,10 @@
     "reference_hexapod_elongated_insect_elongated_v3_leg0_r_v1",
     "reference_crawler_bilateral_eight_legged_compact_v3_leg2_l_v1",
     "reference_hexapod_elongated_insect_compact_v3_leg1_r_v1",
-    "reference_hexapod_elongated_insect_elongated_v3_leg2_l_v1",
-    "reference_hexapod_compact_insect_compact_v3_leg1_r_v1"
+    "reference_crawler_bilateral_eight_legged_compact_v3_leg2_l_v1",
+    "reference_crawler_bilateral_eight_legged_compact_v3_leg2_r_v1",
+    "reference_crawler_alien_tripod_balanced_v3_crown_v1",
+    "reference_quadruped_stocky_plantigrade_balanced_v3_dorsal_1_v1"
    ],
    "length_scales": [
     1.116223,
@@ -3578,8 +3834,10 @@
     0.907816,
     1.022573,
     0.928279,
-    0.907816,
-    1.117139
+    1.022573,
+    1.022573,
+    1.027778,
+    1.235
    ],
    "girth_scales": [
     1.000639,
@@ -3589,20 +3847,22 @@
     0.998734,
     0.999983,
     1.003478,
-    0.998734,
-    0.997865
+    0.999983,
+    0.999983,
+    0.994125,
+    1.012146
    ],
-   "mass_kg": 133.909922,
+   "mass_kg": 134.49596,
    "com_m": [
-    1.8e-05,
-    0.335511,
-    0.005199
+    -2.1e-05,
+    0.336704,
+    0.004869
    ],
-   "performance": 1.090859,
-   "v_walk": 0.963013,
-   "v_run": 3.254817,
-   "v_max": 4.023534,
-   "cadence_max": 3.438918
+   "performance": 1.087909,
+   "v_walk": 0.96171,
+   "v_run": 3.237235,
+   "v_max": 4.012652,
+   "cadence_max": 3.429617
   },
   {
    "skeleton_id": "biped_digitigrade_creature_balanced_v3",
@@ -3613,43 +3873,51 @@
     "leg_R",
     "arm_L",
     "arm_R",
-    "head"
+    "head",
+    "tail",
+    "arm2_R"
    ],
    "part_ids": [
     "reference_dragger_forelimb_puller_compact_v3_core_v1",
     "reference_biped_digitigrade_creature_elongated_v3_leg_l_v1",
     "reference_dragger_arm_leg_crawler_balanced_v3_leg_r_v1",
-    "reference_amalgam_walker_s0024_v3_striker_v1",
-    "reference_amalgam_hauled_s0009_v3_striker_v1",
-    "reference_dragger_forelimb_puller_elongated_v3_head_v1"
+    "reference_dragger_belly_hauler_compact_v3_arm_l_v1",
+    "reference_biped_plantigrade_humanoid_elongated_v3_arm2_r_v1",
+    "reference_dragger_forelimb_puller_elongated_v3_head_v1",
+    "reference_dragger_belly_hauler_compact_v3_belly_v1",
+    "reference_amalgam_slither_s0028_v3_flail5_v1"
    ],
    "length_scales": [
     1.117994,
     0.872514,
     1.136631,
-    0.925134,
-    0.953168,
-    0.936909
+    1.042169,
+    0.931359,
+    0.936909,
+    0.850746,
+    1.013675
    ],
    "girth_scales": [
     1.000208,
     1.00213,
     1.000549,
-    0.994451,
-    0.998485,
-    0.995385
+    0.99561,
+    0.994433,
+    0.995385,
+    1.003241,
+    1.003373
    ],
-   "mass_kg": 81.956319,
+   "mass_kg": 89.911834,
    "com_m": [
-    1e-05,
-    0.818839,
-    0.038075
+    -0.018585,
+    0.828134,
+    0.029424
    ],
-   "performance": 0.763166,
-   "v_walk": 1.210816,
-   "v_run": 2.394686,
-   "v_max": 2.684738,
-   "cadence_max": 2.330527
+   "performance": 0.706141,
+   "v_walk": 1.1647,
+   "v_run": 2.050183,
+   "v_max": 2.484128,
+   "cadence_max": 2.156385
   },
   {
    "skeleton_id": "biped_digitigrade_creature_compact_v3",
@@ -3660,43 +3928,47 @@
     "leg_R",
     "arm_L",
     "arm_R",
-    "head"
+    "head",
+    "tail"
    ],
    "part_ids": [
     "reference_dragger_forelimb_puller_compact_v3_core_v1",
     "reference_biped_digitigrade_creature_balanced_v3_leg_l_v1",
     "reference_biped_digitigrade_creature_compact_v3_leg_r_v1",
-    "reference_amalgam_slither_s0006_v3_striker_v1",
+    "reference_biped_digitigrade_creature_balanced_v3_arm2_l_v1",
     "reference_dragger_belly_hauler_compact_v3_arm_r_v1",
-    "reference_biped_plantigrade_humanoid_balanced_v3_head_v1"
+    "reference_biped_plantigrade_humanoid_balanced_v3_head_v1",
+    "reference_amalgam_hauled_s0014_v3_belly_v1"
    ],
    "length_scales": [
     1.028024,
     0.84456,
     1.0,
-    0.833333,
+    0.944351,
     0.843373,
-    0.872204
+    0.872204,
+    1.175862
    ],
    "girth_scales": [
     1.001491,
     1.000317,
     1.0,
-    1.002985,
+    0.996639,
     0.998496,
-    0.990176
+    0.990176,
+    1.005809
    ],
-   "mass_kg": 53.244119,
+   "mass_kg": 55.146129,
    "com_m": [
-    9.8e-05,
-    0.717826,
-    0.029137
+    -1.8e-05,
+    0.713018,
+    0.013148
    ],
-   "performance": 0.772188,
-   "v_walk": 1.094651,
-   "v_run": 2.203442,
-   "v_max": 2.795025,
-   "cadence_max": 2.565894
+   "performance": 0.76841,
+   "v_walk": 1.09197,
+   "v_run": 2.181935,
+   "v_max": 2.781351,
+   "cadence_max": 2.553341
   },
   {
    "skeleton_id": "biped_plantigrade_humanoid_compact_v3",
@@ -3713,37 +3985,37 @@
     "reference_dragger_arm_leg_crawler_balanced_v3_core_v1",
     "reference_biped_plantigrade_humanoid_balanced_v3_leg_l_v1",
     "reference_biped_plantigrade_humanoid_balanced_v3_leg_r_v1",
-    "reference_biped_digitigrade_creature_balanced_v3_arm_l_v1",
-    "reference_biped_plantigrade_humanoid_balanced_v3_arm_r_v1",
+    "reference_biped_plantigrade_humanoid_compact_v3_arm2_l_v1",
+    "reference_amalgam_slither_s0018_v3_flail4_v1",
     "reference_biped_digitigrade_creature_compact_v3_head_v1"
    ],
    "length_scales": [
     0.866902,
     0.84335,
     0.84335,
-    0.854046,
-    0.809589,
+    1.16568,
+    1.189135,
     1.054945
    ],
    "girth_scales": [
     0.999728,
     0.999644,
     0.999644,
-    1.001202,
-    0.998308,
+    1.002262,
+    1.002342,
     1.01028
    ],
-   "mass_kg": 74.775291,
+   "mass_kg": 74.791375,
    "com_m": [
-    5.3e-05,
-    0.688975,
-    0.063269
+    -1e-06,
+    0.689043,
+    0.063271
    ],
-   "performance": 0.83686,
-   "v_walk": 1.171011,
-   "v_run": 2.659387,
-   "v_max": 3.931661,
-   "cadence_max": 2.713702
+   "performance": 0.83675,
+   "v_walk": 1.170935,
+   "v_run": 2.658691,
+   "v_max": 3.931147,
+   "cadence_max": 2.713347
   },
   {
    "skeleton_id": "quadruped_lean_digitigrade_elongated_v3",
@@ -3754,7 +4026,8 @@
     "leg_R0",
     "leg_L1",
     "leg_R1",
-    "head"
+    "head",
+    "tail"
    ],
    "part_ids": [
     "reference_hexapod_elongated_insect_elongated_v3_core_v1",
@@ -3762,7 +4035,8 @@
     "reference_quadruped_lean_digitigrade_elongated_v3_leg_r1_v1",
     "reference_quadruped_lean_digitigrade_balanced_v3_leg_l1_v1",
     "reference_amalgam_hauled_s0004_v3_leg2_v1",
-    "reference_serpentine_limbless_articulated_balanced_v3_core_v1"
+    "reference_serpentine_limbless_articulated_balanced_v3_core_v1",
+    "meshy_tentacle_a_v1"
    ],
    "length_scales": [
     1.02551,
@@ -3770,7 +4044,8 @@
     1.023514,
     1.145958,
     1.124908,
-    1.057395
+    1.057395,
+    0.83125
    ],
    "girth_scales": [
     1.000931,
@@ -3778,15 +4053,16 @@
     0.998266,
     1.003527,
     1.001442,
-    0.997847
+    0.997847,
+    1.002506
    ],
-   "mass_kg": 682.46323,
+   "mass_kg": 733.659,
    "com_m": [
-    0.000242,
-    1.012223,
-    0.041038
+    0.000225,
+    1.041122,
+    -0.070474
    ],
-   "performance": 0.76157,
+   "performance": 0.698267,
    "v_walk": 1.252537,
    "v_run": 2.254567,
    "v_max": 2.505074,
@@ -3804,7 +4080,8 @@
     "leg2_L",
     "leg2_R",
     "leg3_L",
-    "leg3_R"
+    "leg3_R",
+    "dorsal_1"
    ],
    "part_ids": [
     "reference_radial_raised_articulated_walker_balanced_v3_core_v1",
@@ -3814,8 +4091,9 @@
     "reference_crawler_bilateral_eight_legged_compact_v3_leg1_r_v1",
     "reference_crawler_bilateral_eight_legged_compact_v3_leg0_l_v1",
     "reference_crawler_bilateral_eight_legged_elongated_v3_leg3_r_v1",
-    "reference_hexapod_elongated_insect_compact_v3_leg0_l_v1",
-    "reference_hexapod_elongated_insect_compact_v3_leg0_r_v1"
+    "reference_hexapod_compact_insect_compact_v3_leg1_l_v1",
+    "reference_hexapod_elongated_insect_balanced_v3_leg2_r_v1",
+    "reference_crawler_bilateral_eight_legged_compact_v3_dorsal_0_v1"
    ],
    "length_scales": [
     1.145349,
@@ -3825,8 +4103,9 @@
     1.0,
     1.0,
     0.977925,
-    0.907787,
-    0.907787
+    1.092478,
+    0.894046,
+    0.831579
    ],
    "girth_scales": [
     0.99702,
@@ -3836,20 +4115,21 @@
     1.0,
     1.0,
     1.000017,
-    1.003494,
-    1.003494
+    0.997881,
+    0.998402,
+    1.00211
    ],
-   "mass_kg": 91.921085,
+   "mass_kg": 91.871226,
    "com_m": [
-    0.000192,
-    0.333952,
-    0.004864
+    0.000203,
+    0.334064,
+    0.004468
    ],
-   "performance": 1.323911,
-   "v_walk": 1.065025,
-   "v_run": 4.812708,
+   "performance": 1.323215,
+   "v_walk": 1.064745,
+   "v_run": 4.807651,
    "v_max": 5.4375,
-   "cadence_max": 4.220713
+   "cadence_max": 4.218495
   },
   {
    "skeleton_id": "biped_digitigrade_creature_balanced_v3",
@@ -3860,43 +4140,51 @@
     "leg_R",
     "arm_L",
     "arm_R",
-    "head"
+    "head",
+    "tail",
+    "arm2_L"
    ],
    "part_ids": [
     "reference_dragger_arm_leg_crawler_balanced_v3_core_v1",
     "reference_biped_digitigrade_creature_compact_v3_leg_l_v1",
     "reference_biped_digitigrade_creature_balanced_v3_leg_r_v1",
-    "reference_dragger_forelimb_puller_compact_v3_arm_l_v1",
-    "meshy_frayed_arm_a_v1",
-    "reference_dragger_arm_leg_crawler_elongated_v3_head_v1"
+    "reference_biped_digitigrade_creature_elongated_v3_arm2_l_v1",
+    "reference_dragger_belly_hauler_compact_v3_arm_r_v1",
+    "reference_dragger_arm_leg_crawler_elongated_v3_head_v1",
+    "reference_biped_digitigrade_creature_elongated_v3_tail_v1",
+    "reference_biped_plantigrade_humanoid_compact_v3_arm2_l_v1"
    ],
    "length_scales": [
     0.892815,
     1.184049,
     1.0,
-    0.96648,
-    0.814118,
-    0.911043
+    0.982955,
+    1.042169,
+    0.911043,
+    0.942748,
+    1.169625
    ],
    "girth_scales": [
     0.997067,
     0.999683,
     1.0,
-    0.998504,
-    0.99711,
-    1.001147
+    0.995695,
+    0.99561,
+    1.001147,
+    1.000969,
+    1.007346
    ],
-   "mass_kg": 82.382574,
+   "mass_kg": 94.405402,
    "com_m": [
-    -0.001986,
-    0.820725,
-    0.038404
+    0.017902,
+    0.823443,
+    0.005384
    ],
-   "performance": 0.759873,
-   "v_walk": 1.208201,
-   "v_run": 2.374062,
-   "v_max": 2.673152,
-   "cadence_max": 2.32047
+   "performance": 0.701218,
+   "v_walk": 1.160633,
+   "v_run": 2.021696,
+   "v_max": 2.466809,
+   "cadence_max": 2.141351
   },
   {
    "skeleton_id": "biped_plantigrade_humanoid_elongated_v3",
@@ -3907,7 +4195,8 @@
     "leg_R",
     "arm_L",
     "arm_R",
-    "head"
+    "head",
+    "arm2_L"
    ],
    "part_ids": [
     "reference_dragger_forelimb_puller_balanced_v3_core_v1",
@@ -3915,7 +4204,8 @@
     "reference_quadruped_stocky_plantigrade_balanced_v3_leg_r0_v1",
     "meshy_frayed_arm_a_v1",
     "meshy_frayed_arm_a_v1",
-    "reference_biped_digitigrade_creature_elongated_v3_head_v1"
+    "reference_biped_digitigrade_creature_elongated_v3_head_v1",
+    "reference_biped_plantigrade_humanoid_balanced_v3_arm2_l_v1"
    ],
    "length_scales": [
     1.026634,
@@ -3923,7 +4213,8 @@
     0.982293,
     1.02,
     1.02,
-    1.057325
+    1.057325,
+    1.186901
    ],
    "girth_scales": [
     0.997622,
@@ -3931,19 +4222,20 @@
     0.998523,
     0.997693,
     0.997693,
-    0.999521
+    0.999521,
+    1.004296
    ],
-   "mass_kg": 170.929967,
+   "mass_kg": 181.33866,
    "com_m": [
-    0.0,
-    0.880382,
-    0.090279
+    0.019228,
+    0.900152,
+    0.095768
    ],
-   "performance": 0.812351,
-   "v_walk": 1.399646,
-   "v_run": 3.040009,
-   "v_max": 3.517033,
-   "cadence_max": 2.257884
+   "performance": 0.756256,
+   "v_walk": 1.350457,
+   "v_run": 2.634664,
+   "v_max": 3.274173,
+   "cadence_max": 2.101972
   },
   {
    "skeleton_id": "crawler_bilateral_eight_legged_balanced_v3",
@@ -3967,8 +4259,8 @@
     "reference_crawler_bilateral_eight_legged_balanced_v3_leg3_r_v1",
     "reference_hexapod_compact_insect_elongated_v3_leg0_l_v1",
     "reference_crawler_bilateral_eight_legged_elongated_v3_leg1_r_v1",
-    "reference_crawler_bilateral_eight_legged_balanced_v3_leg1_l_v1",
-    "reference_crawler_bilateral_eight_legged_balanced_v3_leg0_r_v1"
+    "reference_hexapod_compact_insect_compact_v3_leg0_l_v1",
+    "reference_hexapod_compact_insect_compact_v3_leg1_r_v1"
    ],
    "length_scales": [
     1.116279,
@@ -3978,8 +4270,8 @@
     1.0,
     1.081928,
     0.99117,
-    1.0,
-    1.0
+    1.107275,
+    1.107275
    ],
    "girth_scales": [
     0.997423,
@@ -3989,20 +4281,20 @@
     1.0,
     1.006268,
     1.00149,
-    1.0,
-    1.0
+    0.999352,
+    0.999352
    ],
-   "mass_kg": 105.879127,
+   "mass_kg": 105.858971,
    "com_m": [
     0.000228,
-    0.3354,
-    0.005091
+    0.335401,
+    0.005004
    ],
-   "performance": 1.241789,
-   "v_walk": 1.032365,
-   "v_run": 4.237858,
-   "v_max": 4.846154,
-   "cadence_max": 3.930377
+   "performance": 1.24173,
+   "v_walk": 1.032341,
+   "v_run": 4.237456,
+   "v_max": 4.845925,
+   "cadence_max": 3.93019
   },
   {
    "skeleton_id": "crawler_alien_tripod_elongated_v3",
@@ -4011,37 +4303,41 @@
     "core",
     "leg_0",
     "leg_1",
-    "leg_2"
+    "leg_2",
+    "crown"
    ],
    "part_ids": [
     "reference_crawler_alien_tripod_elongated_v3_core_v1",
     "reference_radial_raised_articulated_walker_elongated_v3_arm_5_v1",
     "reference_radial_raised_articulated_walker_elongated_v3_arm_0_v1",
-    "reference_radial_raised_articulated_walker_balanced_v3_arm_2_v1"
+    "reference_radial_raised_articulated_walker_balanced_v3_arm_2_v1",
+    "reference_quadruped_stocky_plantigrade_elongated_v3_dorsal_0_v1"
    ],
    "length_scales": [
     1.0,
     0.907357,
     0.907357,
-    1.178066
+    1.178066,
+    1.234114
    ],
    "girth_scales": [
     1.0,
     1.001911,
     1.001911,
-    1.002577
+    1.002577,
+    0.995991
    ],
-   "mass_kg": 78.075224,
+   "mass_kg": 78.778749,
    "com_m": [
     2.4e-05,
-    0.372271,
-    -4.3e-05
+    0.37504,
+    0.00028
    ],
-   "performance": 1.071591,
-   "v_walk": 1.002559,
+   "performance": 1.065732,
+   "v_walk": 0.999814,
    "v_run": 2.260746,
    "v_max": 2.51194,
-   "cadence_max": 3.215737
+   "cadence_max": 3.198156
   },
   {
    "skeleton_id": "crawler_bilateral_eight_legged_elongated_v3",
@@ -4055,7 +4351,9 @@
     "leg2_L",
     "leg2_R",
     "leg3_L",
-    "leg3_R"
+    "leg3_R",
+    "dorsal_0",
+    "dorsal_1"
    ],
    "part_ids": [
     "reference_crawler_alien_tripod_elongated_v3_core_v1",
@@ -4065,8 +4363,10 @@
     "reference_hexapod_elongated_insect_elongated_v3_leg0_r_v1",
     "reference_crawler_bilateral_eight_legged_compact_v3_leg2_l_v1",
     "reference_hexapod_elongated_insect_compact_v3_leg1_r_v1",
-    "reference_hexapod_elongated_insect_elongated_v3_leg2_l_v1",
-    "reference_hexapod_compact_insect_compact_v3_leg1_r_v1"
+    "reference_crawler_bilateral_eight_legged_compact_v3_leg2_l_v1",
+    "reference_crawler_bilateral_eight_legged_compact_v3_leg2_r_v1",
+    "reference_crawler_alien_tripod_balanced_v3_crown_v1",
+    "reference_quadruped_stocky_plantigrade_balanced_v3_dorsal_1_v1"
    ],
    "length_scales": [
     1.116223,
@@ -4076,8 +4376,10 @@
     0.907816,
     1.022573,
     0.928279,
-    0.907816,
-    1.117139
+    1.022573,
+    1.022573,
+    1.027778,
+    1.235
    ],
    "girth_scales": [
     1.000639,
@@ -4087,20 +4389,22 @@
     0.998734,
     0.999983,
     1.003478,
-    0.998734,
-    0.997865
+    0.999983,
+    0.999983,
+    0.994125,
+    1.012146
    ],
-   "mass_kg": 133.909922,
+   "mass_kg": 134.49596,
    "com_m": [
-    1.8e-05,
-    0.335511,
-    0.005199
+    -2.1e-05,
+    0.336704,
+    0.004869
    ],
-   "performance": 1.090859,
-   "v_walk": 0.963013,
-   "v_run": 3.254817,
-   "v_max": 4.023534,
-   "cadence_max": 3.438918
+   "performance": 1.087909,
+   "v_walk": 0.96171,
+   "v_run": 3.237235,
+   "v_max": 4.012652,
+   "cadence_max": 3.429617
   },
   {
    "skeleton_id": "crawler_alien_tripod_balanced_v3",
@@ -4148,37 +4452,41 @@
     "core",
     "leg_0",
     "leg_1",
-    "leg_2"
+    "leg_2",
+    "crown"
    ],
    "part_ids": [
     "reference_radial_raised_articulated_walker_balanced_v3_core_v1",
     "reference_radial_raised_articulated_walker_balanced_v3_arm_0_v1",
     "reference_crawler_alien_tripod_balanced_v3_leg_1_v1",
-    "reference_crawler_alien_tripod_balanced_v3_leg_1_v1"
+    "reference_crawler_alien_tripod_balanced_v3_leg_1_v1",
+    "reference_quadruped_stocky_plantigrade_elongated_v3_dorsal_1_v1"
    ],
    "length_scales": [
     1.025194,
     1.152123,
     0.984879,
-    0.984879
+    0.984879,
+    0.921875
    ],
    "girth_scales": [
     1.000598,
     1.00465,
     1.001724,
-    1.001724
+    1.001724,
+    1.005374
    ],
-   "mass_kg": 49.195975,
+   "mass_kg": 49.383407,
    "com_m": [
-    0.000489,
-    0.369124,
-    9e-06
+    0.000487,
+    0.369925,
+    9.7e-05
    ],
-   "performance": 1.368407,
-   "v_walk": 1.137349,
+   "performance": 1.365284,
+   "v_walk": 1.136051,
    "v_run": 2.559963,
    "v_max": 2.844403,
-   "cadence_max": 4.152836
+   "cadence_max": 4.143358
   },
   {
    "skeleton_id": "crawler_bilateral_eight_legged_compact_v3",
@@ -4192,7 +4500,9 @@
     "leg2_L",
     "leg2_R",
     "leg3_L",
-    "leg3_R"
+    "leg3_R",
+    "dorsal_0",
+    "dorsal_1"
    ],
    "part_ids": [
     "reference_radial_raised_articulated_walker_compact_v3_core_v1",
@@ -4202,8 +4512,10 @@
     "reference_crawler_bilateral_eight_legged_balanced_v3_leg0_r_v1",
     "reference_hexapod_elongated_insect_elongated_v3_leg1_l_v1",
     "reference_crawler_bilateral_eight_legged_elongated_v3_leg2_r_v1",
-    "reference_crawler_bilateral_eight_legged_balanced_v3_leg3_l_v1",
-    "reference_crawler_bilateral_eight_legged_compact_v3_leg2_r_v1"
+    "reference_hexapod_compact_insect_compact_v3_leg0_l_v1",
+    "reference_hexapod_elongated_insect_elongated_v3_leg2_r_v1",
+    "reference_crawler_bilateral_eight_legged_compact_v3_dorsal_0_v1",
+    "reference_hexapod_compact_insect_balanced_v3_dorsal_0_v1"
    ],
    "length_scales": [
     1.246835,
@@ -4213,8 +4525,10 @@
     0.986637,
     0.887776,
     0.977925,
-    0.986637,
-    1.0
+    1.092478,
+    0.887776,
+    1.0,
+    0.940476
    ],
    "girth_scales": [
     0.999714,
@@ -4224,20 +4538,22 @@
     0.998529,
     0.998751,
     1.000017,
-    0.998529,
-    1.0
+    0.997881,
+    0.998751,
+    1.0,
+    0.984529
    ],
-   "mass_kg": 91.891504,
+   "mass_kg": 92.032943,
    "com_m": [
-    0.000286,
-    0.333971,
-    0.004526
+    0.000231,
+    0.334278,
+    0.004396
    ],
-   "performance": 1.323182,
-   "v_walk": 1.064732,
-   "v_run": 4.807406,
+   "performance": 1.321825,
+   "v_walk": 1.064186,
+   "v_run": 4.797552,
    "v_max": 5.4375,
-   "cadence_max": 4.218388
+   "cadence_max": 4.214062
   },
   {
    "skeleton_id": "crawler_alien_tripod_elongated_v3",
@@ -4246,37 +4562,41 @@
     "core",
     "leg_0",
     "leg_1",
-    "leg_2"
+    "leg_2",
+    "crown"
    ],
    "part_ids": [
     "reference_crawler_bilateral_eight_legged_elongated_v3_core_v1",
     "reference_radial_raised_articulated_walker_balanced_v3_arm_1_v1",
     "reference_crawler_alien_tripod_balanced_v3_leg_2_v1",
-    "reference_radial_raised_articulated_walker_elongated_v3_arm_5_v1"
+    "reference_radial_raised_articulated_walker_elongated_v3_arm_5_v1",
+    "reference_hexapod_elongated_insect_elongated_v3_dorsal_0_v1"
    ],
    "length_scales": [
     0.895879,
     1.178066,
     1.007056,
-    0.907357
+    0.907357,
+    0.941327
    ],
    "girth_scales": [
     0.999362,
     1.002577,
     0.999657,
-    1.001911
+    1.001911,
+    0.994881
    ],
-   "mass_kg": 77.992544,
+   "mass_kg": 78.695649,
    "com_m": [
-    0.000134,
-    0.372272,
-    0.000326
+    0.000133,
+    0.375042,
+    0.000646
    ],
-   "performance": 1.071557,
-   "v_walk": 1.002543,
+   "performance": 1.065661,
+   "v_walk": 0.999781,
    "v_run": 2.260746,
    "v_max": 2.51194,
-   "cadence_max": 3.215634
+   "cadence_max": 3.197943
   },
   {
    "skeleton_id": "crawler_bilateral_eight_legged_compact_v3",
@@ -4290,7 +4610,8 @@
     "leg2_L",
     "leg2_R",
     "leg3_L",
-    "leg3_R"
+    "leg3_R",
+    "dorsal_1"
    ],
    "part_ids": [
     "reference_radial_raised_articulated_walker_balanced_v3_core_v1",
@@ -4300,8 +4621,9 @@
     "reference_crawler_bilateral_eight_legged_compact_v3_leg1_r_v1",
     "reference_crawler_bilateral_eight_legged_compact_v3_leg0_l_v1",
     "reference_crawler_bilateral_eight_legged_elongated_v3_leg3_r_v1",
-    "reference_hexapod_elongated_insect_compact_v3_leg0_l_v1",
-    "reference_hexapod_elongated_insect_compact_v3_leg0_r_v1"
+    "reference_hexapod_compact_insect_compact_v3_leg1_l_v1",
+    "reference_hexapod_elongated_insect_balanced_v3_leg2_r_v1",
+    "reference_crawler_bilateral_eight_legged_compact_v3_dorsal_0_v1"
    ],
    "length_scales": [
     1.145349,
@@ -4311,8 +4633,9 @@
     1.0,
     1.0,
     0.977925,
-    0.907787,
-    0.907787
+    1.092478,
+    0.894046,
+    0.831579
    ],
    "girth_scales": [
     0.99702,
@@ -4322,20 +4645,21 @@
     1.0,
     1.0,
     1.000017,
-    1.003494,
-    1.003494
+    0.997881,
+    0.998402,
+    1.00211
    ],
-   "mass_kg": 91.921085,
+   "mass_kg": 91.871226,
    "com_m": [
-    0.000192,
-    0.333952,
-    0.004864
+    0.000203,
+    0.334064,
+    0.004468
    ],
-   "performance": 1.323911,
-   "v_walk": 1.065025,
-   "v_run": 4.812708,
+   "performance": 1.323215,
+   "v_walk": 1.064745,
+   "v_run": 4.807651,
    "v_max": 5.4375,
-   "cadence_max": 4.220713
+   "cadence_max": 4.218495
   },
   {
    "skeleton_id": "crawler_alien_tripod_balanced_v3",
@@ -4344,37 +4668,41 @@
     "core",
     "leg_0",
     "leg_1",
-    "leg_2"
+    "leg_2",
+    "crown"
    ],
    "part_ids": [
     "reference_crawler_alien_tripod_balanced_v3_core_v1",
     "reference_radial_raised_articulated_walker_balanced_v3_arm_5_v1",
     "reference_radial_raised_articulated_walker_elongated_v3_arm_0_v1",
-    "reference_radial_raised_articulated_walker_elongated_v3_arm_2_v1"
+    "reference_radial_raised_articulated_walker_elongated_v3_arm_2_v1",
+    "reference_quadruped_lean_digitigrade_balanced_v3_dorsal_1_v1"
    ],
    "length_scales": [
     1.0,
     1.169811,
     0.900999,
-    0.900999
+    0.900999,
+    1.156627
    ],
    "girth_scales": [
     1.0,
     1.002921,
     1.002254,
-    1.002254
+    1.002254,
+    0.994271
    ],
-   "mass_kg": 58.626371,
+   "mass_kg": 58.960708,
    "com_m": [
     -4e-05,
-    0.371531,
-    0.0
+    0.372952,
+    0.00016
    ],
-   "performance": 1.259633,
-   "v_walk": 1.092454,
+   "performance": 1.255285,
+   "v_walk": 1.090567,
    "v_run": 2.426978,
    "v_max": 2.696642,
-   "cadence_max": 3.795064
+   "cadence_max": 3.781964
   },
   {
    "skeleton_id": "crawler_bilateral_eight_legged_elongated_v3",
@@ -4398,8 +4726,8 @@
     "reference_crawler_bilateral_eight_legged_balanced_v3_leg0_r_v1",
     "reference_hexapod_compact_insect_elongated_v3_leg1_l_v1",
     "reference_hexapod_elongated_insect_balanced_v3_leg1_r_v1",
-    "reference_crawler_bilateral_eight_legged_compact_v3_leg3_l_v1",
-    "reference_hexapod_elongated_insect_balanced_v3_leg2_r_v1"
+    "reference_hexapod_elongated_insect_elongated_v3_leg2_l_v1",
+    "reference_crawler_bilateral_eight_legged_elongated_v3_leg1_r_v1"
    ],
    "length_scales": [
     1.0,
@@ -4409,8 +4737,8 @@
     1.008909,
     1.091566,
     0.914228,
-    1.022573,
-    0.914228
+    0.907816,
+    1.0
    ],
    "girth_scales": [
     1.0,
@@ -4420,20 +4748,20 @@
     0.998512,
     1.004771,
     0.998385,
-    0.999983,
-    0.998385
+    0.998734,
+    1.0
    ],
-   "mass_kg": 133.805362,
+   "mass_kg": 133.819987,
    "com_m": [
-    0.000264,
-    0.335508,
-    0.005203
+    0.000228,
+    0.335507,
+    0.005264
    ],
-   "performance": 1.091025,
-   "v_walk": 0.963086,
-   "v_run": 3.255806,
-   "v_max": 4.024146,
-   "cadence_max": 3.439441
+   "performance": 1.091077,
+   "v_walk": 0.963109,
+   "v_run": 3.256114,
+   "v_max": 4.024336,
+   "cadence_max": 3.439603
   },
   {
    "skeleton_id": "crawler_bilateral_eight_legged_balanced_v3",
@@ -4457,8 +4785,8 @@
     "reference_crawler_bilateral_eight_legged_balanced_v3_leg3_r_v1",
     "reference_hexapod_compact_insect_elongated_v3_leg0_l_v1",
     "reference_crawler_bilateral_eight_legged_elongated_v3_leg1_r_v1",
-    "reference_crawler_bilateral_eight_legged_balanced_v3_leg1_l_v1",
-    "reference_crawler_bilateral_eight_legged_balanced_v3_leg0_r_v1"
+    "reference_hexapod_compact_insect_compact_v3_leg0_l_v1",
+    "reference_hexapod_compact_insect_compact_v3_leg1_r_v1"
    ],
    "length_scales": [
     1.116279,
@@ -4468,8 +4796,8 @@
     1.0,
     1.081928,
     0.99117,
-    1.0,
-    1.0
+    1.107275,
+    1.107275
    ],
    "girth_scales": [
     0.997423,
@@ -4479,20 +4807,20 @@
     1.0,
     1.006268,
     1.00149,
-    1.0,
-    1.0
+    0.999352,
+    0.999352
    ],
-   "mass_kg": 105.879127,
+   "mass_kg": 105.858971,
    "com_m": [
     0.000228,
-    0.3354,
-    0.005091
+    0.335401,
+    0.005004
    ],
-   "performance": 1.241789,
-   "v_walk": 1.032365,
-   "v_run": 4.237858,
-   "v_max": 4.846154,
-   "cadence_max": 3.930377
+   "performance": 1.24173,
+   "v_walk": 1.032341,
+   "v_run": 4.237456,
+   "v_max": 4.845925,
+   "cadence_max": 3.93019
   },
   {
    "skeleton_id": "biped_digitigrade_creature_elongated_v3",
@@ -4503,43 +4831,47 @@
     "leg_R",
     "arm_L",
     "arm_R",
-    "head"
+    "head",
+    "arm2_L"
    ],
    "part_ids": [
     "reference_dragger_arm_leg_crawler_balanced_v3_core_v1",
     "reference_quadruped_lean_digitigrade_balanced_v3_leg_l1_v1",
     "reference_quadruped_lean_digitigrade_compact_v3_leg_r1_v1",
-    "reference_biped_digitigrade_creature_elongated_v3_arm_l_v1",
-    "reference_dragger_forelimb_puller_compact_v3_arm_r_v1",
-    "reference_dragger_belly_hauler_balanced_v3_head_v1"
+    "reference_amalgam_walker_s0024_v3_striker_v1",
+    "reference_biped_plantigrade_humanoid_elongated_v3_arm_r_v1",
+    "reference_dragger_belly_hauler_balanced_v3_head_v1",
+    "reference_amalgam_hauled_s0014_v3_striker_v1"
    ],
    "length_scales": [
     0.945819,
     0.827844,
     0.979628,
-    1.0,
-    1.148045,
-    0.894587
+    1.09893,
+    0.948097,
+    0.894587,
+    1.163636
    ],
    "girth_scales": [
     0.999238,
     1.001597,
     1.000681,
-    1.0,
-    0.998962,
-    1.00377
+    0.994907,
+    0.999873,
+    1.00377,
+    1.00142
    ],
-   "mass_kg": 117.152564,
+   "mass_kg": 125.930012,
    "com_m": [
-    9.1e-05,
-    0.911512,
-    0.04711
+    0.023707,
+    0.928862,
+    0.056133
    ],
-   "performance": 0.753707,
-   "v_walk": 1.246853,
-   "v_run": 2.244335,
-   "v_max": 2.493705,
-   "cadence_max": 2.149651
+   "performance": 0.69355,
+   "v_walk": 1.160051,
+   "v_run": 2.088093,
+   "v_max": 2.320103,
+   "cadence_max": 2.0
   },
   {
    "skeleton_id": "biped_plantigrade_humanoid_elongated_v3",
@@ -4550,43 +4882,47 @@
     "leg_R",
     "arm_L",
     "arm_R",
-    "head"
+    "head",
+    "arm2_R"
    ],
    "part_ids": [
     "reference_dragger_arm_leg_crawler_balanced_v3_core_v1",
     "reference_quadruped_stocky_plantigrade_elongated_v3_leg_l1_v1",
     "reference_biped_plantigrade_humanoid_elongated_v3_leg_r_v1",
-    "reference_dragger_arm_leg_crawler_balanced_v3_arm_l_v1",
-    "reference_amalgam_walker_s0039_v3_striker_v1",
-    "reference_biped_plantigrade_humanoid_balanced_v3_head_v1"
+    "reference_amalgam_hauled_s0005_v3_striker_v1",
+    "reference_dragger_forelimb_puller_compact_v3_arm_r_v1",
+    "reference_biped_plantigrade_humanoid_balanced_v3_head_v1",
+    "reference_biped_digitigrade_creature_elongated_v3_arm2_r_v1"
    ],
    "length_scales": [
     0.998822,
     0.868107,
     1.0,
-    0.850834,
-    1.176391,
-    1.060703
+    1.085106,
+    1.210894,
+    1.060703,
+    1.055398
    ],
    "girth_scales": [
     0.997253,
     0.999642,
     1.0,
-    0.996715,
-    1.000408,
-    0.996338
+    0.996446,
+    0.999089,
+    0.996338,
+    1.00127
    ],
-   "mass_kg": 168.899243,
+   "mass_kg": 179.249338,
    "com_m": [
-    -0.000152,
-    0.87499,
-    0.090207
+    -0.019469,
+    0.895181,
+    0.095745
    ],
-   "performance": 0.818789,
-   "v_walk": 1.405181,
-   "v_run": 3.088384,
-   "v_max": 3.544906,
-   "cadence_max": 2.275778
+   "performance": 0.762011,
+   "v_walk": 1.355586,
+   "v_run": 2.674919,
+   "v_max": 3.299092,
+   "cadence_max": 2.117969
   },
   {
    "skeleton_id": "biped_digitigrade_creature_balanced_v3",
@@ -4597,43 +4933,51 @@
     "leg_R",
     "arm_L",
     "arm_R",
-    "head"
+    "head",
+    "tail",
+    "arm2_R"
    ],
    "part_ids": [
     "reference_dragger_forelimb_puller_compact_v3_core_v1",
     "reference_biped_digitigrade_creature_elongated_v3_leg_l_v1",
     "reference_dragger_arm_leg_crawler_balanced_v3_leg_r_v1",
-    "reference_amalgam_walker_s0024_v3_striker_v1",
-    "reference_amalgam_hauled_s0009_v3_striker_v1",
-    "reference_dragger_forelimb_puller_elongated_v3_head_v1"
+    "reference_dragger_belly_hauler_compact_v3_arm_l_v1",
+    "reference_biped_plantigrade_humanoid_elongated_v3_arm2_r_v1",
+    "reference_dragger_forelimb_puller_elongated_v3_head_v1",
+    "reference_dragger_belly_hauler_compact_v3_belly_v1",
+    "reference_amalgam_slither_s0028_v3_flail5_v1"
    ],
    "length_scales": [
     1.117994,
     0.872514,
     1.136631,
-    0.925134,
-    0.953168,
-    0.936909
+    1.042169,
+    0.931359,
+    0.936909,
+    0.850746,
+    1.013675
    ],
    "girth_scales": [
     1.000208,
     1.00213,
     1.000549,
-    0.994451,
-    0.998485,
-    0.995385
+    0.99561,
+    0.994433,
+    0.995385,
+    1.003241,
+    1.003373
    ],
-   "mass_kg": 81.956319,
+   "mass_kg": 89.911834,
    "com_m": [
-    1e-05,
-    0.818839,
-    0.038075
+    -0.018585,
+    0.828134,
+    0.029424
    ],
-   "performance": 0.763166,
-   "v_walk": 1.210816,
-   "v_run": 2.394686,
-   "v_max": 2.684738,
-   "cadence_max": 2.330527
+   "performance": 0.706141,
+   "v_walk": 1.1647,
+   "v_run": 2.050183,
+   "v_max": 2.484128,
+   "cadence_max": 2.156385
   },
   {
    "skeleton_id": "biped_digitigrade_creature_compact_v3",
@@ -4644,43 +4988,47 @@
     "leg_R",
     "arm_L",
     "arm_R",
-    "head"
+    "head",
+    "tail"
    ],
    "part_ids": [
     "reference_dragger_forelimb_puller_compact_v3_core_v1",
     "reference_biped_digitigrade_creature_balanced_v3_leg_l_v1",
     "reference_biped_digitigrade_creature_compact_v3_leg_r_v1",
-    "reference_amalgam_slither_s0006_v3_striker_v1",
+    "reference_biped_digitigrade_creature_balanced_v3_arm2_l_v1",
     "reference_dragger_belly_hauler_compact_v3_arm_r_v1",
-    "reference_biped_plantigrade_humanoid_balanced_v3_head_v1"
+    "reference_biped_plantigrade_humanoid_balanced_v3_head_v1",
+    "reference_amalgam_hauled_s0014_v3_belly_v1"
    ],
    "length_scales": [
     1.028024,
     0.84456,
     1.0,
-    0.833333,
+    0.944351,
     0.843373,
-    0.872204
+    0.872204,
+    1.175862
    ],
    "girth_scales": [
     1.001491,
     1.000317,
     1.0,
-    1.002985,
+    0.996639,
     0.998496,
-    0.990176
+    0.990176,
+    1.005809
    ],
-   "mass_kg": 53.244119,
+   "mass_kg": 55.146129,
    "com_m": [
-    9.8e-05,
-    0.717826,
-    0.029137
+    -1.8e-05,
+    0.713018,
+    0.013148
    ],
-   "performance": 0.772188,
-   "v_walk": 1.094651,
-   "v_run": 2.203442,
-   "v_max": 2.795025,
-   "cadence_max": 2.565894
+   "performance": 0.76841,
+   "v_walk": 1.09197,
+   "v_run": 2.181935,
+   "v_max": 2.781351,
+   "cadence_max": 2.553341
   },
   {
    "skeleton_id": "biped_plantigrade_humanoid_compact_v3",
@@ -4697,37 +5045,37 @@
     "reference_dragger_arm_leg_crawler_balanced_v3_core_v1",
     "reference_biped_plantigrade_humanoid_balanced_v3_leg_l_v1",
     "reference_biped_plantigrade_humanoid_balanced_v3_leg_r_v1",
-    "reference_biped_digitigrade_creature_balanced_v3_arm_l_v1",
-    "reference_biped_plantigrade_humanoid_balanced_v3_arm_r_v1",
+    "reference_biped_plantigrade_humanoid_compact_v3_arm2_l_v1",
+    "reference_amalgam_slither_s0018_v3_flail4_v1",
     "reference_biped_digitigrade_creature_compact_v3_head_v1"
    ],
    "length_scales": [
     0.866902,
     0.84335,
     0.84335,
-    0.854046,
-    0.809589,
+    1.16568,
+    1.189135,
     1.054945
    ],
    "girth_scales": [
     0.999728,
     0.999644,
     0.999644,
-    1.001202,
-    0.998308,
+    1.002262,
+    1.002342,
     1.01028
    ],
-   "mass_kg": 74.775291,
+   "mass_kg": 74.791375,
    "com_m": [
-    5.3e-05,
-    0.688975,
-    0.063269
+    -1e-06,
+    0.689043,
+    0.063271
    ],
-   "performance": 0.83686,
-   "v_walk": 1.171011,
-   "v_run": 2.659387,
-   "v_max": 3.931661,
-   "cadence_max": 2.713702
+   "performance": 0.83675,
+   "v_walk": 1.170935,
+   "v_run": 2.658691,
+   "v_max": 3.931147,
+   "cadence_max": 2.713347
   },
   {
    "skeleton_id": "biped_digitigrade_creature_elongated_v3",
@@ -4738,43 +5086,47 @@
     "leg_R",
     "arm_L",
     "arm_R",
-    "head"
+    "head",
+    "tail"
    ],
    "part_ids": [
     "reference_dragger_arm_leg_crawler_compact_v3_core_v1",
     "reference_quadruped_lean_digitigrade_balanced_v3_leg_l1_v1",
     "reference_quadruped_lean_digitigrade_compact_v3_leg_r1_v1",
     "reference_amalgam_hauled_s0004_v3_striker_v1",
-    "reference_amalgam_hauled_s0009_v3_striker_v1",
-    "reference_dragger_belly_hauler_compact_v3_head_v1"
+    "reference_biped_digitigrade_creature_elongated_v3_arm2_r_v1",
+    "reference_dragger_belly_hauler_compact_v3_head_v1",
+    "reference_amalgam_hauled_s0004_v3_belly_v1"
    ],
    "length_scales": [
     1.153736,
     0.827844,
     0.979628,
     1.187861,
-    1.132231,
-    1.094077
+    1.167614,
+    1.094077,
+    1.027451
    ],
    "girth_scales": [
     0.999458,
     1.001597,
     1.000681,
     1.000458,
-    0.998943,
-    0.993001
+    0.996152,
+    0.993001,
+    1.001494
    ],
-   "mass_kg": 117.189346,
+   "mass_kg": 120.278107,
    "com_m": [
-    5.1e-05,
-    0.91158,
-    0.047102
+    0.00018,
+    0.910463,
+    0.032993
    ],
-   "performance": 0.753571,
-   "v_walk": 1.246627,
-   "v_run": 2.243929,
-   "v_max": 2.493254,
-   "cadence_max": 2.149262
+   "performance": 0.75194,
+   "v_walk": 1.243929,
+   "v_run": 2.239072,
+   "v_max": 2.487858,
+   "cadence_max": 2.14461
   },
   {
    "skeleton_id": "biped_plantigrade_humanoid_compact_v3",
@@ -4785,43 +5137,47 @@
     "leg_R",
     "arm_L",
     "arm_R",
-    "head"
+    "head",
+    "arm2_L"
    ],
    "part_ids": [
     "reference_biped_plantigrade_humanoid_balanced_v3_core_v1",
     "reference_biped_plantigrade_humanoid_balanced_v3_leg_l_v1",
     "reference_quadruped_stocky_plantigrade_compact_v3_leg_r1_v1",
-    "reference_amalgam_walker_s0029_v3_flail2_v1",
-    "reference_amalgam_walker_s0039_v3_striker_v1",
-    "meshy_animal_skull_a_v1"
+    "reference_biped_plantigrade_humanoid_compact_v3_arm2_l_v1",
+    "reference_biped_digitigrade_creature_balanced_v3_arm_r_v1",
+    "meshy_animal_skull_a_v1",
+    "reference_biped_digitigrade_creature_compact_v3_arm2_l_v1"
    ],
    "length_scales": [
     0.92,
     0.84335,
     0.868154,
-    1.061041,
-    0.8019,
-    0.96
+    1.16568,
+    0.854046,
+    0.96,
+    1.05625
    ],
    "girth_scales": [
     1.000906,
     0.999644,
     0.997933,
-    1.001905,
-    1.001024,
-    1.004464
+    1.002262,
+    1.001202,
+    1.004464,
+    0.996055
    ],
-   "mass_kg": 77.005042,
+   "mass_kg": 80.260983,
    "com_m": [
-    0.000109,
-    0.711917,
-    0.065129
+    0.011754,
+    0.720563,
+    0.067531
    ],
-   "performance": 0.820357,
-   "v_walk": 1.159408,
-   "v_run": 2.555537,
-   "v_max": 3.85413,
-   "cadence_max": 2.660189
+   "performance": 0.774774,
+   "v_walk": 1.126736,
+   "v_run": 2.279431,
+   "v_max": 3.639976,
+   "cadence_max": 2.512376
   },
   {
    "skeleton_id": "biped_digitigrade_creature_balanced_v3",
@@ -4832,43 +5188,51 @@
     "leg_R",
     "arm_L",
     "arm_R",
-    "head"
+    "head",
+    "tail",
+    "arm2_L"
    ],
    "part_ids": [
     "reference_dragger_arm_leg_crawler_balanced_v3_core_v1",
     "reference_biped_digitigrade_creature_compact_v3_leg_l_v1",
     "reference_biped_digitigrade_creature_balanced_v3_leg_r_v1",
-    "reference_dragger_forelimb_puller_compact_v3_arm_l_v1",
-    "meshy_frayed_arm_a_v1",
-    "reference_dragger_arm_leg_crawler_elongated_v3_head_v1"
+    "reference_biped_digitigrade_creature_elongated_v3_arm2_l_v1",
+    "reference_dragger_belly_hauler_compact_v3_arm_r_v1",
+    "reference_dragger_arm_leg_crawler_elongated_v3_head_v1",
+    "reference_biped_digitigrade_creature_elongated_v3_tail_v1",
+    "reference_biped_plantigrade_humanoid_compact_v3_arm2_l_v1"
    ],
    "length_scales": [
     0.892815,
     1.184049,
     1.0,
-    0.96648,
-    0.814118,
-    0.911043
+    0.982955,
+    1.042169,
+    0.911043,
+    0.942748,
+    1.169625
    ],
    "girth_scales": [
     0.997067,
     0.999683,
     1.0,
-    0.998504,
-    0.99711,
-    1.001147
+    0.995695,
+    0.99561,
+    1.001147,
+    1.000969,
+    1.007346
    ],
-   "mass_kg": 82.382574,
+   "mass_kg": 94.405402,
    "com_m": [
-    -0.001986,
-    0.820725,
-    0.038404
+    0.017902,
+    0.823443,
+    0.005384
    ],
-   "performance": 0.759873,
-   "v_walk": 1.208201,
-   "v_run": 2.374062,
-   "v_max": 2.673152,
-   "cadence_max": 2.32047
+   "performance": 0.701218,
+   "v_walk": 1.160633,
+   "v_run": 2.021696,
+   "v_max": 2.466809,
+   "cadence_max": 2.141351
   },
   {
    "skeleton_id": "biped_plantigrade_humanoid_elongated_v3",
@@ -4879,7 +5243,8 @@
     "leg_R",
     "arm_L",
     "arm_R",
-    "head"
+    "head",
+    "arm2_L"
    ],
    "part_ids": [
     "reference_dragger_forelimb_puller_balanced_v3_core_v1",
@@ -4887,7 +5252,8 @@
     "reference_quadruped_stocky_plantigrade_balanced_v3_leg_r0_v1",
     "meshy_frayed_arm_a_v1",
     "meshy_frayed_arm_a_v1",
-    "reference_biped_digitigrade_creature_elongated_v3_head_v1"
+    "reference_biped_digitigrade_creature_elongated_v3_head_v1",
+    "reference_biped_plantigrade_humanoid_balanced_v3_arm2_l_v1"
    ],
    "length_scales": [
     1.026634,
@@ -4895,7 +5261,8 @@
     0.982293,
     1.02,
     1.02,
-    1.057325
+    1.057325,
+    1.186901
    ],
    "girth_scales": [
     0.997622,
@@ -4903,19 +5270,20 @@
     0.998523,
     0.997693,
     0.997693,
-    0.999521
+    0.999521,
+    1.004296
    ],
-   "mass_kg": 170.929967,
+   "mass_kg": 181.33866,
    "com_m": [
-    0.0,
-    0.880382,
-    0.090279
+    0.019228,
+    0.900152,
+    0.095768
    ],
-   "performance": 0.812351,
-   "v_walk": 1.399646,
-   "v_run": 3.040009,
-   "v_max": 3.517033,
-   "cadence_max": 2.257884
+   "performance": 0.756256,
+   "v_walk": 1.350457,
+   "v_run": 2.634664,
+   "v_max": 3.274173,
+   "cadence_max": 2.101972
   },
   {
    "skeleton_id": "biped_plantigrade_humanoid_balanced_v3",
@@ -4932,37 +5300,37 @@
     "reference_biped_digitigrade_creature_balanced_v3_core_v1",
     "reference_biped_plantigrade_humanoid_elongated_v3_leg_l_v1",
     "reference_quadruped_stocky_plantigrade_compact_v3_leg_r0_v1",
-    "reference_biped_digitigrade_creature_balanced_v3_arm_l_v1",
-    "reference_dragger_forelimb_puller_compact_v3_arm_r_v1",
+    "reference_biped_plantigrade_humanoid_balanced_v3_arm2_l_v1",
+    "reference_amalgam_hauled_s0009_v3_striker_v1",
     "reference_dragger_forelimb_puller_elongated_v3_head_v1"
    ],
    "length_scales": [
     1.055409,
     0.871245,
     1.011964,
-    1.054913,
-    1.019553,
+    1.166134,
+    1.00551,
     0.987382
    ],
    "girth_scales": [
     1.001762,
     0.999827,
     0.99712,
-    1.002899,
-    1.001399,
+    1.0016,
+    1.001379,
     1.0014
    ],
-   "mass_kg": 116.930436,
+   "mass_kg": 116.931127,
    "com_m": [
-    0.000247,
-    0.786771,
+    0.00018,
+    0.786773,
     0.077515
    ],
-   "performance": 0.825285,
-   "v_walk": 1.293746,
-   "v_run": 2.877376,
-   "v_max": 3.785005,
-   "cadence_max": 2.457613
+   "performance": 0.825283,
+   "v_walk": 1.293744,
+   "v_run": 2.877356,
+   "v_max": 3.784992,
+   "cadence_max": 2.457605
   },
   {
    "skeleton_id": "crawler_alien_tripod_elongated_v3",
@@ -4971,37 +5339,41 @@
     "core",
     "leg_0",
     "leg_1",
-    "leg_2"
+    "leg_2",
+    "crown"
    ],
    "part_ids": [
     "reference_crawler_alien_tripod_elongated_v3_core_v1",
     "reference_radial_raised_articulated_walker_elongated_v3_arm_5_v1",
     "reference_radial_raised_articulated_walker_elongated_v3_arm_0_v1",
-    "reference_radial_raised_articulated_walker_balanced_v3_arm_2_v1"
+    "reference_radial_raised_articulated_walker_balanced_v3_arm_2_v1",
+    "reference_quadruped_stocky_plantigrade_elongated_v3_dorsal_0_v1"
    ],
    "length_scales": [
     1.0,
     0.907357,
     0.907357,
-    1.178066
+    1.178066,
+    1.234114
    ],
    "girth_scales": [
     1.0,
     1.001911,
     1.001911,
-    1.002577
+    1.002577,
+    0.995991
    ],
-   "mass_kg": 78.075224,
+   "mass_kg": 78.778749,
    "com_m": [
     2.4e-05,
-    0.372271,
-    -4.3e-05
+    0.37504,
+    0.00028
    ],
-   "performance": 1.071591,
-   "v_walk": 1.002559,
+   "performance": 1.065732,
+   "v_walk": 0.999814,
    "v_run": 2.260746,
    "v_max": 2.51194,
-   "cadence_max": 3.215737
+   "cadence_max": 3.198156
   },
   {
    "skeleton_id": "crawler_bilateral_eight_legged_elongated_v3",
@@ -5015,7 +5387,9 @@
     "leg2_L",
     "leg2_R",
     "leg3_L",
-    "leg3_R"
+    "leg3_R",
+    "dorsal_0",
+    "dorsal_1"
    ],
    "part_ids": [
     "reference_crawler_alien_tripod_elongated_v3_core_v1",
@@ -5025,8 +5399,10 @@
     "reference_hexapod_elongated_insect_elongated_v3_leg0_r_v1",
     "reference_crawler_bilateral_eight_legged_compact_v3_leg2_l_v1",
     "reference_hexapod_elongated_insect_compact_v3_leg1_r_v1",
-    "reference_hexapod_elongated_insect_elongated_v3_leg2_l_v1",
-    "reference_hexapod_compact_insect_compact_v3_leg1_r_v1"
+    "reference_crawler_bilateral_eight_legged_compact_v3_leg2_l_v1",
+    "reference_crawler_bilateral_eight_legged_compact_v3_leg2_r_v1",
+    "reference_crawler_alien_tripod_balanced_v3_crown_v1",
+    "reference_quadruped_stocky_plantigrade_balanced_v3_dorsal_1_v1"
    ],
    "length_scales": [
     1.116223,
@@ -5036,8 +5412,10 @@
     0.907816,
     1.022573,
     0.928279,
-    0.907816,
-    1.117139
+    1.022573,
+    1.022573,
+    1.027778,
+    1.235
    ],
    "girth_scales": [
     1.000639,
@@ -5047,20 +5425,22 @@
     0.998734,
     0.999983,
     1.003478,
-    0.998734,
-    0.997865
+    0.999983,
+    0.999983,
+    0.994125,
+    1.012146
    ],
-   "mass_kg": 133.909922,
+   "mass_kg": 134.49596,
    "com_m": [
-    1.8e-05,
-    0.335511,
-    0.005199
+    -2.1e-05,
+    0.336704,
+    0.004869
    ],
-   "performance": 1.090859,
-   "v_walk": 0.963013,
-   "v_run": 3.254817,
-   "v_max": 4.023534,
-   "cadence_max": 3.438918
+   "performance": 1.087909,
+   "v_walk": 0.96171,
+   "v_run": 3.237235,
+   "v_max": 4.012652,
+   "cadence_max": 3.429617
   },
   {
    "skeleton_id": "crawler_alien_tripod_balanced_v3",
@@ -5108,37 +5488,41 @@
     "core",
     "leg_0",
     "leg_1",
-    "leg_2"
+    "leg_2",
+    "crown"
    ],
    "part_ids": [
     "reference_radial_raised_articulated_walker_balanced_v3_core_v1",
     "reference_radial_raised_articulated_walker_balanced_v3_arm_0_v1",
     "reference_crawler_alien_tripod_balanced_v3_leg_1_v1",
-    "reference_crawler_alien_tripod_balanced_v3_leg_1_v1"
+    "reference_crawler_alien_tripod_balanced_v3_leg_1_v1",
+    "reference_quadruped_stocky_plantigrade_elongated_v3_dorsal_1_v1"
    ],
    "length_scales": [
     1.025194,
     1.152123,
     0.984879,
-    0.984879
+    0.984879,
+    0.921875
    ],
    "girth_scales": [
     1.000598,
     1.00465,
     1.001724,
-    1.001724
+    1.001724,
+    1.005374
    ],
-   "mass_kg": 49.195975,
+   "mass_kg": 49.383407,
    "com_m": [
-    0.000489,
-    0.369124,
-    9e-06
+    0.000487,
+    0.369925,
+    9.7e-05
    ],
-   "performance": 1.368407,
-   "v_walk": 1.137349,
+   "performance": 1.365284,
+   "v_walk": 1.136051,
    "v_run": 2.559963,
    "v_max": 2.844403,
-   "cadence_max": 4.152836
+   "cadence_max": 4.143358
   },
   {
    "skeleton_id": "crawler_bilateral_eight_legged_compact_v3",
@@ -5152,7 +5536,9 @@
     "leg2_L",
     "leg2_R",
     "leg3_L",
-    "leg3_R"
+    "leg3_R",
+    "dorsal_0",
+    "dorsal_1"
    ],
    "part_ids": [
     "reference_radial_raised_articulated_walker_compact_v3_core_v1",
@@ -5162,8 +5548,10 @@
     "reference_crawler_bilateral_eight_legged_balanced_v3_leg0_r_v1",
     "reference_hexapod_elongated_insect_elongated_v3_leg1_l_v1",
     "reference_crawler_bilateral_eight_legged_elongated_v3_leg2_r_v1",
-    "reference_crawler_bilateral_eight_legged_balanced_v3_leg3_l_v1",
-    "reference_crawler_bilateral_eight_legged_compact_v3_leg2_r_v1"
+    "reference_hexapod_compact_insect_compact_v3_leg0_l_v1",
+    "reference_hexapod_elongated_insect_elongated_v3_leg2_r_v1",
+    "reference_crawler_bilateral_eight_legged_compact_v3_dorsal_0_v1",
+    "reference_hexapod_compact_insect_balanced_v3_dorsal_0_v1"
    ],
    "length_scales": [
     1.246835,
@@ -5173,8 +5561,10 @@
     0.986637,
     0.887776,
     0.977925,
-    0.986637,
-    1.0
+    1.092478,
+    0.887776,
+    1.0,
+    0.940476
    ],
    "girth_scales": [
     0.999714,
@@ -5184,20 +5574,22 @@
     0.998529,
     0.998751,
     1.000017,
-    0.998529,
-    1.0
+    0.997881,
+    0.998751,
+    1.0,
+    0.984529
    ],
-   "mass_kg": 91.891504,
+   "mass_kg": 92.032943,
    "com_m": [
-    0.000286,
-    0.333971,
-    0.004526
+    0.000231,
+    0.334278,
+    0.004396
    ],
-   "performance": 1.323182,
-   "v_walk": 1.064732,
-   "v_run": 4.807406,
+   "performance": 1.321825,
+   "v_walk": 1.064186,
+   "v_run": 4.797552,
    "v_max": 5.4375,
-   "cadence_max": 4.218388
+   "cadence_max": 4.214062
   },
   {
    "skeleton_id": "crawler_alien_tripod_elongated_v3",
@@ -5206,37 +5598,41 @@
     "core",
     "leg_0",
     "leg_1",
-    "leg_2"
+    "leg_2",
+    "crown"
    ],
    "part_ids": [
     "reference_crawler_bilateral_eight_legged_elongated_v3_core_v1",
     "reference_radial_raised_articulated_walker_balanced_v3_arm_1_v1",
     "reference_crawler_alien_tripod_balanced_v3_leg_2_v1",
-    "reference_radial_raised_articulated_walker_elongated_v3_arm_5_v1"
+    "reference_radial_raised_articulated_walker_elongated_v3_arm_5_v1",
+    "reference_hexapod_elongated_insect_elongated_v3_dorsal_0_v1"
    ],
    "length_scales": [
     0.895879,
     1.178066,
     1.007056,
-    0.907357
+    0.907357,
+    0.941327
    ],
    "girth_scales": [
     0.999362,
     1.002577,
     0.999657,
-    1.001911
+    1.001911,
+    0.994881
    ],
-   "mass_kg": 77.992544,
+   "mass_kg": 78.695649,
    "com_m": [
-    0.000134,
-    0.372272,
-    0.000326
+    0.000133,
+    0.375042,
+    0.000646
    ],
-   "performance": 1.071557,
-   "v_walk": 1.002543,
+   "performance": 1.065661,
+   "v_walk": 0.999781,
    "v_run": 2.260746,
    "v_max": 2.51194,
-   "cadence_max": 3.215634
+   "cadence_max": 3.197943
   },
   {
    "skeleton_id": "crawler_bilateral_eight_legged_compact_v3",
@@ -5250,7 +5646,8 @@
     "leg2_L",
     "leg2_R",
     "leg3_L",
-    "leg3_R"
+    "leg3_R",
+    "dorsal_1"
    ],
    "part_ids": [
     "reference_radial_raised_articulated_walker_balanced_v3_core_v1",
@@ -5260,8 +5657,9 @@
     "reference_crawler_bilateral_eight_legged_compact_v3_leg1_r_v1",
     "reference_crawler_bilateral_eight_legged_compact_v3_leg0_l_v1",
     "reference_crawler_bilateral_eight_legged_elongated_v3_leg3_r_v1",
-    "reference_hexapod_elongated_insect_compact_v3_leg0_l_v1",
-    "reference_hexapod_elongated_insect_compact_v3_leg0_r_v1"
+    "reference_hexapod_compact_insect_compact_v3_leg1_l_v1",
+    "reference_hexapod_elongated_insect_balanced_v3_leg2_r_v1",
+    "reference_crawler_bilateral_eight_legged_compact_v3_dorsal_0_v1"
    ],
    "length_scales": [
     1.145349,
@@ -5271,8 +5669,9 @@
     1.0,
     1.0,
     0.977925,
-    0.907787,
-    0.907787
+    1.092478,
+    0.894046,
+    0.831579
    ],
    "girth_scales": [
     0.99702,
@@ -5282,20 +5681,21 @@
     1.0,
     1.0,
     1.000017,
-    1.003494,
-    1.003494
+    0.997881,
+    0.998402,
+    1.00211
    ],
-   "mass_kg": 91.921085,
+   "mass_kg": 91.871226,
    "com_m": [
-    0.000192,
-    0.333952,
-    0.004864
+    0.000203,
+    0.334064,
+    0.004468
    ],
-   "performance": 1.323911,
-   "v_walk": 1.065025,
-   "v_run": 4.812708,
+   "performance": 1.323215,
+   "v_walk": 1.064745,
+   "v_run": 4.807651,
    "v_max": 5.4375,
-   "cadence_max": 4.220713
+   "cadence_max": 4.218495
   },
   {
    "skeleton_id": "crawler_alien_tripod_balanced_v3",
@@ -5304,37 +5704,41 @@
     "core",
     "leg_0",
     "leg_1",
-    "leg_2"
+    "leg_2",
+    "crown"
    ],
    "part_ids": [
     "reference_crawler_alien_tripod_balanced_v3_core_v1",
     "reference_radial_raised_articulated_walker_balanced_v3_arm_5_v1",
     "reference_radial_raised_articulated_walker_elongated_v3_arm_0_v1",
-    "reference_radial_raised_articulated_walker_elongated_v3_arm_2_v1"
+    "reference_radial_raised_articulated_walker_elongated_v3_arm_2_v1",
+    "reference_quadruped_lean_digitigrade_balanced_v3_dorsal_1_v1"
    ],
    "length_scales": [
     1.0,
     1.169811,
     0.900999,
-    0.900999
+    0.900999,
+    1.156627
    ],
    "girth_scales": [
     1.0,
     1.002921,
     1.002254,
-    1.002254
+    1.002254,
+    0.994271
    ],
-   "mass_kg": 58.626371,
+   "mass_kg": 58.960708,
    "com_m": [
     -4e-05,
-    0.371531,
-    0.0
+    0.372952,
+    0.00016
    ],
-   "performance": 1.259633,
-   "v_walk": 1.092454,
+   "performance": 1.255285,
+   "v_walk": 1.090567,
    "v_run": 2.426978,
    "v_max": 2.696642,
-   "cadence_max": 3.795064
+   "cadence_max": 3.781964
   },
   {
    "skeleton_id": "crawler_bilateral_eight_legged_elongated_v3",
@@ -5358,8 +5762,8 @@
     "reference_crawler_bilateral_eight_legged_balanced_v3_leg0_r_v1",
     "reference_hexapod_compact_insect_elongated_v3_leg1_l_v1",
     "reference_hexapod_elongated_insect_balanced_v3_leg1_r_v1",
-    "reference_crawler_bilateral_eight_legged_compact_v3_leg3_l_v1",
-    "reference_hexapod_elongated_insect_balanced_v3_leg2_r_v1"
+    "reference_hexapod_elongated_insect_elongated_v3_leg2_l_v1",
+    "reference_crawler_bilateral_eight_legged_elongated_v3_leg1_r_v1"
    ],
    "length_scales": [
     1.0,
@@ -5369,8 +5773,8 @@
     1.008909,
     1.091566,
     0.914228,
-    1.022573,
-    0.914228
+    0.907816,
+    1.0
    ],
    "girth_scales": [
     1.0,
@@ -5380,20 +5784,20 @@
     0.998512,
     1.004771,
     0.998385,
-    0.999983,
-    0.998385
+    0.998734,
+    1.0
    ],
-   "mass_kg": 133.805362,
+   "mass_kg": 133.819987,
    "com_m": [
-    0.000264,
-    0.335508,
-    0.005203
+    0.000228,
+    0.335507,
+    0.005264
    ],
-   "performance": 1.091025,
-   "v_walk": 0.963086,
-   "v_run": 3.255806,
-   "v_max": 4.024146,
-   "cadence_max": 3.439441
+   "performance": 1.091077,
+   "v_walk": 0.963109,
+   "v_run": 3.256114,
+   "v_max": 4.024336,
+   "cadence_max": 3.439603
   },
   {
    "skeleton_id": "crawler_bilateral_eight_legged_balanced_v3",
@@ -5417,8 +5821,8 @@
     "reference_crawler_bilateral_eight_legged_balanced_v3_leg3_r_v1",
     "reference_hexapod_compact_insect_elongated_v3_leg0_l_v1",
     "reference_crawler_bilateral_eight_legged_elongated_v3_leg1_r_v1",
-    "reference_crawler_bilateral_eight_legged_balanced_v3_leg1_l_v1",
-    "reference_crawler_bilateral_eight_legged_balanced_v3_leg0_r_v1"
+    "reference_hexapod_compact_insect_compact_v3_leg0_l_v1",
+    "reference_hexapod_compact_insect_compact_v3_leg1_r_v1"
    ],
    "length_scales": [
     1.116279,
@@ -5428,8 +5832,8 @@
     1.0,
     1.081928,
     0.99117,
-    1.0,
-    1.0
+    1.107275,
+    1.107275
    ],
    "girth_scales": [
     0.997423,
@@ -5439,20 +5843,20 @@
     1.0,
     1.006268,
     1.00149,
-    1.0,
-    1.0
+    0.999352,
+    0.999352
    ],
-   "mass_kg": 105.879127,
+   "mass_kg": 105.858971,
    "com_m": [
     0.000228,
-    0.3354,
-    0.005091
+    0.335401,
+    0.005004
    ],
-   "performance": 1.241789,
-   "v_walk": 1.032365,
-   "v_run": 4.237858,
-   "v_max": 4.846154,
-   "cadence_max": 3.930377
+   "performance": 1.24173,
+   "v_walk": 1.032341,
+   "v_run": 4.237456,
+   "v_max": 4.845925,
+   "cadence_max": 3.93019
   },
   {
    "skeleton_id": "biped_digitigrade_creature_elongated_v3",
@@ -5463,43 +5867,47 @@
     "leg_R",
     "arm_L",
     "arm_R",
-    "head"
+    "head",
+    "arm2_L"
    ],
    "part_ids": [
     "reference_dragger_arm_leg_crawler_balanced_v3_core_v1",
     "reference_quadruped_lean_digitigrade_balanced_v3_leg_l1_v1",
     "reference_quadruped_lean_digitigrade_compact_v3_leg_r1_v1",
-    "reference_biped_digitigrade_creature_elongated_v3_arm_l_v1",
-    "reference_dragger_forelimb_puller_compact_v3_arm_r_v1",
-    "reference_dragger_belly_hauler_balanced_v3_head_v1"
+    "reference_amalgam_walker_s0024_v3_striker_v1",
+    "reference_biped_plantigrade_humanoid_elongated_v3_arm_r_v1",
+    "reference_dragger_belly_hauler_balanced_v3_head_v1",
+    "reference_amalgam_hauled_s0014_v3_striker_v1"
    ],
    "length_scales": [
     0.945819,
     0.827844,
     0.979628,
-    1.0,
-    1.148045,
-    0.894587
+    1.09893,
+    0.948097,
+    0.894587,
+    1.163636
    ],
    "girth_scales": [
     0.999238,
     1.001597,
     1.000681,
-    1.0,
-    0.998962,
-    1.00377
+    0.994907,
+    0.999873,
+    1.00377,
+    1.00142
    ],
-   "mass_kg": 117.152564,
+   "mass_kg": 125.930012,
    "com_m": [
-    9.1e-05,
-    0.911512,
-    0.04711
+    0.023707,
+    0.928862,
+    0.056133
    ],
-   "performance": 0.753707,
-   "v_walk": 1.246853,
-   "v_run": 2.244335,
-   "v_max": 2.493705,
-   "cadence_max": 2.149651
+   "performance": 0.69355,
+   "v_walk": 1.160051,
+   "v_run": 2.088093,
+   "v_max": 2.320103,
+   "cadence_max": 2.0
   },
   {
    "skeleton_id": "biped_plantigrade_humanoid_elongated_v3",
@@ -5510,43 +5918,47 @@
     "leg_R",
     "arm_L",
     "arm_R",
-    "head"
+    "head",
+    "arm2_R"
    ],
    "part_ids": [
     "reference_dragger_arm_leg_crawler_balanced_v3_core_v1",
     "reference_quadruped_stocky_plantigrade_elongated_v3_leg_l1_v1",
     "reference_biped_plantigrade_humanoid_elongated_v3_leg_r_v1",
-    "reference_dragger_arm_leg_crawler_balanced_v3_arm_l_v1",
-    "reference_amalgam_walker_s0039_v3_striker_v1",
-    "reference_biped_plantigrade_humanoid_balanced_v3_head_v1"
+    "reference_amalgam_hauled_s0005_v3_striker_v1",
+    "reference_dragger_forelimb_puller_compact_v3_arm_r_v1",
+    "reference_biped_plantigrade_humanoid_balanced_v3_head_v1",
+    "reference_biped_digitigrade_creature_elongated_v3_arm2_r_v1"
    ],
    "length_scales": [
     0.998822,
     0.868107,
     1.0,
-    0.850834,
-    1.176391,
-    1.060703
+    1.085106,
+    1.210894,
+    1.060703,
+    1.055398
    ],
    "girth_scales": [
     0.997253,
     0.999642,
     1.0,
-    0.996715,
-    1.000408,
-    0.996338
+    0.996446,
+    0.999089,
+    0.996338,
+    1.00127
    ],
-   "mass_kg": 168.899243,
+   "mass_kg": 179.249338,
    "com_m": [
-    -0.000152,
-    0.87499,
-    0.090207
+    -0.019469,
+    0.895181,
+    0.095745
    ],
-   "performance": 0.818789,
-   "v_walk": 1.405181,
-   "v_run": 3.088384,
-   "v_max": 3.544906,
-   "cadence_max": 2.275778
+   "performance": 0.762011,
+   "v_walk": 1.355586,
+   "v_run": 2.674919,
+   "v_max": 3.299092,
+   "cadence_max": 2.117969
   },
   {
    "skeleton_id": "biped_digitigrade_creature_balanced_v3",
@@ -5557,43 +5969,51 @@
     "leg_R",
     "arm_L",
     "arm_R",
-    "head"
+    "head",
+    "tail",
+    "arm2_R"
    ],
    "part_ids": [
     "reference_dragger_forelimb_puller_compact_v3_core_v1",
     "reference_biped_digitigrade_creature_elongated_v3_leg_l_v1",
     "reference_dragger_arm_leg_crawler_balanced_v3_leg_r_v1",
-    "reference_amalgam_walker_s0024_v3_striker_v1",
-    "reference_amalgam_hauled_s0009_v3_striker_v1",
-    "reference_dragger_forelimb_puller_elongated_v3_head_v1"
+    "reference_dragger_belly_hauler_compact_v3_arm_l_v1",
+    "reference_biped_plantigrade_humanoid_elongated_v3_arm2_r_v1",
+    "reference_dragger_forelimb_puller_elongated_v3_head_v1",
+    "reference_dragger_belly_hauler_compact_v3_belly_v1",
+    "reference_amalgam_slither_s0028_v3_flail5_v1"
    ],
    "length_scales": [
     1.117994,
     0.872514,
     1.136631,
-    0.925134,
-    0.953168,
-    0.936909
+    1.042169,
+    0.931359,
+    0.936909,
+    0.850746,
+    1.013675
    ],
    "girth_scales": [
     1.000208,
     1.00213,
     1.000549,
-    0.994451,
-    0.998485,
-    0.995385
+    0.99561,
+    0.994433,
+    0.995385,
+    1.003241,
+    1.003373
    ],
-   "mass_kg": 81.956319,
+   "mass_kg": 89.911834,
    "com_m": [
-    1e-05,
-    0.818839,
-    0.038075
+    -0.018585,
+    0.828134,
+    0.029424
    ],
-   "performance": 0.763166,
-   "v_walk": 1.210816,
-   "v_run": 2.394686,
-   "v_max": 2.684738,
-   "cadence_max": 2.330527
+   "performance": 0.706141,
+   "v_walk": 1.1647,
+   "v_run": 2.050183,
+   "v_max": 2.484128,
+   "cadence_max": 2.156385
   },
   {
    "skeleton_id": "biped_digitigrade_creature_compact_v3",
@@ -5604,43 +6024,47 @@
     "leg_R",
     "arm_L",
     "arm_R",
-    "head"
+    "head",
+    "tail"
    ],
    "part_ids": [
     "reference_dragger_forelimb_puller_compact_v3_core_v1",
     "reference_biped_digitigrade_creature_balanced_v3_leg_l_v1",
     "reference_biped_digitigrade_creature_compact_v3_leg_r_v1",
-    "reference_amalgam_slither_s0006_v3_striker_v1",
+    "reference_biped_digitigrade_creature_balanced_v3_arm2_l_v1",
     "reference_dragger_belly_hauler_compact_v3_arm_r_v1",
-    "reference_biped_plantigrade_humanoid_balanced_v3_head_v1"
+    "reference_biped_plantigrade_humanoid_balanced_v3_head_v1",
+    "reference_amalgam_hauled_s0014_v3_belly_v1"
    ],
    "length_scales": [
     1.028024,
     0.84456,
     1.0,
-    0.833333,
+    0.944351,
     0.843373,
-    0.872204
+    0.872204,
+    1.175862
    ],
    "girth_scales": [
     1.001491,
     1.000317,
     1.0,
-    1.002985,
+    0.996639,
     0.998496,
-    0.990176
+    0.990176,
+    1.005809
    ],
-   "mass_kg": 53.244119,
+   "mass_kg": 55.146129,
    "com_m": [
-    9.8e-05,
-    0.717826,
-    0.029137
+    -1.8e-05,
+    0.713018,
+    0.013148
    ],
-   "performance": 0.772188,
-   "v_walk": 1.094651,
-   "v_run": 2.203442,
-   "v_max": 2.795025,
-   "cadence_max": 2.565894
+   "performance": 0.76841,
+   "v_walk": 1.09197,
+   "v_run": 2.181935,
+   "v_max": 2.781351,
+   "cadence_max": 2.553341
   },
   {
    "skeleton_id": "biped_plantigrade_humanoid_compact_v3",
@@ -5657,37 +6081,37 @@
     "reference_dragger_arm_leg_crawler_balanced_v3_core_v1",
     "reference_biped_plantigrade_humanoid_balanced_v3_leg_l_v1",
     "reference_biped_plantigrade_humanoid_balanced_v3_leg_r_v1",
-    "reference_biped_digitigrade_creature_balanced_v3_arm_l_v1",
-    "reference_biped_plantigrade_humanoid_balanced_v3_arm_r_v1",
+    "reference_biped_plantigrade_humanoid_compact_v3_arm2_l_v1",
+    "reference_amalgam_slither_s0018_v3_flail4_v1",
     "reference_biped_digitigrade_creature_compact_v3_head_v1"
    ],
    "length_scales": [
     0.866902,
     0.84335,
     0.84335,
-    0.854046,
-    0.809589,
+    1.16568,
+    1.189135,
     1.054945
    ],
    "girth_scales": [
     0.999728,
     0.999644,
     0.999644,
-    1.001202,
-    0.998308,
+    1.002262,
+    1.002342,
     1.01028
    ],
-   "mass_kg": 74.775291,
+   "mass_kg": 74.791375,
    "com_m": [
-    5.3e-05,
-    0.688975,
-    0.063269
+    -1e-06,
+    0.689043,
+    0.063271
    ],
-   "performance": 0.83686,
-   "v_walk": 1.171011,
-   "v_run": 2.659387,
-   "v_max": 3.931661,
-   "cadence_max": 2.713702
+   "performance": 0.83675,
+   "v_walk": 1.170935,
+   "v_run": 2.658691,
+   "v_max": 3.931147,
+   "cadence_max": 2.713347
   },
   {
    "skeleton_id": "biped_digitigrade_creature_elongated_v3",
@@ -5698,43 +6122,47 @@
     "leg_R",
     "arm_L",
     "arm_R",
-    "head"
+    "head",
+    "tail"
    ],
    "part_ids": [
     "reference_dragger_arm_leg_crawler_compact_v3_core_v1",
     "reference_quadruped_lean_digitigrade_balanced_v3_leg_l1_v1",
     "reference_quadruped_lean_digitigrade_compact_v3_leg_r1_v1",
     "reference_amalgam_hauled_s0004_v3_striker_v1",
-    "reference_amalgam_hauled_s0009_v3_striker_v1",
-    "reference_dragger_belly_hauler_compact_v3_head_v1"
+    "reference_biped_digitigrade_creature_elongated_v3_arm2_r_v1",
+    "reference_dragger_belly_hauler_compact_v3_head_v1",
+    "reference_amalgam_hauled_s0004_v3_belly_v1"
    ],
    "length_scales": [
     1.153736,
     0.827844,
     0.979628,
     1.187861,
-    1.132231,
-    1.094077
+    1.167614,
+    1.094077,
+    1.027451
    ],
    "girth_scales": [
     0.999458,
     1.001597,
     1.000681,
     1.000458,
-    0.998943,
-    0.993001
+    0.996152,
+    0.993001,
+    1.001494
    ],
-   "mass_kg": 117.189346,
+   "mass_kg": 120.278107,
    "com_m": [
-    5.1e-05,
-    0.91158,
-    0.047102
+    0.00018,
+    0.910463,
+    0.032993
    ],
-   "performance": 0.753571,
-   "v_walk": 1.246627,
-   "v_run": 2.243929,
-   "v_max": 2.493254,
-   "cadence_max": 2.149262
+   "performance": 0.75194,
+   "v_walk": 1.243929,
+   "v_run": 2.239072,
+   "v_max": 2.487858,
+   "cadence_max": 2.14461
   },
   {
    "skeleton_id": "biped_plantigrade_humanoid_compact_v3",
@@ -5745,43 +6173,47 @@
     "leg_R",
     "arm_L",
     "arm_R",
-    "head"
+    "head",
+    "arm2_L"
    ],
    "part_ids": [
     "reference_biped_plantigrade_humanoid_balanced_v3_core_v1",
     "reference_biped_plantigrade_humanoid_balanced_v3_leg_l_v1",
     "reference_quadruped_stocky_plantigrade_compact_v3_leg_r1_v1",
-    "reference_amalgam_walker_s0029_v3_flail2_v1",
-    "reference_amalgam_walker_s0039_v3_striker_v1",
-    "meshy_animal_skull_a_v1"
+    "reference_biped_plantigrade_humanoid_compact_v3_arm2_l_v1",
+    "reference_biped_digitigrade_creature_balanced_v3_arm_r_v1",
+    "meshy_animal_skull_a_v1",
+    "reference_biped_digitigrade_creature_compact_v3_arm2_l_v1"
    ],
    "length_scales": [
     0.92,
     0.84335,
     0.868154,
-    1.061041,
-    0.8019,
-    0.96
+    1.16568,
+    0.854046,
+    0.96,
+    1.05625
    ],
    "girth_scales": [
     1.000906,
     0.999644,
     0.997933,
-    1.001905,
-    1.001024,
-    1.004464
+    1.002262,
+    1.001202,
+    1.004464,
+    0.996055
    ],
-   "mass_kg": 77.005042,
+   "mass_kg": 80.260983,
    "com_m": [
-    0.000109,
-    0.711917,
-    0.065129
+    0.011754,
+    0.720563,
+    0.067531
    ],
-   "performance": 0.820357,
-   "v_walk": 1.159408,
-   "v_run": 2.555537,
-   "v_max": 3.85413,
-   "cadence_max": 2.660189
+   "performance": 0.774774,
+   "v_walk": 1.126736,
+   "v_run": 2.279431,
+   "v_max": 3.639976,
+   "cadence_max": 2.512376
   },
   {
    "skeleton_id": "biped_digitigrade_creature_balanced_v3",
@@ -5792,43 +6224,51 @@
     "leg_R",
     "arm_L",
     "arm_R",
-    "head"
+    "head",
+    "tail",
+    "arm2_L"
    ],
    "part_ids": [
     "reference_dragger_arm_leg_crawler_balanced_v3_core_v1",
     "reference_biped_digitigrade_creature_compact_v3_leg_l_v1",
     "reference_biped_digitigrade_creature_balanced_v3_leg_r_v1",
-    "reference_dragger_forelimb_puller_compact_v3_arm_l_v1",
-    "meshy_frayed_arm_a_v1",
-    "reference_dragger_arm_leg_crawler_elongated_v3_head_v1"
+    "reference_biped_digitigrade_creature_elongated_v3_arm2_l_v1",
+    "reference_dragger_belly_hauler_compact_v3_arm_r_v1",
+    "reference_dragger_arm_leg_crawler_elongated_v3_head_v1",
+    "reference_biped_digitigrade_creature_elongated_v3_tail_v1",
+    "reference_biped_plantigrade_humanoid_compact_v3_arm2_l_v1"
    ],
    "length_scales": [
     0.892815,
     1.184049,
     1.0,
-    0.96648,
-    0.814118,
-    0.911043
+    0.982955,
+    1.042169,
+    0.911043,
+    0.942748,
+    1.169625
    ],
    "girth_scales": [
     0.997067,
     0.999683,
     1.0,
-    0.998504,
-    0.99711,
-    1.001147
+    0.995695,
+    0.99561,
+    1.001147,
+    1.000969,
+    1.007346
    ],
-   "mass_kg": 82.382574,
+   "mass_kg": 94.405402,
    "com_m": [
-    -0.001986,
-    0.820725,
-    0.038404
+    0.017902,
+    0.823443,
+    0.005384
    ],
-   "performance": 0.759873,
-   "v_walk": 1.208201,
-   "v_run": 2.374062,
-   "v_max": 2.673152,
-   "cadence_max": 2.32047
+   "performance": 0.701218,
+   "v_walk": 1.160633,
+   "v_run": 2.021696,
+   "v_max": 2.466809,
+   "cadence_max": 2.141351
   },
   {
    "skeleton_id": "biped_plantigrade_humanoid_elongated_v3",
@@ -5839,7 +6279,8 @@
     "leg_R",
     "arm_L",
     "arm_R",
-    "head"
+    "head",
+    "arm2_L"
    ],
    "part_ids": [
     "reference_dragger_forelimb_puller_balanced_v3_core_v1",
@@ -5847,7 +6288,8 @@
     "reference_quadruped_stocky_plantigrade_balanced_v3_leg_r0_v1",
     "meshy_frayed_arm_a_v1",
     "meshy_frayed_arm_a_v1",
-    "reference_biped_digitigrade_creature_elongated_v3_head_v1"
+    "reference_biped_digitigrade_creature_elongated_v3_head_v1",
+    "reference_biped_plantigrade_humanoid_balanced_v3_arm2_l_v1"
    ],
    "length_scales": [
     1.026634,
@@ -5855,7 +6297,8 @@
     0.982293,
     1.02,
     1.02,
-    1.057325
+    1.057325,
+    1.186901
    ],
    "girth_scales": [
     0.997622,
@@ -5863,19 +6306,20 @@
     0.998523,
     0.997693,
     0.997693,
-    0.999521
+    0.999521,
+    1.004296
    ],
-   "mass_kg": 170.929967,
+   "mass_kg": 181.33866,
    "com_m": [
-    0.0,
-    0.880382,
-    0.090279
+    0.019228,
+    0.900152,
+    0.095768
    ],
-   "performance": 0.812351,
-   "v_walk": 1.399646,
-   "v_run": 3.040009,
-   "v_max": 3.517033,
-   "cadence_max": 2.257884
+   "performance": 0.756256,
+   "v_walk": 1.350457,
+   "v_run": 2.634664,
+   "v_max": 3.274173,
+   "cadence_max": 2.101972
   },
   {
    "skeleton_id": "biped_plantigrade_humanoid_balanced_v3",
@@ -5892,37 +6336,37 @@
     "reference_biped_digitigrade_creature_balanced_v3_core_v1",
     "reference_biped_plantigrade_humanoid_elongated_v3_leg_l_v1",
     "reference_quadruped_stocky_plantigrade_compact_v3_leg_r0_v1",
-    "reference_biped_digitigrade_creature_balanced_v3_arm_l_v1",
-    "reference_dragger_forelimb_puller_compact_v3_arm_r_v1",
+    "reference_biped_plantigrade_humanoid_balanced_v3_arm2_l_v1",
+    "reference_amalgam_hauled_s0009_v3_striker_v1",
     "reference_dragger_forelimb_puller_elongated_v3_head_v1"
    ],
    "length_scales": [
     1.055409,
     0.871245,
     1.011964,
-    1.054913,
-    1.019553,
+    1.166134,
+    1.00551,
     0.987382
    ],
    "girth_scales": [
     1.001762,
     0.999827,
     0.99712,
-    1.002899,
-    1.001399,
+    1.0016,
+    1.001379,
     1.0014
    ],
-   "mass_kg": 116.930436,
+   "mass_kg": 116.931127,
    "com_m": [
-    0.000247,
-    0.786771,
+    0.00018,
+    0.786773,
     0.077515
    ],
-   "performance": 0.825285,
-   "v_walk": 1.293746,
-   "v_run": 2.877376,
-   "v_max": 3.785005,
-   "cadence_max": 2.457613
+   "performance": 0.825283,
+   "v_walk": 1.293744,
+   "v_run": 2.877356,
+   "v_max": 3.784992,
+   "cadence_max": 2.457605
   },
   {
    "skeleton_id": "quadruped_lean_digitigrade_elongated_v3",
@@ -5933,7 +6377,10 @@
     "leg_R0",
     "leg_L1",
     "leg_R1",
-    "head"
+    "head",
+    "tail",
+    "dorsal_0",
+    "dorsal_1"
    ],
    "part_ids": [
     "reference_dragger_belly_hauler_elongated_v3_core_v1",
@@ -5941,7 +6388,10 @@
     "reference_quadruped_lean_digitigrade_balanced_v3_leg_r0_v1",
     "reference_quadruped_lean_digitigrade_elongated_v3_leg_l1_v1",
     "reference_quadruped_lean_digitigrade_elongated_v3_leg_r1_v1",
-    "reference_serpentine_limbless_articulated_elongated_v3_core_v1"
+    "reference_serpentine_limbless_articulated_elongated_v3_core_v1",
+    "reference_quadruped_stocky_plantigrade_elongated_v3_tail_v1",
+    "reference_quadruped_lean_digitigrade_elongated_v3_dorsal_1_v1",
+    "reference_amalgam_slither_s0018_v3_flail3_v1"
    ],
    "length_scales": [
     1.210033,
@@ -5949,7 +6399,10 @@
     1.142961,
     1.0,
     1.0,
-    0.825862
+    0.825862,
+    1.246485,
+    1.169279,
+    1.119298
    ],
    "girth_scales": [
     0.999439,
@@ -5957,15 +6410,18 @@
     0.998897,
     1.0,
     1.0,
-    1.001572
+    1.001572,
+    1.00282,
+    1.00615,
+    0.990527
    ],
-   "mass_kg": 681.453372,
+   "mass_kg": 724.780139,
    "com_m": [
-    -4.5e-05,
-    1.012318,
-    0.041245
+    -4.2e-05,
+    1.037537,
+    -0.051522
    ],
-   "performance": 0.761613,
+   "performance": 0.708042,
    "v_walk": 1.252537,
    "v_run": 2.254567,
    "v_max": 2.505074,
@@ -5980,7 +6436,9 @@
     "leg_R0",
     "leg_L1",
     "leg_R1",
-    "head"
+    "head",
+    "tail",
+    "dorsal_1"
    ],
    "part_ids": [
     "reference_quadruped_stocky_plantigrade_elongated_v3_core_v1",
@@ -5988,7 +6446,9 @@
     "reference_quadruped_stocky_plantigrade_balanced_v3_leg_r1_v1",
     "reference_quadruped_stocky_plantigrade_elongated_v3_leg_l0_v1",
     "reference_quadruped_stocky_plantigrade_elongated_v3_leg_r1_v1",
-    "reference_biped_digitigrade_creature_elongated_v3_head_v1"
+    "reference_biped_digitigrade_creature_elongated_v3_head_v1",
+    "reference_dragger_arm_leg_crawler_elongated_v3_belly_v1",
+    "reference_hexapod_elongated_insect_balanced_v3_dorsal_0_v1"
    ],
    "length_scales": [
     1.0,
@@ -5996,7 +6456,9 @@
     1.161677,
     0.988218,
     1.0,
-    1.22293
+    1.22293,
+    1.200225,
+    0.836601
    ],
    "girth_scales": [
     1.0,
@@ -6004,19 +6466,21 @@
     1.001504,
     0.998385,
     1.0,
-    1.003551
+    1.003551,
+    0.999813,
+    1.000159
    ],
-   "mass_kg": 495.102441,
+   "mass_kg": 503.366426,
    "com_m": [
-    -0.000123,
-    0.795246,
-    0.037672
+    -0.000121,
+    0.802725,
+    0.017298
    ],
-   "performance": 0.918122,
-   "v_walk": 1.571458,
-   "v_run": 2.828624,
-   "v_max": 3.142915,
-   "cadence_max": 2.370756
+   "performance": 0.900808,
+   "v_walk": 1.541824,
+   "v_run": 2.775283,
+   "v_max": 3.083647,
+   "cadence_max": 2.326049
   },
   {
    "skeleton_id": "quadruped_lean_digitigrade_balanced_v3",
@@ -6027,7 +6491,9 @@
     "leg_R0",
     "leg_L1",
     "leg_R1",
-    "head"
+    "head",
+    "tail",
+    "dorsal_1"
    ],
    "part_ids": [
     "reference_quadruped_lean_digitigrade_compact_v3_core_v1",
@@ -6035,7 +6501,9 @@
     "reference_quadruped_lean_digitigrade_compact_v3_leg_r1_v1",
     "reference_quadruped_lean_digitigrade_compact_v3_leg_l0_v1",
     "reference_quadruped_lean_digitigrade_compact_v3_leg_r1_v1",
-    "reference_serpentine_segmented_paired_legs_compact_v3_core_v1"
+    "reference_serpentine_segmented_paired_legs_compact_v3_core_v1",
+    "reference_dragger_forelimb_puller_elongated_v3_belly_v1",
+    "reference_crawler_bilateral_eight_legged_elongated_v3_dorsal_1_v1"
    ],
    "length_scales": [
     1.220017,
@@ -6043,7 +6511,9 @@
     1.214349,
     1.149742,
     1.183348,
-    1.129909
+    1.129909,
+    1.201156,
+    1.008097
    ],
    "girth_scales": [
     0.998667,
@@ -6051,19 +6521,21 @@
     1.001976,
     0.998768,
     0.999086,
-    0.999224
+    0.999224,
+    0.99797,
+    0.991968
    ],
-   "mass_kg": 382.540025,
+   "mass_kg": 390.112852,
    "com_m": [
-    -0.000151,
-    0.809009,
-    0.039322
+    -0.000148,
+    0.81659,
+    0.0158
    ],
-   "performance": 0.881679,
-   "v_walk": 1.482383,
-   "v_run": 2.66829,
-   "v_max": 2.964766,
-   "cadence_max": 2.273582
+   "performance": 0.862386,
+   "v_walk": 1.449944,
+   "v_run": 2.6099,
+   "v_max": 2.899889,
+   "cadence_max": 2.22383
   },
   {
    "skeleton_id": "quadruped_lean_digitigrade_compact_v3",
@@ -6074,7 +6546,8 @@
     "leg_R0",
     "leg_L1",
     "leg_R1",
-    "head"
+    "head",
+    "tail"
    ],
    "part_ids": [
     "reference_dragger_belly_hauler_balanced_v3_core_v1",
@@ -6082,7 +6555,8 @@
     "reference_amalgam_hauled_s0004_v3_leg2_v1",
     "reference_quadruped_lean_digitigrade_compact_v3_leg_l0_v1",
     "reference_quadruped_lean_digitigrade_compact_v3_leg_r1_v1",
-    "reference_quadruped_lean_digitigrade_balanced_v3_head_v1"
+    "reference_quadruped_lean_digitigrade_balanced_v3_head_v1",
+    "reference_quadruped_stocky_plantigrade_compact_v3_tail_v1"
    ],
    "length_scales": [
     0.992295,
@@ -6090,7 +6564,8 @@
     0.853784,
     0.971601,
     1.0,
-    0.820856
+    0.820856,
+    1.245614
    ],
    "girth_scales": [
     0.999152,
@@ -6098,19 +6573,20 @@
     0.999153,
     0.999682,
     1.0,
-    0.997797
+    0.997797,
+    0.998626
    ],
-   "mass_kg": 221.972462,
+   "mass_kg": 232.94192,
    "com_m": [
-    -7.6e-05,
-    0.646473,
-    0.033026
+    -7.2e-05,
+    0.661584,
+    -0.015501
    ],
-   "performance": 0.953363,
-   "v_walk": 1.431382,
-   "v_run": 3.085418,
-   "v_max": 3.428242,
-   "cadence_max": 2.672163
+   "performance": 0.904121,
+   "v_walk": 1.393926,
+   "v_run": 2.926054,
+   "v_max": 3.251171,
+   "cadence_max": 2.534144
   },
   {
    "skeleton_id": "quadruped_stocky_plantigrade_compact_v3",
@@ -6121,7 +6597,8 @@
     "leg_R0",
     "leg_L1",
     "leg_R1",
-    "head"
+    "head",
+    "dorsal_1"
    ],
    "part_ids": [
     "reference_hexapod_compact_insect_balanced_v3_core_v1",
@@ -6129,7 +6606,8 @@
     "reference_quadruped_stocky_plantigrade_balanced_v3_leg_r1_v1",
     "reference_biped_plantigrade_humanoid_elongated_v3_leg_l_v1",
     "reference_biped_plantigrade_humanoid_elongated_v3_leg_r_v1",
-    "reference_dragger_belly_hauler_compact_v3_head_v1"
+    "reference_dragger_belly_hauler_compact_v3_head_v1",
+    "reference_hexapod_compact_insect_balanced_v3_dorsal_0_v1"
    ],
    "length_scales": [
     1.230159,
@@ -6137,7 +6615,8 @@
     0.857998,
     0.846352,
     0.846352,
-    0.857143
+    0.857143,
+    0.97619
    ],
    "girth_scales": [
     0.999119,
@@ -6145,19 +6624,20 @@
     1.002242,
     1.001541,
     1.001541,
-    0.993827
+    0.993827,
+    0.98645
    ],
-   "mass_kg": 171.633152,
+   "mass_kg": 171.693902,
    "com_m": [
     5.1e-05,
-    0.505137,
-    0.028549
+    0.505306,
+    0.028614
    ],
-   "performance": 1.104443,
-   "v_walk": 1.444089,
-   "v_run": 4.064509,
-   "v_max": 4.516121,
-   "cadence_max": 3.321977
+   "performance": 1.104245,
+   "v_walk": 1.443961,
+   "v_run": 4.063783,
+   "v_max": 4.515315,
+   "cadence_max": 3.321384
   },
   {
    "skeleton_id": "quadruped_lean_digitigrade_elongated_v3",
@@ -6168,7 +6648,8 @@
     "leg_R0",
     "leg_L1",
     "leg_R1",
-    "head"
+    "head",
+    "tail"
    ],
    "part_ids": [
     "reference_hexapod_elongated_insect_elongated_v3_core_v1",
@@ -6176,7 +6657,8 @@
     "reference_quadruped_lean_digitigrade_elongated_v3_leg_r1_v1",
     "reference_quadruped_lean_digitigrade_balanced_v3_leg_l1_v1",
     "reference_amalgam_hauled_s0004_v3_leg2_v1",
-    "reference_serpentine_limbless_articulated_balanced_v3_core_v1"
+    "reference_serpentine_limbless_articulated_balanced_v3_core_v1",
+    "meshy_tentacle_a_v1"
    ],
    "length_scales": [
     1.02551,
@@ -6184,7 +6666,8 @@
     1.023514,
     1.145958,
     1.124908,
-    1.057395
+    1.057395,
+    0.83125
    ],
    "girth_scales": [
     1.000931,
@@ -6192,15 +6675,16 @@
     0.998266,
     1.003527,
     1.001442,
-    0.997847
+    0.997847,
+    1.002506
    ],
-   "mass_kg": 682.46323,
+   "mass_kg": 733.659,
    "com_m": [
-    0.000242,
-    1.012223,
-    0.041038
+    0.000225,
+    1.041122,
+    -0.070474
    ],
-   "performance": 0.76157,
+   "performance": 0.698267,
    "v_walk": 1.252537,
    "v_run": 2.254567,
    "v_max": 2.505074,
@@ -6215,7 +6699,8 @@
     "leg_R0",
     "leg_L1",
     "leg_R1",
-    "head"
+    "head",
+    "tail"
    ],
    "part_ids": [
     "reference_quadruped_lean_digitigrade_compact_v3_core_v1",
@@ -6223,7 +6708,8 @@
     "reference_biped_plantigrade_humanoid_balanced_v3_leg_r_v1",
     "reference_biped_plantigrade_humanoid_elongated_v3_leg_l_v1",
     "reference_quadruped_stocky_plantigrade_balanced_v3_leg_r0_v1",
-    "reference_quadruped_stocky_plantigrade_compact_v3_head_v1"
+    "reference_quadruped_stocky_plantigrade_compact_v3_head_v1",
+    "reference_quadruped_stocky_plantigrade_balanced_v3_tail_v1"
    ],
    "length_scales": [
     0.802416,
@@ -6231,7 +6717,8 @@
     0.988177,
     0.846352,
     0.831366,
-    1.0
+    1.0,
+    0.820144
    ],
    "girth_scales": [
     0.999138,
@@ -6239,19 +6726,20 @@
     1.002888,
     1.001541,
     1.000062,
-    1.0
+    1.0,
+    0.999825
    ],
-   "mass_kg": 171.614112,
+   "mass_kg": 177.305645,
    "com_m": [
-    8.1e-05,
-    0.505207,
-    0.028624
+    7.8e-05,
+    0.516096,
+    0.002027
    ],
-   "performance": 1.10435,
-   "v_walk": 1.444029,
-   "v_run": 4.064169,
-   "v_max": 4.515743,
-   "cadence_max": 3.321699
+   "performance": 1.068012,
+   "v_walk": 1.420072,
+   "v_run": 3.930437,
+   "v_max": 4.367152,
+   "cadence_max": 3.212398
   },
   {
    "skeleton_id": "quadruped_lean_digitigrade_balanced_v3",
@@ -6262,7 +6750,9 @@
     "leg_R0",
     "leg_L1",
     "leg_R1",
-    "head"
+    "head",
+    "tail",
+    "dorsal_0"
    ],
    "part_ids": [
     "reference_hexapod_elongated_insect_balanced_v3_core_v1",
@@ -6270,7 +6760,9 @@
     "reference_amalgam_hauled_s0004_v3_leg2_v1",
     "reference_quadruped_lean_digitigrade_compact_v3_leg_l1_v1",
     "reference_quadruped_lean_digitigrade_elongated_v3_leg_r0_v1",
-    "reference_quadruped_lean_digitigrade_compact_v3_head_v1"
+    "reference_quadruped_lean_digitigrade_compact_v3_head_v1",
+    "reference_dragger_forelimb_puller_elongated_v3_belly_v1",
+    "reference_crawler_bilateral_eight_legged_elongated_v3_dorsal_0_v1"
    ],
    "length_scales": [
     1.026125,
@@ -6278,7 +6770,9 @@
     1.007348,
     1.183348,
     0.852585,
-    1.218241
+    1.218241,
+    1.201156,
+    0.983108
    ],
    "girth_scales": [
     1.000497,
@@ -6286,19 +6780,21 @@
     1.00081,
     0.999086,
     0.998216,
-    1.002207
+    1.002207,
+    0.99797,
+    1.017182
    ],
-   "mass_kg": 382.901965,
+   "mass_kg": 390.614969,
    "com_m": [
-    0.000124,
-    0.809234,
-    0.039466
+    0.000121,
+    0.817032,
+    0.015746
    ],
-   "performance": 0.881297,
-   "v_walk": 1.481741,
-   "v_run": 2.667133,
-   "v_max": 2.963481,
-   "cadence_max": 2.272597
+   "performance": 0.861761,
+   "v_walk": 1.448894,
+   "v_run": 2.608009,
+   "v_max": 2.897788,
+   "cadence_max": 2.222219
   },
   {
    "skeleton_id": "quadruped_stocky_plantigrade_elongated_v3",
@@ -6309,7 +6805,9 @@
     "leg_R0",
     "leg_L1",
     "leg_R1",
-    "head"
+    "head",
+    "tail",
+    "dorsal_1"
    ],
    "part_ids": [
     "reference_hexapod_elongated_insect_balanced_v3_core_v1",
@@ -6317,7 +6815,9 @@
     "reference_quadruped_stocky_plantigrade_elongated_v3_leg_r1_v1",
     "reference_biped_plantigrade_humanoid_elongated_v3_leg_l_v1",
     "reference_quadruped_stocky_plantigrade_balanced_v3_leg_r0_v1",
-    "reference_biped_plantigrade_humanoid_elongated_v3_head_v1"
+    "reference_biped_plantigrade_humanoid_elongated_v3_head_v1",
+    "reference_quadruped_stocky_plantigrade_elongated_v3_tail_v1",
+    "reference_hexapod_elongated_insect_compact_v3_dorsal_0_v1"
    ],
    "length_scales": [
     1.052975,
@@ -6325,7 +6825,9 @@
     1.011923,
     1.151931,
     1.131535,
-    1.156627
+    1.156627,
+    1.0,
+    1.01992
    ],
    "girth_scales": [
     1.000279,
@@ -6333,19 +6835,21 @@
     1.001618,
     1.000358,
     0.998881,
-    1.004032
+    1.004032,
+    1.0,
+    1.00498
    ],
-   "mass_kg": 495.235279,
+   "mass_kg": 517.106786,
    "com_m": [
-    0.000114,
-    0.795246,
-    0.037592
+    0.00011,
+    0.814352,
+    -0.016082
    ],
-   "performance": 0.918066,
-   "v_walk": 1.571363,
-   "v_run": 2.828453,
-   "v_max": 3.142726,
-   "cadence_max": 2.370613
+   "performance": 0.873205,
+   "v_walk": 1.494579,
+   "v_run": 2.690241,
+   "v_max": 2.989157,
+   "cadence_max": 2.254773
   },
   {
    "skeleton_id": "quadruped_stocky_plantigrade_balanced_v3",
@@ -6356,7 +6860,9 @@
     "leg_R0",
     "leg_L1",
     "leg_R1",
-    "head"
+    "head",
+    "tail",
+    "dorsal_0"
    ],
    "part_ids": [
     "reference_quadruped_lean_digitigrade_compact_v3_core_v1",
@@ -6364,7 +6870,9 @@
     "reference_quadruped_stocky_plantigrade_compact_v3_leg_r1_v1",
     "reference_quadruped_stocky_plantigrade_elongated_v3_leg_l0_v1",
     "reference_quadruped_stocky_plantigrade_elongated_v3_leg_r1_v1",
-    "reference_dragger_belly_hauler_balanced_v3_head_v1"
+    "reference_dragger_belly_hauler_balanced_v3_head_v1",
+    "reference_dragger_forelimb_puller_elongated_v3_belly_v1",
+    "reference_quadruped_lean_digitigrade_compact_v3_dorsal_0_v1"
    ],
    "length_scales": [
     0.97843,
@@ -6372,7 +6880,9 @@
     1.20284,
     0.860825,
     0.871088,
-    0.854701
+    0.854701,
+    0.964162,
+    0.974895
    ],
    "girth_scales": [
     0.998551,
@@ -6380,19 +6890,21 @@
     0.999938,
     0.998498,
     1.000113,
-    1.002857
+    1.002857,
+    0.997279,
+    0.998758
    ],
-   "mass_kg": 291.964027,
+   "mass_kg": 295.939813,
    "com_m": [
-    -0.000134,
-    0.633498,
-    0.033955
+    -0.000132,
+    0.639095,
+    0.020958
    ],
-   "performance": 1.029183,
-   "v_walk": 1.550724,
-   "v_run": 3.542708,
-   "v_max": 3.936342,
-   "cadence_max": 2.845154
+   "performance": 1.014379,
+   "v_walk": 1.53953,
+   "v_run": 3.491747,
+   "v_max": 3.879718,
+   "cadence_max": 2.804227
   },
   {
    "skeleton_id": "crawler_alien_tripod_elongated_v3",
@@ -6401,37 +6913,41 @@
     "core",
     "leg_0",
     "leg_1",
-    "leg_2"
+    "leg_2",
+    "crown"
    ],
    "part_ids": [
     "reference_crawler_alien_tripod_elongated_v3_core_v1",
     "reference_radial_raised_articulated_walker_elongated_v3_arm_5_v1",
     "reference_radial_raised_articulated_walker_elongated_v3_arm_0_v1",
-    "reference_radial_raised_articulated_walker_balanced_v3_arm_2_v1"
+    "reference_radial_raised_articulated_walker_balanced_v3_arm_2_v1",
+    "reference_quadruped_stocky_plantigrade_elongated_v3_dorsal_0_v1"
    ],
    "length_scales": [
     1.0,
     0.907357,
     0.907357,
-    1.178066
+    1.178066,
+    1.234114
    ],
    "girth_scales": [
     1.0,
     1.001911,
     1.001911,
-    1.002577
+    1.002577,
+    0.995991
    ],
-   "mass_kg": 78.075224,
+   "mass_kg": 78.778749,
    "com_m": [
     2.4e-05,
-    0.372271,
-    -4.3e-05
+    0.37504,
+    0.00028
    ],
-   "performance": 1.071591,
-   "v_walk": 1.002559,
+   "performance": 1.065732,
+   "v_walk": 0.999814,
    "v_run": 2.260746,
    "v_max": 2.51194,
-   "cadence_max": 3.215737
+   "cadence_max": 3.198156
   },
   {
    "skeleton_id": "quadruped_stocky_plantigrade_elongated_v3",
@@ -6442,7 +6958,9 @@
     "leg_R0",
     "leg_L1",
     "leg_R1",
-    "head"
+    "head",
+    "tail",
+    "dorsal_1"
    ],
    "part_ids": [
     "reference_quadruped_stocky_plantigrade_elongated_v3_core_v1",
@@ -6450,7 +6968,9 @@
     "reference_quadruped_stocky_plantigrade_balanced_v3_leg_r1_v1",
     "reference_quadruped_stocky_plantigrade_elongated_v3_leg_l0_v1",
     "reference_quadruped_stocky_plantigrade_elongated_v3_leg_r1_v1",
-    "reference_biped_digitigrade_creature_elongated_v3_head_v1"
+    "reference_biped_digitigrade_creature_elongated_v3_head_v1",
+    "reference_dragger_arm_leg_crawler_elongated_v3_belly_v1",
+    "reference_hexapod_elongated_insect_balanced_v3_dorsal_0_v1"
    ],
    "length_scales": [
     1.0,
@@ -6458,7 +6978,9 @@
     1.161677,
     0.988218,
     1.0,
-    1.22293
+    1.22293,
+    1.200225,
+    0.836601
    ],
    "girth_scales": [
     1.0,
@@ -6466,19 +6988,21 @@
     1.001504,
     0.998385,
     1.0,
-    1.003551
+    1.003551,
+    0.999813,
+    1.000159
    ],
-   "mass_kg": 495.102441,
+   "mass_kg": 503.366426,
    "com_m": [
-    -0.000123,
-    0.795246,
-    0.037672
+    -0.000121,
+    0.802725,
+    0.017298
    ],
-   "performance": 0.918122,
-   "v_walk": 1.571458,
-   "v_run": 2.828624,
-   "v_max": 3.142915,
-   "cadence_max": 2.370756
+   "performance": 0.900808,
+   "v_walk": 1.541824,
+   "v_run": 2.775283,
+   "v_max": 3.083647,
+   "cadence_max": 2.326049
   },
   {
    "skeleton_id": "quadruped_lean_digitigrade_balanced_v3",
@@ -6489,7 +7013,9 @@
     "leg_R0",
     "leg_L1",
     "leg_R1",
-    "head"
+    "head",
+    "tail",
+    "dorsal_1"
    ],
    "part_ids": [
     "reference_quadruped_lean_digitigrade_compact_v3_core_v1",
@@ -6497,7 +7023,9 @@
     "reference_quadruped_lean_digitigrade_compact_v3_leg_r1_v1",
     "reference_quadruped_lean_digitigrade_compact_v3_leg_l0_v1",
     "reference_quadruped_lean_digitigrade_compact_v3_leg_r1_v1",
-    "reference_serpentine_segmented_paired_legs_compact_v3_core_v1"
+    "reference_serpentine_segmented_paired_legs_compact_v3_core_v1",
+    "reference_dragger_forelimb_puller_elongated_v3_belly_v1",
+    "reference_crawler_bilateral_eight_legged_elongated_v3_dorsal_1_v1"
    ],
    "length_scales": [
     1.220017,
@@ -6505,7 +7033,9 @@
     1.214349,
     1.149742,
     1.183348,
-    1.129909
+    1.129909,
+    1.201156,
+    1.008097
    ],
    "girth_scales": [
     0.998667,
@@ -6513,19 +7043,21 @@
     1.001976,
     0.998768,
     0.999086,
-    0.999224
+    0.999224,
+    0.99797,
+    0.991968
    ],
-   "mass_kg": 382.540025,
+   "mass_kg": 390.112852,
    "com_m": [
-    -0.000151,
-    0.809009,
-    0.039322
+    -0.000148,
+    0.81659,
+    0.0158
    ],
-   "performance": 0.881679,
-   "v_walk": 1.482383,
-   "v_run": 2.66829,
-   "v_max": 2.964766,
-   "cadence_max": 2.273582
+   "performance": 0.862386,
+   "v_walk": 1.449944,
+   "v_run": 2.6099,
+   "v_max": 2.899889,
+   "cadence_max": 2.22383
   },
   {
    "skeleton_id": "crawler_alien_tripod_compact_v3",
@@ -6534,37 +7066,41 @@
     "core",
     "leg_0",
     "leg_1",
-    "leg_2"
+    "leg_2",
+    "crown"
    ],
    "part_ids": [
     "reference_radial_raised_articulated_walker_balanced_v3_core_v1",
     "reference_radial_raised_articulated_walker_balanced_v3_arm_0_v1",
     "reference_crawler_alien_tripod_balanced_v3_leg_1_v1",
-    "reference_crawler_alien_tripod_balanced_v3_leg_1_v1"
+    "reference_crawler_alien_tripod_balanced_v3_leg_1_v1",
+    "reference_quadruped_stocky_plantigrade_elongated_v3_dorsal_1_v1"
    ],
    "length_scales": [
     1.025194,
     1.152123,
     0.984879,
-    0.984879
+    0.984879,
+    0.921875
    ],
    "girth_scales": [
     1.000598,
     1.00465,
     1.001724,
-    1.001724
+    1.001724,
+    1.005374
    ],
-   "mass_kg": 49.195975,
+   "mass_kg": 49.383407,
    "com_m": [
-    0.000489,
-    0.369124,
-    9e-06
+    0.000487,
+    0.369925,
+    9.7e-05
    ],
-   "performance": 1.368407,
-   "v_walk": 1.137349,
+   "performance": 1.365284,
+   "v_walk": 1.136051,
    "v_run": 2.559963,
    "v_max": 2.844403,
-   "cadence_max": 4.152836
+   "cadence_max": 4.143358
   },
   {
    "skeleton_id": "quadruped_stocky_plantigrade_compact_v3",
@@ -6575,7 +7111,8 @@
     "leg_R0",
     "leg_L1",
     "leg_R1",
-    "head"
+    "head",
+    "dorsal_1"
    ],
    "part_ids": [
     "reference_hexapod_compact_insect_balanced_v3_core_v1",
@@ -6583,7 +7120,8 @@
     "reference_quadruped_stocky_plantigrade_balanced_v3_leg_r1_v1",
     "reference_biped_plantigrade_humanoid_elongated_v3_leg_l_v1",
     "reference_biped_plantigrade_humanoid_elongated_v3_leg_r_v1",
-    "reference_dragger_belly_hauler_compact_v3_head_v1"
+    "reference_dragger_belly_hauler_compact_v3_head_v1",
+    "reference_hexapod_compact_insect_balanced_v3_dorsal_0_v1"
    ],
    "length_scales": [
     1.230159,
@@ -6591,7 +7129,8 @@
     0.857998,
     0.846352,
     0.846352,
-    0.857143
+    0.857143,
+    0.97619
    ],
    "girth_scales": [
     0.999119,
@@ -6599,19 +7138,20 @@
     1.002242,
     1.001541,
     1.001541,
-    0.993827
+    0.993827,
+    0.98645
    ],
-   "mass_kg": 171.633152,
+   "mass_kg": 171.693902,
    "com_m": [
     5.1e-05,
-    0.505137,
-    0.028549
+    0.505306,
+    0.028614
    ],
-   "performance": 1.104443,
-   "v_walk": 1.444089,
-   "v_run": 4.064509,
-   "v_max": 4.516121,
-   "cadence_max": 3.321977
+   "performance": 1.104245,
+   "v_walk": 1.443961,
+   "v_run": 4.063783,
+   "v_max": 4.515315,
+   "cadence_max": 3.321384
   },
   {
    "skeleton_id": "quadruped_lean_digitigrade_elongated_v3",
@@ -6622,7 +7162,8 @@
     "leg_R0",
     "leg_L1",
     "leg_R1",
-    "head"
+    "head",
+    "tail"
    ],
    "part_ids": [
     "reference_hexapod_elongated_insect_elongated_v3_core_v1",
@@ -6630,7 +7171,8 @@
     "reference_quadruped_lean_digitigrade_elongated_v3_leg_r1_v1",
     "reference_quadruped_lean_digitigrade_balanced_v3_leg_l1_v1",
     "reference_amalgam_hauled_s0004_v3_leg2_v1",
-    "reference_serpentine_limbless_articulated_balanced_v3_core_v1"
+    "reference_serpentine_limbless_articulated_balanced_v3_core_v1",
+    "meshy_tentacle_a_v1"
    ],
    "length_scales": [
     1.02551,
@@ -6638,7 +7180,8 @@
     1.023514,
     1.145958,
     1.124908,
-    1.057395
+    1.057395,
+    0.83125
    ],
    "girth_scales": [
     1.000931,
@@ -6646,15 +7189,16 @@
     0.998266,
     1.003527,
     1.001442,
-    0.997847
+    0.997847,
+    1.002506
    ],
-   "mass_kg": 682.46323,
+   "mass_kg": 733.659,
    "com_m": [
-    0.000242,
-    1.012223,
-    0.041038
+    0.000225,
+    1.041122,
+    -0.070474
    ],
-   "performance": 0.76157,
+   "performance": 0.698267,
    "v_walk": 1.252537,
    "v_run": 2.254567,
    "v_max": 2.505074,
@@ -6669,7 +7213,8 @@
     "leg_R0",
     "leg_L1",
     "leg_R1",
-    "head"
+    "head",
+    "tail"
    ],
    "part_ids": [
     "reference_quadruped_lean_digitigrade_compact_v3_core_v1",
@@ -6677,7 +7222,8 @@
     "reference_biped_plantigrade_humanoid_balanced_v3_leg_r_v1",
     "reference_biped_plantigrade_humanoid_elongated_v3_leg_l_v1",
     "reference_quadruped_stocky_plantigrade_balanced_v3_leg_r0_v1",
-    "reference_quadruped_stocky_plantigrade_compact_v3_head_v1"
+    "reference_quadruped_stocky_plantigrade_compact_v3_head_v1",
+    "reference_quadruped_stocky_plantigrade_balanced_v3_tail_v1"
    ],
    "length_scales": [
     0.802416,
@@ -6685,7 +7231,8 @@
     0.988177,
     0.846352,
     0.831366,
-    1.0
+    1.0,
+    0.820144
    ],
    "girth_scales": [
     0.999138,
@@ -6693,19 +7240,20 @@
     1.002888,
     1.001541,
     1.000062,
-    1.0
+    1.0,
+    0.999825
    ],
-   "mass_kg": 171.614112,
+   "mass_kg": 177.305645,
    "com_m": [
-    8.1e-05,
-    0.505207,
-    0.028624
+    7.8e-05,
+    0.516096,
+    0.002027
    ],
-   "performance": 1.10435,
-   "v_walk": 1.444029,
-   "v_run": 4.064169,
-   "v_max": 4.515743,
-   "cadence_max": 3.321699
+   "performance": 1.068012,
+   "v_walk": 1.420072,
+   "v_run": 3.930437,
+   "v_max": 4.367152,
+   "cadence_max": 3.212398
   },
   {
    "skeleton_id": "crawler_alien_tripod_balanced_v3",
@@ -6714,37 +7262,41 @@
     "core",
     "leg_0",
     "leg_1",
-    "leg_2"
+    "leg_2",
+    "crown"
    ],
    "part_ids": [
     "reference_crawler_alien_tripod_balanced_v3_core_v1",
     "reference_radial_raised_articulated_walker_balanced_v3_arm_5_v1",
     "reference_radial_raised_articulated_walker_elongated_v3_arm_0_v1",
-    "reference_radial_raised_articulated_walker_elongated_v3_arm_2_v1"
+    "reference_radial_raised_articulated_walker_elongated_v3_arm_2_v1",
+    "reference_quadruped_lean_digitigrade_balanced_v3_dorsal_1_v1"
    ],
    "length_scales": [
     1.0,
     1.169811,
     0.900999,
-    0.900999
+    0.900999,
+    1.156627
    ],
    "girth_scales": [
     1.0,
     1.002921,
     1.002254,
-    1.002254
+    1.002254,
+    0.994271
    ],
-   "mass_kg": 58.626371,
+   "mass_kg": 58.960708,
    "com_m": [
     -4e-05,
-    0.371531,
-    0.0
+    0.372952,
+    0.00016
    ],
-   "performance": 1.259633,
-   "v_walk": 1.092454,
+   "performance": 1.255285,
+   "v_walk": 1.090567,
    "v_run": 2.426978,
    "v_max": 2.696642,
-   "cadence_max": 3.795064
+   "cadence_max": 3.781964
   },
   {
    "skeleton_id": "quadruped_stocky_plantigrade_elongated_v3",
@@ -6755,7 +7307,9 @@
     "leg_R0",
     "leg_L1",
     "leg_R1",
-    "head"
+    "head",
+    "tail",
+    "dorsal_1"
    ],
    "part_ids": [
     "reference_hexapod_elongated_insect_balanced_v3_core_v1",
@@ -6763,7 +7317,9 @@
     "reference_quadruped_stocky_plantigrade_elongated_v3_leg_r1_v1",
     "reference_biped_plantigrade_humanoid_elongated_v3_leg_l_v1",
     "reference_quadruped_stocky_plantigrade_balanced_v3_leg_r0_v1",
-    "reference_biped_plantigrade_humanoid_elongated_v3_head_v1"
+    "reference_biped_plantigrade_humanoid_elongated_v3_head_v1",
+    "reference_quadruped_stocky_plantigrade_elongated_v3_tail_v1",
+    "reference_hexapod_elongated_insect_compact_v3_dorsal_0_v1"
    ],
    "length_scales": [
     1.052975,
@@ -6771,7 +7327,9 @@
     1.011923,
     1.151931,
     1.131535,
-    1.156627
+    1.156627,
+    1.0,
+    1.01992
    ],
    "girth_scales": [
     1.000279,
@@ -6779,19 +7337,21 @@
     1.001618,
     1.000358,
     0.998881,
-    1.004032
+    1.004032,
+    1.0,
+    1.00498
    ],
-   "mass_kg": 495.235279,
+   "mass_kg": 517.106786,
    "com_m": [
-    0.000114,
-    0.795246,
-    0.037592
+    0.00011,
+    0.814352,
+    -0.016082
    ],
-   "performance": 0.918066,
-   "v_walk": 1.571363,
-   "v_run": 2.828453,
-   "v_max": 3.142726,
-   "cadence_max": 2.370613
+   "performance": 0.873205,
+   "v_walk": 1.494579,
+   "v_run": 2.690241,
+   "v_max": 2.989157,
+   "cadence_max": 2.254773
   },
   {
    "skeleton_id": "crawler_bilateral_eight_legged_balanced_v3",
@@ -6815,8 +7375,8 @@
     "reference_crawler_bilateral_eight_legged_balanced_v3_leg3_r_v1",
     "reference_hexapod_compact_insect_elongated_v3_leg0_l_v1",
     "reference_crawler_bilateral_eight_legged_elongated_v3_leg1_r_v1",
-    "reference_crawler_bilateral_eight_legged_balanced_v3_leg1_l_v1",
-    "reference_crawler_bilateral_eight_legged_balanced_v3_leg0_r_v1"
+    "reference_hexapod_compact_insect_compact_v3_leg0_l_v1",
+    "reference_hexapod_compact_insect_compact_v3_leg1_r_v1"
    ],
    "length_scales": [
     1.116279,
@@ -6826,8 +7386,8 @@
     1.0,
     1.081928,
     0.99117,
-    1.0,
-    1.0
+    1.107275,
+    1.107275
    ],
    "girth_scales": [
     0.997423,
@@ -6837,20 +7397,20 @@
     1.0,
     1.006268,
     1.00149,
-    1.0,
-    1.0
+    0.999352,
+    0.999352
    ],
-   "mass_kg": 105.879127,
+   "mass_kg": 105.858971,
    "com_m": [
     0.000228,
-    0.3354,
-    0.005091
+    0.335401,
+    0.005004
    ],
-   "performance": 1.241789,
-   "v_walk": 1.032365,
-   "v_run": 4.237858,
-   "v_max": 4.846154,
-   "cadence_max": 3.930377
+   "performance": 1.24173,
+   "v_walk": 1.032341,
+   "v_run": 4.237456,
+   "v_max": 4.845925,
+   "cadence_max": 3.93019
   }
  ]
 }

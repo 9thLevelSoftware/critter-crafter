@@ -479,6 +479,74 @@ def _dragger(a: dict[str, Any], h: float, length: float, width: float) -> tuple[
     return branches, support, support, "bilateral"
 
 
+def _optional(branch: dict[str, Any], fill_pct: int) -> dict[str, Any]:
+    """Mark a branch as optional: its bones always exist, but a recipe fills it only ``fill_pct`` of the time."""
+    branch["required"] = False
+    branch["optional_fill_pct"] = fill_pct
+    return branch
+
+
+def _spine_index(t: float) -> int:
+    """The spine3 bone (0 pelvis, 1 lower, 2 end) that a point ``t`` of the way along the torso sits in."""
+    return 0 if t < .34 else 1 if t < .67 else 2
+
+
+def _extras(a: dict[str, Any], h: float, length: float, width: float) -> list[dict[str, Any]]:
+    """Optional sprouts that make a body plan less tidy: tails, dorsal spines, a second pair of arms, antennae, a
+    crown. They are contactless ``sway`` limbs that only hang off the core, so they never carry weight or move
+    a foot, and a recipe leaves each one off part of the time. Sizes follow the body, so presets scale them."""
+    plan, variant = a["plan"], a["variant"]
+    out: list[dict[str, Any]] = []
+
+    def dorsal(index: int, t: float, core_y: float, core_len: float, rear_z: float, radius: float, size: float, pct: int) -> None:
+        origin = _v(0, core_y + radius * .9, rear_z + t * core_len)
+        out.append(_optional(_branch(f"dorsal_{index}", "appendage1", "core", origin=origin, direction=[0.0, 1.0, -.25],
+                                     up=[0, 0, 1], length=size, role="sway", attach=_spine_index(t) if plan != "crawler" else 0,
+                                     phase=index * 1.3), pct))
+
+    if plan == "quadruped":
+        core_len, rear_z = length * .68, -length * .34
+        out.append(_optional(_branch("tail", "tentacle8", "core", origin=_v(0, h, rear_z), direction=[0, .2, -1],
+                                     up=[0, 1, 0], length=length * .5, role="sway", attach=0), 70))
+        radius = core_len * _PROFILE_GIRTH["spine3_axial"] * .5
+        dorsal(0, .5, h, core_len, rear_z, radius, length * .14, 55)
+        dorsal(1, .75, h, core_len, rear_z, radius, length * .12, 45)
+    elif plan == "biped":
+        y0, torso = h * .48, h * .46
+        if variant == "digitigrade":
+            out.append(_optional(_branch("tail", "tentacle8", "core", origin=_v(0, y0 + torso * .08, -h * .07),
+                                         direction=[0, -.35, -1], up=[0, 1, 0], length=h * .45, role="sway", attach=0), 65))
+        arm_len = h * .36 * a["limb_scale"]
+        for side, sx in (("L", 1), ("R", -1)):
+            out.append(_optional(_branch(
+                f"arm2_{side}", "limb3", "core", origin=_v(sx * width * .3, y0 + torso * .5, 0.0),
+                direction=[sx * .55, -.5, .35], up=[0, 0, -1], length=arm_len, side=side, attach=1,
+                mirror_of="arm2_L" if side == "R" else "", role="manipulator", phase=math.pi if side == "L" else 0,
+                support=0.0, profile_id="limb3_brachial"), 30))
+    elif plan == "hexapod":
+        core_len, rear_z = length * .72, -length * .36
+        radius = core_len * _PROFILE_GIRTH["spine3_axial"] * .5
+        for side, sx in (("L", 1), ("R", -1)):
+            out.append(_optional(_branch(
+                f"antenna_{side}", "appendage1", "core", origin=_v(sx * width * .05, h + length * .04, length * .36),
+                direction=[sx * .35, .55, 1.0], up=[0, 1, 0], length=length * .3, side=side, attach=2,
+                mirror_of="antenna_L" if side == "R" else "", role="sway", phase=0.7 * (1 if sx > 0 else 2)), 75))
+        dorsal(0, .5, h, core_len, rear_z, radius, length * .16, 50)
+    elif plan == "crawler":
+        core_len, rear_z = length * .56, -length * .28
+        radius = core_len * _PROFILE_GIRTH["core1_body"] * .5
+        if variant == "tripod":
+            out.append(_optional(_branch("crown", "appendage1", "core", origin=_v(0, h + radius * .9, rear_z + core_len * .5),
+                                         direction=[0, 1, .2], up=[0, 0, 1], length=length * .25, role="sway", attach=0), 80))
+        else:
+            dorsal(0, .3, h, core_len, rear_z, radius, length * .18, 55)
+            dorsal(1, .7, h, core_len, rear_z, radius, length * .15, 50)
+    elif plan == "radial":
+        out.append(_optional(_branch("crown", "tentacle8", "core", origin=_v(0, h + h * .5, 0), direction=[0, 1, 0],
+                                     up=[0, 0, 1], length=h * .6, role="sway", attach=0), 80))
+    return out
+
+
 _BUILDERS = {"biped": _biped, "quadruped": _quadruped, "crawler": _crawler, "hexapod": _hexapod, "radial": _radial, "serpentine": _serpentine, "dragger": _dragger}
 
 
@@ -646,6 +714,7 @@ def build_candidate(archetype: str, preset: str, seed: int = 1, style: str = "an
         length = a["length"] * shape["length"] * _r(seed, 2)
         width = a["width"] * shape["width"] * _r(seed, 3)
     branches, supports, contacts, symmetry = _BUILDERS[a["plan"]](a, h, length, width)
+    branches += _extras(a, h, length, width)
     _scale_stance(branches, shape["stance"])
     if style == "horror":
         _apply_horror_modifier(branches)
