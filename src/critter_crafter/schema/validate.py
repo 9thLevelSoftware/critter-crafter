@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 from pathlib import Path
 from typing import Any
 
@@ -230,8 +231,8 @@ def validate_sources(data_dir: Path, schemas_dir: Path) -> tuple[list[str], dict
         library,
         "library.json",
     )
-    if library.get("version") != "0.2.0":
-        diagnostics.append(f"CC_LIBRARY_VERSION: expected 0.2.0, got {library.get('version')}")
+    if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", str(library.get("version"))):
+        diagnostics.append(f"CC_LIBRARY_VERSION: expected MAJOR.MINOR.PATCH, got {library.get('version')}")
     if library.get("generator", {}).get("algorithm") != "cc-gen-3":
         diagnostics.append("CC_GENERATOR_VERSION: expected cc-gen-3")
     for subdir, schema_name in SCHEMA_FOR.items():

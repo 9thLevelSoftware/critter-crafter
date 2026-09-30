@@ -6,9 +6,14 @@ both test suites, and the copies in the Unity package
 (`unity/com.ninthlevelsoftware.crittercrafter/Tests/Editor/GoldenV3/`) must stay
 byte-identical to them. (`cc-gen-2` and `tests/golden/` are frozen v2 history.)
 
-Schema `3.0.0`, library `0.2.0`. A catalog with a different schema version, library
-version or algorithm is rejected (`CC_GEN_SCHEMA_VERSION`, `CC_GEN_LIBRARY_VERSION`,
-`CC_GEN_ALGORITHM`).
+Schema `3.x.y`. A catalog is accepted when its schema major is 3 and its generator is
+`cc-gen-3` with `splitmix64`; anything else is rejected (`CC_GEN_SCHEMA_VERSION`,
+`CC_GEN_ALGORITHM`, `CC_GEN_RNG`; the C# runtime throws the same codes). The library's own
+content version (`0.2.0`, `0.2.1`, `0.3.0` ...) is **not** gated: a library can be re-released and
+still generate. A saved recipe records the library id and version it was made on and replays only on that
+exact one (`CC_RECIPE_LIBRARY_VERSION` in Python, `CC_LIBRARY_VERSION` from the C# validator), so any
+library bump invalidates saved recipes; games that save recipes should keep the library version they
+saved against, or regenerate from the stored pool and seed.
 
 ## RNG: SplitMix64
 ```

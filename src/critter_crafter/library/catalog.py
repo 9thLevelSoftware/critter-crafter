@@ -19,8 +19,8 @@ from ..binding.profiles import (
 )
 
 SCHEMA_VERSION = "3.0.0"
-LIBRARY_VERSION = "0.2.0"
 GENERATOR = "cc-gen-3"
+RNG = "splitmix64"
 DEFAULT_OPTIONAL_FILL_PCT = 50
 ROOT_BONE = "root"
 REFERENCE_GROUND_CLEARANCE_M = 0.005
@@ -621,11 +621,15 @@ def compile_catalog(sources: dict[str, Any]) -> dict[str, Any]:
     version = library.get("schema_version")
     if version != SCHEMA_VERSION:
         raise CatalogError("CC_LIBRARY_SCHEMA_VERSION", f"expected {SCHEMA_VERSION}, got {version}")
-    if library.get("version") != LIBRARY_VERSION:
-        raise CatalogError("CC_LIBRARY_VERSION", f"expected {LIBRARY_VERSION}, got {library.get('version')}")
-    algorithm = library.get("generator", {}).get("algorithm")
-    if algorithm != GENERATOR:
-        raise CatalogError("CC_GENERATOR_VERSION", f"expected {GENERATOR}, got {algorithm}")
+    # The content version is free (0.2.0, 0.2.1, 0.3.0 ...) as long as it is a version; what pins the generated
+    # recipes is the generator's identity, not the release number.
+    if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", str(library.get("version"))):
+        raise CatalogError("CC_LIBRARY_VERSION", f"expected a MAJOR.MINOR.PATCH version, got {library.get('version')}")
+    generator = library.get("generator", {})
+    if generator.get("algorithm") != GENERATOR:
+        raise CatalogError("CC_GENERATOR_VERSION", f"expected {GENERATOR}, got {generator.get('algorithm')}")
+    if generator.get("rng") != RNG:
+        raise CatalogError("CC_GENERATOR_VERSION", f"expected rng {RNG}, got {generator.get('rng')}")
     try:
         registry = _registry_index(sources.get("binding_profile_registry", []))
         baseline = _registry_index(sources.get("binding_profile_baseline", []))

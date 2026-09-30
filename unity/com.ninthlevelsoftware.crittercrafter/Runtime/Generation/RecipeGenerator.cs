@@ -17,7 +17,19 @@ namespace CritterCrafter
     {
         public const string SchemaVersion = "3.0.0";
         public const string Algorithm = "cc-gen-3";
-        public const string LibraryVersion = "0.2.0";
+        public const string Rng = "splitmix64";
+
+        /// <summary>
+        /// Catalogs of any 3.x.y schema are read (the layout is compatible); recipes carry exactly <see cref="SchemaVersion"/>.
+        /// The library's own content version is not gated: a library can be re-released and still generate with cc-gen-3.
+        /// A saved recipe replays only on the library version it was made on (RecipeValidator, CC_LIBRARY_VERSION).
+        /// </summary>
+        public static bool SupportedCatalogSchema(string version) =>
+            !string.IsNullOrEmpty(version) && version.Split('.')[0] == SchemaVersion.Split('.')[0];
+
+        /// <summary>The generator's identity: what decides whether a catalog generates the recipes these goldens expect.</summary>
+        public static bool SupportedGenerator(GeneratorInfo generator) =>
+            generator != null && generator.algorithm == Algorithm && generator.rng == Rng;
 
         public static bool RatioFits(int partMm, int branchMm) =>
             4 * partMm <= 5 * branchMm && 4 * branchMm <= 5 * partMm;
@@ -98,13 +110,14 @@ namespace CritterCrafter
 
         static void RequireV3(CatalogData catalog)
         {
-            if (catalog == null) throw new GenerationException("CC_GEN_UNSUPPORTED_CATALOG", "null");
-            if (catalog.schema_version != SchemaVersion)
-                throw new GenerationException("CC_GEN_UNSUPPORTED_CATALOG", catalog.schema_version ?? "");
-            if (catalog.version != LibraryVersion)
-                throw new GenerationException("CC_GEN_UNSUPPORTED_LIBRARY_VERSION", catalog.version ?? "");
+            // The codes match the Python generator (docs/generator.md).
+            if (catalog == null) throw new GenerationException("CC_GEN_SCHEMA_VERSION", "null");
+            if (!SupportedCatalogSchema(catalog.schema_version))
+                throw new GenerationException("CC_GEN_SCHEMA_VERSION", catalog.schema_version ?? "");
             if (catalog.generator == null || catalog.generator.algorithm != Algorithm)
-                throw new GenerationException("CC_GEN_UNSUPPORTED_GENERATOR", catalog.generator?.algorithm ?? "");
+                throw new GenerationException("CC_GEN_ALGORITHM", catalog.generator?.algorithm ?? "");
+            if (catalog.generator.rng != Rng)
+                throw new GenerationException("CC_GEN_RNG", catalog.generator.rng ?? "");
         }
 
         public static CritterRecipe Generate(CatalogData catalog, string poolId, long seed)

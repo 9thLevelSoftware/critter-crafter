@@ -146,7 +146,34 @@ namespace CritterCrafter.Tests
         {
             var legacy = JsonUtility.FromJson<CatalogData>(File.ReadAllText(Path.GetFullPath(GoldenDir + "/catalog.json")));
             var ex = Assert.Throws<GenerationException>(() => RecipeGenerator.Generate(legacy, "any", 1));
-            Assert.AreEqual("CC_GEN_UNSUPPORTED_CATALOG", ex.Code);
+            Assert.AreEqual("CC_GEN_SCHEMA_VERSION", ex.Code);
+        }
+
+        [Test]
+        public void AReReleasedLibraryStillGeneratesButOnlyItsOwnRecipesReplay()
+        {
+            var catalog = Catalog();
+            var recipe = RecipeGenerator.Generate(catalog, "any", 3);
+            catalog.version = "0.2.1";                                      // released again: not gated
+            Assert.DoesNotThrow(() => RecipeGenerator.Generate(catalog, "any", 3));
+            Assert.That(RecipeValidator.Validate(catalog, recipe), Has.Some.StartsWith("CC_LIBRARY_VERSION"));
+            catalog.schema_version = "3.1.0";                               // any 3.x.y layout is read
+            Assert.DoesNotThrow(() => RecipeGenerator.Generate(catalog, "any", 3));
+        }
+
+        [Test]
+        public void TheGeneratorIdentityIsGatedWithTheSameCodesAsPython()
+        {
+            var catalog = Catalog();
+            catalog.schema_version = "4.0.0";
+            Assert.AreEqual("CC_GEN_SCHEMA_VERSION", Assert.Throws<GenerationException>(() => RecipeGenerator.Generate(catalog, "any", 1)).Code);
+            catalog = Catalog();
+            catalog.generator.algorithm = "cc-gen-4";
+            Assert.AreEqual("CC_GEN_ALGORITHM", Assert.Throws<GenerationException>(() => RecipeGenerator.Generate(catalog, "any", 1)).Code);
+            catalog = Catalog();
+            catalog.generator.rng = "xorshift";
+            Assert.AreEqual("CC_GEN_RNG", Assert.Throws<GenerationException>(() => RecipeGenerator.Generate(catalog, "any", 1)).Code);
+            Assert.That(RecipeValidator.Validate(catalog, new CritterRecipe()), Has.Some.StartsWith("CC_UNSUPPORTED_GENERATOR"));
         }
 
         [Test]
