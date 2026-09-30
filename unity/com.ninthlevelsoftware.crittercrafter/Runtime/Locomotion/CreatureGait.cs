@@ -89,6 +89,13 @@ namespace CritterCrafter.Locomotion
         public float teleportDistance = 2f;
         [Tooltip("Maximum visual body turn rate (deg/s). The root may snap to a new heading (NavMeshAgent with a huge angularSpeed); the body follows at this rate so planted feet are not dragged in one frame.")]
         public float bodyTurnRateDeg = 360f;
+        [Tooltip("How much the body's turn is held back so its feet can follow: 0 = always bodyTurnRateDeg (feet may drag after an " +
+                 "instant turn), 1 = never faster than the most strained planted foot can take.")]
+        [Range(0f, 1f)] public float turnReachGate = 1f;
+        [Tooltip("Reach gating: the time (s) a foot has to re-step before a turn may use up its remaining reach.")]
+        public float turnGateSeconds = 0.25f;
+        [Tooltip("Reach gating: the slowest the body will turn (degrees per second), so a turn always finishes.")]
+        public float turnGateMinDeg = 60f;
         [Tooltip("Rig weight; set to 0 to fall back to the baked overlay (LOD / off-screen).")]
         [Range(0f, 1f)] public float ikWeight = 1f;
 
@@ -110,6 +117,8 @@ namespace CritterCrafter.Locomotion
         Vector3 _velocity;
         /// <summary>Root velocity with much lighter smoothing, for placing landings (the body-speed smoothing lags a turn).</summary>
         Vector3 _landVelocity;
+        /// <summary>The yaw catch-up rate in force this frame (degrees per second): bodyTurnRateDeg, slowed by reach gating.</summary>
+        float _turnRateNow;
         List<Leg> _order;
         double _clock;
         float _bodyHeight, _bodyPitch, _bodyRoll, _bodyYaw, _bodySurge, _limpDip, _limpRoll;
@@ -219,7 +228,8 @@ namespace CritterCrafter.Locomotion
             float speed = Speed;
             float yaw = transform.eulerAngles.y;
             _yawLag = Mathf.Clamp(_yawLag - Mathf.DeltaAngle(_lastYaw, yaw), -180f, 180f);
-            _yawLag = Mathf.MoveTowards(_yawLag, 0f, bodyTurnRateDeg * dt);
+            _turnRateNow = TurnRate();
+            _yawLag = Mathf.MoveTowards(_yawLag, 0f, _turnRateNow * dt);
             _lastYaw = yaw;
             // Apply the body yaw now: hip positions used for reach checks below must already reflect it.
             if (body != null) body.localRotation = BodyRotation();
@@ -279,7 +289,7 @@ namespace CritterCrafter.Locomotion
                 else
                 {
                     float landIn = remaining + (moving ? 0.5f * (float)_params.duty / (float)_params.cadenceHz : 0f);
-                    var lagThen = Quaternion.Euler(0f, Mathf.MoveTowards(_yawLag, 0f, bodyTurnRateDeg * landIn), 0f);
+                    var lagThen = Quaternion.Euler(0f, Mathf.MoveTowards(_yawLag, 0f, _turnRateNow * landIn), 0f);
                     Vector3 homeThen = Ground(transform.TransformPoint(lagThen * leg.stanceLocal), leg.homeLocal.y);
                     land = moving
                         ? Ground(homeThen + _landVelocity * remaining + landHeading * lead, leg.homeLocal.y)
@@ -459,6 +469,28 @@ namespace CritterCrafter.Locomotion
             Vector3 d = p - leg.hip.position;
             float max = MaxReachFraction * leg.reach;
             return d.sqrMagnitude > max * max ? leg.hip.position + d.normalized * max : p;
+        }
+
+        /// <summary>
+        /// The body's yaw catch-up rate. Instant agent turns leave the body far from its heading and it swings round at
+        /// bodyTurnRateDeg, so a hip at radius r sweeps 0.2 r m per frame while its foot is planted: the feet run out of
+        /// reach at once and drag. Each planted foot has some reach left and sits some distance from the pivot; the body
+        /// may only turn as fast as the tightest of them can take within turnGateSeconds (never below turnGateMinDeg).
+        /// Grounded bodies keep their own turn model.
+        /// </summary>
+        float TurnRate()
+        {
+            if (turnReachGate <= 0f || _block.body_on_ground || legs == null) return bodyTurnRateDeg;
+            float allowed = bodyTurnRateDeg;
+            foreach (var leg in legs)
+            {
+                if (!leg.planted) continue;
+                float margin = Mathf.Max(0f, 1f - leg.reachFrac) * MaxReachFraction * leg.reach;
+                float radius = Mathf.Max(0.2f, new Vector2(leg.homeLocal.x, leg.homeLocal.z).magnitude);
+                allowed = Mathf.Min(allowed, Mathf.Rad2Deg * margin / (radius * Mathf.Max(0.05f, turnGateSeconds)));
+            }
+            allowed = Mathf.Clamp(allowed, Mathf.Min(turnGateMinDeg, bodyTurnRateDeg), bodyTurnRateDeg);
+            return Mathf.Lerp(bodyTurnRateDeg, allowed, turnReachGate);
         }
 
         static int ByStrain(Leg a, Leg b) => b.reachFrac.CompareTo(a.reachFrac);
