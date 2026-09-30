@@ -85,13 +85,13 @@ namespace CritterCrafter.Tests
 
         [Test]
         public void DraftCandidateLibraryIsRejectedByRuntimeDefault() =>
-            Assert.Throws<GenerationException>(() => RawLib.Generate("any", 1));
+            Assert.Throws<GenerationException>(() => RawLib.EditorCreateSkeletonStatusClone("draft").Generate("any", 1));
 
         [Test]
         public void FactoryOnTheDraftBuiltLibraryFallsBackWithoutThrowing()
         {
             GameObject built = null;
-            Assert.DoesNotThrow(() => built = new DefaultCreatureVisualFactory(RawLib, AssemblyOptions.Default)
+            Assert.DoesNotThrow(() => built = new DefaultCreatureVisualFactory(RawLib.EditorCreateSkeletonStatusClone("draft"), AssemblyOptions.Default)
                 .Build(new CreatureSpawnRequest { poolId = "any", seed = 1 }));
             _spawned.Add(built);
             var creature = built.GetComponent<AssembledCreature>();

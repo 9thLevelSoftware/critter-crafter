@@ -30,11 +30,12 @@ namespace CritterCrafter.Tests
             return File.Exists(packaged) ? packaged : Path.GetFullPath("../../tests/golden_v3/" + name);
         }
 
-        /// <summary>The real compiled catalog (every skeleton still draft) with no model assets behind it.</summary>
+        /// <summary>The real compiled catalog with every skeleton set to draft in memory (so approving real content
+        /// in the source data can't change what these tests mean) and no model assets behind it.</summary>
         CritterLibrary DraftOnlyLibrary()
         {
             var catalog = JsonUtility.FromJson<CatalogData>(File.ReadAllText(V3Path("catalog.json")));
-            Assert.IsTrue(System.Array.TrueForAll(catalog.skeletons, s => s.status == "draft"));
+            foreach (var skeleton in catalog.skeletons) skeleton.status = "draft";
             var library = ScriptableObject.CreateInstance<CritterLibrary>();
             library.EditorSetContents(new TextAsset(JsonUtility.ToJson(catalog)),
                 new CritterLibrary.SkeletonEntry[0], new CritterLibrary.PartEntry[0]);
