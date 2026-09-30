@@ -3,7 +3,7 @@
   "skeleton_id": "dragger_belly_hauler_compact_v3",
   "family": "dragger",
   "locomotion_hint": "drag",
-  "status": "draft",
+  "status": "approved",
   "symmetry_pct": 100,
   "branches": [
     {
@@ -659,5 +659,10 @@
     "generator": "cc-gen-3",
     "seed": 1,
     "preset": "compact"
+  },
+  "review": {
+    "by": "owner",
+    "date": "2026-09-30",
+    "method": "owner"
   }
 }

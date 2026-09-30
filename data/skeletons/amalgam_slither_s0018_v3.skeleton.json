@@ -3,7 +3,7 @@
   "skeleton_id": "amalgam_slither_s0018_v3",
   "family": "amalgam",
   "locomotion_hint": "slither",
-  "status": "draft",
+  "status": "approved",
   "symmetry_pct": 92,
   "branches": [
     {
@@ -1563,5 +1563,10 @@
     "seed": 18,
     "preset": "amalgam",
     "mode": "slither"
+  },
+  "review": {
+    "by": "owner",
+    "date": "2026-09-30",
+    "method": "owner"
   }
 }

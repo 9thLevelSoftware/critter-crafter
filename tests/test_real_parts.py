@@ -174,6 +174,8 @@ def test_draft_real_parts_never_generate_but_approved_ones_can():
     catalog = _catalog()
     for skeleton in catalog["skeletons"]:
         skeleton["status"] = "approved"
+    for part in real_parts(catalog):
+        part["status"] = "draft"        # whatever the owner has really approved
     ids = {p["part_id"] for p in real_parts(catalog)}
     pools = [p["pool_id"] for p in catalog["pools"]]
     drafts = {f["part_id"] for pool in pools for seed in range(1, 41) for f in generate(catalog, pool, seed)["fills"]}
@@ -418,6 +420,9 @@ def test_build_refuses_approved_parts_whose_pipeline_changed_since_approval(monk
     from critter_crafter.library.catalog import compile_part
 
     catalog = _catalog()
+    for part in real_parts(catalog):
+        part["status"] = "draft"
+        part.get("real", {}).pop("approved_pipeline", None)
     source = json.loads(next((paths().data / "parts").glob("meshy_insect_leg_*.part.json")).read_text(encoding="utf-8"))
     profiles = {(p["binding_profile_id"], p["binding_profile_version"]): p for p in catalog["binding_profiles"]}
     monkeypatch.setattr(library_commands, "realpart_pipeline_fingerprint", lambda: "c" * 64)

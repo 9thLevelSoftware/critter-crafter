@@ -3,7 +3,7 @@
   "skeleton_id": "dragger_arm_leg_crawler_s002_v3",
   "family": "dragger",
   "locomotion_hint": "drag",
-  "status": "draft",
+  "status": "approved",
   "symmetry_pct": 92,
   "branches": [
     {
@@ -666,5 +666,10 @@
       "limb": 0.9885,
       "stance": 1.016
     }
+  },
+  "review": {
+    "by": "owner",
+    "date": "2026-09-30",
+    "method": "owner"
   }
 }

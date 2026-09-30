@@ -3,7 +3,7 @@
   "skeleton_id": "crawler_alien_tripod_compact_v3",
   "family": "crawler",
   "locomotion_hint": "crawl",
-  "status": "draft",
+  "status": "approved",
   "symmetry_pct": 92,
   "branches": [
     {
@@ -598,5 +598,10 @@
     "generator": "cc-gen-3",
     "seed": 1,
     "preset": "compact"
+  },
+  "review": {
+    "by": "owner",
+    "date": "2026-09-30",
+    "method": "owner"
   }
 }

@@ -3,7 +3,7 @@
   "skeleton_id": "serpentine_segmented_paired_legs_s004_v3",
   "family": "serpentine",
   "locomotion_hint": "slither",
-  "status": "draft",
+  "status": "approved",
   "symmetry_pct": 100,
   "branches": [
     {
@@ -764,5 +764,10 @@
       "limb": 1.0318,
       "stance": 1.0157
     }
+  },
+  "review": {
+    "by": "owner",
+    "date": "2026-09-30",
+    "method": "owner"
   }
 }

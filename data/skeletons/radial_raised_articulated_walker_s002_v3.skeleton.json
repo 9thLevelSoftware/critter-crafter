@@ -3,7 +3,7 @@
   "skeleton_id": "radial_raised_articulated_walker_s002_v3",
   "family": "radial",
   "locomotion_hint": "crawl",
-  "status": "draft",
+  "status": "approved",
   "symmetry_pct": 92,
   "branches": [
     {
@@ -1064,5 +1064,10 @@
       "limb": 1.0416,
       "stance": 0.9677
     }
+  },
+  "review": {
+    "by": "owner",
+    "date": "2026-09-30",
+    "method": "owner"
   }
 }

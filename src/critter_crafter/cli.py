@@ -28,6 +28,7 @@ def golden_catalog(cat: dict) -> dict:
     for part in cat["parts"]:
         if part["inventory_kind"] == "production":
             part["status"] = "draft"
+            part.get("real", {}).pop("approved_pipeline", None)
     return cat
 
 
