@@ -33,6 +33,8 @@ AMALGAM_SEEDS: tuple[int, ...] = (
 )
 
 MAX_BRANCHES = 14
+# A walker's legs are tall and slim next to its body: this scales the profile's girth ratio.
+WALKER_LEG_GIRTH = .6
 _GROUND_TOLERANCE_M = .002
 
 
@@ -105,7 +107,7 @@ def _height_error(branch: dict[str, Any]) -> float:
     return arch._contact_height(branch, branch["stance_deg"], contact, branch["stance_z_deg"]) - arch._contact_clearance(contact["kind"])
 
 
-def _ground_arm(branch: dict[str, Any], base_length: float, max_length: float) -> None:
+def _ground_arm(branch: dict[str, Any], base_length: float, max_length: float, girth_scale: float = 1.0) -> None:
     """Grow an arm/leg used as a foot until swinging its shoulder can reach the ground, then swing it.
 
     A limb longer than *max_length* is refused: its girth grows with it, and a very thick limb pushes its
@@ -115,7 +117,7 @@ def _ground_arm(branch: dict[str, Any], base_length: float, max_length: float) -
     for mult in (1.0, 1.2, 1.45, 1.7, 2.0, 2.4):
         if base_length * mult > max_length:
             break
-        arch._refresh_branch_dimensions(branch, base_length * mult / branch["length_m"])
+        arch._refresh_branch_dimensions(branch, base_length * mult / branch["length_m"], girth_scale)
         branch["stance_deg"], branch["stance_z_deg"] = list(base[0]), list(base[1])
         arch._tune_extension(branch, target)
         arch._ground_by_first_joint(branch)
@@ -124,12 +126,16 @@ def _ground_arm(branch: dict[str, Any], base_length: float, max_length: float) -
     raise AmalgamError(f"{branch['branch_id']} cannot reach the ground")
 
 
-def _fit_leg(branch: dict[str, Any], hip_y: float) -> None:
-    """Crouch a leg to its stepping extension and size it so its neutral contact meets the ground."""
+def _fit_leg(branch: dict[str, Any], hip_y: float, girth_scale: float = 1.0) -> None:
+    """Crouch a leg to its stepping extension and size it so its neutral contact meets the ground.
+
+    Slimmer legs move their contact point a little, so the fit is repeated until it settles."""
     arch._tune_extension(branch, branch.pop("_extension_target"))
-    arch._fit_leg_to_hip(branch, hip_y)
-    if abs(_height_error(branch)) >= _GROUND_TOLERANCE_M:
-        raise AmalgamError(f"{branch['branch_id']} does not meet the ground ({_height_error(branch):.4f} m)")
+    for _ in range(4):
+        arch._fit_leg_to_hip(branch, hip_y, girth_scale)
+        if abs(_height_error(branch)) < _GROUND_TOLERANCE_M:
+            return
+    raise AmalgamError(f"{branch['branch_id']} does not meet the ground ({_height_error(branch):.4f} m)")
 
 
 def _set_gait(branch: dict[str, Any], **flags: Any) -> None:
@@ -188,7 +194,7 @@ def _walking_leg(body: _Body, bid: str, kind: str, sx: int, z: float, rng: Split
                            attach=0, role="locomotor", phase=0.0, support=.58, contact="foot", profile_id=profile)
         leg["_extension_target"] = arch._LIMB_EXTENSION
         _set_gait(leg, pole_ik=True, centre_stance=True)
-    _fit_leg(leg, hip_y)
+    _fit_leg(leg, hip_y, WALKER_LEG_GIRTH)
     return leg, hip_y
 
 
@@ -314,19 +320,26 @@ def _walker(seed: int, body: _Body, rng: SplitMix64) -> tuple[list[dict[str, Any
             arm = _pull_arm(body, bid, sx, (z - body.rear_z) / body.length, hip_y * _between(rng, 1.4, 2.0), 0.0, rng)
             _set_gait(arm, centre_stance=True)
             try:
-                _ground_arm(arm, arm["length_m"], max_length=1.4)
+                _ground_arm(arm, arm["length_m"], max_length=body.y * 2.2, girth_scale=WALKER_LEG_GIRTH)
                 legs.append(arm)
                 continue
             except AmalgamError:
                 kind = "mammal"                 # too big an arm to stand on: grow an ordinary leg here instead
         leg, _ = _walking_leg(body, bid, kind, sx, z, rng)
         legs.append(leg)
-    # Walk phases follow the order of the legs round the body; alternate at a run when there is an even count.
+    # Walk phases follow the order of the legs round the body but are spaced unevenly, so the gait lurches rather
+    # than ticking like a metronome; alternate at a run when there is an even count.
     order = sorted(legs, key=lambda b: math.atan2(b["origin_m"][0], b["origin_m"][2] - body.z(.5)))
+    gaps = [_between(rng, .55, 1.45) for _ in order]
+    elapsed = 0.0
     for k, leg in enumerate(order):
-        leg["gait"]["phase_rad"] = round(k * math.tau / len(order), 6)
+        leg["gait"]["phase_rad"] = round(elapsed / sum(gaps) * math.tau, 6)
+        elapsed += gaps[k]
         if len(order) % 2 == 0:
             leg["gait"]["run_phase_rad"] = round((k % 2) * math.pi, 6)
+    # One leg limps: the body drops toward it whenever it carries weight.
+    limper = order[rng.below(len(order))]
+    _set_gait(limper, limp=round(limper["origin_m"][1] * _between(rng, .06, .12), 4))
     return legs, [b["branch_id"] for b in legs], "crawl"
 
 
@@ -346,11 +359,11 @@ def build_amalgam(seed: int) -> dict[str, Any]:
     """Grow one amalgam skeleton from *seed* (raises :class:`AmalgamError` if it can't stand)."""
     mode = mode_for_seed(seed)
     body_rng = _stream(seed, 2)
-    length = _between(body_rng, .9, 1.7)
-    radius = length * _between(body_rng, .26, .40)
-    center_y = _between(body_rng, .65, 1.05) if mode == "walker" else radius + .02
-    if mode == "walker":
-        center_y = max(center_y, radius + .35)
+    length = _between(body_rng, .9, 1.7) * (.78 if mode == "walker" else 1.0)     # walkers are carried high, so smaller
+    fat = _between(body_rng, .26, .40)
+    # A walker's body is a smaller pod carried high on long legs; the others are fat blobs lying on the ground.
+    radius = length * (.18 + (fat - .26) / .14 * .10 if mode == "walker" else fat)
+    center_y = radius + length * _between(body_rng, .45, .85) if mode == "walker" else radius + .02
     body = _Body(length, radius, center_y, on_ground=mode != "walker")
     core = arch._branch("core", "core1", None, origin=[0.0, round(center_y, 4), round(body.rear_z, 4)], direction=[0, 0, 1],
                         up=[0, 1, 0], length=length, role="core")

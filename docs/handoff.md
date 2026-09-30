@@ -41,7 +41,7 @@ critter-crafter is a standalone tool that builds procedural monsters from three 
 ## Everyday commands
 
 ```powershell
-uv run pytest                                   # 381 tests, ~10 min with Blender (-m "not blender": ~20 s)
+uv run pytest                                   # 383 tests, ~12 min with Blender (-m "not blender": ~20 s)
 uv run critter skeleton vary --force            # regenerate the 42 draft skeletons from archetypes.py
 uv run critter schema validate
 uv run critter recipe golden                    # writes tests/golden_v3/{catalog,recipes,locomotion}.json

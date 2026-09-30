@@ -13,8 +13,8 @@
       "attach_bone_index": 0,
       "origin_m": [
         0.0,
-        0.6692,
-        -0.5892
+        0.5964,
+        -0.4595
       ],
       "direction": [
         0,
@@ -26,8 +26,8 @@
         1,
         0
       ],
-      "length_m": 1.1783,
-      "girth_m": 0.6385,
+      "length_m": 0.9191,
+      "girth_m": 0.3452,
       "size_class": "L",
       "side": "C",
       "required": true,
@@ -46,8 +46,8 @@
         "parent_joint": "root",
         "position_m": [
           0.0,
-          0.6692,
-          -0.5892
+          0.5964,
+          -0.4595
         ],
         "rotation_xyzw": [
           0.0,
@@ -62,11 +62,11 @@
         "support_phase": 0.5,
         "bend_pole_m": [
           0.0,
-          0.8692,
-          -0.8392
+          0.7964,
+          -0.7095
         ],
-        "stride_m": 0.4949,
-        "clearance_m": 0.1414,
+        "stride_m": 0.386,
+        "clearance_m": 0.1103,
         "cadence_hz": 0.0
       },
       "stance_deg": [
@@ -82,9 +82,9 @@
       "parent_branch": "core",
       "attach_bone_index": 0,
       "origin_m": [
-        0.1859,
-        0.9129,
-        0.2604
+        0.1005,
+        0.7281,
+        0.2031
       ],
       "direction": [
         0.353517,
@@ -96,8 +96,8 @@
         1,
         0
       ],
-      "length_m": 0.2811,
-      "girth_m": 0.0787,
+      "length_m": 0.152,
+      "girth_m": 0.0426,
       "size_class": "M",
       "side": "L",
       "required": true,
@@ -115,9 +115,9 @@
       "socket": {
         "parent_joint": "upper",
         "position_m": [
-          0.1859,
-          0.2437,
-          0.8496
+          0.1005,
+          0.1317,
+          0.6626
         ],
         "rotation_xyzw": [
           -0.12517161,
@@ -131,12 +131,12 @@
         "phase_rad": 0.0,
         "support_phase": 0.5,
         "bend_pole_m": [
-          0.1859,
-          1.1129,
-          0.0104
+          0.1005,
+          0.9281,
+          -0.0469
         ],
         "stride_m": 0.12,
-        "clearance_m": 0.0337,
+        "clearance_m": 0.03,
         "cadence_hz": 0.0
       },
       "stance_deg": [
@@ -152,9 +152,9 @@
       "parent_branch": "core",
       "attach_bone_index": 0,
       "origin_m": [
-        0.3061,
-        0.6031,
-        -0.1959
+        0.1655,
+        0.5606,
+        -0.1528
       ],
       "direction": [
         0.35349,
@@ -166,8 +166,8 @@
         0,
         1
       ],
-      "length_m": 0.7606,
-      "girth_m": 0.1369,
+      "length_m": 0.7063,
+      "girth_m": 0.0763,
       "size_class": "M",
       "side": "L",
       "required": true,
@@ -185,9 +185,9 @@
       "socket": {
         "parent_joint": "upper",
         "position_m": [
-          0.3061,
-          -0.0661,
-          0.3933
+          0.1655,
+          -0.0358,
+          0.3067
         ],
         "rotation_xyzw": [
           0.69093561,
@@ -198,23 +198,23 @@
       },
       "gait": {
         "role": "locomotor",
-        "phase_rad": 2.094395,
+        "phase_rad": 2.148097,
         "support_phase": 0.58,
         "bend_pole_m": [
-          0.3061,
-          0.8031,
-          -0.4459
+          0.1655,
+          0.7606,
+          -0.4028
         ],
-        "stride_m": 0.3195,
-        "clearance_m": 0.0913,
+        "stride_m": 0.2966,
+        "clearance_m": 0.0848,
         "cadence_hz": 1.5,
         "pole_ik": true,
         "centre_stance": true
       },
       "stance_deg": [
-        30.423,
-        -73.885,
-        41.288
+        30.42,
+        -73.877,
+        41.284
       ],
       "stance_z_deg": [
         0.0,
@@ -227,7 +227,7 @@
           "bone_index": 2,
           "local_point_m": [
             0.0,
-            0.1521,
+            0.1413,
             0.0
           ]
         }
@@ -239,9 +239,9 @@
       "parent_branch": "core",
       "attach_bone_index": 0,
       "origin_m": [
-        -0.2723,
-        0.512,
-        -0.1307
+        -0.1472,
+        0.5113,
+        -0.1019
       ],
       "direction": [
         -0.364305,
@@ -253,8 +253,8 @@
         0,
         1
       ],
-      "length_m": 0.6424,
-      "girth_m": 0.1413,
+      "length_m": 0.6415,
+      "girth_m": 0.0847,
       "size_class": "M",
       "side": "R",
       "required": true,
@@ -272,9 +272,9 @@
       "socket": {
         "parent_joint": "upper",
         "position_m": [
-          -0.2723,
-          -0.1572,
-          0.4585
+          -0.1472,
+          -0.0851,
+          0.3576
         ],
         "rotation_xyzw": [
           0.69906903,
@@ -288,19 +288,20 @@
         "phase_rad": 0.0,
         "support_phase": 0.58,
         "bend_pole_m": [
-          -0.2723,
-          0.712,
-          -0.3807
+          -0.1472,
+          0.7113,
+          -0.3519
         ],
-        "stride_m": 0.2698,
-        "clearance_m": 0.0771,
+        "stride_m": 0.2694,
+        "clearance_m": 0.077,
         "cadence_hz": 1.5,
         "pole_ik": true,
-        "centre_stance": true
+        "centre_stance": true,
+        "limp": 0.0357
       },
       "stance_deg": [
-        29.725,
-        -69.359,
+        29.727,
+        -69.362,
         32.0
       ],
       "stance_z_deg": [
@@ -314,7 +315,7 @@
           "bone_index": 2,
           "local_point_m": [
             0.0,
-            0.0642,
+            0.0641,
             0.0
           ]
         }
@@ -326,9 +327,9 @@
       "parent_branch": "core",
       "attach_bone_index": 0,
       "origin_m": [
-        0.3034,
-        0.5912,
-        -0.3126
+        0.164,
+        0.5542,
+        -0.2438
       ],
       "direction": [
         0.469725,
@@ -340,8 +341,8 @@
         0,
         1
       ],
-      "length_m": 0.7887,
-      "girth_m": 0.142,
+      "length_m": 0.7387,
+      "girth_m": 0.0798,
       "size_class": "M",
       "side": "L",
       "required": true,
@@ -359,9 +360,9 @@
       "socket": {
         "parent_joint": "upper",
         "position_m": [
-          0.3034,
-          -0.078,
-          0.2766
+          0.164,
+          -0.0422,
+          0.2157
         ],
         "rotation_xyzw": [
           0.7118437,
@@ -372,23 +373,23 @@
       },
       "gait": {
         "role": "locomotor",
-        "phase_rad": 4.18879,
+        "phase_rad": 4.313175,
         "support_phase": 0.58,
         "bend_pole_m": [
-          0.3034,
-          0.7912,
-          -0.5626
+          0.164,
+          0.7542,
+          -0.4938
         ],
-        "stride_m": 0.3313,
-        "clearance_m": 0.0946,
+        "stride_m": 0.3103,
+        "clearance_m": 0.0886,
         "cadence_hz": 1.5,
         "pole_ik": true,
         "centre_stance": true
       },
       "stance_deg": [
-        30.421,
-        -73.879,
-        41.285
+        30.428,
+        -73.895,
+        41.295
       ],
       "stance_z_deg": [
         0.0,
@@ -401,7 +402,7 @@
           "bone_index": 2,
           "local_point_m": [
             0.0,
-            0.1577,
+            0.1477,
             0.0
           ]
         }
@@ -413,9 +414,9 @@
       "parent_branch": "core",
       "attach_bone_index": 0,
       "origin_m": [
-        0.2832,
-        0.7865,
-        0.4021
+        0.1531,
+        0.6597,
+        0.3136
       ],
       "direction": [
         0.715416,
@@ -427,8 +428,8 @@
         1,
         0
       ],
-      "length_m": 0.7912,
-      "girth_m": 0.1582,
+      "length_m": 0.6171,
+      "girth_m": 0.1234,
       "size_class": "M",
       "side": "L",
       "required": true,
@@ -446,9 +447,9 @@
       "socket": {
         "parent_joint": "upper",
         "position_m": [
-          0.2832,
-          0.1173,
-          0.9913
+          0.1531,
+          0.0633,
+          0.7731
         ],
         "rotation_xyzw": [
           -0.07874539,
@@ -462,12 +463,12 @@
         "phase_rad": 0.0,
         "support_phase": 0.0,
         "bend_pole_m": [
-          0.2832,
-          0.9865,
-          0.1521
+          0.1531,
+          0.8597,
+          0.0636
         ],
-        "stride_m": 0.3323,
-        "clearance_m": 0.0949,
+        "stride_m": 0.2592,
+        "clearance_m": 0.0741,
         "cadence_hz": 0.0
       },
       "stance_deg": [
@@ -487,9 +488,9 @@
       "parent_branch": "core",
       "attach_bone_index": 0,
       "origin_m": [
-        0.1725,
-        0.9341,
-        0.5123
+        0.0933,
+        0.7395,
+        0.3996
       ],
       "direction": [
         0.464299,
@@ -520,9 +521,9 @@
       "socket": {
         "parent_joint": "upper",
         "position_m": [
-          0.1725,
-          0.2649,
-          1.1015
+          0.0933,
+          0.1431,
+          0.8591
         ],
         "rotation_xyzw": [
           0.14986176,
@@ -536,9 +537,9 @@
         "phase_rad": 0.0,
         "support_phase": 0.5,
         "bend_pole_m": [
-          0.1725,
-          1.1341,
-          0.2623
+          0.0933,
+          0.9395,
+          0.1496
         ],
         "stride_m": 0.4416,
         "clearance_m": 0.1262,
@@ -572,9 +573,9 @@
       "parent_branch": "core",
       "attach_bone_index": 0,
       "origin_m": [
-        -0.3135,
-        0.7094,
-        -0.1892
+        -0.1695,
+        0.6181,
+        -0.1476
       ],
       "direction": [
         -0.940654,
@@ -605,9 +606,9 @@
       "socket": {
         "parent_joint": "upper",
         "position_m": [
-          -0.3135,
-          0.0402,
-          0.4
+          -0.1695,
+          0.0217,
+          0.3119
         ],
         "rotation_xyzw": [
           -0.10363168,
@@ -621,9 +622,9 @@
         "phase_rad": 0.0,
         "support_phase": 0.5,
         "bend_pole_m": [
-          -0.3135,
-          0.9094,
-          -0.4392
+          -0.1695,
+          0.8181,
+          -0.3976
         ],
         "stride_m": 0.3838,
         "clearance_m": 0.1096,
@@ -657,9 +658,9 @@
       "parent_branch": "core",
       "attach_bone_index": 0,
       "origin_m": [
-        0.1359,
-        0.9546,
-        -0.0893
+        0.0735,
+        0.7506,
+        -0.0696
       ],
       "direction": [
         0.376153,
@@ -690,9 +691,9 @@
       "socket": {
         "parent_joint": "upper",
         "position_m": [
-          0.1359,
-          0.2854,
-          0.4999
+          0.0735,
+          0.1542,
+          0.3899
         ],
         "rotation_xyzw": [
           0.1427503,
@@ -706,9 +707,9 @@
         "phase_rad": 0.0,
         "support_phase": 0.5,
         "bend_pole_m": [
-          0.1359,
-          1.1546,
-          -0.3393
+          0.0735,
+          0.9506,
+          -0.3196
         ],
         "stride_m": 0.1443,
         "clearance_m": 0.0412,
@@ -732,9 +733,9 @@
       "parent_branch": "flail3",
       "attach_bone_index": 1,
       "origin_m": [
-        0.1902,
-        1.0876,
-        -0.1035
+        0.1278,
+        0.8836,
+        -0.0838
       ],
       "direction": [
         0.281862,
@@ -781,9 +782,9 @@
         "phase_rad": 0.0,
         "support_phase": 0.5,
         "bend_pole_m": [
-          0.1902,
-          1.2876,
-          -0.3535
+          0.1278,
+          1.0836,
+          -0.3338
         ],
         "stride_m": 0.2723,
         "clearance_m": 0.0778,
@@ -817,9 +818,9 @@
       "parent_branch": "core",
       "attach_bone_index": 0,
       "origin_m": [
-        -0.3158,
-        0.6576,
-        -0.1986
+        -0.1708,
+        0.59,
+        -0.1549
       ],
       "direction": [
         -0.95903,
@@ -850,9 +851,9 @@
       "socket": {
         "parent_joint": "upper",
         "position_m": [
-          -0.3158,
-          -0.0116,
-          0.3906
+          -0.1708,
+          -0.0064,
+          0.3046
         ],
         "rotation_xyzw": [
           -0.04316019,
@@ -866,9 +867,9 @@
         "phase_rad": 0.0,
         "support_phase": 0.5,
         "bend_pole_m": [
-          -0.3158,
-          0.8576,
-          -0.4486
+          -0.1708,
+          0.79,
+          -0.4049
         ],
         "stride_m": 0.3054,
         "clearance_m": 0.0873,
@@ -902,9 +903,9 @@
       "parent_branch": "core",
       "attach_bone_index": 0,
       "origin_m": [
-        0.1443,
-        0.9505,
-        -0.4009
+        0.078,
+        0.7484,
+        -0.3127
       ],
       "direction": [
         0.398982,
@@ -935,9 +936,9 @@
       "socket": {
         "parent_joint": "upper",
         "position_m": [
-          0.1443,
-          0.2813,
-          0.1883
+          0.078,
+          0.152,
+          0.1468
         ],
         "rotation_xyzw": [
           0.15384207,
@@ -951,9 +952,9 @@
         "phase_rad": 0.0,
         "support_phase": 0.5,
         "bend_pole_m": [
-          0.1443,
-          1.1505,
-          -0.6509
+          0.078,
+          0.9484,
+          -0.5627
         ],
         "stride_m": 0.2009,
         "clearance_m": 0.0574,
@@ -977,9 +978,9 @@
       "parent_branch": "core",
       "attach_bone_index": 0,
       "origin_m": [
-        -0.1887,
-        0.9228,
-        -0.3246
+        -0.102,
+        0.7334,
+        -0.2532
       ],
       "direction": [
         -0.519845,
@@ -1010,9 +1011,9 @@
       "socket": {
         "parent_joint": "upper",
         "position_m": [
-          -0.1887,
-          0.2536,
-          0.2646
+          -0.102,
+          0.137,
+          0.2063
         ],
         "rotation_xyzw": [
           0.17414247,
@@ -1026,9 +1027,9 @@
         "phase_rad": 0.0,
         "support_phase": 0.5,
         "bend_pole_m": [
-          -0.1887,
-          1.1228,
-          -0.5746
+          -0.102,
+          0.9334,
+          -0.5032
         ],
         "stride_m": 0.4053,
         "clearance_m": 0.1158,
@@ -1060,7 +1061,7 @@
   "neutral_pose": {
     "root_offset_m": [
       0.0,
-      -0.0,
+      0.0,
       0.0
     ],
     "rotations": [
@@ -1094,46 +1095,46 @@
       {
         "bone_name": "leg1_b0",
         "rotation_xyzw": [
-          0.26238286,
+          0.2623576,
           0.0,
           0.0,
-          0.96496385
+          0.96497072
         ]
       },
       {
         "bone_name": "leg1_b1",
         "rotation_xyzw": [
-          -0.60101324,
+          -0.60095744,
           0.0,
           0.0,
-          0.79923907
+          0.79928102
         ]
       },
       {
         "bone_name": "leg1_b2",
         "rotation_xyzw": [
-          0.35256039,
+          0.35252772,
           0.0,
           0.0,
-          0.93578906
+          0.93580137
         ]
       },
       {
         "bone_name": "leg2_b0",
         "rotation_xyzw": [
-          0.25650025,
+          0.25651712,
           0.0,
           0.0,
-          0.96654417
+          0.96653969
         ]
       },
       {
         "bone_name": "leg2_b1",
         "rotation_xyzw": [
-          -0.56898533,
+          -0.56900686,
           0.0,
           0.0,
-          0.82234767
+          0.82233278
         ]
       },
       {
@@ -1148,28 +1149,28 @@
       {
         "bone_name": "leg3_b0",
         "rotation_xyzw": [
-          0.26236602,
+          0.26242497,
           0.0,
           0.0,
-          0.96496843
+          0.9649524
         ]
       },
       {
         "bone_name": "leg3_b1",
         "rotation_xyzw": [
-          -0.60097139,
+          -0.60108298,
           0.0,
           0.0,
-          0.79927054
+          0.79918662
         ]
       },
       {
         "bone_name": "leg3_b2",
         "rotation_xyzw": [
-          0.35253589,
+          0.35261755,
           0.0,
           0.0,
-          0.93579829
+          0.93576753
         ]
       },
       {
@@ -1645,9 +1646,9 @@
       "neck": "head"
     },
     "silhouette": {
-      "height_m": 0.9885,
-      "length_m": 1.1783,
-      "width_m": 0.6385
+      "height_m": 0.769,
+      "length_m": 0.9191,
+      "width_m": 0.3452
     },
     "budgets": {
       "bones": 61,

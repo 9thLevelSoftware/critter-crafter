@@ -215,7 +215,7 @@ def _ground_by_first_joint(branch: dict[str, Any]) -> None:
     branch["stance_deg"][0] = round((lo + hi) / 2, 3)
 
 
-def _fit_leg_to_hip(branch: dict[str, Any], hip_height: float) -> None:
+def _fit_leg_to_hip(branch: dict[str, Any], hip_height: float, girth_scale: float = 1.0) -> None:
     """Scale the leg so its neutral contact meets the ground with the hip at ``hip_height``.
 
     The neutral shape (angles) is length-independent, so the drop scales linearly with length.
@@ -224,7 +224,7 @@ def _fit_leg_to_hip(branch: dict[str, Any], hip_height: float) -> None:
     drop = branch["origin_m"][1] - contact_y
     if drop <= 1e-6:
         return
-    _refresh_branch_dimensions(branch, (hip_height - _GROUND_CLEARANCE_M) / drop)
+    _refresh_branch_dimensions(branch, (hip_height - _GROUND_CLEARANCE_M) / drop, girth_scale)
 
 
 def _extension(branch: dict[str, Any], angles: list[float]) -> float:
@@ -581,10 +581,10 @@ def _scale_stance(branches: list[dict[str, Any]], factor: float) -> None:
         branch["stance_z_deg"] = [round(angle * factor, 3) for angle in branch["stance_z_deg"]]
 
 
-def _refresh_branch_dimensions(branch: dict[str, Any], factor: float) -> None:
+def _refresh_branch_dimensions(branch: dict[str, Any], factor: float, girth_scale: float = 1.0) -> None:
     branch["length_m"] = round(branch["length_m"] * factor, 4)
     profile_id = branch["binding_profile_id"]
-    branch["girth_m"] = round(branch["length_m"] * _PROFILE_GIRTH[profile_id], 4)
+    branch["girth_m"] = round(branch["length_m"] * _PROFILE_GIRTH[profile_id] * girth_scale, 4)
     branch["gait"]["stride_m"] = round(max(.12, branch["length_m"] * .42), 4)
     branch["gait"]["clearance_m"] = round(max(.03, branch["length_m"] * .12), 4)
     for contact in branch.get("contacts", []):

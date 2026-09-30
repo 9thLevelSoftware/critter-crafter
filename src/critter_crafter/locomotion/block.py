@@ -287,6 +287,8 @@ def _locomotion_block(skeleton: dict[str, Any]) -> dict[str, Any]:
             "walk_phase": walk_phase,
             "run_phase": run_phase,
             "support": branch["branch_id"] in set(skeleton.get("anatomy", {}).get("support_branches", [])),
+            # A limping leg (amalgam walkers): the body dips toward it while it carries weight.
+            **({"limp": mu.r6(float(branch["gait"]["limp"]))} if branch.get("gait", {}).get("limp") else {}),
         })
     if not legs:
         return _slide_block(skeleton)
@@ -316,6 +318,7 @@ def _locomotion_block(skeleton: dict[str, Any]) -> dict[str, Any]:
             attack_branch = ""
     return {
         "version": LOCOMOTION_VERSION, "mode": "legs", "attack_branch_id": attack_branch,
+        **({"body_limp_m": max(l.get("limp", 0.0) for l in legs)} if any("limp" in l for l in legs) else {}),
         "hip_height_m": mu.r6(hip_height), "leg_length_m": mu.r6(leg_length),
         "usable_stroke_m": mu.r6(stroke), "min_support": minimum,
         "duty_walk": mu.r6(duty_walk), "duty_run": mu.r6(duty_run),

@@ -178,6 +178,7 @@ namespace CritterCrafter.Locomotion
                 built.stroke = (float)leg.stroke_m;
                 built.clearance = (float)leg.clearance_m;
                 built.walkPhase = leg.walk_phase;
+                built.limp = (float)leg.limp;
                 built.runPhase = leg.run_phase;
                 built.support = leg.support;
                 built.push = leg.drag_drive == "push";
