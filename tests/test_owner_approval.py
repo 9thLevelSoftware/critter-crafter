@@ -107,3 +107,42 @@ def test_part_approval_without_owner_still_needs_a_review(tmp_path, monkeypatch)
 
     assert result.exit_code != 0 and "critter part review" in result.output
     assert json.loads(record.read_text(encoding="utf-8"))["status"] == "draft"
+
+
+def test_regenerating_keeps_the_owners_decision_when_the_source_is_unchanged(tmp_path, monkeypatch):
+    """`skeleton vary --force` is step 2 of the change loop; it must not wipe approvals."""
+    first, second = _skeleton_data(tmp_path, monkeypatch)
+    CliRunner().invoke(skeleton_commands.skeleton, ["approve", "--owner", first["skeleton_id"]])
+    CliRunner().invoke(skeleton_commands.skeleton, ["reject", "--owner", second["skeleton_id"]])
+    approved_before = _read(tmp_path, first["skeleton_id"])
+
+    result = CliRunner().invoke(skeleton_commands.skeleton, ["vary", "--force"])
+
+    assert result.exit_code == 0, result.output
+    assert _read(tmp_path, first["skeleton_id"]) == approved_before          # status and review carried forward
+    assert _read(tmp_path, second["skeleton_id"])["status"] == "rejected"
+
+
+def test_regenerating_a_changed_source_comes_back_as_a_draft(tmp_path, monkeypatch):
+    first, _ = _skeleton_data(tmp_path, monkeypatch)
+    CliRunner().invoke(skeleton_commands.skeleton, ["approve", "--owner", first["skeleton_id"]])
+    path = tmp_path / "data" / "skeletons" / f"{first['skeleton_id']}.skeleton.json"
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    doc["branches"][0]["length_m"] = round(doc["branches"][0]["length_m"] * 1.5, 4)     # the source moved on since
+    path.write_text(json.dumps(doc, indent=2) + "\n", encoding="utf-8")
+
+    CliRunner().invoke(skeleton_commands.skeleton, ["vary", "--force"])
+
+    regenerated = _read(tmp_path, first["skeleton_id"])
+    assert regenerated["status"] == "draft" and "review" not in regenerated
+
+
+def test_the_shared_fixtures_do_not_move_when_content_is_approved():
+    from critter_crafter.cli import golden_catalog
+    catalog = {"skeletons": [{"status": "approved"}, {"status": "rejected"}],
+               "parts": [{"inventory_kind": "production", "status": "approved"},
+                         {"inventory_kind": "reference", "status": "approved"}]}
+    normalized = golden_catalog(catalog)
+    assert [s["status"] for s in normalized["skeletons"]] == ["draft", "draft"]
+    assert [p["status"] for p in normalized["parts"]] == ["draft", "approved"]      # only real parts are drafts
+    assert catalog["skeletons"][0]["status"] == "approved"                        # the input is left alone

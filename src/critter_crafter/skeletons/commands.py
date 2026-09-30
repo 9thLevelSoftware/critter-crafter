@@ -20,6 +20,29 @@ def _skeleton_files(family: str | None = None) -> list[Path]:
             and (family is None or d["family"] == family)]
 
 
+_NOT_SOURCE = ("status", "review", "asset", "source_fingerprint", "content_fingerprint")
+
+
+def _write_skeleton(doc: dict, *, force: bool) -> bool:
+    """Write one generated skeleton source. False means an existing reviewed file was kept.
+
+    With ``force`` a reviewed file is regenerated, but the owner's decision (``status``, ``review``) is carried
+    forward when the regenerated *source* is identical to what was decided on: regenerating from the same code
+    must not wipe approvals. A source that really changed comes back as a draft."""
+    path = paths().data / "skeletons" / f"{doc['skeleton_id']}.skeleton.json"
+    if path.exists():
+        old = json.loads(path.read_text(encoding="utf-8"))
+        if not force and old.get("status") != "draft":
+            return False
+        if old.get("status") in ("approved", "rejected") and (
+                {k: v for k, v in old.items() if k not in _NOT_SOURCE} == {k: v for k, v in doc.items() if k not in _NOT_SOURCE}):
+            doc["status"] = old["status"]
+            if "review" in old:
+                doc["review"] = old["review"]
+    _write_json(path, doc)
+    return True
+
+
 def _selection(cat: dict, families: tuple[str, ...], ids: tuple[str, ...] = ()) -> list[dict]:
     unknown = set(ids) - {s["skeleton_id"] for s in cat["skeletons"]}
     if unknown:
@@ -59,35 +82,26 @@ def skeleton_vary(families, archetypes, presets, style, seed, count, force, amal
             if count is not None and per_family.get(family, 0) >= count:
                 continue
             per_family[family] = per_family.get(family, 0) + 1
-            doc = build_candidate(archetype, preset, seed=seed, style=style)
-            path = paths().data / "skeletons" / f"{doc['skeleton_id']}.skeleton.json"
-            if path.exists() and not force and json.loads(path.read_text(encoding="utf-8")).get("status") != "draft":
+            if _write_skeleton(build_candidate(archetype, preset, seed=seed, style=style), force=force):
+                written += 1
+            else:
                 kept += 1
-                continue
-            _write_json(path, doc)
-            written += 1
     from .archetypes import build_variant, variant_seeds_for
     if style == "anatomical" and not presets:
         for archetype in chosen:
             for variant_seed in variant_seeds or variant_seeds_for(archetype):
-                doc = build_variant(archetype, variant_seed)
-                path = paths().data / "skeletons" / f"{doc['skeleton_id']}.skeleton.json"
-                if path.exists() and not force and json.loads(path.read_text(encoding="utf-8")).get("status") != "draft":
+                if _write_skeleton(build_variant(archetype, variant_seed), force=force):
+                    written += 1
+                else:
                     kept += 1
-                    continue
-                _write_json(path, doc)
-                written += 1
     from .amalgam import AMALGAM_SEEDS, build_amalgam
     if style == "anatomical" and not archetypes and not presets and (not families or "amalgam" in families):
         for amalgam_seed in amalgam_seeds or AMALGAM_SEEDS:
-            doc = build_amalgam(amalgam_seed)
-            path = paths().data / "skeletons" / f"{doc['skeleton_id']}.skeleton.json"
-            if path.exists() and not force and json.loads(path.read_text(encoding="utf-8")).get("status") != "draft":
+            if _write_skeleton(build_amalgam(amalgam_seed), force=force):
+                written += 1
+            else:
                 kept += 1
-                continue
-            _write_json(path, doc)
-            written += 1
-    click.echo(f"wrote {written} drafts; preserved {kept} reviewed candidates")
+    click.echo(f"wrote {written} skeletons; preserved {kept} reviewed candidates")
 
 
 @skeleton.command("amalgam-sweep")
