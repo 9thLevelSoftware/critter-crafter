@@ -144,6 +144,8 @@ namespace CritterCrafter
         public bool body_on_ground;
         /// <summary>Grounded bodies pitch/roll about this point (catalog frame; the rear of the torso).</summary>
         public double[] body_pivot_m;
+        /// <summary>Walkers with a limping leg: how far (m) the body dips toward it while it carries weight.</summary>
+        public double body_limp_m;
         /// <summary>Branch whose baked strike plays during telegraph/attack (IK released).</summary>
         public string attack_branch_id;
         public double hip_height_m;
@@ -213,6 +215,8 @@ namespace CritterCrafter
         public string drag_drive;
         public double walk_phase;
         public double run_phase;
+        /// <summary>A limping leg: the body dips this far (m) toward it while it is planted. 0 for sound legs.</summary>
+        public double limp;
         /// <summary>Bears weight (counts toward min_support and body height). Defaults to true, like the Python planner.</summary>
         public bool support = true;
     }

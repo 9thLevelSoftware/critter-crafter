@@ -468,6 +468,10 @@
             },
             "pole_ik": {
               "type": "boolean"
+            },
+            "limp": {
+              "type": "number",
+              "minimum": 0
             }
           }
         },

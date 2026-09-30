@@ -128,3 +128,26 @@ def test_amalgams_have_their_own_pool(catalog):
     assert pool["families"] == ["amalgam"]
     any_pool = next(p for p in catalog["pools"] if p["pool_id"] == "any")
     assert "amalgam" not in any_pool["families"]
+
+
+def test_walkers_limp_on_one_leg_and_step_unevenly(compiled):
+    for skeleton in compiled.values():
+        if skeleton["anatomy"]["archetype_id"] != "amalgam_walker":
+            continue
+        block = skeleton["locomotion"]
+        limpers = [leg for leg in block["legs"] if leg.get("limp")]
+        assert len(limpers) == 1, skeleton["skeleton_id"]
+        assert block["body_limp_m"] == limpers[0]["limp"] > 0
+        phases = sorted(leg["walk_phase"] for leg in block["legs"])
+        gaps = [b - a for a, b in zip(phases, phases[1:] + [phases[0] + 6.283185])]
+        assert max(gaps) - min(gaps) > .1, "the legs step in a metronome rhythm"
+
+
+def test_walker_legs_are_long_and_slim_beside_the_body(compiled):
+    for skeleton in compiled.values():
+        if skeleton["anatomy"]["archetype_id"] != "amalgam_walker":
+            continue
+        body = next(b for b in skeleton["branches"] if b["branch_id"] == "core")
+        legs = [b for b in skeleton["branches"] if b["gait_role"] == "locomotor"]
+        assert all(leg["length_m"] > body["girth_m"] for leg in legs), skeleton["skeleton_id"]
+        assert all(leg["girth_m"] < .5 * leg["length_m"] * .22 * 2 for leg in legs)

@@ -46,6 +46,8 @@ namespace CritterCrafter.Locomotion
             public double runPhase;
             public bool support;
             public bool attack;
+            /// <summary>A limping leg: the body dips this far (m) toward it while it is planted.</summary>
+            public float limp;
             /// <summary>Drag gaits: a leg that drives the torso from behind (an arm pulls it from ahead).</summary>
             public bool push;
             /// <summary>Legs sharing a walk phase offset step together (e.g. a hexapod tripod).</summary>
@@ -103,7 +105,7 @@ namespace CritterCrafter.Locomotion
         Vector3 _lastPosition;
         Vector3 _velocity;
         double _clock;
-        float _bodyHeight, _bodyPitch, _bodyRoll, _bodyYaw, _bodySurge;
+        float _bodyHeight, _bodyPitch, _bodyRoll, _bodyYaw, _bodySurge, _limpDip, _limpRoll;
         float _lastYaw, _yawLag;
         GaitParams _params;
 
@@ -497,6 +499,8 @@ namespace CritterCrafter.Locomotion
         public float dragYawDeg = 6f;
         [Tooltip("Crawl: fraction of each haul the torso rests while the new hand grips (at least the hand-over overlap).")]
         [Range(0f, 0.45f)] public float dragGrip = 0.2f;
+        [Tooltip("Walkers with a limping leg: how far (degrees) the body rolls toward it while it carries weight.")]
+        [Range(0f, 15f)] public float limpRollDeg = 5f;
         [Tooltip("Crawl: fraction at the end of each haul the torso rests after the pull.")]
         [Range(0f, 0.45f)] public float dragSettle = 0.15f;
         [Tooltip("Crawl: time constant (s) for the torso to settle onto the root once travel stops.")]
@@ -607,6 +611,22 @@ namespace CritterCrafter.Locomotion
                     }
                 }
             }
+            // A limping leg: the body drops and rolls toward it while it carries weight, and lifts as it swings,
+            // so the walk lurches instead of gliding level over its feet.
+            float limpDip = 0f, limpRoll = 0f;
+            if (_block.body_limp_m > 0.0 && speed > 0.05f)
+            {
+                float strength = Mathf.Clamp01(speed / Mathf.Max(0.1f, (float)_block.v_walk_mps));
+                foreach (var leg in legs)
+                {
+                    if (leg.limp <= 0f || !leg.planted) continue;
+                    limpDip = leg.limp * strength;
+                    limpRoll = (leg.homeLocal.x >= 0f ? 1f : -1f) * limpRollDeg * strength * leg.limp / (float)_block.body_limp_m;
+                }
+            }
+            float kl = 1f - Mathf.Exp(-dt / 0.07f);
+            _limpDip = Mathf.Lerp(_limpDip, limpDip, kl);
+            _limpRoll = Mathf.Lerp(_limpRoll, limpRoll, kl);
             float k = 1f - Mathf.Exp(-dt / 0.12f);
             _bodyHeight = Mathf.Lerp(_bodyHeight, height, k);
             _bodyPitch = Mathf.Lerp(_bodyPitch, pitch, k);
@@ -617,12 +637,12 @@ namespace CritterCrafter.Locomotion
                 ? -0.03f * (float)_block.hip_height_m * (float)_params.weight
                   * (0.5f + 0.5f * Mathf.Cos((float)(_clock * 4.0 * Math.PI)))
                 : 0f;
-            body.localPosition = bodyBaseLocalPosition + Vector3.up * (_bodyHeight + bob);
+            body.localPosition = bodyBaseLocalPosition + Vector3.up * (_bodyHeight + bob - _limpDip);
             body.localRotation = BodyRotation();
         }
 
         Quaternion BodyRotation() =>
-            Quaternion.Euler(0f, _yawLag, 0f) * Quaternion.Euler(_bodyPitch, _bodyYaw, _bodyRoll) * bodyBaseLocalRotation;
+            Quaternion.Euler(0f, _yawLag, 0f) * Quaternion.Euler(_bodyPitch, _bodyYaw, _bodyRoll + _limpRoll) * bodyBaseLocalRotation;
 
         void UpdateAnimator(float speed)
         {

@@ -280,6 +280,13 @@ def test_branch_semantics_and_girth_match_the_exact_binding_profile() -> None:
             assert branch["accepts"] == {"categories": [expected_category], "templates": [branch["template"]]}
             if candidate["family"] == "amalgam" and role == "core":
                 continue                # an amalgam's blob body is deliberately fatter than its profile's ratio
+            if candidate["family"] == "amalgam" and role == "locomotor":
+                # a walker's legs are deliberately slimmer than their profile's ratio
+                from critter_crafter.skeletons.amalgam import WALKER_LEG_GIRTH
+                ratios = (1.0, WALKER_LEG_GIRTH)
+                assert any(math.isclose(branch["girth_m"], branch["length_m"] * profile["girth_ratio"] * r, abs_tol=1e-4)
+                           for r in ratios)
+                continue
             assert math.isclose(branch["girth_m"], branch["length_m"] * profile["girth_ratio"], abs_tol=1e-4)
 
 

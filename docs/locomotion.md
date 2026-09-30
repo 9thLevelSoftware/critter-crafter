@@ -136,6 +136,11 @@ from the seed and maps onto machinery that already exists:
   leg does, instead of a symmetric stroke. The runtime already applies the shift to every solver.
 - **`gait.pole_ik`** (per limb) overrides the skeleton trait: mammal legs and arms keep their IK pole, insect legs
   don't (a pole on a fanned four-bone chain flips its bend plane).
+- **Walkers are built to look lopsided.** The body is a small pod carried high (hips about 0.5-1.0 m) on long,
+  slim legs (`WALKER_LEG_GIRTH`, 0.6 of the profile ratio; insect legs run 2-3 m), and the legs step with **uneven
+  gaps** instead of evenly spaced phases. One leg **limps**: `gait.limp` becomes `limp` on that leg and
+  `body_limp_m` on the block, and `CreatureGait` drops the body (and rolls it up to `limpRollDeg`) toward that leg
+  while it is planted, so the walk lurches. Neither field touches the step planner.
 - **Every working limb is grounded on its own** (`_ground_arm`, `_fit_leg`), because the neutral pose only lowers the
   root by the worst limb and a leg that hovers would leave the creature hovering.
 - **The attack is derived** (`actions.derive_attack_profile`): the dragger's hammer swing, turned to the direction
@@ -154,6 +159,8 @@ from the seed and maps onto machinery that already exists:
 - **Amalgam hands are placeholder too:** the reference image's giant splayed hands need a Meshy part (owner cost
   confirmation first). A hauled amalgam's heave pivots at the rear of the body, as a dragger's does; a body carried
   mostly by pushers may want the pivot at the front.
+- **Walker amalgams slip 3-16 cm at instant 90° turns** (and some lifts are refused while they re-step); the
+  straight walk and the 20° ramp are clean. This is the general turn limitation, worse on tall legs.
 - **Amalgams are slow.** Hauled ones walk at 0.2-0.35 m/s and walkers at about 0.6 m/s (their `v_walk_mps`); none
   reaches the game's shared 2.5 m/s, so the game should use each creature's own published speeds.
 - **Arms used as legs are the hardest amalgam kit.** About a third of the seeds that use one fail the bake
