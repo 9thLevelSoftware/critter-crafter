@@ -1,6 +1,7 @@
 """Curated anatomy, evaluated motion QA, and fresh review gates."""
 from __future__ import annotations
 import json
+from datetime import date
 from pathlib import Path
 import click
 from ..config import paths
@@ -17,6 +18,29 @@ def _skeleton_files(family: str | None = None) -> list[Path]:
     files = sorted((paths().data / "skeletons").glob("*.skeleton.json"))
     return [f for f in files if (d := json.loads(f.read_text(encoding="utf-8"))).get("schema_version") == "3.0.0"
             and (family is None or d["family"] == family)]
+
+
+_NOT_SOURCE = ("status", "review", "asset", "source_fingerprint", "content_fingerprint")
+
+
+def _write_skeleton(doc: dict, *, force: bool) -> bool:
+    """Write one generated skeleton source. False means an existing reviewed file was kept.
+
+    With ``force`` a reviewed file is regenerated, but the owner's decision (``status``, ``review``) is carried
+    forward when the regenerated *source* is identical to what was decided on: regenerating from the same code
+    must not wipe approvals. A source that really changed comes back as a draft."""
+    path = paths().data / "skeletons" / f"{doc['skeleton_id']}.skeleton.json"
+    if path.exists():
+        old = json.loads(path.read_text(encoding="utf-8"))
+        if not force and old.get("status") != "draft":
+            return False
+        if old.get("status") in ("approved", "rejected") and (
+                {k: v for k, v in old.items() if k not in _NOT_SOURCE} == {k: v for k, v in doc.items() if k not in _NOT_SOURCE}):
+            doc["status"] = old["status"]
+            if "review" in old:
+                doc["review"] = old["review"]
+    _write_json(path, doc)
+    return True
 
 
 def _selection(cat: dict, families: tuple[str, ...], ids: tuple[str, ...] = ()) -> list[dict]:
@@ -58,35 +82,26 @@ def skeleton_vary(families, archetypes, presets, style, seed, count, force, amal
             if count is not None and per_family.get(family, 0) >= count:
                 continue
             per_family[family] = per_family.get(family, 0) + 1
-            doc = build_candidate(archetype, preset, seed=seed, style=style)
-            path = paths().data / "skeletons" / f"{doc['skeleton_id']}.skeleton.json"
-            if path.exists() and not force and json.loads(path.read_text(encoding="utf-8")).get("status") != "draft":
+            if _write_skeleton(build_candidate(archetype, preset, seed=seed, style=style), force=force):
+                written += 1
+            else:
                 kept += 1
-                continue
-            _write_json(path, doc)
-            written += 1
     from .archetypes import build_variant, variant_seeds_for
     if style == "anatomical" and not presets:
         for archetype in chosen:
             for variant_seed in variant_seeds or variant_seeds_for(archetype):
-                doc = build_variant(archetype, variant_seed)
-                path = paths().data / "skeletons" / f"{doc['skeleton_id']}.skeleton.json"
-                if path.exists() and not force and json.loads(path.read_text(encoding="utf-8")).get("status") != "draft":
+                if _write_skeleton(build_variant(archetype, variant_seed), force=force):
+                    written += 1
+                else:
                     kept += 1
-                    continue
-                _write_json(path, doc)
-                written += 1
     from .amalgam import AMALGAM_SEEDS, build_amalgam
     if style == "anatomical" and not archetypes and not presets and (not families or "amalgam" in families):
         for amalgam_seed in amalgam_seeds or AMALGAM_SEEDS:
-            doc = build_amalgam(amalgam_seed)
-            path = paths().data / "skeletons" / f"{doc['skeleton_id']}.skeleton.json"
-            if path.exists() and not force and json.loads(path.read_text(encoding="utf-8")).get("status") != "draft":
+            if _write_skeleton(build_amalgam(amalgam_seed), force=force):
+                written += 1
+            else:
                 kept += 1
-                continue
-            _write_json(path, doc)
-            written += 1
-    click.echo(f"wrote {written} drafts; preserved {kept} reviewed candidates")
+    click.echo(f"wrote {written} skeletons; preserved {kept} reviewed candidates")
 
 
 @skeleton.command("amalgam-sweep")
@@ -262,21 +277,50 @@ def _set_status(family: str | None, ids: tuple[str, ...], status: str) -> int:
     return len(selected)
 
 
+def _set_status_owner(family: str | None, ids: tuple[str, ...], status: str) -> int:
+    """The owner's own decision: no review receipt, no built library. Records who decided and when.
+    Status and review are outside the source fingerprint, so built assets and receipts stay valid."""
+    files = _skeleton_files(family)
+    parsed = [(f, json.loads(f.read_text(encoding="utf-8"))) for f in files]
+    known = {d["skeleton_id"] for _, d in parsed}
+    unknown = set(ids) - known
+    if unknown:
+        raise click.ClickException(f"unknown skeletons: {', '.join(sorted(unknown))}")
+    docs = [(f, d) for f, d in parsed if not ids or d["skeleton_id"] in ids]
+    unknown = set(ids) - known
+    if unknown:
+        raise click.ClickException(f"unknown skeletons: {', '.join(sorted(unknown))}")
+    docs = [(f, json.loads(f.read_text(encoding="utf-8"))) for f in files]
+    docs = [(f, d) for f, d in docs if not ids or d["skeleton_id"] in ids]
+    if not docs:
+        raise click.ClickException("no skeletons match the selection")
+    stamp = {"by": "owner", "date": date.today().isoformat(), "method": "owner"}
+    for f, doc in docs:
+        doc["status"] = status
+        doc["review"] = stamp
+        _write_json(f, doc)
+    return len(docs)
+
+
 @skeleton.command("approve")
 @click.option("--family", type=click.Choice(FAMILIES), default=None)
+@click.option("--owner", is_flag=True, help="Owner decision: skip the review receipt and record who decided")
 @click.argument("skeleton_ids", nargs=-1)
-def skeleton_approve(family, skeleton_ids) -> None:
-    """Human visual approval, valid only for a current passing review bundle."""
+def skeleton_approve(family, owner, skeleton_ids) -> None:
+    """Human visual approval. Needs a current passing review bundle unless --owner."""
     if not family and not skeleton_ids:
         raise click.ClickException("give --family or skeleton IDs")
-    click.echo(f"approved {_set_status(family, skeleton_ids, 'approved')} skeleton(s)")
+    count = _set_status_owner(family, skeleton_ids, "approved") if owner else _set_status(family, skeleton_ids, "approved")
+    click.echo(f"approved {count} skeleton(s)")
 
 
 @skeleton.command("reject")
 @click.option("--family", type=click.Choice(FAMILIES), default=None)
+@click.option("--owner", is_flag=True, help="Owner decision: skip the review receipt and record who decided")
 @click.argument("skeleton_ids", nargs=-1)
-def skeleton_reject(family, skeleton_ids) -> None:
-    """Record visual rejection of current reviewed content."""
+def skeleton_reject(family, owner, skeleton_ids) -> None:
+    """Record visual rejection. Needs current reviewed content unless --owner."""
     if not family and not skeleton_ids:
         raise click.ClickException("give --family or skeleton IDs")
-    click.echo(f"rejected {_set_status(family, skeleton_ids, 'rejected')} skeleton(s)")
+    count = _set_status_owner(family, skeleton_ids, "rejected") if owner else _set_status(family, skeleton_ids, "rejected")
+    click.echo(f"rejected {count} skeleton(s)")

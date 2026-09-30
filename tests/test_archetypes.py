@@ -83,6 +83,10 @@ def test_write_profiles_emits_the_exact_profiles_referenced_by_candidates(tmp_pa
 def test_committed_v3_sources_are_the_seed_one_candidate_set() -> None:
     source_dir = Path(__file__).parents[1] / "data" / "skeletons"
     committed = [json.loads(path.read_text(encoding="utf-8")) for path in sorted(source_dir.glob("*_v3.skeleton.json"))]
+    # The owner's decision (status, review) is recorded in the source but is not part of what the code generates.
+    for doc in committed:
+        doc["status"] = "draft"
+        doc.pop("review", None)
 
     assert committed == generate_all(seed=1)
 

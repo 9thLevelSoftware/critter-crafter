@@ -17,6 +17,20 @@ from .recipes.validate import validate_recipe
 from .schema.validate import validate_sources
 
 
+def golden_catalog(cat: dict) -> dict:
+    """The catalog as the shared fixtures record it: every skeleton and production part as a draft.
+
+    The fixtures are made with fixture-only approval, so they must not depend on which skeletons or parts the owner
+    has really approved; approving content never changes them."""
+    cat = json.loads(json.dumps(cat))
+    for skeleton in cat["skeletons"]:
+        skeleton["status"] = "draft"
+    for part in cat["parts"]:
+        if part["inventory_kind"] == "production":
+            part["status"] = "draft"
+    return cat
+
+
 def _compiled_catalog() -> dict:
     diags, catalog = validate_sources(paths().data, paths().schemas)
     errors = [d for d in diags if not d.startswith("CC_NO_CANDIDATE_OPTIONAL")]
@@ -160,7 +174,7 @@ def recipe_sweep(pool_ids: tuple[str, ...], seeds: str, review_drafts: bool) -> 
 @click.option("--out", type=click.Path(path_type=Path), default=None)
 def recipe_golden(seeds: str, out: Path | None) -> None:
     """Write v3 parity fixtures from an in-memory approved copy; preserve v2 fixtures."""
-    cat = _compiled_catalog()
+    cat = golden_catalog(_compiled_catalog())
     gdir = out or paths().root / "tests" / "golden_v3"
     if gdir.resolve() == (paths().root / "tests" / "golden").resolve():
         raise click.ClickException("legacy golden fixtures are frozen; choose a v3 output directory")

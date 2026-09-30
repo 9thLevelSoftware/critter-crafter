@@ -131,8 +131,9 @@ def test_legacy_golden_remains_explicitly_v2():
 
 def test_golden_matches_current_generator(authored_catalog):
     """golden_v3 is shared with Unity; regenerate with `critter recipe golden`."""
+    from critter_crafter.cli import golden_catalog
     golden_cat = json.loads((GOLDEN_V3 / "catalog.json").read_text(encoding="utf-8"))
-    assert golden_cat == json.loads(json.dumps(authored_catalog)), "catalog changed: run `critter recipe golden`"
+    assert golden_cat == golden_catalog(authored_catalog), "catalog changed: run `critter recipe golden`"
     recipes = json.loads((GOLDEN_V3 / "recipes.json").read_text(encoding="utf-8"))
     assert recipes["generator"] == "cc-gen-3"
     assert recipes["fixture_only_approval"] is True

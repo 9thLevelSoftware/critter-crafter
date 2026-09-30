@@ -538,12 +538,21 @@ def _set_status(part_id: str, status: str, pipeline: str | None = None) -> Path:
 
 @part.command("approve")
 @click.argument("part_id")
-def part_approve(part_id: str) -> None:
+@click.option("--owner", is_flag=True,
+              help="Owner decision: skip the QA report and staleness checks; still pins the current part pipeline")
+def part_approve(part_id: str, owner: bool) -> None:
     """Mark PART_ID approved (generatable) after a passing `critter part review` of the current build."""
-    from ..library.commands import _built_catalog
+    from ..library.commands import _built_catalog, part_build_state
 
     built, src = _built_catalog()
     part = next((p for p in built["parts"] if p["part_id"] == part_id), None)
+    if owner:
+        if part is None:
+            raise click.ClickException(f"{part_id} is not in the built library; run `critter library build` first")
+        path = _set_status(part_id, "approved", part_build_state(part, src)["pipeline"])
+        click.echo(f"approved {part_id} by owner ({path}). Approved parts join generation: rerun `critter recipe golden`, "
+                   "copy the goldens into the Unity package and rebuild the library.")
+        return
     qa = _read_qa(part_id)
     if part is None or qa is None:
         raise click.ClickException(f"run `critter part review {part_id}` first")
