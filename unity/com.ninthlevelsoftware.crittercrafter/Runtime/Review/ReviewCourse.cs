@@ -19,7 +19,8 @@ namespace CritterCrafter.Review
         public const float RampAngleDeg = 20f;
         public const float RampLength = 4f;
 
-        public static void Build(Transform parent, Material material)
+        /// <param name="ramp">False leaves the ground flat: the "turns" course must not climb the ramp at speed.</param>
+        public static void Build(Transform parent, Material material, bool ramp = true)
         {
             var ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
             ground.transform.SetParent(parent, false);
@@ -27,19 +28,22 @@ namespace CritterCrafter.Review
             ground.GetComponent<Renderer>().sharedMaterial = material;
             float rise = RampLength * Mathf.Sin(RampAngleDeg * Mathf.Deg2Rad);
             float run = RampLength * Mathf.Cos(RampAngleDeg * Mathf.Deg2Rad);
-            var ramp = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            ramp.transform.SetParent(parent, false);
-            ramp.transform.localScale = new Vector3(4f, 0.2f, RampLength);
-            ramp.transform.localRotation = Quaternion.Euler(-RampAngleDeg, 0f, 0f);
-            // Top surface runs from (z=2, y=0) to (z=2+run, y=rise).
-            Vector3 top = new Vector3(0f, rise * 0.5f, 2f + run * 0.5f);
-            ramp.transform.localPosition = top - ramp.transform.localRotation * Vector3.up * 0.1f;
-            ramp.GetComponent<Renderer>().sharedMaterial = material;
-            var plateau = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            plateau.transform.SetParent(parent, false);
-            plateau.transform.localScale = new Vector3(8f, rise, 6f);
-            plateau.transform.localPosition = new Vector3(2f, rise * 0.5f, 2f + run + 3f - 0.001f);
-            plateau.GetComponent<Renderer>().sharedMaterial = material;
+            if (ramp)
+            {
+                var slope = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                slope.transform.SetParent(parent, false);
+                slope.transform.localScale = new Vector3(4f, 0.2f, RampLength);
+                slope.transform.localRotation = Quaternion.Euler(-RampAngleDeg, 0f, 0f);
+                // Top surface runs from (z=2, y=0) to (z=2+run, y=rise).
+                Vector3 top = new Vector3(0f, rise * 0.5f, 2f + run * 0.5f);
+                slope.transform.localPosition = top - slope.transform.localRotation * Vector3.up * 0.1f;
+                slope.GetComponent<Renderer>().sharedMaterial = material;
+                var plateau = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                plateau.transform.SetParent(parent, false);
+                plateau.transform.localScale = new Vector3(8f, rise, 6f);
+                plateau.transform.localPosition = new Vector3(2f, rise * 0.5f, 2f + run + 3f - 0.001f);
+                plateau.GetComponent<Renderer>().sharedMaterial = material;
+            }
             var light = new GameObject("Key").AddComponent<Light>();
             light.transform.SetParent(parent, false);
             light.type = LightType.Directional;
@@ -68,10 +72,6 @@ namespace CritterCrafter.Review
             };
         }
 
-        /// <summary>
-        /// Turns only, on the flat: instant heading changes of +90, -135 and +45 degrees with 1.2 s of straight
-        /// travel between them, then a stop and an instant 180 degree turn in place.
-        /// </summary>
         /// <summary>Stand at the origin for <paramref name="seconds"/> (reaction captures: idle, hit, stun, death).</summary>
         public static List<Waypoint> Still(float seconds) => new List<Waypoint>
         {
@@ -79,6 +79,10 @@ namespace CritterCrafter.Review
             new Waypoint { time = seconds, position = Vector3.zero, headingDeg = 0f },
         };
 
+        /// <summary>
+        /// Turns only, on the flat (build the scene with <c>ramp: false</c>): instant heading changes of +90, -135 and
+        /// +45 degrees with 1.2 s of straight travel between them, then a stop and an instant 180 degree turn in place.
+        /// </summary>
         public static List<Waypoint> Turns(float speed)
         {
             var path = new List<Waypoint>();

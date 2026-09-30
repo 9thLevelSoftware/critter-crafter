@@ -124,6 +124,8 @@ namespace CritterCrafter.Locomotion
         public float Surge => _bodySurge;
         public float Speed => new Vector3(_velocity.x, 0f, _velocity.z).magnitude;
         public LocomotionData Block => _block;
+        /// <summary>How far the body is raised (+) or dropped (-) by the planted feet (m); review diagnostics.</summary>
+        public float BodyHeight => _bodyHeight;
         /// <summary>The posed torso (grounded bodies travel in hauls relative to the root).</summary>
         public Transform Body => body;
 
@@ -285,6 +287,8 @@ namespace CritterCrafter.Locomotion
                             float duration = (float)((1.0 - phase) / _params.cadenceHz);
                             Lift(leg, Mathf.Max(0.08f, duration), false, cycle);
                         }
+                        else
+                            leg.liftBlocked = true;
                     }
                     else if (Overrun(leg, leg.home))
                     {
@@ -332,7 +336,7 @@ namespace CritterCrafter.Locomotion
                 if (leg.target == null) continue;
                 if (!leg.hinge || leg.coxa == null)
                 {
-                    Vector3 reachable = ClampToReach(leg, leg.position);
+                    Vector3 reachable = leg.planted ? ClampPlantedToReach(leg, leg.position) : ClampToReach(leg, leg.position);
                     leg.clamped = reachable != leg.position;
                     if (leg.planted && leg.clamped)
                     {
@@ -358,7 +362,8 @@ namespace CritterCrafter.Locomotion
                 leg.clamped = reach.sqrMagnitude > max * max;
                 if (leg.clamped)
                 {
-                    ankle = femur + reach.normalized * max;
+                    // A planted foot is pulled in along the ground; a swinging one may be pulled in any direction.
+                    ankle = leg.planted ? ClampHorizontally(ankle, femur, max) : femur + reach.normalized * max;
                     leg.position = ankle - frame * leg.ankleOffset;
                     if (leg.planted)
                     {
@@ -388,9 +393,29 @@ namespace CritterCrafter.Locomotion
             leg.position = at;
             leg.planted = true;
             leg.forced = false;
+            leg.clamped = false;        // a foot that has just landed is not being dragged; ApplyTargets decides again
         }
 
         const float MaxReachFraction = 0.95f;
+
+        /// <summary>
+        /// Pull <paramref name="point"/> within <paramref name="max"/> of <paramref name="centre"/> by shortening it
+        /// horizontally and keeping its height, so a planted foot slides along the ground instead of rising. If
+        /// the height alone is already out of reach, fall back to pulling it in straight (there is no ground point
+        /// that reaches).
+        /// </summary>
+        static Vector3 ClampHorizontally(Vector3 point, Vector3 centre, float max)
+        {
+            Vector3 d = point - centre;
+            if (d.sqrMagnitude <= max * max) return point;
+            float room = max * max - d.y * d.y;
+            if (room <= 0f) return centre + d.normalized * max;
+            var flat = new Vector3(d.x, 0f, d.z);
+            return centre + flat.normalized * Mathf.Sqrt(room) + Vector3.up * d.y;
+        }
+
+        static Vector3 ClampPlantedToReach(Leg leg, Vector3 p) =>
+            leg.hip == null ? p : ClampHorizontally(p, leg.hip.position, MaxReachFraction * leg.reach);
 
         static Vector3 ClampToReach(Leg leg, Vector3 p)
         {
@@ -595,7 +620,9 @@ namespace CritterCrafter.Locomotion
             float height = 0f, pitch = 0f, roll = 0f;
             if (n > 0)
             {
-                height = (float)(sy / n);
+                // Bounded: a foot that couldn't reach its plant must never drag the body up with it.
+                float hip = (float)_block.hip_height_m;
+                height = Mathf.Clamp((float)(sy / n), -MaxBodyDropFraction * hip, MaxBodyRiseFraction * hip);
                 if (n >= 3)
                 {
                     // Centered normal equations for the slopes.
@@ -641,6 +668,9 @@ namespace CritterCrafter.Locomotion
             body.localPosition = bodyBaseLocalPosition + Vector3.up * (_bodyHeight + bob - _limpDip);
             body.localRotation = BodyRotation();
         }
+
+        const float MaxBodyDropFraction = 0.35f;
+        const float MaxBodyRiseFraction = 0.15f;
 
         Quaternion BodyRotation() =>
             Quaternion.Euler(0f, _yawLag, 0f) * Quaternion.Euler(_bodyPitch, _bodyYaw, _bodyRoll + _limpRoll) * bodyBaseLocalRotation;

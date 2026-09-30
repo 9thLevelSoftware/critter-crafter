@@ -33,6 +33,12 @@ namespace CritterCrafter.Review
         public int clamped_planted_frames;
         /// <summary>Frames after warmup in which a strained leg wanted to re-step but was not allowed to.</summary>
         public int lift_blocked_frames;
+        /// <summary>Highest the body rose above where the feet's plane put it on the first frame (m). A runaway shows here.</summary>
+        public float max_body_rise_m;
+        /// <summary>Highest a planted supporting foot's sole sat above the ground (m): planted feet must not hover.</summary>
+        public float max_planted_hover_m;
+        /// <summary>The furthest a foot travelled during one stance (m); the per-frame slip can hide a long drag.</summary>
+        public float max_stance_drift_m;
         /// <summary>The leg and frame of the largest planted slip.</summary>
         public string max_slip_leg = "";
         public int max_slip_frame = -1;
@@ -61,6 +67,8 @@ namespace CritterCrafter.Review
         int _cell;
         readonly Dictionary<string, Transform> _tips = new Dictionary<string, Transform>();
         readonly Dictionary<string, Vector3> _lastPlanted = new Dictionary<string, Vector3>();
+        readonly Dictionary<string, Vector3> _stanceStart = new Dictionary<string, Vector3>();
+        float _baseBodyHeight;
         readonly StringBuilder _csv = new StringBuilder("frame,time,speed,body_speed,residual,slip,planted_supports,yaw_lag_deg,surge_m\n");
         Vector3 _lastBody;
         float _bodyTravel, _bodyTime;
@@ -145,7 +153,7 @@ namespace CritterCrafter.Review
         void Measure()
         {
             var m = Metrics;
-            float residual = 0f, slip = 0f, rewrite = 0f;
+            float residual = 0f, slip = 0f, rewrite = 0f, hover = 0f, drift = 0f;
             string slipLeg = "";
             bool clampedPlanted = false, liftBlocked = false;
             int planted = 0;
@@ -159,9 +167,12 @@ namespace CritterCrafter.Review
                 Vector3 p = tip.position;
                 residual = Mathf.Max(residual, Vector3.Distance(p, leg.position));
                 m.max_penetration_m = Mathf.Max(m.max_penetration_m, ReviewCourse.GroundY(p) - p.y);
-                if (!leg.planted) continue;
+                if (!leg.planted) { _stanceStart.Remove(leg.branchId); continue; }
                 if (leg.support) planted++;
                 now[leg.branchId] = p;
+                if (!_stanceStart.TryGetValue(leg.branchId, out var stanceStart)) _stanceStart[leg.branchId] = stanceStart = p;
+                drift = Mathf.Max(drift, Vector3.Distance(stanceStart, p));
+                if (leg.support) hover = Mathf.Max(hover, leg.plant.y - (ReviewCourse.GroundY(leg.plant) + leg.homeLocal.y));
                 if (_lastPlanted.TryGetValue(leg.branchId, out var last))
                 {
                     float d = Vector3.Distance(last, p);
@@ -196,12 +207,20 @@ namespace CritterCrafter.Review
                     if (liftBlocked) m.lift_blocked_frames++;
                 }
                 m.min_planted_supports = Mathf.Min(m.min_planted_supports, planted);
+                if (_frame >= m.warmup_frames)
+                {
+                    m.max_planted_hover_m = Mathf.Max(m.max_planted_hover_m, hover);
+                    m.max_stance_drift_m = Mathf.Max(m.max_stance_drift_m, drift);
+                }
             }
             m.cadence_hz = Mathf.Max(m.cadence_hz, (float)_gait.Current.cadenceHz);
             m.overspeed |= _gait.Current.overspeed;
             float bodySpeed = 0f;
             Transform body = _gait.Body != null ? _gait.Body : _gait.transform;
             Vector3 b = body.position;
+            float bodyHeight = b.y - _gait.transform.position.y;
+            if (_frame == 0) _baseBodyHeight = bodyHeight;
+            else if (_frame >= m.warmup_frames) m.max_body_rise_m = Mathf.Max(m.max_body_rise_m, bodyHeight - _baseBodyHeight);
             if (_frame > 0 && Time.deltaTime > 0f)
             {
                 Vector3 d = b - _lastBody;

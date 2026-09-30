@@ -392,6 +392,60 @@ namespace CritterCrafter.Tests
             Assert.IsEmpty(failures, "dragger hands slid or missed their targets after an instant turn:\n" + string.Join("\n", failures));
         }
 
+        static readonly string[] WalkerAmalgams =
+        {
+            "amalgam_walker_s0008_v3", "amalgam_walker_s0024_v3", "amalgam_walker_s0029_v3",
+            "amalgam_walker_s0037_v3", "amalgam_walker_s0039_v3",
+        };
+
+        [UnityTest]
+        public IEnumerator InstantTurnsNeverLiftTheBodyOrHoverAPlantedFoot()
+        {
+            // The reach clamp used to pull an out-of-reach planted foot toward the hip in 3D, so the foot rose,
+            // the body followed the raised feet, and after an instant turn a quadruped ended 4.5 m in the air
+            // (a tripod 2.6 m) with its planted feet hovering. Sweep 90 and 180 degree turns at walk speed and
+            // 2.5 m/s over every family and the walker amalgams on flat ground. Foot slip after a turn is a
+            // separate problem (see the drift metric) and is not bounded here.
+            EditorSettings.enterPlayModeOptionsEnabled = true;
+            EditorSettings.enterPlayModeOptions = EnterPlayModeOptions.DisableDomainReload | EnterPlayModeOptions.DisableSceneReload;
+            yield return new EnterPlayMode();
+            Time.captureFramerate = 30;
+            var failures = new List<string>();
+            foreach (var id in OnePerFamily.Where(i => !i.StartsWith("dragger")).Concat(WalkerAmalgams))
+            {
+                var holder = new GameObject("TurnTest");
+                var ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
+                ground.transform.SetParent(holder.transform, false);
+                ground.transform.localScale = Vector3.one * 10f;
+                Physics.SyncTransforms();
+                var c = LocomotionCapture.Spawn(Lib, id, holder.transform, out var restore);
+                var gait = c.GetComponent<CritterCrafter.Locomotion.CreatureGait>();
+                var block = c.GaitBlock;
+                Assert.IsNotNull(gait, id + ": a CreatureGait");
+                float hip = (float)block.hip_height_m;
+                foreach (float speed in new[] { (float)block.v_walk_mps, Mathf.Min(2.5f, 0.9f * (float)block.v_max_mps) })
+                    foreach (float turn in new[] { 90f, 180f })
+                    {
+                        var recorder = holder.AddComponent<LocomotionRecorder>();
+                        recorder.Begin(gait, ReviewCourse.TurnAt(speed, 1.2f, turn),
+                            new LocomotionMetrics { skeleton_id = id, speed_mps = speed, warmup_frames = 30 });
+                        while (!recorder.Done) yield return null;
+                        var m = recorder.Metrics;
+                        Object.Destroy(recorder);
+                        yield return null;
+                        if (m.max_body_rise_m > 0.1f * hip || m.max_planted_hover_m > 0.05f || m.max_penetration_m > 0.02f)
+                            failures.Add($"{id} @ {speed:F2} m/s, {turn:F0} deg: body rose {m.max_body_rise_m:F2} m, " +
+                                $"planted foot hovered {m.max_planted_hover_m:F2} m, penetration {m.max_penetration_m:F3} m");
+                    }
+                Object.Destroy(holder);
+                restore();
+                yield return null;
+            }
+            Time.captureFramerate = 0;
+            yield return new ExitPlayMode();
+            Assert.IsEmpty(failures, "an instant turn lifted the body or left planted feet in the air:" + System.Environment.NewLine + string.Join(System.Environment.NewLine, failures));
+        }
+
         [Test]
         public void GaitPhaseDrivesTheLocomotionOverlayClock()
         {

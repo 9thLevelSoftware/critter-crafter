@@ -101,7 +101,8 @@ namespace CritterCrafter.Editor
             var job = _jobs.Dequeue();
             Time.captureFramerate = Fps;
             _holder = new GameObject("LocomotionCapture");
-            ReviewCourse.Build(_holder.transform, new Material(LibraryImporter.DefaultLitShader()) { color = new Color(0.22f, 0.23f, 0.27f) });
+            ReviewCourse.Build(_holder.transform, new Material(LibraryImporter.DefaultLitShader()) { color = new Color(0.22f, 0.23f, 0.27f) },
+                ramp: job.course != "turns");
             Physics.SyncTransforms();
             var creature = Spawn(_library, job.skeletonId, _holder.transform, out _restore);
             var gait = creature.GetComponent<CreatureGait>();
