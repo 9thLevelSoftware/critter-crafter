@@ -151,7 +151,7 @@ from the seed and maps onto machinery that already exists:
 
 ## Known limitations
 
-- **Instant agent turns** cause a brief shuffle while re-stepping groups catch up with the smoothed body yaw.
+- **Instant agent turns** cause foot drag while re-stepping groups catch up with the body yaw. On the flat `turns` course (walk and 2.5 m/s) the longest a foot travels in one stance (`max_stance_drift_m`) is now about 0.1-0.5 m for the radial, tripod, hexapod, biped and walker amalgams and about 1 m for the quadruped (before the strain-detection change: up to 1.9 m for the tripod); per-frame slip is still 3-20 cm. The quadruped's hips sit about 0.6 m from the body's pivot, so its yaw outruns its feet; gating the yaw by reach is the next step (plan A3).
 - **Dragger hands after instant turns** can still be dragged for one frame (a centimetre or two; at most 3 cm in the test sweep) between the reach clamp and the re-step, because the clamp is only seen after the body has moved. Before the fix in "Dragging" below they slid 4–20 cm.
 - **On a 20° ramp,** downhill feet can reach the end of their reach and slide a few centimetres.
 - **Starting from standing to full speed in one frame** can drag a foot during the first stride. Tests allow a one-second warmup.
