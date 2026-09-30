@@ -13,7 +13,7 @@ The milestone list below was restored from the original plan (`git show 6379277:
 
 - Work: 7 families, `skeleton vary`, the clip generator, review sheets.
 - Accepted when: at least 40 skeletons across the 7 families pass QA, clips play without root motion, and **the owner approves the per-family review GIFs**.
-- Status: 42 skeletons (the tentacle radial archetype was retired; the one-arm-one-leg dragger was added), all `draft`. That meets the "at least 40" target once approved. The owner has approved every family visually in locomotion captures, but no skeleton has been formally approved. The `skeleton review` receipt process predates runtime locomotion and may deserve simplifying.
+- Status: 85 skeletons (the 42 curated anchors, 28 seeded variants and 15 amalgams; the tentacle radial archetype was retired and the one-arm-one-leg dragger added), all `draft`. That meets the "at least 40" target once approved. The owner has approved every family visually in locomotion captures, but no skeleton has been formally approved. The `skeleton review` receipt process predates runtime locomotion and may deserve simplifying.
 
 ## Inserted milestone: runtime locomotion ("option B") — merged
 
@@ -36,7 +36,7 @@ The milestone list below was restored from the original plan (`git show 6379277:
 
 - Work: at least 9 connector variants, at least 24 parts, at least 80 skeletons, species and tag affinity, `CreatureBaker`.
 - Accepted when: each family yields at least 80 distinct creatures per 100 seeds, a baked creature takes at most 2 draw calls, and baked and runtime screenshots match.
-- Status: connectors exist only as generated reference lofts; there are 42 of the 80 skeletons.
+- Status: connectors exist only as generated reference lofts; the skeleton target is met (85, in the library), the parts and "80 distinct creatures per 100 seeds" targets are not.
 
 ## M5: synaptic-sea-unity integration — not started
 
@@ -44,12 +44,12 @@ The milestone list below was restored from the original plan (`git show 6379277:
 - Accepted when: the game's tests stay green, a PlayMode test spawns all 6 archetypes, a save/load round trip restores an identical recipe, and iso screenshots pass review.
 - Preconditions not yet met: every skeleton and part is `draft`, so pool + seed generation yields nothing at runtime (the owner approves with `critter skeleton approve --owner`). The game reads `move_speed_mps` from the creature's own locomotion block (`AssembledCreature.Locomotion`; see `docs/locomotion.md`).
 
-## In flight: locomotion thread (branch `feature/locomotion-thread`)
+## Merged since the locomotion thread
 
-1. Docs: this roadmap and the count fixes.
-2. Dragger hand slip at instant turns.
-3. A one-arm-one-leg dragger (a 14th archetype, 42 skeletons): built, awaiting GIF review.
-4. Per-creature gait and speed derived from the assembled build (`build-1`, branch `feature/build-speeds`): built, awaiting GIF review (`work/review/build-speeds`). The airborne-run follow-up (3b) is deferred.
+- **#19-#20:** dragger turn fix, the one-arm-one-leg dragger, per-creature speeds (`build-1`), the radial gait fix.
+- **#21-#26:** anatomy traits instead of family checks, legs on the right spine bones, clips that move with IK-pinned feet and a collapsing death, the seeded **amalgams** (hauled, walker, slither; 15 committed), optional tails/spines/arms/antennae/crowns, and 28 seeded variants (85 skeletons).
+- **#28-#34:** runtime robustness: the reach clamp no longer lifts planted feet (the body used to climb after them), earlier strain detection, reach-gated turning, slope pitch, death/limp fixes, and Play Mode coverage for turns, ramps, starts and death.
+- **Consumer readiness (in review):** exception-safe factory, the light `--owner` approval path, pools for every family, renderer bounds, the generator-identity version gate, package docs, the albedo test, CI and a slim release zip.
 
 ## Closed pull requests
 

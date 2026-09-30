@@ -18,7 +18,7 @@ uv run critter schema validate                  # v3 sources + cross-record rule
 uv run critter skeleton vary --force            # regenerate the 85 draft skeletons (archetypes.py, seeded variants, amalgam seeds)
 uv run critter recipe golden                    # writes tests/golden_v3/{catalog,recipes,locomotion}.json
 Copy-Item tests/golden_v3/*.json unity/com.ninthlevelsoftware.crittercrafter/Tests/Editor/GoldenV3/
-uv run critter library build                    # ~5 min: Blender bakes every skeleton/part -> library/
+uv run critter library build                    # ~15 min for 85 skeletons (--no-clean rebuilds only what changed)
 uv run critter skeleton qa                      # motion + export + locomotion QA per skeleton
 ```
 
