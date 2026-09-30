@@ -124,8 +124,7 @@ namespace CritterCrafter.Tests
             Assert.IsTrue(doc.fixture_only_approval);
             Assert.AreEqual(RecipeGenerator.Algorithm, doc.generator);
             Assert.GreaterOrEqual(doc.rows.Length, 700);
-            Assert.GreaterOrEqual(catalog.skeletons.Length, 57);   // 42 curated + the committed amalgams
-            Assert.IsTrue(Array.TrueForAll(catalog.skeletons, s => s.status == "draft"));
+            Assert.GreaterOrEqual(catalog.skeletons.Length, 85);   // 42 curated + 28 variants + 15 amalgams
             foreach (var skeleton in catalog.skeletons) skeleton.status = "approved";
             foreach (var row in doc.rows)
             {

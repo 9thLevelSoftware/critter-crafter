@@ -60,13 +60,27 @@ namespace CritterCrafter
             _catalog = null;
         }
 
-        /// <summary>Test/review helper. Approval is applied only to a cloned in-memory catalog.</summary>
-        public CritterLibrary EditorCreateApprovedSkeletonClone()
+        /// <summary>
+        /// Test/review helper. Approval is applied only to a cloned in-memory catalog; <paramref name="edit"/>
+        /// may then damage that clone (tests use it to build a broken catalog over the real models).
+        /// </summary>
+        public CritterLibrary EditorCreateApprovedSkeletonClone(Action<CatalogData> edit = null) =>
+            EditorCreateSkeletonStatusClone("approved", edit);
+
+        /// <summary>
+        /// Like <see cref="EditorCreateApprovedSkeletonClone"/> with every skeleton set to <paramref name="status"/>.
+        /// Tests that mean "nothing is approved" use "draft" so they keep meaning that once the owner approves real
+        /// content in the source data.
+        /// </summary>
+        public CritterLibrary EditorCreateSkeletonStatusClone(string status, Action<CatalogData> edit = null)
         {
             var cloneCatalog = JsonUtility.FromJson<CatalogData>(catalogJson.text);
-            foreach (var skeleton in cloneCatalog.skeletons) skeleton.status = "approved";
+            foreach (var skeleton in cloneCatalog.skeletons) skeleton.status = status;
+            edit?.Invoke(cloneCatalog);
+            // Not assets, so Unity would destroy them when a test enters Play Mode; the clone must outlive that.
             var clone = CreateInstance<CritterLibrary>();
-            clone.catalogJson = new TextAsset(JsonUtility.ToJson(cloneCatalog));
+            clone.hideFlags = HideFlags.HideAndDontSave;
+            clone.catalogJson = new TextAsset(JsonUtility.ToJson(cloneCatalog)) { hideFlags = HideFlags.HideAndDontSave };
             clone.skeletons = skeletons;
             clone.parts = parts;
             return clone;

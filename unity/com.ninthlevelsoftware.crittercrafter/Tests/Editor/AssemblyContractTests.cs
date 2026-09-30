@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using CritterCrafter.Editor;
 using NUnit.Framework;
 using UnityEditor;
@@ -19,6 +20,64 @@ namespace CritterCrafter.Tests
             foreach (var path in _assets) AssetDatabase.DeleteAsset(path);
             _objects.Clear();
             _assets.Clear();
+        }
+
+        const string GoldenV3Dir = "Packages/com.ninthlevelsoftware.crittercrafter/Tests/Editor/GoldenV3";
+
+        static string V3Path(string name)
+        {
+            string packaged = Path.GetFullPath(GoldenV3Dir + "/" + name);
+            return File.Exists(packaged) ? packaged : Path.GetFullPath("../../tests/golden_v3/" + name);
+        }
+
+        /// <summary>The real compiled catalog with every skeleton set to draft in memory (so approving real content
+        /// in the source data can't change what these tests mean) and no model assets behind it.</summary>
+        CritterLibrary DraftOnlyLibrary()
+        {
+            var catalog = JsonUtility.FromJson<CatalogData>(File.ReadAllText(V3Path("catalog.json")));
+            foreach (var skeleton in catalog.skeletons) skeleton.status = "draft";
+            var library = ScriptableObject.CreateInstance<CritterLibrary>();
+            library.EditorSetContents(new TextAsset(JsonUtility.ToJson(catalog)),
+                new CritterLibrary.SkeletonEntry[0], new CritterLibrary.PartEntry[0]);
+            _objects.Add(library);
+            return library;
+        }
+
+        GameObject BuildWithDefaultFactory(CritterLibrary library, string pool, long seed)
+        {
+            GameObject built = null;
+            Assert.DoesNotThrow(() => built = new DefaultCreatureVisualFactory(library, AssemblyOptions.Default)
+                .Build(new CreatureSpawnRequest { poolId = pool, seed = seed }));
+            _objects.Add(built);
+            return built;
+        }
+
+        [Test]
+        public void FactoryReturnsAFallbackInsteadOfThrowingWhenNothingIsApproved()
+        {
+            var built = BuildWithDefaultFactory(DraftOnlyLibrary(), "any", 1);
+            var creature = built.GetComponent<AssembledCreature>();
+            Assert.IsTrue(creature.IsFallback);
+            Assert.That(creature.Diagnostics[0], Does.StartWith("CC_GEN_NO_SKELETON"));
+            Assert.IsNull(built.GetComponent<CreatureMotion>(), "a fallback is not driven as a creature");
+        }
+
+        [Test]
+        public void FactoryFallbackKeepsTheErrorCodeForUnknownPoolsAndMissingLibraries()
+        {
+            var unknownPool = BuildWithDefaultFactory(DraftOnlyLibrary(), "no_such_pool", 1);
+            Assert.That(unknownPool.GetComponent<AssembledCreature>().Diagnostics[0], Does.StartWith("CC_GEN_UNKNOWN_POOL"));
+            var noLibrary = BuildWithDefaultFactory(null, "any", 1);
+            Assert.That(noLibrary.GetComponent<AssembledCreature>().Diagnostics[0], Does.StartWith("CC_NO_LIBRARY"));
+        }
+
+        [Test]
+        public void FactoryStillThrowsWhenTheGameOptsOutOfFallbacks()
+        {
+            var options = AssemblyOptions.Default;
+            options.fallbackOnInvalid = false;
+            var factory = new DefaultCreatureVisualFactory(DraftOnlyLibrary(), options);
+            Assert.Throws<GenerationException>(() => factory.Build(new CreatureSpawnRequest { poolId = "any", seed = 1 }));
         }
 
         [Test]

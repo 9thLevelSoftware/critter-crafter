@@ -85,7 +85,43 @@ namespace CritterCrafter.Tests
 
         [Test]
         public void DraftCandidateLibraryIsRejectedByRuntimeDefault() =>
-            Assert.Throws<GenerationException>(() => RawLib.Generate("any", 1));
+            Assert.Throws<GenerationException>(() => RawLib.EditorCreateSkeletonStatusClone("draft").Generate("any", 1));
+
+        [Test]
+        public void FactoryOnTheDraftBuiltLibraryFallsBackWithoutThrowing()
+        {
+            GameObject built = null;
+            Assert.DoesNotThrow(() => built = new DefaultCreatureVisualFactory(RawLib.EditorCreateSkeletonStatusClone("draft"), AssemblyOptions.Default)
+                .Build(new CreatureSpawnRequest { poolId = "any", seed = 1 }));
+            _spawned.Add(built);
+            var creature = built.GetComponent<AssembledCreature>();
+            Assert.IsTrue(creature.IsFallback);
+            Assert.That(creature.Diagnostics[0], Does.StartWith("CC_GEN_NO_SKELETON"));
+        }
+
+        [Test]
+        public void AMissingLocomotionBoneFallsBackAndLeavesNoHalfBuiltCreature()
+        {
+            var broken = RawLib.EditorCreateApprovedSkeletonClone(catalog =>
+                catalog.FindSkeleton(RuntimeLegSkeleton).locomotion.legs[0].chain_bones[0] = "no_such_bone");
+            try
+            {
+                var recipe = LocomotionCapture.ReferenceRecipe(broken.Catalog, broken.Catalog.FindSkeleton(RuntimeLegSkeleton));
+                int before = Object.FindObjectsByType<AssembledCreature>(FindObjectsSortMode.None).Length;
+                var creature = CreatureAssembler.Assemble(broken, recipe, AssemblyOptions.Review);
+                _spawned.Add(creature.gameObject);
+                Assert.IsTrue(creature.IsFallback);
+                Assert.That(creature.Diagnostics[0], Does.StartWith("CC_ASSEMBLY_FAILED").And.Contain("no_such_bone"));
+                Assert.AreEqual(before + 1, Object.FindObjectsByType<AssembledCreature>(FindObjectsSortMode.None).Length,
+                    "only the fallback may remain; the half-built creature must be destroyed");
+                var options = AssemblyOptions.Review;
+                options.fallbackOnInvalid = false;
+                Assert.Throws<AssemblyException>(() => CreatureAssembler.Assemble(broken, recipe, options));
+                Assert.AreEqual(before + 1, Object.FindObjectsByType<AssembledCreature>(FindObjectsSortMode.None).Length,
+                    "a rethrown failure must not leave a half-built creature either");
+            }
+            finally { Object.DestroyImmediate(broken); }
+        }
 
         [Test]
         public void FrameProbeSnapsCoincideWithBranchRootBones()
