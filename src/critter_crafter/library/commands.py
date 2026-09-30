@@ -6,6 +6,7 @@ import copy
 import functools
 import hashlib
 import json
+import math
 import shutil
 import zipfile
 from pathlib import Path
@@ -334,6 +335,42 @@ def build_jobs(catalog: dict[str, Any], out: Path, only: set[str] | None = None)
     return jobs
 
 
+def motion_bounds(skeleton: dict[str, Any], motion: dict[str, Any]) -> dict[str, list[float]] | None:
+    """The box (catalog frame, metres) that every bone head and tail reaches in any baked clip sample or the bind pose.
+
+    Rounded outward to a millimetre. The runtime pads it (part thickness, IK foot travel) and uses it as every
+    part renderer's bounds, instead of baking each part mesh through every clip on each spawn. None when there
+    is nothing to measure (a stub motion file)."""
+    def ends(bone: dict[str, Any]) -> list[Any]:
+        return [bone[k] for k in ("head_m", "tail_m") if k in bone]
+
+    points = [p for bone in skeleton.get("bones", []) for p in ends(bone)]
+    for clip in motion.get("clips", []):
+        for sample in clip.get("samples", []):
+            bones = sample.get("bones", [])
+            for bone in (bones.values() if isinstance(bones, dict) else bones):
+                points.extend(ends(bone))
+    if not points:
+        return None
+    low = [math.floor(min(p[i] for p in points) * 1000) / 1000 for i in range(3)]
+    high = [math.ceil(max(p[i] for p in points) * 1000) / 1000 for i in range(3)]
+    return {"min": low, "max": high}
+
+
+def add_motion_bounds(catalog: dict[str, Any], out: Path) -> None:
+    """Record ``asset.motion_bounds_m`` for every skeleton that has a baked motion file (also cached ones)."""
+    for skeleton in catalog["skeletons"]:
+        asset = skeleton.get("asset") or {}
+        motion = asset.get("motion")
+        if motion and (out / motion).is_file():
+            try:
+                box = motion_bounds(skeleton, json.loads((out / motion).read_text(encoding="utf-8")))
+            except (ValueError, KeyError, TypeError):
+                continue            # the box is optional; a motion file that can't be read is QA's problem, not the build's
+            if box is not None:
+                asset["motion_bounds_m"] = box
+
+
 def apply_results(catalog: dict[str, Any], out: Path, results: list[dict[str, Any]]) -> list[str]:
     problems = []
     skel = {s["skeleton_id"]: s for s in catalog["skeletons"]}
@@ -497,6 +534,7 @@ def library_build(out_root: Path | None, clean: bool) -> None:
         raise click.ClickException(str(e))
     require_part_pipelines_unchanged()
     problems = apply_results(catalog, out, result["results"])
+    add_motion_bounds(catalog, out)
     if problems:
         for problem in problems:
             click.echo(problem, err=True)

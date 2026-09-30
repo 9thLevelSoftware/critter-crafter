@@ -74,6 +74,8 @@ namespace CritterCrafter
         static readonly Dictionary<string, Mesh> MeshCache = new Dictionary<string, Mesh>();
         struct BoundsSet { public Bounds bind, neutral, animation; }
         static readonly Dictionary<string, BoundsSet> BoundsCache = new Dictionary<string, BoundsSet>();
+        /// <summary>Motion bounds per skeleton (not per part combination): the skeleton's clips don't depend on the parts on it.</summary>
+        static readonly Dictionary<string, Bounds> MotionBoundsCache = new Dictionary<string, Bounds>();
 
         public static void ClearCache()
         {
@@ -85,6 +87,7 @@ namespace CritterCrafter
                 }
             MeshCache.Clear();
             BoundsCache.Clear();
+            MotionBoundsCache.Clear();
         }
 
         public static AssembledCreature Assemble(CritterLibrary library, CritterRecipe recipe, AssemblyOptions options)
@@ -156,10 +159,13 @@ namespace CritterCrafter
             if (!BoundsCache.TryGetValue(boundsKey, out var measured))
             {
                 measured.bind = MeasureBounds(creature);
-                measured.animation = SampleAnimationBounds(creature, skelGo, measured.bind);
                 creature.ApplyBindPose();
                 creature.ApplyNeutralPose();
                 measured.neutral = MeasureBounds(creature);
+                // The motion box comes from the catalog (or, for an older library, one bone sampling per skeleton):
+                // baking every part through every clip cost thousands of BakeMesh calls per spawn.
+                measured.animation = SkeletonMotionBounds(library, skeleton, creature, skelGo);
+                measured.animation.Encapsulate(measured.bind);
                 measured.animation.Encapsulate(measured.neutral);
                 BoundsCache[boundsKey] = measured;
             }
@@ -233,12 +239,15 @@ namespace CritterCrafter
             var smr = go.AddComponent<SkinnedMeshRenderer>();
             smr.sharedMesh = mesh;
             smr.bones = targets;
-            smr.rootBone = targets[0];
+            // One stable root bone for every part: localBounds is read in the rootBone's space, so a limb bone (which
+            // moves) would drag the bounds around the body and they'd miss the mesh they are meant to cover.
+            Transform rootBone = bones.TryGetValue(RootBoneName, out var creatureRoot) ? creatureRoot : targets[0];
+            smr.rootBone = rootBone;
             if (mesh.subMeshCount > 2 || mesh.subMeshCount > part.max_material_slots)
                 throw new AssemblyException($"part {part.part_id} has {mesh.subMeshCount} material slots");
             smr.sharedMaterials = MaterialsForPart(entry, mesh);
             smr.updateWhenOffscreen = false;
-            smr.localBounds = PaddedBounds(mesh.bounds, targets[0].worldToLocalMatrix * meshToWorld, 0.35f);
+            smr.localBounds = PaddedBounds(mesh.bounds, rootBone.worldToLocalMatrix * meshToWorld, 0.35f);
             creature.AddRenderer(smr, branch.branch_id, part.part_id, connector);
             return TriangleCount(mesh);
         }
@@ -303,9 +312,54 @@ namespace CritterCrafter
             return any ? result : new Bounds(Vector3.zero, Vector3.zero);
         }
 
-        static Bounds SampleAnimationBounds(AssembledCreature creature, GameObject skeleton, Bounds initial)
+        /// <summary>The skeleton's bone that every part renderer is rooted at (the catalog's root bone).</summary>
+        const string RootBoneName = "root";
+
+        /// <summary>
+        /// Where a creature on this skeleton can be, in creature-local space: the catalog's motion box (every bone head
+        /// and tail in every baked clip), grown by the thickest part, the runtime IK's foot travel and the body's own
+        /// motion (bob, tilt, haul surge). Cached per skeleton.
+        /// </summary>
+        static Bounds SkeletonMotionBounds(CritterLibrary library, SkeletonData skeleton, AssembledCreature creature, GameObject skeletonGo)
         {
-            Bounds result = initial;
+            string key = System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(library) + "|" + skeleton.skeleton_id;
+            if (MotionBoundsCache.TryGetValue(key, out var cached)) return cached;
+            Bounds box;
+            var declared = skeleton.asset?.motion_bounds_m;
+            if (declared != null && declared.IsValid)
+            {
+                // The catalog frame mirrors X into Unity's (CritterFrame.Position).
+                Vector3 a = CritterFrame.Position(declared.min), b = CritterFrame.Position(declared.max);
+                box = new Bounds((a + b) * 0.5f, Vector3.zero);
+                box.Encapsulate(a);
+                box.Encapsulate(b);
+            }
+            else box = SampleBoneBounds(creature, skeletonGo);
+            float thickest = 0f;
+            foreach (var branch in skeleton.branches) thickest = Mathf.Max(thickest, (float)branch.girth_m);
+            float horizontal = 0f, vertical = 0f;
+            var locomotion = skeleton.locomotion;
+            if (locomotion != null && locomotion.legs != null)
+                foreach (var leg in locomotion.legs)
+                {
+                    horizontal = Mathf.Max(horizontal, (float)(leg.stroke_m * 0.5 + System.Math.Abs(leg.stance_shift_m)));
+                    vertical = Mathf.Max(vertical, (float)leg.clearance_m);
+                }
+            float body = 0.15f * (locomotion != null ? (float)locomotion.hip_height_m : 0f);
+            float radius = 0.75f * thickest;
+            box.Expand(new Vector3(2f * (radius + horizontal + body), 2f * (radius + vertical + body), 2f * (radius + horizontal + body)));
+            MotionBoundsCache[key] = box;
+            return box;
+        }
+
+        /// <summary>
+        /// Older libraries carry no motion box: sample every clip once and take the bone positions (no mesh baking).
+        /// Runs once per skeleton, not once per part combination.
+        /// </summary>
+        static Bounds SampleBoneBounds(AssembledCreature creature, GameObject skeleton)
+        {
+            var transforms = skeleton.GetComponentsInChildren<Transform>(true);
+            Bounds result = new Bounds(creature.transform.InverseTransformPoint(skeleton.transform.position), Vector3.zero);
             var animator = creature.Animator;
             if (animator == null || animator.runtimeAnimatorController == null) return result;
             foreach (var clip in animator.runtimeAnimatorController.animationClips)
@@ -315,9 +369,11 @@ namespace CritterCrafter
                 for (int i = 0; i <= samples; i++)
                 {
                     clip.SampleAnimation(skeleton, clip.length * i / samples);
-                    result.Encapsulate(MeasureBounds(creature));
+                    foreach (var t in transforms) result.Encapsulate(creature.transform.InverseTransformPoint(t.position));
                 }
             }
+            creature.ApplyBindPose();
+            creature.ApplyNeutralPose();
             return result;
         }
 
@@ -325,8 +381,9 @@ namespace CritterCrafter
         {
             foreach (var pr in creature.Renderers)
             {
-                Matrix4x4 creatureToRenderer = pr.renderer.transform.worldToLocalMatrix * creature.transform.localToWorldMatrix;
-                pr.renderer.localBounds = TransformBounds(animationBounds, creatureToRenderer);
+                // localBounds is read in the space of the renderer's rootBone, not of the renderer's own transform.
+                Matrix4x4 creatureToRoot = pr.renderer.rootBone.worldToLocalMatrix * creature.transform.localToWorldMatrix;
+                pr.renderer.localBounds = TransformBounds(animationBounds, creatureToRoot);
             }
         }
 
