@@ -77,7 +77,7 @@ The package depends on **Animation Rigging** (a core package in Unity 6). `Critt
   - limb3 legs use `TwoBoneIKConstraint` with a knee hint.
   - Insect legs yaw the coxa with a `MultiAimConstraint`, then solve femur and tibia with `TwoBoneIKConstraint`. The tarsus keeps its neutral angle relative to the yawed coxa frame.
   - IK targets sit on the ankle; the foot contact is offset from it in body space.
-- **`CreatureMotion`** keeps its game-facing API (`SetVelocity`, `SetState`, `PlayAttack`, `PlayHit`). Leg weights follow its state: the attack leg is released during telegraph and attack, and every leg fades out at death.
+- **`CreatureMotion`** keeps its game-facing API (`SetVelocity`, `SetState`, `PlayAttack`, `PlayHit`). Leg weights follow its state: the attack leg is released during telegraph and attack (a released leg does not count as a support). At death a walking body keeps its IK on the planted feet, so the baked collapse (made with the feet pinned) buckles over the real feet, on slopes too, and it stops stepping; a grounded body (a dragger) fades its legs out over 0.4 s instead, since it curls rather than collapses.
 
 Game integration: move the creature root with the agent (`updatePosition = true`) and leave the feet to `CreatureGait`, which should run after movement (it uses execution order 1000). No root motion is applied.
 
@@ -140,7 +140,7 @@ from the seed and maps onto machinery that already exists:
   slim legs (`WALKER_LEG_GIRTH`, 0.6 of the profile ratio; insect legs run 2-3 m), and the legs step with **uneven
   gaps** instead of evenly spaced phases. One leg **limps**: `gait.limp` becomes `limp` on that leg and
   `body_limp_m` on the block, and `CreatureGait` drops the body (and rolls it up to `limpRollDeg`) toward that leg
-  while it is planted, so the walk lurches. Neither field touches the step planner.
+  while it is planted, so the walk lurches; it also turns a little toward the weak side (`limpYawDeg`), stands shorter (its stance is cut to 88%), lands short and lifts low (scuffing). Neither field touches the step planner. (Unity's roll about +Z raises +X, so rolling toward a limper on the right takes a negative angle; the first version had the sign inverted.)
 - **Every working limb is grounded on its own** (`_ground_arm`, `_fit_leg`), because the neutral pose only lowers the
   root by the worst limb and a leg that hovers would leave the creature hovering.
 - **The attack is derived** (`actions.derive_attack_profile`): the dragger's hammer swing, turned to the direction
