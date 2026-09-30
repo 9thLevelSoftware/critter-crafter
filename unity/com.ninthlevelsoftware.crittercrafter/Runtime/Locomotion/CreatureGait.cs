@@ -84,7 +84,7 @@ namespace CritterCrafter.Locomotion
         [Tooltip("Velocity smoothing time (s).")]
         public float velocitySmoothing = 0.08f;
         [Tooltip("Maximum body pitch/roll from uneven footing (degrees).")]
-        public float maxBodyTiltDeg = 15f;
+        public float maxBodyTiltDeg = 25f;
         [Tooltip("Displacement in one frame treated as a teleport (m).")]
         public float teleportDistance = 2f;
         [Tooltip("Maximum visual body turn rate (deg/s). The root may snap to a new heading (NavMeshAgent with a huge angularSpeed); the body follows at this rate so planted feet are not dragged in one frame.")]
@@ -223,8 +223,12 @@ namespace CritterCrafter.Locomotion
             raw.y = 0f;
             _lastPosition = position;
             float blend = velocitySmoothing > 0f ? 1f - Mathf.Exp(-dt / velocitySmoothing) : 1f;
+            // The first moving frame takes the real velocity: smoothing it up from rest ran the clock and the walk/run
+            // choice at a fraction of the real speed for the first strides, and feet dragged.
+            bool startingToMove = !_wasMoving && raw.magnitude > 0.05f;
+            if (startingToMove) blend = 1f;
             _velocity = Vector3.Lerp(_velocity, raw, blend);
-            _landVelocity = Vector3.Lerp(_landVelocity, raw, velocitySmoothing > 0f ? 1f - Mathf.Exp(-dt / (0.25f * velocitySmoothing)) : 1f);
+            _landVelocity = Vector3.Lerp(_landVelocity, raw, startingToMove || velocitySmoothing <= 0f ? 1f : 1f - Mathf.Exp(-dt / (0.25f * velocitySmoothing)));
             float speed = Speed;
             float yaw = transform.eulerAngles.y;
             _yawLag = Mathf.Clamp(_yawLag - Mathf.DeltaAngle(_lastYaw, yaw), -180f, 180f);
@@ -690,37 +694,55 @@ namespace CritterCrafter.Locomotion
                 body.localRotation = BodyRotation();
                 return;
             }
-            // Least-squares plane y = a + b x + c z through planted-foot height errors (root-local x, z).
+            // Least-squares plane y = a + b x + c z through the ground height errors under every supporting leg's
+            // home (root-local x, z). Homes exist for all legs every frame (pass 1 already raycast them), so the
+            // plane no longer collapses whenever fewer than three feet happen to be planted (every trot frame).
+            // The height still follows the *planted* feet (hips must stay a reachable distance above them: following the
+            // ground under the homes lifted the body ahead of feet that were still low on a ramp and dragged them).
             double n = 0, sx = 0, sz = 0, sy = 0, sxx = 0, szz = 0, sxz = 0, sxy = 0, szy = 0;
+            double plantedCount = 0, plantedSum = 0;
             foreach (var leg in legs)
             {
-                if (!leg.planted || !leg.support) continue;
-                Vector3 local = transform.InverseTransformPoint(leg.plant);
+                if (!leg.support) continue;
+                Vector3 local = transform.InverseTransformPoint(leg.home);
                 double err = local.y - leg.homeLocal.y;
                 double x = leg.homeLocal.x, z = leg.homeLocal.z;
                 n++; sx += x; sz += z; sy += err;
                 sxx += x * x; szz += z * z; sxz += x * z; sxy += x * err; szy += z * err;
+                if (leg.planted)
+                {
+                    plantedCount++;
+                    plantedSum += transform.InverseTransformPoint(leg.plant).y - leg.homeLocal.y;
+                }
             }
             float height = 0f, pitch = 0f, roll = 0f;
             if (n > 0)
             {
                 // Bounded: a foot that couldn't reach its plant must never drag the body up with it.
                 float hip = (float)_block.hip_height_m;
-                height = Mathf.Clamp((float)(sy / n), -MaxBodyDropFraction * hip, MaxBodyRiseFraction * hip);
-                if (n >= 3)
+                double meanHeight = plantedCount > 0 ? plantedSum / plantedCount : sy / n;
+                height = Mathf.Clamp((float)meanHeight, -MaxBodyDropFraction * hip, MaxBodyRiseFraction * hip);
+                if (n >= 2)
                 {
-                    // Centered normal equations for the slopes.
+                    // Centered normal equations for the slopes; legs spread along one axis only (a biped's two
+                    // side-by-side feet) give that axis' slope alone.
                     double mx = sx / n, mz = sz / n, my = sy / n;
                     double cxx = sxx / n - mx * mx, czz = szz / n - mz * mz, cxz = sxz / n - mx * mz;
                     double cxy = sxy / n - mx * my, czy = szy / n - mz * my;
                     double det = cxx * czz - cxz * cxz;
-                    if (Math.Abs(det) > 1e-9)
+                    double b = 0, c = 0;
+                    if (n >= 3 && Math.Abs(det) > 1e-9)
                     {
-                        double b = (cxy * czz - czy * cxz) / det;
-                        double c = (czy * cxx - cxy * cxz) / det;
-                        pitch = Mathf.Clamp(-Mathf.Rad2Deg * Mathf.Atan((float)c), -maxBodyTiltDeg, maxBodyTiltDeg);
-                        roll = Mathf.Clamp(Mathf.Rad2Deg * Mathf.Atan((float)b), -maxBodyTiltDeg, maxBodyTiltDeg);
+                        b = (cxy * czz - czy * cxz) / det;
+                        c = (czy * cxx - cxy * cxz) / det;
                     }
+                    else
+                    {
+                        if (cxx > 1e-4) b = cxy / cxx;
+                        if (czz > 1e-4) c = czy / czz;
+                    }
+                    pitch = Mathf.Clamp(-Mathf.Rad2Deg * Mathf.Atan((float)c), -maxBodyTiltDeg, maxBodyTiltDeg);
+                    roll = Mathf.Clamp(Mathf.Rad2Deg * Mathf.Atan((float)b), -maxBodyTiltDeg, maxBodyTiltDeg);
                 }
             }
             // A limping leg: the body drops and rolls toward it while it carries weight, and lifts as it swings,
