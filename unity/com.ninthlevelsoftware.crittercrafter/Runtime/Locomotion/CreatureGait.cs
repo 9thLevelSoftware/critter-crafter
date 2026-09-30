@@ -64,6 +64,10 @@ namespace CritterCrafter.Locomotion
             [NonSerialized] public Vector3 home;
             /// <summary>Last frame's target was beyond reach and had to be pulled in.</summary>
             [NonSerialized] public bool clamped;
+            /// <summary>How far the target sat from the leg's root last frame, as a fraction of the reach limit (1 = clamped).</summary>
+            [NonSerialized] public float reachFrac;
+            /// <summary>Seconds since the foot landed; a foot that landed at its reach limit must not re-lift at once.</summary>
+            [NonSerialized] public float plantedTime;
             [NonSerialized] public float weight = 1f;
             /// <summary>
             /// Review diagnostics: how far the reach clamp dragged a foot that was already gripping last frame
@@ -104,6 +108,9 @@ namespace CritterCrafter.Locomotion
         bool _wasMoving;
         Vector3 _lastPosition;
         Vector3 _velocity;
+        /// <summary>Root velocity with much lighter smoothing, for placing landings (the body-speed smoothing lags a turn).</summary>
+        Vector3 _landVelocity;
+        List<Leg> _order;
         double _clock;
         float _bodyHeight, _bodyPitch, _bodyRoll, _bodyYaw, _bodySurge, _limpDip, _limpRoll;
         float _lastYaw, _yawLag;
@@ -142,6 +149,7 @@ namespace CritterCrafter.Locomotion
                 leg.group = g;
             }
             groundMask = mask;
+            _order = new List<Leg>(legs);
             bodyBaseLocalPosition = body.localPosition;
             bodyBaseLocalRotation = body.localRotation;
         }
@@ -207,6 +215,7 @@ namespace CritterCrafter.Locomotion
             _lastPosition = position;
             float blend = velocitySmoothing > 0f ? 1f - Mathf.Exp(-dt / velocitySmoothing) : 1f;
             _velocity = Vector3.Lerp(_velocity, raw, blend);
+            _landVelocity = Vector3.Lerp(_landVelocity, raw, velocitySmoothing > 0f ? 1f - Mathf.Exp(-dt / (0.25f * velocitySmoothing)) : 1f);
             float speed = Speed;
             float yaw = transform.eulerAngles.y;
             _yawLag = Mathf.Clamp(_yawLag - Mathf.DeltaAngle(_lastYaw, yaw), -180f, 180f);
@@ -250,6 +259,7 @@ namespace CritterCrafter.Locomotion
             float swingTime = (float)StepPlanner.SwingTime(_params.cadenceHz, _params.duty);
             float lead = (float)StepPlanner.LandingLead(speed, _params.cadenceHz, _params.duty);
             Vector3 heading = speed > 1e-4f ? _velocity / speed : transform.forward;
+            Vector3 landHeading = _landVelocity.sqrMagnitude > 1e-6f ? _landVelocity.normalized : heading;
             Quaternion lag = Quaternion.Euler(0f, _yawLag, 0f);
 
             // Pass 1: advance swings. A swing owns its own monotonic progress, so gait changes (duty,
@@ -261,18 +271,33 @@ namespace CritterCrafter.Locomotion
                 leg.swingT += dt;
                 float u = Mathf.Clamp01(leg.swingT / leg.swingDuration);
                 float remaining = Mathf.Max(0f, leg.swingDuration - leg.swingT);
-                Vector3 land = moving
-                    ? Ground(leg.home + _velocity * remaining + heading * lead, leg.homeLocal.y)
-                    : leg.home;
+                // Land where the foot's home will be when it touches down: the body is still catching up its yaw,
+                // so the home now is a half-turned one and the foot would need another step at once.
+                Vector3 land;
+                if (_block.body_on_ground)
+                    land = moving ? Ground(leg.home + _velocity * remaining + heading * lead, leg.homeLocal.y) : leg.home;
+                else
+                {
+                    float landIn = remaining + (moving ? 0.5f * (float)_params.duty / (float)_params.cadenceHz : 0f);
+                    var lagThen = Quaternion.Euler(0f, Mathf.MoveTowards(_yawLag, 0f, bodyTurnRateDeg * landIn), 0f);
+                    Vector3 homeThen = Ground(transform.TransformPoint(lagThen * leg.stanceLocal), leg.homeLocal.y);
+                    land = moving
+                        ? Ground(homeThen + _landVelocity * remaining + landHeading * lead, leg.homeLocal.y)
+                        : homeThen;
+                }
                 leg.position = Swing(leg.swingStart, land, u, leg.forced ? leg.clearance * 0.6f : leg.clearance);
                 if (u >= 1f) Plant(leg, land);
             }
 
-            // Pass 2: lift planted feet, on schedule while moving, or early when strained.
-            foreach (var leg in legs)
+            // Pass 2: lift planted feet, on schedule while moving, or early when strained. The most strained leg
+            // goes first: in list order the first legs used up the swing cap and the worst one waited, dragging.
+            bool strainedBlocked = false;
+            _order.Sort(ByStrain);
+            foreach (var leg in _order)
             {
                 leg.liftBlocked = false;
                 if (!leg.planted) continue;
+                leg.plantedTime += dt;
                 leg.position = leg.plant;
                 if (moving)
                 {
@@ -296,7 +321,10 @@ namespace CritterCrafter.Locomotion
                             Lift(leg, Mathf.Clamp(swingTime, 0.12f, 0.2f), true,
                                 StepPlanner.InStance(phase, _params.duty) ? cycle - 1 : cycle);
                         else
+                        {
                             leg.liftBlocked = true;
+                            strainedBlocked = true;
+                        }
                     }
                 }
                 else if (Overrun(leg, leg.home)
@@ -307,6 +335,7 @@ namespace CritterCrafter.Locomotion
                 }
             }
 
+            if (strainedBlocked) HurryLandings(dt);
             UpdateWeights(dt);
             UpdateBody(dt, speed);
             ApplyTargets();
@@ -336,6 +365,7 @@ namespace CritterCrafter.Locomotion
                 if (leg.target == null) continue;
                 if (!leg.hinge || leg.coxa == null)
                 {
+                    if (leg.hip != null) leg.reachFrac = Vector3.Distance(leg.position, leg.hip.position) / (MaxReachFraction * leg.reach);
                     Vector3 reachable = leg.planted ? ClampPlantedToReach(leg, leg.position) : ClampToReach(leg, leg.position);
                     leg.clamped = reachable != leg.position;
                     if (leg.planted && leg.clamped)
@@ -359,6 +389,7 @@ namespace CritterCrafter.Locomotion
                 Vector3 ankle = leg.position + frame * leg.ankleOffset;
                 Vector3 reach = ankle - femur;
                 float max = HingeReachFraction * leg.hingeReach;
+                leg.reachFrac = reach.magnitude / max;
                 leg.clamped = reach.sqrMagnitude > max * max;
                 if (leg.clamped)
                 {
@@ -394,9 +425,14 @@ namespace CritterCrafter.Locomotion
             leg.planted = true;
             leg.forced = false;
             leg.clamped = false;        // a foot that has just landed is not being dragged; ApplyTargets decides again
+            leg.plantedTime = 0f;
         }
 
         const float MaxReachFraction = 0.95f;
+        /// <summary>A planted foot this close to its reach limit is re-stepped before the clamp has to drag it.</summary>
+        const float OverrunReachFraction = 0.97f;
+        /// <summary>A foot has to have stood this long before nearing its limit counts as strain (else landing at the limit loops).</summary>
+        const float MinPlantedForOverrun = 0.1f;
 
         /// <summary>
         /// Pull <paramref name="point"/> within <paramref name="max"/> of <paramref name="centre"/> by shortening it
@@ -425,6 +461,20 @@ namespace CritterCrafter.Locomotion
             return d.sqrMagnitude > max * max ? leg.hip.position + d.normalized * max : p;
         }
 
+        static int ByStrain(Leg a, Leg b) => b.reachFrac.CompareTo(a.reachFrac);
+
+        /// <summary>
+        /// A strained leg is waiting on a support that is still in the air: bring the airborne legs down faster
+        /// (their swing runs at double speed, so the position stays continuous) so the waiting one is not
+        /// dragged for a whole swing. Bodies lying on the ground don't need it: their legs may lift at once.
+        /// </summary>
+        void HurryLandings(float dt)
+        {
+            if (_block.body_on_ground) return;
+            foreach (var leg in legs)
+                if (!leg.planted) leg.swingT += dt;
+        }
+
         static float Strain(Leg leg, Vector3 home)
         {
             Vector3 d = leg.plant - home;
@@ -436,7 +486,9 @@ namespace CritterCrafter.Locomotion
         {
             // Instant heading changes (agents with huge angular speed) leave planted feet far from home or
             // out of reach; re-step them early rather than stretching the chain.
+            // Grounded bodies (draggers) keep their own model: they re-step when the clamp has already dragged a hand.
             if (leg.clamped) return true;
+            if (!_block.body_on_ground && leg.reachFrac > OverrunReachFraction && leg.plantedTime > MinPlantedForOverrun) return true;
             if (!leg.hinge && leg.hip != null && Vector3.Distance(leg.hip.position, leg.plant) > 0.92f * leg.reach) return true;
             return Strain(leg, home) > Mathf.Max(0.6f * leg.stroke, 0.35f * leg.reach);
         }
