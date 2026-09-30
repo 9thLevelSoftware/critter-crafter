@@ -1,0 +1,1318 @@
+{
+  "schema_version": "3.0.0",
+  "skeleton_id": "crawler_bilateral_eight_legged_s002_v3",
+  "family": "crawler",
+  "locomotion_hint": "crawl",
+  "status": "draft",
+  "symmetry_pct": 100,
+  "branches": [
+    {
+      "branch_id": "core",
+      "template": "core1",
+      "parent_branch": null,
+      "attach_bone_index": 0,
+      "origin_m": [
+        0,
+        0.5207,
+        -0.3516
+      ],
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.7032,
+      "girth_m": 0.211,
+      "size_class": "L",
+      "side": "C",
+      "required": true,
+      "accepts": {
+        "categories": [
+          "core"
+        ],
+        "templates": [
+          "core1"
+        ]
+      },
+      "connector_size_class": null,
+      "binding_profile_id": "core1_body",
+      "binding_profile_version": "1.0.0",
+      "socket": {
+        "parent_joint": "root",
+        "position_m": [
+          0,
+          0.5207,
+          -0.3516
+        ],
+        "rotation_xyzw": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "gait": {
+        "role": "core",
+        "phase_rad": 0.0,
+        "support_phase": 0.5,
+        "bend_pole_m": [
+          0,
+          0.7207,
+          -0.6016
+        ],
+        "stride_m": 0.2953,
+        "clearance_m": 0.0844,
+        "cadence_hz": 0.0
+      },
+      "stance_deg": [
+        0.0
+      ],
+      "stance_z_deg": [
+        0.0
+      ]
+    },
+    {
+      "branch_id": "leg0_L",
+      "template": "insect_leg4",
+      "parent_branch": "core",
+      "attach_bone_index": 0,
+      "origin_m": [
+        0.1747,
+        0.5207,
+        -0.2762
+      ],
+      "direction": [
+        1.0,
+        0.0,
+        -0.6
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.8563,
+      "girth_m": 0.1284,
+      "size_class": "M",
+      "side": "L",
+      "required": true,
+      "accepts": {
+        "categories": [
+          "limb"
+        ],
+        "templates": [
+          "insect_leg4"
+        ]
+      },
+      "connector_size_class": "M",
+      "binding_profile_id": "insect_leg4_articulated",
+      "binding_profile_version": "1.0.0",
+      "socket": {
+        "parent_joint": "upper",
+        "position_m": [
+          0.1747,
+          0.0,
+          0.0754
+        ],
+        "rotation_xyzw": [
+          0.0,
+          0.87019991,
+          0.0,
+          0.49269881
+        ]
+      },
+      "gait": {
+        "role": "locomotor",
+        "phase_rad": 0,
+        "support_phase": 0.58,
+        "bend_pole_m": [
+          0.1747,
+          0.7207,
+          -0.5262
+        ],
+        "stride_m": 0.3596,
+        "clearance_m": 0.1028,
+        "cadence_hz": 1.5
+      },
+      "stance_deg": [
+        42.681,
+        -56.908,
+        -66.391,
+        9.485
+      ],
+      "stance_z_deg": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "contacts": [
+        {
+          "kind": "foot",
+          "bone_index": 3,
+          "local_point_m": [
+            0.0,
+            0.0856,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "branch_id": "leg0_R",
+      "template": "insect_leg4",
+      "parent_branch": "core",
+      "attach_bone_index": 0,
+      "origin_m": [
+        -0.1747,
+        0.5207,
+        -0.2762
+      ],
+      "direction": [
+        -1.0,
+        0.0,
+        -0.6
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.8563,
+      "girth_m": 0.1284,
+      "size_class": "M",
+      "side": "R",
+      "required": true,
+      "accepts": {
+        "categories": [
+          "limb"
+        ],
+        "templates": [
+          "insect_leg4"
+        ]
+      },
+      "connector_size_class": "M",
+      "binding_profile_id": "insect_leg4_articulated",
+      "binding_profile_version": "1.0.0",
+      "socket": {
+        "parent_joint": "upper",
+        "position_m": [
+          -0.1747,
+          0.0,
+          0.0754
+        ],
+        "rotation_xyzw": [
+          0.0,
+          -0.87019991,
+          0.0,
+          0.49269881
+        ]
+      },
+      "gait": {
+        "role": "locomotor",
+        "phase_rad": 3.141593,
+        "support_phase": 0.58,
+        "bend_pole_m": [
+          -0.1747,
+          0.7207,
+          -0.5262
+        ],
+        "stride_m": 0.3596,
+        "clearance_m": 0.1028,
+        "cadence_hz": 1.5
+      },
+      "stance_deg": [
+        42.681,
+        -56.908,
+        -66.391,
+        9.485
+      ],
+      "stance_z_deg": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "mirror_of": "leg0_L",
+      "contacts": [
+        {
+          "kind": "foot",
+          "bone_index": 3,
+          "local_point_m": [
+            0.0,
+            0.0856,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "branch_id": "leg1_L",
+      "template": "insect_leg4",
+      "parent_branch": "core",
+      "attach_bone_index": 0,
+      "origin_m": [
+        0.1747,
+        0.5207,
+        -0.0879
+      ],
+      "direction": [
+        1.0,
+        0.0,
+        -0.2
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.8563,
+      "girth_m": 0.1284,
+      "size_class": "M",
+      "side": "L",
+      "required": true,
+      "accepts": {
+        "categories": [
+          "limb"
+        ],
+        "templates": [
+          "insect_leg4"
+        ]
+      },
+      "connector_size_class": "M",
+      "binding_profile_id": "insect_leg4_articulated",
+      "binding_profile_version": "1.0.0",
+      "socket": {
+        "parent_joint": "upper",
+        "position_m": [
+          0.1747,
+          0.0,
+          0.2637
+        ],
+        "rotation_xyzw": [
+          0.0,
+          0.77334214,
+          0.0,
+          0.63398891
+        ]
+      },
+      "gait": {
+        "role": "locomotor",
+        "phase_rad": 3.141593,
+        "support_phase": 0.58,
+        "bend_pole_m": [
+          0.1747,
+          0.7207,
+          -0.3379
+        ],
+        "stride_m": 0.3596,
+        "clearance_m": 0.1028,
+        "cadence_hz": 1.5
+      },
+      "stance_deg": [
+        42.681,
+        -56.908,
+        -66.391,
+        9.485
+      ],
+      "stance_z_deg": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "contacts": [
+        {
+          "kind": "foot",
+          "bone_index": 3,
+          "local_point_m": [
+            0.0,
+            0.0856,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "branch_id": "leg1_R",
+      "template": "insect_leg4",
+      "parent_branch": "core",
+      "attach_bone_index": 0,
+      "origin_m": [
+        -0.1747,
+        0.5207,
+        -0.0879
+      ],
+      "direction": [
+        -1.0,
+        0.0,
+        -0.2
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.8563,
+      "girth_m": 0.1284,
+      "size_class": "M",
+      "side": "R",
+      "required": true,
+      "accepts": {
+        "categories": [
+          "limb"
+        ],
+        "templates": [
+          "insect_leg4"
+        ]
+      },
+      "connector_size_class": "M",
+      "binding_profile_id": "insect_leg4_articulated",
+      "binding_profile_version": "1.0.0",
+      "socket": {
+        "parent_joint": "upper",
+        "position_m": [
+          -0.1747,
+          0.0,
+          0.2637
+        ],
+        "rotation_xyzw": [
+          0.0,
+          -0.77334214,
+          0.0,
+          0.63398891
+        ]
+      },
+      "gait": {
+        "role": "locomotor",
+        "phase_rad": 0,
+        "support_phase": 0.58,
+        "bend_pole_m": [
+          -0.1747,
+          0.7207,
+          -0.3379
+        ],
+        "stride_m": 0.3596,
+        "clearance_m": 0.1028,
+        "cadence_hz": 1.5
+      },
+      "stance_deg": [
+        42.681,
+        -56.908,
+        -66.391,
+        9.485
+      ],
+      "stance_z_deg": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "mirror_of": "leg1_L",
+      "contacts": [
+        {
+          "kind": "foot",
+          "bone_index": 3,
+          "local_point_m": [
+            0.0,
+            0.0856,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "branch_id": "leg2_L",
+      "template": "insect_leg4",
+      "parent_branch": "core",
+      "attach_bone_index": 0,
+      "origin_m": [
+        0.1747,
+        0.5207,
+        0.1005
+      ],
+      "direction": [
+        1.0,
+        0.0,
+        0.2
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.8563,
+      "girth_m": 0.1284,
+      "size_class": "M",
+      "side": "L",
+      "required": true,
+      "accepts": {
+        "categories": [
+          "limb"
+        ],
+        "templates": [
+          "insect_leg4"
+        ]
+      },
+      "connector_size_class": "M",
+      "binding_profile_id": "insect_leg4_articulated",
+      "binding_profile_version": "1.0.0",
+      "socket": {
+        "parent_joint": "upper",
+        "position_m": [
+          0.1747,
+          0.0,
+          0.4521
+        ],
+        "rotation_xyzw": [
+          0.0,
+          0.63398891,
+          0.0,
+          0.77334214
+        ]
+      },
+      "gait": {
+        "role": "locomotor",
+        "phase_rad": 0,
+        "support_phase": 0.58,
+        "bend_pole_m": [
+          0.1747,
+          0.7207,
+          -0.1495
+        ],
+        "stride_m": 0.3596,
+        "clearance_m": 0.1028,
+        "cadence_hz": 1.5
+      },
+      "stance_deg": [
+        42.681,
+        -56.908,
+        -66.391,
+        9.485
+      ],
+      "stance_z_deg": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "contacts": [
+        {
+          "kind": "foot",
+          "bone_index": 3,
+          "local_point_m": [
+            0.0,
+            0.0856,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "branch_id": "leg2_R",
+      "template": "insect_leg4",
+      "parent_branch": "core",
+      "attach_bone_index": 0,
+      "origin_m": [
+        -0.1747,
+        0.5207,
+        0.1005
+      ],
+      "direction": [
+        -1.0,
+        0.0,
+        0.2
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.8563,
+      "girth_m": 0.1284,
+      "size_class": "M",
+      "side": "R",
+      "required": true,
+      "accepts": {
+        "categories": [
+          "limb"
+        ],
+        "templates": [
+          "insect_leg4"
+        ]
+      },
+      "connector_size_class": "M",
+      "binding_profile_id": "insect_leg4_articulated",
+      "binding_profile_version": "1.0.0",
+      "socket": {
+        "parent_joint": "upper",
+        "position_m": [
+          -0.1747,
+          0.0,
+          0.4521
+        ],
+        "rotation_xyzw": [
+          0.0,
+          -0.63398891,
+          0.0,
+          0.77334214
+        ]
+      },
+      "gait": {
+        "role": "locomotor",
+        "phase_rad": 3.141593,
+        "support_phase": 0.58,
+        "bend_pole_m": [
+          -0.1747,
+          0.7207,
+          -0.1495
+        ],
+        "stride_m": 0.3596,
+        "clearance_m": 0.1028,
+        "cadence_hz": 1.5
+      },
+      "stance_deg": [
+        42.681,
+        -56.908,
+        -66.391,
+        9.485
+      ],
+      "stance_z_deg": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "mirror_of": "leg2_L",
+      "contacts": [
+        {
+          "kind": "foot",
+          "bone_index": 3,
+          "local_point_m": [
+            0.0,
+            0.0856,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "branch_id": "leg3_L",
+      "template": "insect_leg4",
+      "parent_branch": "core",
+      "attach_bone_index": 0,
+      "origin_m": [
+        0.1747,
+        0.5207,
+        0.2888
+      ],
+      "direction": [
+        1.0,
+        0.0,
+        0.6
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.8563,
+      "girth_m": 0.1284,
+      "size_class": "M",
+      "side": "L",
+      "required": true,
+      "accepts": {
+        "categories": [
+          "limb"
+        ],
+        "templates": [
+          "insect_leg4"
+        ]
+      },
+      "connector_size_class": "M",
+      "binding_profile_id": "insect_leg4_articulated",
+      "binding_profile_version": "1.0.0",
+      "socket": {
+        "parent_joint": "upper",
+        "position_m": [
+          0.1747,
+          0.0,
+          0.6404
+        ],
+        "rotation_xyzw": [
+          0.0,
+          0.49269881,
+          0.0,
+          0.87019991
+        ]
+      },
+      "gait": {
+        "role": "locomotor",
+        "phase_rad": 3.141593,
+        "support_phase": 0.58,
+        "bend_pole_m": [
+          0.1747,
+          0.7207,
+          0.0388
+        ],
+        "stride_m": 0.3596,
+        "clearance_m": 0.1028,
+        "cadence_hz": 1.5
+      },
+      "stance_deg": [
+        42.681,
+        -56.908,
+        -66.391,
+        9.485
+      ],
+      "stance_z_deg": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "contacts": [
+        {
+          "kind": "foot",
+          "bone_index": 3,
+          "local_point_m": [
+            0.0,
+            0.0856,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "branch_id": "leg3_R",
+      "template": "insect_leg4",
+      "parent_branch": "core",
+      "attach_bone_index": 0,
+      "origin_m": [
+        -0.1747,
+        0.5207,
+        0.2888
+      ],
+      "direction": [
+        -1.0,
+        0.0,
+        0.6
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "length_m": 0.8563,
+      "girth_m": 0.1284,
+      "size_class": "M",
+      "side": "R",
+      "required": true,
+      "accepts": {
+        "categories": [
+          "limb"
+        ],
+        "templates": [
+          "insect_leg4"
+        ]
+      },
+      "connector_size_class": "M",
+      "binding_profile_id": "insect_leg4_articulated",
+      "binding_profile_version": "1.0.0",
+      "socket": {
+        "parent_joint": "upper",
+        "position_m": [
+          -0.1747,
+          0.0,
+          0.6404
+        ],
+        "rotation_xyzw": [
+          0.0,
+          -0.49269881,
+          0.0,
+          0.87019991
+        ]
+      },
+      "gait": {
+        "role": "locomotor",
+        "phase_rad": 0,
+        "support_phase": 0.58,
+        "bend_pole_m": [
+          -0.1747,
+          0.7207,
+          0.0388
+        ],
+        "stride_m": 0.3596,
+        "clearance_m": 0.1028,
+        "cadence_hz": 1.5
+      },
+      "stance_deg": [
+        42.681,
+        -56.908,
+        -66.391,
+        9.485
+      ],
+      "stance_z_deg": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "mirror_of": "leg3_L",
+      "contacts": [
+        {
+          "kind": "foot",
+          "bone_index": 3,
+          "local_point_m": [
+            0.0,
+            0.0856,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "branch_id": "dorsal_0",
+      "template": "appendage1",
+      "parent_branch": "core",
+      "attach_bone_index": 0,
+      "origin_m": [
+        0,
+        0.6157,
+        -0.1406
+      ],
+      "direction": [
+        0.0,
+        1.0,
+        -0.25
+      ],
+      "up": [
+        0,
+        0,
+        1
+      ],
+      "length_m": 0.226,
+      "girth_m": 0.0362,
+      "size_class": "M",
+      "side": "C",
+      "required": false,
+      "accepts": {
+        "categories": [
+          "appendage"
+        ],
+        "templates": [
+          "appendage1"
+        ]
+      },
+      "connector_size_class": "M",
+      "binding_profile_id": "appendage1_terminal",
+      "binding_profile_version": "1.0.0",
+      "socket": {
+        "parent_joint": "upper",
+        "position_m": [
+          0.0,
+          0.095,
+          0.211
+        ],
+        "rotation_xyzw": [
+          0.0,
+          0.78820544,
+          0.61541221,
+          0.0
+        ]
+      },
+      "gait": {
+        "role": "sway",
+        "phase_rad": 0.0,
+        "support_phase": 0.5,
+        "bend_pole_m": [
+          0,
+          0.8157,
+          -0.3906
+        ],
+        "stride_m": 0.12,
+        "clearance_m": 0.03,
+        "cadence_hz": 0.0
+      },
+      "stance_deg": [
+        0.0
+      ],
+      "stance_z_deg": [
+        0.0
+      ],
+      "optional_fill_pct": 55
+    },
+    {
+      "branch_id": "dorsal_1",
+      "template": "appendage1",
+      "parent_branch": "core",
+      "attach_bone_index": 0,
+      "origin_m": [
+        0,
+        0.6157,
+        0.1406
+      ],
+      "direction": [
+        0.0,
+        1.0,
+        -0.25
+      ],
+      "up": [
+        0,
+        0,
+        1
+      ],
+      "length_m": 0.1883,
+      "girth_m": 0.0301,
+      "size_class": "M",
+      "side": "C",
+      "required": false,
+      "accepts": {
+        "categories": [
+          "appendage"
+        ],
+        "templates": [
+          "appendage1"
+        ]
+      },
+      "connector_size_class": "M",
+      "binding_profile_id": "appendage1_terminal",
+      "binding_profile_version": "1.0.0",
+      "socket": {
+        "parent_joint": "upper",
+        "position_m": [
+          0.0,
+          0.095,
+          0.4922
+        ],
+        "rotation_xyzw": [
+          0.0,
+          0.78820544,
+          0.61541221,
+          0.0
+        ]
+      },
+      "gait": {
+        "role": "sway",
+        "phase_rad": 1.3,
+        "support_phase": 0.5,
+        "bend_pole_m": [
+          0,
+          0.8157,
+          -0.1094
+        ],
+        "stride_m": 0.12,
+        "clearance_m": 0.03,
+        "cadence_hz": 0.0
+      },
+      "stance_deg": [
+        0.0
+      ],
+      "stance_z_deg": [
+        0.0
+      ],
+      "optional_fill_pct": 50
+    }
+  ],
+  "neutral_pose": {
+    "root_offset_m": [
+      0.0,
+      -0.1789,
+      0.0
+    ],
+    "rotations": [
+      {
+        "bone_name": "root",
+        "rotation_xyzw": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "bone_name": "core_b0",
+        "rotation_xyzw": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "bone_name": "leg0_L_b0",
+        "rotation_xyzw": [
+          0.36390971,
+          0.0,
+          0.0,
+          0.93143423
+        ]
+      },
+      {
+        "bone_name": "leg0_L_b1",
+        "rotation_xyzw": [
+          -0.47645305,
+          0.0,
+          0.0,
+          0.87919992
+        ]
+      },
+      {
+        "bone_name": "leg0_L_b2",
+        "rotation_xyzw": [
+          -0.5474975,
+          0.0,
+          0.0,
+          0.83680732
+        ]
+      },
+      {
+        "bone_name": "leg0_L_b3",
+        "rotation_xyzw": [
+          0.08267776,
+          0.0,
+          0.0,
+          0.99657633
+        ]
+      },
+      {
+        "bone_name": "leg0_R_b0",
+        "rotation_xyzw": [
+          0.36390971,
+          0.0,
+          0.0,
+          0.93143423
+        ]
+      },
+      {
+        "bone_name": "leg0_R_b1",
+        "rotation_xyzw": [
+          -0.47645305,
+          0.0,
+          0.0,
+          0.87919992
+        ]
+      },
+      {
+        "bone_name": "leg0_R_b2",
+        "rotation_xyzw": [
+          -0.5474975,
+          0.0,
+          0.0,
+          0.83680732
+        ]
+      },
+      {
+        "bone_name": "leg0_R_b3",
+        "rotation_xyzw": [
+          0.08267776,
+          0.0,
+          0.0,
+          0.99657633
+        ]
+      },
+      {
+        "bone_name": "leg1_L_b0",
+        "rotation_xyzw": [
+          0.36390971,
+          0.0,
+          0.0,
+          0.93143423
+        ]
+      },
+      {
+        "bone_name": "leg1_L_b1",
+        "rotation_xyzw": [
+          -0.47645305,
+          0.0,
+          0.0,
+          0.87919992
+        ]
+      },
+      {
+        "bone_name": "leg1_L_b2",
+        "rotation_xyzw": [
+          -0.5474975,
+          0.0,
+          0.0,
+          0.83680732
+        ]
+      },
+      {
+        "bone_name": "leg1_L_b3",
+        "rotation_xyzw": [
+          0.08267776,
+          0.0,
+          0.0,
+          0.99657633
+        ]
+      },
+      {
+        "bone_name": "leg1_R_b0",
+        "rotation_xyzw": [
+          0.36390971,
+          0.0,
+          0.0,
+          0.93143423
+        ]
+      },
+      {
+        "bone_name": "leg1_R_b1",
+        "rotation_xyzw": [
+          -0.47645305,
+          0.0,
+          0.0,
+          0.87919992
+        ]
+      },
+      {
+        "bone_name": "leg1_R_b2",
+        "rotation_xyzw": [
+          -0.5474975,
+          0.0,
+          0.0,
+          0.83680732
+        ]
+      },
+      {
+        "bone_name": "leg1_R_b3",
+        "rotation_xyzw": [
+          0.08267776,
+          0.0,
+          0.0,
+          0.99657633
+        ]
+      },
+      {
+        "bone_name": "leg2_L_b0",
+        "rotation_xyzw": [
+          0.36390971,
+          0.0,
+          0.0,
+          0.93143423
+        ]
+      },
+      {
+        "bone_name": "leg2_L_b1",
+        "rotation_xyzw": [
+          -0.47645305,
+          0.0,
+          0.0,
+          0.87919992
+        ]
+      },
+      {
+        "bone_name": "leg2_L_b2",
+        "rotation_xyzw": [
+          -0.5474975,
+          0.0,
+          0.0,
+          0.83680732
+        ]
+      },
+      {
+        "bone_name": "leg2_L_b3",
+        "rotation_xyzw": [
+          0.08267776,
+          0.0,
+          0.0,
+          0.99657633
+        ]
+      },
+      {
+        "bone_name": "leg2_R_b0",
+        "rotation_xyzw": [
+          0.36390971,
+          0.0,
+          0.0,
+          0.93143423
+        ]
+      },
+      {
+        "bone_name": "leg2_R_b1",
+        "rotation_xyzw": [
+          -0.47645305,
+          0.0,
+          0.0,
+          0.87919992
+        ]
+      },
+      {
+        "bone_name": "leg2_R_b2",
+        "rotation_xyzw": [
+          -0.5474975,
+          0.0,
+          0.0,
+          0.83680732
+        ]
+      },
+      {
+        "bone_name": "leg2_R_b3",
+        "rotation_xyzw": [
+          0.08267776,
+          0.0,
+          0.0,
+          0.99657633
+        ]
+      },
+      {
+        "bone_name": "leg3_L_b0",
+        "rotation_xyzw": [
+          0.36390971,
+          0.0,
+          0.0,
+          0.93143423
+        ]
+      },
+      {
+        "bone_name": "leg3_L_b1",
+        "rotation_xyzw": [
+          -0.47645305,
+          0.0,
+          0.0,
+          0.87919992
+        ]
+      },
+      {
+        "bone_name": "leg3_L_b2",
+        "rotation_xyzw": [
+          -0.5474975,
+          0.0,
+          0.0,
+          0.83680732
+        ]
+      },
+      {
+        "bone_name": "leg3_L_b3",
+        "rotation_xyzw": [
+          0.08267776,
+          0.0,
+          0.0,
+          0.99657633
+        ]
+      },
+      {
+        "bone_name": "leg3_R_b0",
+        "rotation_xyzw": [
+          0.36390971,
+          0.0,
+          0.0,
+          0.93143423
+        ]
+      },
+      {
+        "bone_name": "leg3_R_b1",
+        "rotation_xyzw": [
+          -0.47645305,
+          0.0,
+          0.0,
+          0.87919992
+        ]
+      },
+      {
+        "bone_name": "leg3_R_b2",
+        "rotation_xyzw": [
+          -0.5474975,
+          0.0,
+          0.0,
+          0.83680732
+        ]
+      },
+      {
+        "bone_name": "leg3_R_b3",
+        "rotation_xyzw": [
+          0.08267776,
+          0.0,
+          0.0,
+          0.99657633
+        ]
+      },
+      {
+        "bone_name": "dorsal_0_b0",
+        "rotation_xyzw": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "bone_name": "dorsal_1_b0",
+        "rotation_xyzw": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      }
+    ]
+  },
+  "anatomy": {
+    "archetype_id": "crawler_bilateral_eight_legged",
+    "body_plan": "crawler",
+    "style": "anatomical",
+    "traits": {
+      "min_support": 2,
+      "body_on_ground": false,
+      "ring": false,
+      "pole_ik": false,
+      "compact_clip": true
+    },
+    "support_branches": [
+      "leg0_L",
+      "leg0_R",
+      "leg1_L",
+      "leg1_R",
+      "leg2_L",
+      "leg2_R",
+      "leg3_L",
+      "leg3_R"
+    ],
+    "contact_branches": [
+      "leg0_L",
+      "leg0_R",
+      "leg1_L",
+      "leg1_R",
+      "leg2_L",
+      "leg2_R",
+      "leg3_L",
+      "leg3_R"
+    ],
+    "symmetry": {
+      "kind": "bilateral"
+    },
+    "landmarks": {
+      "pelvis": "core",
+      "shoulder": "core",
+      "neck": "core"
+    },
+    "silhouette": {
+      "height_m": 0.5207,
+      "length_m": 1.2557,
+      "width_m": 1.4557
+    },
+    "budgets": {
+      "bones": 36,
+      "parts": 11,
+      "triangles": 6480
+    }
+  },
+  "provenance": {
+    "generator": "cc-gen-3",
+    "seed": 2,
+    "preset": "blend",
+    "variant": {
+      "blend": 0.547,
+      "height": 1.0092,
+      "length": 1.0822,
+      "width": 1.0241,
+      "limb": 0.9425,
+      "stance": 0.9572
+    }
+  }
+}

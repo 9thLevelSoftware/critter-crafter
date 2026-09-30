@@ -45,7 +45,9 @@ def skeleton() -> None:
 @click.option("--force", is_flag=True, help="Regenerate reviewed candidates as drafts")
 @click.option("--amalgam-seed", "amalgam_seeds", type=int, multiple=True,
               help="Write these amalgam seeds instead of the committed ones (to look at a seed; not committed)")
-def skeleton_vary(families, archetypes, presets, style, seed, count, force, amalgam_seeds) -> None:
+@click.option("--variant-seed", "variant_seeds", type=int, multiple=True,
+              help="Write these variant seeds instead of the committed ones (to look at a seed; not committed)")
+def skeleton_vary(families, archetypes, presets, style, seed, count, force, amalgam_seeds, variant_seeds) -> None:
     """Write 14 curated archetypes x 3 presets plus the committed amalgams by default; keep legacy IDs frozen."""
     chosen = [a for a in (archetypes or sorted(ARCHETYPES)) if not families or ARCHETYPES[a]["family"] in families]
     written = kept = 0
@@ -63,6 +65,17 @@ def skeleton_vary(families, archetypes, presets, style, seed, count, force, amal
                 continue
             _write_json(path, doc)
             written += 1
+    from .archetypes import build_variant, variant_seeds_for
+    if style == "anatomical" and not presets:
+        for archetype in chosen:
+            for variant_seed in variant_seeds or variant_seeds_for(archetype):
+                doc = build_variant(archetype, variant_seed)
+                path = paths().data / "skeletons" / f"{doc['skeleton_id']}.skeleton.json"
+                if path.exists() and not force and json.loads(path.read_text(encoding="utf-8")).get("status") != "draft":
+                    kept += 1
+                    continue
+                _write_json(path, doc)
+                written += 1
     from .amalgam import AMALGAM_SEEDS, build_amalgam
     if style == "anatomical" and not archetypes and not presets and (not families or "amalgam" in families):
         for amalgam_seed in amalgam_seeds or AMALGAM_SEEDS:

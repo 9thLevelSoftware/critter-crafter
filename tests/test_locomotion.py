@@ -109,7 +109,9 @@ def test_legged_bands_are_consistent_and_most_reach_game_speed(catalog):
     # Belly haulers and three-legged tripods (long duty to keep two feet down) are slower, and the compact
     # radial's stance is confined to the coxa yaw cone; the game reads v_max from the catalog rather than
     # forcing a uniform speed.
-    assert slow <= {"dragger_belly_hauler", "crawler_alien_tripod", "radial_raised_articulated_walker"}
+    # A compact seeded variant of the paired-leg serpentine falls just short of it too.
+    assert slow <= {"dragger_belly_hauler", "crawler_alien_tripod", "radial_raised_articulated_walker",
+                    "serpentine_segmented_paired_legs"}
 
 
 def test_quadrupeds_walk_in_lateral_sequence_and_trot_when_running(catalog):
@@ -150,7 +152,7 @@ def _draggers(catalog, archetype):
 
 def test_arm_leg_dragger_has_one_pulling_arm_and_one_pushing_leg(catalog):
     skeletons = _draggers(catalog, "dragger_arm_leg_crawler")
-    assert len(skeletons) == 3
+    assert len(skeletons) >= 3          # three presets plus the seeded variants
     for skeleton in skeletons:
         block = skeleton["locomotion"]
         assert block["mode"] == "legs" and block["gait"] == "drag" and block["body_on_ground"]
@@ -190,7 +192,7 @@ def test_radial_stances_stay_inside_the_coxa_yaw_cone(catalog):
     import math
     from critter_crafter.locomotion.block import MAX_COXA_YAW_DEG
     radials = [s for s in catalog["skeletons"] if s["family"] == "radial"]
-    assert len(radials) == 3
+    assert len(radials) >= 3            # three presets plus the seeded variants
     for skeleton in radials:
         for leg in skeleton["locomotion"]["legs"]:
             hip, home = leg["hip_m"], leg["home_m"]
