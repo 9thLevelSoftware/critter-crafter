@@ -405,6 +405,16 @@ namespace CritterCrafter
         public string fbx;
         public string glb;
         public ClipInfo[] clips;
+        /// <summary>Box every bone head and tail reaches in any baked clip or the bind pose (catalog frame, metres); absent in older libraries.</summary>
+        public MotionBounds motion_bounds_m;
+    }
+
+    [Serializable]
+    public class MotionBounds
+    {
+        public double[] min;
+        public double[] max;
+        public bool IsValid => min != null && max != null && min.Length == 3 && max.Length == 3;
     }
 
     [Serializable]

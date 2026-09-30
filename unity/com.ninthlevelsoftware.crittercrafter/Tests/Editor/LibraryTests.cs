@@ -638,6 +638,66 @@ namespace CritterCrafter.Tests
             Assert.IsEmpty(failures, string.Join(System.Environment.NewLine, failures));
         }
 
+        [UnityTest]
+        public IEnumerator PartRendererBoundsAlwaysCoverTheirBakedMeshAndAreRootedAtTheRootBone()
+        {
+            // SkinnedMeshRenderer.localBounds is read in the rootBone's space. The bounds used to be computed in the
+            // renderer's own space and rooted at a limb bone that moves, so they could miss the mesh they cover and the
+            // renderer was culled while visible. Every part is now rooted at the skeleton's root bone and the box comes
+            // from the catalog; check over a run at speed that no baked mesh ever pokes out of its renderer's bounds.
+            EditorSettings.enterPlayModeOptionsEnabled = true;
+            EditorSettings.enterPlayModeOptions = EnterPlayModeOptions.DisableDomainReload | EnterPlayModeOptions.DisableSceneReload;
+            yield return new EnterPlayMode();
+            Time.captureFramerate = 30;
+            var failures = new List<string>();
+            foreach (var id in new[] { "quadruped_stocky_plantigrade_balanced_v3", "hexapod_compact_insect_balanced_v3",
+                                       "radial_raised_articulated_walker_balanced_v3", "amalgam_walker_s0024_v3",
+                                       "amalgam_hauled_s0004_v3", "dragger_forelimb_puller_balanced_v3" })
+            {
+                var holder = TestScene("BoundsTest", false);
+                var c = LocomotionCapture.Spawn(Lib, id, holder.transform, out var restore);
+                var gait = c.GetComponent<CritterCrafter.Locomotion.CreatureGait>();
+                foreach (var part in c.Renderers)
+                    if (part.renderer.rootBone == null || part.renderer.rootBone.name != "root")
+                        failures.Add($"{id}: {part.partId} is rooted at {part.renderer.rootBone?.name ?? "nothing"}, not the root bone");
+                float speed = Mathf.Min(2.5f, 0.9f * (float)c.GaitBlock.v_max_mps);
+                var recorder = holder.AddComponent<LocomotionRecorder>();
+                recorder.Begin(gait, ReviewCourse.Straight(speed, 2f), new LocomotionMetrics { skeleton_id = id, speed_mps = speed, warmup_frames = 0 });
+                int frame = 0, misses = 0;
+                float worst = 0f;
+                while (!recorder.Done)
+                {
+                    yield return null;
+                    if (++frame % 3 != 0) continue;
+                    foreach (var part in c.Renderers)
+                    {
+                        var baked = new Mesh();
+                        part.renderer.BakeMesh(baked, true);
+                        Bounds mesh = baked.bounds;
+                        Matrix4x4 toWorld = part.renderer.transform.localToWorldMatrix;
+                        var world = new Bounds(toWorld.MultiplyPoint3x4(mesh.center), Vector3.zero);
+                        for (int i = 0; i < 8; i++)
+                            world.Encapsulate(toWorld.MultiplyPoint3x4(mesh.center + new Vector3(
+                                (i & 1) == 0 ? -mesh.extents.x : mesh.extents.x, (i & 2) == 0 ? -mesh.extents.y : mesh.extents.y,
+                                (i & 4) == 0 ? -mesh.extents.z : mesh.extents.z)));
+                        var box = part.renderer.bounds;
+                        float out_ = Mathf.Max(Mathf.Max(box.min.x - world.min.x, box.min.y - world.min.y, box.min.z - world.min.z),
+                                               Mathf.Max(world.max.x - box.max.x, world.max.y - box.max.y, world.max.z - box.max.z));
+                        if (out_ > 0.01f) { misses++; worst = Mathf.Max(worst, out_); }
+                        Object.Destroy(baked);
+                    }
+                }
+                Object.Destroy(recorder);
+                if (misses > 0) failures.Add($"{id}: {misses} part-frames with the baked mesh outside its bounds (worst by {worst:F2} m)");
+                Object.Destroy(holder);
+                restore();
+                yield return null;
+            }
+            Time.captureFramerate = 0;
+            yield return new ExitPlayMode();
+            Assert.IsEmpty(failures, string.Join(System.Environment.NewLine, failures));
+        }
+
         [Test]
         public void GaitPhaseDrivesTheLocomotionOverlayClock()
         {
