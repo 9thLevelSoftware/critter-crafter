@@ -281,7 +281,12 @@ def _set_status_owner(family: str | None, ids: tuple[str, ...], status: str) -> 
     """The owner's own decision: no review receipt, no built library. Records who decided and when.
     Status and review are outside the source fingerprint, so built assets and receipts stay valid."""
     files = _skeleton_files(family)
-    known = {json.loads(f.read_text(encoding="utf-8"))["skeleton_id"] for f in files}
+    parsed = [(f, json.loads(f.read_text(encoding="utf-8"))) for f in files]
+    known = {d["skeleton_id"] for _, d in parsed}
+    unknown = set(ids) - known
+    if unknown:
+        raise click.ClickException(f"unknown skeletons: {', '.join(sorted(unknown))}")
+    docs = [(f, d) for f, d in parsed if not ids or d["skeleton_id"] in ids]
     unknown = set(ids) - known
     if unknown:
         raise click.ClickException(f"unknown skeletons: {', '.join(sorted(unknown))}")
