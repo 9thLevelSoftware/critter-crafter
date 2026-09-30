@@ -123,15 +123,20 @@ namespace CritterCrafter.Locomotion
         /// <summary>Swing trajectory: smoothstep interpolation plus a sin^2 lift of <paramref name="clearance"/>.</summary>
         public static double[] SwingPoint(double[] start, double[] end, double u, double clearance)
         {
+            SwingPoint(start[0], start[1], start[2], end[0], end[1], end[2], u, clearance, out double x, out double y, out double z);
+            return new[] { x, y, z };
+        }
+
+        /// <summary>Allocation-free <see cref="SwingPoint(double[], double[], double, double)"/> for per-frame use.</summary>
+        public static void SwingPoint(double sx, double sy, double sz, double ex, double ey, double ez,
+            double u, double clearance, out double x, out double y, out double z)
+        {
             double s = Smoothstep(u);
             double k = Math.Sin(Math.PI * Math.Min(1.0, Math.Max(0.0, u)));
             double lift = clearance * k * k;
-            return new[]
-            {
-                start[0] + (end[0] - start[0]) * s,
-                start[1] + (end[1] - start[1]) * s + lift,
-                start[2] + (end[2] - start[2]) * s,
-            };
+            x = sx + (ex - sx) * s;
+            y = sy + (ey - sy) * s + lift;
+            z = sz + (ez - sz) * s;
         }
 
         public static int SupportCount(LocomotionData block, double clock, double duty, bool run)

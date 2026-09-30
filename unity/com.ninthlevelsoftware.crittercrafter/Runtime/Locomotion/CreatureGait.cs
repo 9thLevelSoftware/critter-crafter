@@ -232,10 +232,10 @@ namespace CritterCrafter.Locomotion
             {
                 // Feet standing at home are mid-stance: start the clock there so the first stride is
                 // not spent stretching planted legs. Swings already owed this cycle are consumed.
-                _clock = 0.5 * _params.duty - StepPlanner.LegOffset(ToPlanner(legs[0]), _run);
+                _clock = 0.5 * _params.duty - PhaseOffset(legs[0], _run);
                 foreach (var leg in legs)
                 {
-                    double offset = StepPlanner.LegOffset(ToPlanner(leg), _run);
+                    double offset = PhaseOffset(leg, _run);
                     double phase = StepPlanner.LegPhase(_clock, offset);
                     if (StepPlanner.InStance(phase, _params.duty))
                         leg.lastSwingCycle = Math.Floor(_clock + offset) - 1;
@@ -274,7 +274,7 @@ namespace CritterCrafter.Locomotion
                 leg.position = leg.plant;
                 if (moving)
                 {
-                    double offset = StepPlanner.LegOffset(ToPlanner(leg), _run);
+                    double offset = PhaseOffset(leg, _run);
                     double phase = StepPlanner.LegPhase(_clock, offset);
                     double cycle = Math.Floor(_clock + offset);
                     if (!StepPlanner.InStance(phase, _params.duty) && cycle != leg.lastSwingCycle)
@@ -372,13 +372,14 @@ namespace CritterCrafter.Locomotion
             }
         }
 
-        static LocomotionLeg ToPlanner(Leg leg) => new LocomotionLeg { walk_phase = leg.walkPhase, run_phase = leg.runPhase };
+        /// <summary>The leg's phase offset in the current pattern (same rule as StepPlanner.LegOffset, without a per-frame object).</summary>
+        static double PhaseOffset(Leg leg, bool run) => run ? leg.runPhase : leg.walkPhase;
 
         Vector3 Swing(Vector3 start, Vector3 end, float u, float clearance)
         {
             // Ground-plane interpolation and lift are expressed in world up; ramps come from the endpoints.
-            var p = StepPlanner.SwingPoint(new double[] { start.x, start.y, start.z }, new double[] { end.x, end.y, end.z }, u, clearance);
-            return new Vector3((float)p[0], (float)p[1], (float)p[2]);
+            StepPlanner.SwingPoint(start.x, start.y, start.z, end.x, end.y, end.z, u, clearance, out double x, out double y, out double z);
+            return new Vector3((float)x, (float)y, (float)z);
         }
 
         void Plant(Leg leg, Vector3 at)
@@ -525,7 +526,7 @@ namespace CritterCrafter.Locomotion
             foreach (var leg in legs)
             {
                 // The arm that planted most recently (phase within its first haul span) is the one pulling.
-                double phase = StepPlanner.LegPhase(_clock, StepPlanner.LegOffset(ToPlanner(leg), _run));
+                double phase = StepPlanner.LegPhase(_clock, PhaseOffset(leg, _run));
                 if (phase >= span) continue;
                 w = (float)(phase / span);
                 side = leg.homeLocal.x < 0f ? -1 : 1;
