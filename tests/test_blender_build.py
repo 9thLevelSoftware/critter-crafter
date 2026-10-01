@@ -91,7 +91,7 @@ def test_assembled_creature_renders_and_bakes_a_draft_review_recipe(built, tmp_p
     from critter_crafter.recipes.generator import generate_for_skeleton
 
     catalog, out, _ = built
-    skel = next(s for s in catalog["skeletons"] if s["status"] == "draft")
+    skel = catalog["skeletons"][0]      # review recipes ignore approval; the owner may have approved everything
     recipe = generate_for_skeleton(catalog, skel["skeleton_id"], 3)
     used = {f["part_id"] for f in recipe["fills"]} | {f["connector_part_id"] for f in recipe["fills"] if f["connector_part_id"]}
     res = run_op("assemble", {
