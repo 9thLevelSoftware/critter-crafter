@@ -282,7 +282,9 @@ def test_branch_semantics_and_girth_match_the_exact_binding_profile() -> None:
                 "appendage" if branch["template"] in ("tentacle8", "appendage1", "neck2") else
                 "limb"
             )
-            assert branch["accepts"] == {"categories": [expected_category], "templates": [branch["template"]]}
+            accepts = dict(branch["accepts"])
+            accepts.pop("tags_any", None)               # an amalgam's hauling arm also asks for a part tag
+            assert accepts == {"categories": [expected_category], "templates": [branch["template"]]}
             if candidate["family"] == "amalgam" and role == "core":
                 continue                # an amalgam's blob body is deliberately fatter than its profile's ratio
             if candidate["family"] == "amalgam" and role == "locomotor":

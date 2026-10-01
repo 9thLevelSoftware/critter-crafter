@@ -443,6 +443,7 @@
                 "manipulator",
                 "head",
                 "neck",
+                "hand",
                 "sway",
                 "flail",
                 "none"

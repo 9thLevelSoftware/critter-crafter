@@ -3,7 +3,7 @@
   "skeleton_id": "amalgam_hauled_s0009_v3",
   "family": "amalgam",
   "locomotion_hint": "drag",
-  "status": "approved",
+  "status": "draft",
   "symmetry_pct": 92,
   "branches": [
     {
@@ -230,6 +230,76 @@
             0.0
           ]
         }
+      ]
+    },
+    {
+      "branch_id": "hand1",
+      "template": "appendage1",
+      "parent_branch": "arm1",
+      "attach_bone_index": -1,
+      "origin_m": [
+        0.6919,
+        0.4016,
+        1.5263
+      ],
+      "direction": [
+        0.222448,
+        0.689973,
+        0.688806
+      ],
+      "up": [
+        -0.111479,
+        0.719875,
+        -0.685093
+      ],
+      "length_m": 0.7,
+      "girth_m": 0.112,
+      "size_class": "M",
+      "side": "L",
+      "required": true,
+      "accepts": {
+        "categories": [
+          "appendage"
+        ],
+        "templates": [
+          "appendage1"
+        ]
+      },
+      "connector_size_class": "M",
+      "binding_profile_id": "hand1_rigid",
+      "binding_profile_version": "1.0.0",
+      "socket": {
+        "parent_joint": "end",
+        "position_m": [
+          -0.0459,
+          0.0615,
+          0.1224
+        ],
+        "rotation_xyzw": [
+          -0.40271685,
+          -0.1338238,
+          0.28554274,
+          0.85928789
+        ]
+      },
+      "gait": {
+        "role": "hand",
+        "phase_rad": 0.0,
+        "support_phase": 0.5,
+        "bend_pole_m": [
+          0.6919,
+          0.6016,
+          1.2763
+        ],
+        "stride_m": 0.294,
+        "clearance_m": 0.084,
+        "cadence_hz": 0.0
+      },
+      "stance_deg": [
+        0.0
+      ],
+      "stance_z_deg": [
+        0.0
       ]
     },
     {
@@ -718,81 +788,6 @@
         0.0
       ],
       "optional_fill_pct": 70
-    },
-    {
-      "branch_id": "flail5",
-      "template": "limb3",
-      "parent_branch": "core",
-      "attach_bone_index": 0,
-      "origin_m": [
-        0.138,
-        0.8777,
-        -0.205
-      ],
-      "direction": [
-        0.212441,
-        0.943186,
-        -0.25548
-      ],
-      "up": [
-        0.0,
-        0.0,
-        1.0
-      ],
-      "length_m": 0.4463,
-      "girth_m": 0.0893,
-      "size_class": "M",
-      "side": "L",
-      "required": false,
-      "accepts": {
-        "categories": [
-          "limb"
-        ],
-        "templates": [
-          "limb3"
-        ]
-      },
-      "connector_size_class": "M",
-      "binding_profile_id": "limb3_brachial",
-      "binding_profile_version": "1.0.0",
-      "socket": {
-        "parent_joint": "upper",
-        "position_m": [
-          0.138,
-          0.4155,
-          0.3514
-        ],
-        "rotation_xyzw": [
-          0.087584,
-          0.78744459,
-          0.60639184,
-          0.0674463
-        ]
-      },
-      "gait": {
-        "role": "flail",
-        "phase_rad": 0.0,
-        "support_phase": 0.5,
-        "bend_pole_m": [
-          0.138,
-          1.0777,
-          -0.455
-        ],
-        "stride_m": 0.1874,
-        "clearance_m": 0.0536,
-        "cadence_hz": 0.0
-      },
-      "stance_deg": [
-        10.0,
-        -60.0,
-        8.0
-      ],
-      "stance_z_deg": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "optional_fill_pct": 80
     }
   ],
   "neutral_pose": {
@@ -854,6 +849,15 @@
           0.05640248,
           0.16423291,
           0.93141114
+        ]
+      },
+      {
+        "bone_name": "hand1_b0",
+        "rotation_xyzw": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
         ]
       },
       {
@@ -1062,33 +1066,6 @@
           0.0,
           0.9945219
         ]
-      },
-      {
-        "bone_name": "flail5_b0",
-        "rotation_xyzw": [
-          0.08715574,
-          0.0,
-          0.0,
-          0.9961947
-        ]
-      },
-      {
-        "bone_name": "flail5_b1",
-        "rotation_xyzw": [
-          -0.5,
-          0.0,
-          0.0,
-          0.8660254
-        ]
-      },
-      {
-        "bone_name": "flail5_b2",
-        "rotation_xyzw": [
-          0.06975647,
-          0.0,
-          0.0,
-          0.99756405
-        ]
       }
     ]
   },
@@ -1125,9 +1102,9 @@
       "width_m": 0.8845
     },
     "budgets": {
-      "bones": 32,
+      "bones": 30,
       "parts": 10,
-      "triangles": 5860
+      "triangles": 5550
     }
   },
   "provenance": {
@@ -1135,10 +1112,5 @@
     "seed": 9,
     "preset": "amalgam",
     "mode": "hauled"
-  },
-  "review": {
-    "by": "owner",
-    "date": "2026-09-30",
-    "method": "owner"
   }
 }

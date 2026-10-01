@@ -254,8 +254,8 @@ def _gesture(name: str, role: str, k: int, u: float, phase: float,
              death_style: str = "collapse") -> tuple[float, float]:
     if role == "stabilizer":
         return 0.0, 0.0
-    if role == "locomotor":
-        return 0.0, 0.0
+    if role == "locomotor" or role == "hand":
+        return 0.0, 0.0                 # a locomotor is driven by contact IK; a hand is rigid on the arm that carries it
     if role == "neck":
         # A neck plays the head's gestures spread down its chain, so the whole neck bends about as far as a head
         # does (a head on top adds its own curve): each bone takes NECK_SHARE / chain_count of the head's angle.

@@ -679,6 +679,76 @@
       ]
     },
     {
+      "branch_id": "hand1",
+      "template": "appendage1",
+      "parent_branch": "arm1",
+      "attach_bone_index": -1,
+      "origin_m": [
+        -0.8171,
+        0.4301,
+        1.417
+      ],
+      "direction": [
+        -0.301157,
+        0.711773,
+        0.634574
+      ],
+      "up": [
+        0.220286,
+        0.699398,
+        -0.679939
+      ],
+      "length_m": 0.7,
+      "girth_m": 0.112,
+      "size_class": "M",
+      "side": "R",
+      "required": true,
+      "accepts": {
+        "categories": [
+          "appendage"
+        ],
+        "templates": [
+          "appendage1"
+        ]
+      },
+      "connector_size_class": "M",
+      "binding_profile_id": "hand1_rigid",
+      "binding_profile_version": "1.0.0",
+      "socket": {
+        "parent_joint": "end",
+        "position_m": [
+          0.0449,
+          0.0588,
+          0.127
+        ],
+        "rotation_xyzw": [
+          -0.41487689,
+          0.14027554,
+          -0.28794968,
+          0.85163661
+        ]
+      },
+      "gait": {
+        "role": "hand",
+        "phase_rad": 0.0,
+        "support_phase": 0.5,
+        "bend_pole_m": [
+          -0.8171,
+          0.6301,
+          1.167
+        ],
+        "stride_m": 0.294,
+        "clearance_m": 0.084,
+        "cadence_hz": 0.0
+      },
+      "stance_deg": [
+        0.0
+      ],
+      "stance_z_deg": [
+        0.0
+      ]
+    },
+    {
       "branch_id": "belly",
       "template": "tentacle8",
       "parent_branch": "core",
@@ -1197,6 +1267,15 @@
         ]
       },
       {
+        "bone_name": "hand1_b0",
+        "rotation_xyzw": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
         "bone_name": "belly_b0",
         "rotation_xyzw": [
           0.0,
@@ -1476,9 +1555,9 @@
       "width_m": 0.8198
     },
     "budgets": {
-      "bones": 44,
-      "parts": 13,
-      "triangles": 7720
+      "bones": 45,
+      "parts": 14,
+      "triangles": 7875
     }
   },
   "provenance": {

@@ -156,8 +156,9 @@ from the seed and maps onto machinery that already exists:
 - **On a 20° ramp** the body now pitches to the ground plane under all supporting homes (it used to stay level whenever fewer than three feet were planted, which is every trot frame, and the tilt limit was below the ramp angle); the height still follows the planted feet, because following the ground under the homes lifted the body ahead of feet that were still low and dragged them. The quadruped's ramp slip went from 0.139 to 0.000 m at walk. A biped's two side-by-side feet give roll only, no pitch.
 - **Starting from standing to full speed in one frame** can drag a foot during the first stride. Tests allow a one-second warmup.
 - **Draggers use placeholder parts,** so the hands read as feet and the head is small. Real parts (M2) will improve the read.
-- **Amalgam hands are placeholder too:** the reference image's giant splayed hands need a Meshy part (owner cost
-  confirmation first). A hauled amalgam's heave pivots at the rear of the body, as a dragger's does; a body carried
+- **Amalgam hands:** a hauling arm ends in a rigid hand branch, filled by one of four Meshy giant-hand parts once the
+  owner approves them (until then, by a placeholder capsule). The hand rides on the arm's last bone, so it tilts with
+  the wrist in a stride; the contact stays at the wrist, with the hand set 12 cm above it. A hauled amalgam's heave pivots at the rear of the body, as a dragger's does; a body carried
   mostly by pushers may want the pivot at the front.
 - **Walker amalgams slip 3-16 cm at instant 90° turns** (and some lifts are refused while they re-step); the
   straight walk and the 20° ramp are clean. This is the general turn limitation, worse on tall legs.
