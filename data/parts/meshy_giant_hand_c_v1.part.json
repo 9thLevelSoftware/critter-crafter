@@ -1,0 +1,62 @@
+{
+  "schema_version": "3.0.0",
+  "part_id": "meshy_giant_hand_c_v1",
+  "category": "appendage",
+  "template": "appendage1",
+  "binding_profile_id": "hand1_rigid",
+  "binding_profile_version": "1.0.0",
+  "side": "symmetric",
+  "girth_m": 0.112,
+  "species_tags": [],
+  "roles": [
+    "puller"
+  ],
+  "size_class": null,
+  "status": "draft",
+  "style_profile": "flesh_stylized_v1",
+  "dimensions_m": [
+    0.626077,
+    0.310089,
+    0.711813
+  ],
+  "length_m": 0.7,
+  "budget": {
+    "max_triangles": 2500,
+    "max_material_slots": 1,
+    "texture_size": 1024
+  },
+  "fallback": {
+    "primitive": "capsule",
+    "albedo": "#9b6874"
+  },
+  "provenance": {
+    "source": "meshy",
+    "meshy_task_id": "01a0f5c8-34f0-720e-a139-7fdf3733167d",
+    "license": "meshy-output: may be paid-private; never publish mesh, texture or render bytes"
+  },
+  "real": {
+    "archive_path": "procedural-biomass-assembly/artifacts/meshy_mcp_scout/biomass_giant_hand_v1/01a0f5c8-34f0-720e-a139-7fdf3733167d",
+    "sha256": "2d9700a87658ae0a816badfd9ffbd830af796ac600baeba3562a6aa27dc87e50",
+    "fit": {
+      "axis": "+y",
+      "up": "+z"
+    },
+    "measured": {
+      "dimensions_m": [
+        0.626077,
+        0.310089,
+        0.711813
+      ],
+      "uniform_scale": 0.37429,
+      "radial_scale": 1.0,
+      "radial_scale_wanted": 1.0,
+      "nominal_girth_m": 0.376675,
+      "up_source": "authored",
+      "end_to_end_bend_deg": 0.0,
+      "strain_p99": 1.0,
+      "strain_max": 1.0,
+      "islands": null,
+      "triangles": 2424
+    }
+  }
+}

@@ -44,6 +44,14 @@ HEADY_SEEDS: dict[int, str] = {
     40: HEAD_GROWTH_LIMB_TIP, 58: HEAD_GROWTH_LIMB_TIP,
 }
 
+# A hauling arm ends in a rigid hand branch on its own binding profile, so only a part fitted to it (a giant splayed
+# hand) fills it and no other branch accepts that part. The arm keeps its own contact at the wrist; the hand is set
+# HAND_LIFT_M above it so the palm's underside rests at the contact's height (the bake's IK aims the bone tail, so
+# the contact itself can't move).
+HAND_PROFILE = "hand1_rigid"
+HAND_LENGTH_M = .7                 # one nominal size: a hand part fits within 80-125% of its length
+HAND_LIFT_M = .12                  # how far the hand's axis rides above the wrist at the neutral pose (half its thickness)
+
 MAX_BRANCHES = 14
 # A walker's legs are tall and slim next to its body: this scales the profile's girth ratio.
 WALKER_LEG_GIRTH = .6
@@ -169,6 +177,55 @@ def _pull_arm(body: _Body, bid: str, sx: int, t: float, length: float, phase: fl
     arm["_extension_target"] = .72
     _set_gait(arm, pole_ik=True)
     return arm
+
+
+def _arm_pose(arm: dict[str, Any]) -> tuple[tuple[float, ...], tuple[float, ...]]:
+    """The rest basis of a hauling arm and the rotation its stance puts on its last bone (bone basis: Y along the bone,
+    Z toward up, X = Y x Z; the same convention as ``kinematics.pose_world``)."""
+    forward = mu.normalize(arm["direction"])
+    up = mu.normalize(mu.sub(arm["up"], mu.scale(forward, mu.dot(arm["up"], forward))))
+    rest = mu.quat_from_basis(mu.cross(forward, up), forward, up)
+    stance = (0.0, 0.0, 0.0, 1.0)
+    for x_angle, z_angle in zip(arm["stance_deg"], arm["stance_z_deg"], strict=True):
+        x_half, z_half = math.radians(x_angle) / 2, math.radians(z_angle) / 2
+        local = arch._qmul((0.0, 0.0, math.sin(z_half), math.cos(z_half)), (math.sin(x_half), 0.0, 0.0, math.cos(x_half)))
+        stance = arch._qmul(stance, local)
+    return rest, stance
+
+
+def _inverse(q: tuple[float, ...]) -> tuple[float, ...]:
+    return (-q[0], -q[1], -q[2], q[3])
+
+
+def _hand_frame(arm: dict[str, Any], lift: float) -> tuple[list[float], list[float], list[float]]:
+    """Where a hand sits and how it points so that, at the neutral pose, it lies flat on the ground ahead of the wrist.
+
+    A child of the arm's last bone rides that bone's posed rotation P = R Q (R the rest basis, Q the stance), and ends
+    up at the bone's posed tail. Both the position and the rest rotation are chosen so the posed result is wanted:
+    *lift* metres straight above the wrist, its axis horizontal along the arm's reach and its dorsal side up.
+    Returns (offset from the wrist, direction, up) in the rest frame."""
+    rest, stance = _arm_pose(arm)
+    to_rest = lambda v: mu.quat_rotate(rest, mu.quat_rotate(_inverse(stance), mu.quat_rotate(_inverse(rest), v)))  # noqa: E731
+    posed_axis = mu.quat_rotate(arch._qmul(rest, stance), (0.0, 1.0, 0.0))
+    reach = [posed_axis[0], 0.0, posed_axis[2]]
+    if mu.length(reach) < .2:
+        reach = [arm["direction"][0], 0.0, arm["direction"][2]]
+    axis = mu.normalize(reach)
+    wanted = mu.quat_from_basis(mu.cross(axis, [0.0, 1.0, 0.0]), axis, [0.0, 1.0, 0.0])
+    hand_rest = arch._qmul(arch._qmul(rest, _inverse(stance)), arch._qmul(_inverse(rest), wanted))
+    return (list(to_rest((0.0, lift, 0.0))), list(mu.quat_rotate(hand_rest, (0.0, 1.0, 0.0))),
+            list(mu.quat_rotate(hand_rest, (0.0, 0.0, 1.0))))
+
+
+def _hand(arm: dict[str, Any]) -> dict[str, Any]:
+    """A rigid one-bone hand on the end of a hauling arm: it never gestures, and lies flat ahead of the wrist."""
+    px, py, pz = mu.frame_from_dir_up(arm["direction"], arm["up"])
+    lift, direction, up = _hand_frame(arm, HAND_LIFT_M)
+    tip = [round(v, 4) for v in mu.add(mu.add(arm["origin_m"], mu.scale(pz, arm["length_m"])), lift)]
+    hand = arch._branch(f"hand{arm['branch_id'].removeprefix('arm')}", "appendage1", arm["branch_id"], origin=tip,
+                        direction=direction, up=up, length=HAND_LENGTH_M, side=arm["side"], attach=-1, role="hand",
+                        profile_id=HAND_PROFILE)
+    return hand
 
 
 def _push_leg(body: _Body, bid: str, sx: int, t: float, length: float, phase: float, rng: SplitMix64) -> dict[str, Any]:
@@ -359,7 +416,7 @@ def _hauled(seed: int, body: _Body, rng: SplitMix64) -> tuple[list[dict[str, Any
     count = 1 + rng.below(3)
     kinds = ["pull"] + [("pull" if rng.below(100) < 55 else "push") for _ in range(count - 1)]
     first_side = 1 if rng.below(2) else -1
-    limbs = []
+    limbs, hands = [], []
     for index, kind in enumerate(kinds):
         sx = first_side * (1 if index % 2 == 0 else -1)
         phase = index * math.tau / count
@@ -369,8 +426,10 @@ def _hauled(seed: int, body: _Body, rng: SplitMix64) -> tuple[list[dict[str, Any
             limb = _push_leg(body, f"leg{index + 1}", sx, _between(rng, .03, .2), body.length * _between(rng, .6, .85), phase, rng)
         _ground_arm(limb, limb["length_m"], max_length=2.0)
         limbs.append(limb)
+        if kind == "pull":
+            hands.append(_hand(limb))
     belly = _belly(body, "belly", body.length * _between(rng, .45, .65), "body")
-    return limbs + [belly], [b["branch_id"] for b in limbs] + ["belly"], "drag"
+    return limbs + hands + [belly], [b["branch_id"] for b in limbs] + ["belly"], "drag"
 
 
 def _walker(seed: int, body: _Body, rng: SplitMix64) -> tuple[list[dict[str, Any]], list[str], str]:

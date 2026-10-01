@@ -188,3 +188,56 @@ def test_head_growth_leaves_the_seeds_it_does_not_name_exactly_as_they_were():
     finally:
         amalgam.HEADY_SEEDS.update(saved)
     assert all(not any(b["gait"]["role"] == "neck" for b in json.loads(doc)["branches"]) for doc in old.values())
+
+
+def test_a_hauling_arms_hand_has_its_own_profile_and_its_own_placeholder_fits(catalog):
+    from critter_crafter.library.catalog import reference_part_id
+    from critter_crafter.recipes.generator import part_accepted
+
+    parts = {p["part_id"]: p for p in catalog["parts"]}
+    hands = 0
+    for skeleton in catalog["skeletons"]:
+        for branch in skeleton["branches"]:
+            assert part_accepted(parts[reference_part_id(skeleton["skeleton_id"], branch["branch_id"])], branch),                 (skeleton["skeleton_id"], branch["branch_id"])
+            if branch["binding_profile_id"] == amalgam.HAND_PROFILE:
+                hands += 1
+                assert skeleton["skeleton_id"].startswith("amalgam_hauled") and branch["branch_id"].startswith("hand")
+                assert branch["gait_role"] == "hand" and branch["template"] == "appendage1" and not branch.get("contacts")
+                assert branch["parent_branch"].startswith("arm")
+    assert hands
+
+
+def test_a_hauling_arms_hand_lies_flat_just_above_the_wrist_at_the_neutral_pose(compiled):
+    from critter_crafter.skeletons.amalgam import HAND_LIFT_M
+    from critter_crafter.skeletons.kinematics import neutral_pose_world
+
+    checked = 0
+    for skeleton in compiled.values():
+        pose = neutral_pose_world(skeleton)
+        for branch in skeleton["branches"]:
+            if branch["gait_role"] != "hand":
+                continue
+            arm = next(b for b in skeleton["branches"] if b["branch_id"] == branch["parent_branch"])
+            wrist = pose[arm["bone_names"][-1]]["tail"]
+            hand = pose[branch["bone_names"][0]]["head"]
+            assert [round(h - w, 3) for h, w in zip(hand, wrist)] == [0.0, round(HAND_LIFT_M, 3), 0.0], skeleton["skeleton_id"]
+            from critter_crafter import mathutil as mu
+            rotation = pose[branch["bone_names"][0]]["rotation"]
+            axis, dorsal = mu.quat_rotate(rotation, (0, 1, 0)), mu.quat_rotate(rotation, (0, 0, 1))
+            assert abs(axis[1]) < 1e-4 and dorsal[1] == pytest.approx(1.0, abs=1e-4)      # flat, palm down
+            assert arm["binding_profile_id"] != amalgam.HAND_PROFILE        # the arm keeps its ordinary parts
+            checked += 1
+    assert checked
+
+
+def test_the_giant_hands_fit_every_hand_branch_and_nothing_else(catalog):
+    from critter_crafter.recipes.generator import part_accepted
+
+    hand_parts = [p for p in catalog["parts"] if p["part_id"].startswith("meshy_giant_hand_")]
+    assert len(hand_parts) == 4
+    branches = [(s["skeleton_id"], b) for s in catalog["skeletons"] for b in s["branches"]]
+    hand_branches = [(sid, b) for sid, b in branches if b["gait_role"] == "hand"]
+    assert hand_branches
+    for part in hand_parts:
+        assert all(part_accepted(part, b) for _, b in hand_branches), part["part_id"]
+        assert not [sid for sid, b in branches if b["gait_role"] != "hand" and part_accepted(part, b)], part["part_id"]

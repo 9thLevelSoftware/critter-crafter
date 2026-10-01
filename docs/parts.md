@@ -185,3 +185,23 @@ Scout meshes not imported yet:
   fit's `strain_p99`/`strain_max` report it; texture stretch follows.
 - The Unity texture binding (`asset.albedo_png` → `_BaseMap`/`_MainTex`) was written without a Unity
   editor in the loop. Run the EditMode tests and an import of a built library before relying on it.
+
+## Giant hands (hauled amalgams)
+
+Four text-to-3D hands (prefix from `flesh_stylized_v1`, "a single giant hand, palm flat and facing down, ... raw
+severed wrist stump at the attachment end"; 20 credits for the mesh and 10 for the texture each, 120 in all) are fitted as
+`meshy_giant_hand_{a,b,c,d}_v1` (long thin fingers with a severed wrist, curled, webbed, thumb with red nails). They live
+in the archive under `meshy_mcp_scout/biomass_giant_hand_v1/<task-id>` and the records keep only the path, SHA-256 and
+fit.
+
+* **A hand is a rigid terminal part, not a whole arm.** The meshes have no forearm, so fitting them as `limb3` arms
+  would fold the palm at the elbow and wrist. Each hauling arm instead carries a one-bone `hand` branch
+  (`appendage1` template, own profile `hand1_rigid`, so no other branch accepts a hand). The arm keeps its contact at
+  the wrist because the bake's IK aims the bone tail; the hand is set `HAND_LIFT_M` (12 cm) above it and rotated to lie
+  flat along the arm's reach at the neutral pose (`amalgam._hand_frame`). The hand never gestures
+  (`motion._gesture`, role `hand`).
+* Import: `critter part import <archive path> --part-id meshy_giant_hand_<x>_v1 --profile hand1_rigid --axis +y --up <+z|-z> --length 0.7 --role puller`.
+  `--up` is the mesh's dorsal normal (the back of the hand), so the branch's up puts the palm down. All four hands are
+  0.7 m, so one record covers every hauled arm (parts fit within 80-125% of a branch's length).
+* `part review` checks them against the placeholder on three hauled skeletons; a rigid part scores 1.000 everywhere.
+  Look at `sheet.png` for how the hand sits on the ground.

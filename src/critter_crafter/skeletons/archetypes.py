@@ -60,13 +60,13 @@ _PROFILE_FRACTIONS = {
     "core1_body": (1.0,), "spine3_axial": (.34, .33, .33),
     "limb3_plantigrade": (.45, .45, .10), "limb3_digitigrade": (.35, .45, .20), "limb3_brachial": (.42, .40, .18),
     "insect_leg4_articulated": (.20, .35, .35, .10), "tentacle8_flexible": (.125,) * 8,
-    "head1_neck": (1.0,), "appendage1_terminal": (1.0,), "neck2_axial": (.5, .5),
+    "head1_neck": (1.0,), "appendage1_terminal": (1.0,), "neck2_axial": (.5, .5), "hand1_rigid": (1.0,),
 }
 _PROFILE_GIRTH = {
     "core1_body": .30, "spine3_axial": .30,
     "limb3_plantigrade": .22, "limb3_digitigrade": .18, "limb3_brachial": .20,
     "insect_leg4_articulated": .15, "tentacle8_flexible": .18,
-    "head1_neck": .28, "appendage1_terminal": .16, "neck2_axial": .22,
+    "head1_neck": .28, "appendage1_terminal": .16, "neck2_axial": .22, "hand1_rigid": .16,
 }
 _JOINTS = {
     "core1_body": ("upper",), "spine3_axial": ("pelvis", "lower", "end"),
@@ -74,7 +74,7 @@ _JOINTS = {
     "limb3_brachial": ("upper", "lower", "end"),
     "insect_leg4_articulated": ("upper", "femur", "tibia", "end"),
     "tentacle8_flexible": ("seg0", "seg1", "seg2", "seg3", "seg4", "seg5", "seg6", "end"),
-    "head1_neck": ("upper",), "appendage1_terminal": ("upper",), "neck2_axial": ("base", "upper"),
+    "head1_neck": ("upper",), "appendage1_terminal": ("upper",), "neck2_axial": ("base", "upper"), "hand1_rigid": ("upper",),
 }
 
 

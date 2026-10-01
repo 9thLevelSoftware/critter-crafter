@@ -3,7 +3,7 @@
   "skeleton_id": "amalgam_hauled_s0004_v3",
   "family": "amalgam",
   "locomotion_hint": "drag",
-  "status": "approved",
+  "status": "draft",
   "symmetry_pct": 92,
   "branches": [
     {
@@ -402,6 +402,146 @@
             0.0
           ]
         }
+      ]
+    },
+    {
+      "branch_id": "hand1",
+      "template": "appendage1",
+      "parent_branch": "arm1",
+      "attach_bone_index": -1,
+      "origin_m": [
+        0.7812,
+        0.4574,
+        1.4728
+      ],
+      "direction": [
+        0.203867,
+        0.77106,
+        0.603245
+      ],
+      "up": [
+        -0.214928,
+        0.636403,
+        -0.740808
+      ],
+      "length_m": 0.7,
+      "girth_m": 0.112,
+      "size_class": "M",
+      "side": "L",
+      "required": true,
+      "accepts": {
+        "categories": [
+          "appendage"
+        ],
+        "templates": [
+          "appendage1"
+        ]
+      },
+      "connector_size_class": "M",
+      "binding_profile_id": "hand1_rigid",
+      "binding_profile_version": "1.0.0",
+      "socket": {
+        "parent_joint": "end",
+        "position_m": [
+          -0.0417,
+          0.0503,
+          0.1071
+        ],
+        "rotation_xyzw": [
+          -0.44869806,
+          -0.16208276,
+          0.29858729,
+          0.82658627
+        ]
+      },
+      "gait": {
+        "role": "hand",
+        "phase_rad": 0.0,
+        "support_phase": 0.5,
+        "bend_pole_m": [
+          0.7812,
+          0.6574,
+          1.2228
+        ],
+        "stride_m": 0.294,
+        "clearance_m": 0.084,
+        "cadence_hz": 0.0
+      },
+      "stance_deg": [
+        0.0
+      ],
+      "stance_z_deg": [
+        0.0
+      ]
+    },
+    {
+      "branch_id": "hand3",
+      "template": "appendage1",
+      "parent_branch": "arm3",
+      "attach_bone_index": -1,
+      "origin_m": [
+        1.1972,
+        0.5201,
+        1.5158
+      ],
+      "direction": [
+        0.385092,
+        0.768036,
+        0.511688
+      ],
+      "up": [
+        -0.434095,
+        0.640028,
+        -0.633976
+      ],
+      "length_m": 0.7,
+      "girth_m": 0.112,
+      "size_class": "M",
+      "side": "L",
+      "required": true,
+      "accepts": {
+        "categories": [
+          "appendage"
+        ],
+        "templates": [
+          "appendage1"
+        ]
+      },
+      "connector_size_class": "M",
+      "binding_profile_id": "hand1_rigid",
+      "binding_profile_version": "1.0.0",
+      "socket": {
+        "parent_joint": "end",
+        "position_m": [
+          -0.0427,
+          0.0509,
+          0.1439
+        ],
+        "rotation_xyzw": [
+          -0.44412159,
+          -0.1616603,
+          0.30143131,
+          0.82810695
+        ]
+      },
+      "gait": {
+        "role": "hand",
+        "phase_rad": 0.0,
+        "support_phase": 0.5,
+        "bend_pole_m": [
+          1.1972,
+          0.7201,
+          1.2658
+        ],
+        "stride_m": 0.294,
+        "clearance_m": 0.084,
+        "cadence_hz": 0.0
+      },
+      "stance_deg": [
+        0.0
+      ],
+      "stance_z_deg": [
+        0.0
       ]
     },
     {
@@ -870,6 +1010,24 @@
         ]
       },
       {
+        "bone_name": "hand1_b0",
+        "rotation_xyzw": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "bone_name": "hand3_b0",
+        "rotation_xyzw": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
         "bone_name": "belly_b0",
         "rotation_xyzw": [
           0.0,
@@ -1115,9 +1273,9 @@
       "width_m": 0.9607
     },
     "budgets": {
-      "bones": 35,
-      "parts": 9,
-      "triangles": 6325
+      "bones": 37,
+      "parts": 11,
+      "triangles": 6635
     }
   },
   "provenance": {
@@ -1125,10 +1283,5 @@
     "seed": 4,
     "preset": "amalgam",
     "mode": "hauled"
-  },
-  "review": {
-    "by": "owner",
-    "date": "2026-09-30",
-    "method": "owner"
   }
 }

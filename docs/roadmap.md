@@ -2,7 +2,7 @@
 
 The milestone list below was restored from the original plan (`git show 6379277:.claude/plans/floating-wiggling-sprout.md`, "Milestones & acceptance"). That plan file was later overwritten by the runtime-locomotion plan, so this page is now the one place that holds the milestones and their status. Live counts (skeletons, parts, tests) belong here too, so other docs can point at this page instead of repeating them.
 
-**Live counts (2026-09-29):** 14 archetypes × 3 presets = 42 draft anchors, 28 seeded variants and 15 seeded amalgams (85 skeletons), none approved; 4 real parts, all `draft`; pytest collects 402 tests; the Unity EditMode suite has 41 cases (40 passed, 1 skipped for missing env vars).
+**Live counts (2026-09-29):** 14 archetypes × 3 presets = 42 draft anchors, 28 seeded variants and 15 seeded amalgams (85 skeletons), none approved; 4 scout parts approved and 4 giant-hand parts draft; pytest collects 402 tests; the Unity EditMode suite has 41 cases (40 passed, 1 skipped for missing env vars).
 
 ## M0: Scaffold, schemas, placeholders, first Unity assembly — done
 
@@ -25,7 +25,7 @@ The milestone list below was restored from the original plan (`git show 6379277:
 
 - Work: import the scout meshes, then clean, fit, weight, QA, export.
 - Accepted when: at least 3 parts pass QA including clip deformation and are **approved by the owner**, and a mixed real-plus-placeholder library imports and animates in Unity.
-- Status: 4 parts pass QA (see `docs/handoff.md` → M2 status). Approval is pending, and the Unity albedo binding has not been run in Unity.
+- Status: 4 parts pass QA (see `docs/handoff.md` → M2 status). The four scouts are approved, the four giant hands (hauled amalgams) are pending, and the Unity `_MainTex` albedo binding is covered by an EditMode test (the URP path has not been run).
 
 ## M3: First paid Meshy batch — not started
 

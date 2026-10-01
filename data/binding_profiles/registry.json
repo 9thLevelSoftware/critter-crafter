@@ -12,6 +12,11 @@
       "binding_profile_hash": "538e50215be731bc703f1eef994ead8ed4fa52a52516ca8c6042a62f56914a5f"
     },
     {
+      "binding_profile_id": "hand1_rigid",
+      "binding_profile_version": "1.0.0",
+      "binding_profile_hash": "f8c64f303dd1a4dd7e630cbd58c39e58ba7647a73df1270fcb84b6d5e04abf70"
+    },
+    {
       "binding_profile_id": "head1_neck",
       "binding_profile_version": "1.0.0",
       "binding_profile_hash": "411d00a73578d55ec2c8df021ddc45dcf3760dd1de14392f90e31386c1f3c0ad"
