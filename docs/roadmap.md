@@ -36,7 +36,7 @@ The milestone list below was restored from the original plan (`git show 6379277:
 
 - Work: at least 9 connector variants, at least 24 parts, at least 80 skeletons, species and tag affinity, `CreatureBaker`.
 - Accepted when: each family yields at least 80 distinct creatures per 100 seeds, a baked creature takes at most 2 draw calls, and baked and runtime screenshots match.
-- Status: connectors exist only as generated reference lofts; the skeleton target is met (85, in the library), the parts and "80 distinct creatures per 100 seeds" targets are not.
+- Status: connectors exist only as generated reference lofts; the skeleton target is met (85, in the library), the parts target is not. The "80 distinct creatures per 100 seeds" target is met by every pool (`critter recipe sweep`: 100 of 100, serpentine 89), though the distinctness comes from placeholder reference parts, not real ones.
 
 ## M5: synaptic-sea-unity integration — not started
 
