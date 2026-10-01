@@ -442,6 +442,7 @@
                 "locomotor",
                 "manipulator",
                 "head",
+                "neck",
                 "sway",
                 "flail",
                 "none"

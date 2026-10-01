@@ -106,15 +106,21 @@ def skeleton_vary(families, archetypes, presets, style, seed, count, force, amal
 
 @skeleton.command("amalgam-sweep")
 @click.option("--seeds", default="1-100", show_default=True, help="Seed range LO-HI (inclusive)")
-def skeleton_amalgam_sweep(seeds) -> None:
+@click.option("--growth", type=click.Choice(["necked", "cluster", "limb_tip"]), default=None,
+              help="Try the seeds with this head growth (committed seeds are skipped)")
+def skeleton_amalgam_sweep(seeds, growth) -> None:
     """Grow and check amalgam seeds without Blender: mode, branch count, and pass or the reasons it fails.
 
     A development aid for choosing which seeds to commit in ``amalgam.AMALGAM_SEEDS``, not a gate."""
-    from .amalgam import AmalgamError, build_amalgam, mode_for_seed, validate_amalgam
+    from .amalgam import AMALGAM_SEEDS, HEADY_SEEDS, AmalgamError, build_amalgam, mode_for_seed, validate_amalgam
     low, _, high = seeds.partition("-")
     passed: dict[str, list[int]] = {}
     for amalgam_seed in range(int(low), int(high or low) + 1):
         mode = mode_for_seed(amalgam_seed)
+        if growth:
+            if amalgam_seed in AMALGAM_SEEDS:
+                continue
+            HEADY_SEEDS[amalgam_seed] = growth
         try:
             doc = build_amalgam(amalgam_seed)
             problems = validate_amalgam(doc)

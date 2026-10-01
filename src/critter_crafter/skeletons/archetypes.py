@@ -50,23 +50,23 @@ ARCHETYPES: dict[str, dict[str, Any]] = {
     "dragger_arm_leg_crawler": {"family": "dragger", "plan": "dragger", "variant": "armleg", "height": 0.74, "length": 1.5, "width": 0.7},
 }
 
-_FRACTIONS = {"core1": 1, "spine3": 3, "limb3": 3, "insect_leg4": 4, "tentacle8": 8, "head1": 1, "appendage1": 1}
+_FRACTIONS = {"core1": 1, "spine3": 3, "limb3": 3, "insect_leg4": 4, "tentacle8": 8, "head1": 1, "appendage1": 1, "neck2": 2}
 _PROFILES = {
     "core1": "core1_body", "spine3": "spine3_axial", "limb3": "limb3_plantigrade",
     "insect_leg4": "insect_leg4_articulated", "tentacle8": "tentacle8_flexible",
-    "head1": "head1_neck", "appendage1": "appendage1_terminal",
+    "head1": "head1_neck", "appendage1": "appendage1_terminal", "neck2": "neck2_axial",
 }
 _PROFILE_FRACTIONS = {
     "core1_body": (1.0,), "spine3_axial": (.34, .33, .33),
     "limb3_plantigrade": (.45, .45, .10), "limb3_digitigrade": (.35, .45, .20), "limb3_brachial": (.42, .40, .18),
     "insect_leg4_articulated": (.20, .35, .35, .10), "tentacle8_flexible": (.125,) * 8,
-    "head1_neck": (1.0,), "appendage1_terminal": (1.0,),
+    "head1_neck": (1.0,), "appendage1_terminal": (1.0,), "neck2_axial": (.5, .5),
 }
 _PROFILE_GIRTH = {
     "core1_body": .30, "spine3_axial": .30,
     "limb3_plantigrade": .22, "limb3_digitigrade": .18, "limb3_brachial": .20,
     "insect_leg4_articulated": .15, "tentacle8_flexible": .18,
-    "head1_neck": .28, "appendage1_terminal": .16,
+    "head1_neck": .28, "appendage1_terminal": .16, "neck2_axial": .22,
 }
 _JOINTS = {
     "core1_body": ("upper",), "spine3_axial": ("pelvis", "lower", "end"),
@@ -74,7 +74,7 @@ _JOINTS = {
     "limb3_brachial": ("upper", "lower", "end"),
     "insect_leg4_articulated": ("upper", "femur", "tibia", "end"),
     "tentacle8_flexible": ("seg0", "seg1", "seg2", "seg3", "seg4", "seg5", "seg6", "end"),
-    "head1_neck": ("upper",), "appendage1_terminal": ("upper",),
+    "head1_neck": ("upper",), "appendage1_terminal": ("upper",), "neck2_axial": ("base", "upper"),
 }
 
 
@@ -110,7 +110,7 @@ def _branch(branch_id: str, template: str, parent: str | None, *, origin: list[f
     profile_id = profile_id or _PROFILES[template]
     length = round(length, 4)
     category = ("core" if role == "core" else "head" if role == "head" else
-                "tail" if branch_id == "body" else "appendage" if template in {"tentacle8", "appendage1"} else "limb")
+                "tail" if branch_id == "body" else "appendage" if template in {"tentacle8", "appendage1", "neck2"} else "limb")
     stance = {
         "limb3_plantigrade": [12.0, -28.0, 16.0],
         "limb3_digitigrade": [14.0, -34.0, 19.0],
@@ -665,7 +665,7 @@ def _refresh_branch_dimensions(branch: dict[str, Any], factor: float, girth_scal
 def _apply_horror_modifier(branches: list[dict[str, Any]]) -> None:
     """Apply an explicit, deterministic elongation modifier without changing topology."""
     factors = {"core1": 1.10, "spine3": 1.0, "head1": 1.22, "tentacle8": 1.15,
-               "limb3": 1.08, "insect_leg4": 1.08, "appendage1": 1.18}
+               "limb3": 1.08, "insect_leg4": 1.08, "appendage1": 1.18, "neck2": 1.10}
     for branch in branches:
         _refresh_branch_dimensions(branch, factors[branch["template"]])
         branch["gait"]["bend_pole_m"][2] = round(branch["gait"]["bend_pole_m"][2] - branch["length_m"] * .04, 4)

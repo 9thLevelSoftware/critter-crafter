@@ -462,6 +462,181 @@
    ]
   },
   {
+   "skeleton_id": "amalgam_hauled_s0043_v3",
+   "speed": 0.3,
+   "mode": "legs",
+   "weight": 0.0,
+   "duty": 0.6,
+   "stride_m": 1.5023190000000002,
+   "cadence_hz": 0.19969127728531688,
+   "run": false,
+   "overspeed": false,
+   "landings": [
+    0.369902,
+    0.017503,
+    1.4517007
+   ]
+  },
+  {
+   "skeleton_id": "amalgam_hauled_s0043_v3",
+   "speed": 1.502319,
+   "mode": "legs",
+   "weight": 0.0,
+   "duty": 0.6,
+   "stride_m": 1.5023190000000002,
+   "cadence_hz": 0.9999999999999999,
+   "run": false,
+   "overspeed": false,
+   "landings": [
+    0.369902,
+    0.017503,
+    1.4517007
+   ]
+  },
+  {
+   "skeleton_id": "amalgam_hauled_s0043_v3",
+   "speed": 2.226164,
+   "mode": "legs",
+   "weight": 0.5000005180670709,
+   "duty": 0.5749999740966465,
+   "stride_m": 1.5676372880122833,
+   "cadence_hz": 1.4200759429642735,
+   "run": true,
+   "overspeed": false,
+   "landings": [
+    0.369902,
+    0.017503,
+    1.4517007
+   ]
+  },
+  {
+   "skeleton_id": "amalgam_hauled_s0043_v3",
+   "speed": 2.950008,
+   "mode": "legs",
+   "weight": 1.0,
+   "duty": 0.55,
+   "stride_m": 1.6388934545454545,
+   "cadence_hz": 1.7999998668724817,
+   "run": true,
+   "overspeed": false,
+   "landings": [
+    0.369902,
+    0.017503,
+    1.4517007
+   ]
+  },
+  {
+   "skeleton_id": "amalgam_hauled_s0043_v3",
+   "speed": 2.5,
+   "mode": "legs",
+   "weight": 0.7701957262289191,
+   "duty": 0.5614902136885541,
+   "stride_m": 1.6053554951181774,
+   "cadence_hz": 1.557287471592679,
+   "run": true,
+   "overspeed": false,
+   "landings": [
+    0.369902,
+    0.017503,
+    1.4517007
+   ]
+  },
+  {
+   "skeleton_id": "amalgam_hauled_s0059_v3",
+   "speed": 0.3,
+   "mode": "legs",
+   "weight": 0.0,
+   "duty": 0.6,
+   "stride_m": 1.3693005,
+   "cadence_hz": 0.21908996600819175,
+   "run": false,
+   "overspeed": false,
+   "landings": [
+    -0.446407,
+    0.017503,
+    1.35877815,
+    0.461047,
+    0.017504,
+    -0.6668388500000002
+   ]
+  },
+  {
+   "skeleton_id": "amalgam_hauled_s0059_v3",
+   "speed": 1.369301,
+   "mode": "legs",
+   "weight": 0.0,
+   "duty": 0.6,
+   "stride_m": 1.3693005,
+   "cadence_hz": 1.0000003651499434,
+   "run": false,
+   "overspeed": false,
+   "landings": [
+    -0.446407,
+    0.017503,
+    1.35877815,
+    0.461047,
+    0.017504,
+    -0.6668388500000002
+   ]
+  },
+  {
+   "skeleton_id": "amalgam_hauled_s0059_v3",
+   "speed": 2.029054,
+   "mode": "legs",
+   "weight": 0.4999994316058951,
+   "duty": 0.5750000284197052,
+   "stride_m": 1.4288352337268242,
+   "cadence_hz": 1.420075563721667,
+   "run": false,
+   "overspeed": false,
+   "landings": [
+    -0.446407,
+    0.017503,
+    1.35877815,
+    0.461047,
+    0.017504,
+    -0.6668388500000002
+   ]
+  },
+  {
+   "skeleton_id": "amalgam_hauled_s0059_v3",
+   "speed": 2.688808,
+   "mode": "legs",
+   "weight": 1.0,
+   "duty": 0.55,
+   "stride_m": 1.4937823636363636,
+   "cadence_hz": 1.799999829596693,
+   "run": true,
+   "overspeed": false,
+   "landings": [
+    -0.446407,
+    0.017503,
+    1.35877815,
+    0.461047,
+    0.017504,
+    -0.6668388500000002
+   ]
+  },
+  {
+   "skeleton_id": "amalgam_hauled_s0059_v3",
+   "speed": 2.5,
+   "mode": "legs",
+   "weight": 0.9444353621953081,
+   "duty": 0.5527782318902347,
+   "stride_m": 1.4862746986085036,
+   "cadence_hz": 1.6820578338180536,
+   "run": true,
+   "overspeed": false,
+   "landings": [
+    -0.446407,
+    0.017503,
+    1.35877815,
+    0.461047,
+    0.017504,
+    -0.6668388500000002
+   ]
+  },
+  {
    "skeleton_id": "amalgam_slither_s0006_v3",
    "speed": 0.3,
    "mode": "slide",
@@ -634,6 +809,41 @@
    "speed": 2.5,
    "mode": "slide",
    "cadence_hz": 2.3552465472085617,
+   "overspeed": false
+  },
+  {
+   "skeleton_id": "amalgam_slither_s0040_v3",
+   "speed": 0.3,
+   "mode": "slide",
+   "cadence_hz": 0.26831231553528306,
+   "overspeed": false
+  },
+  {
+   "skeleton_id": "amalgam_slither_s0040_v3",
+   "speed": 1.1181,
+   "mode": "slide",
+   "cadence_hz": 1.0,
+   "overspeed": false
+  },
+  {
+   "skeleton_id": "amalgam_slither_s0040_v3",
+   "speed": 1.67715,
+   "mode": "slide",
+   "cadence_hz": 1.4999999999999998,
+   "overspeed": false
+  },
+  {
+   "skeleton_id": "amalgam_slither_s0040_v3",
+   "speed": 2.2362,
+   "mode": "slide",
+   "cadence_hz": 2.0,
+   "overspeed": false
+  },
+  {
+   "skeleton_id": "amalgam_slither_s0040_v3",
+   "speed": 2.5,
+   "mode": "slide",
+   "cadence_hz": 2.2359359627940254,
    "overspeed": false
   },
   {
@@ -1169,6 +1379,351 @@
     -1.648712,
     0.007522,
     0.4930987
+   ]
+  },
+  {
+   "skeleton_id": "amalgam_walker_s0047_v3",
+   "speed": 0.3,
+   "mode": "legs",
+   "weight": 0.0,
+   "duty": 0.593333,
+   "stride_m": 0.48688959537287263,
+   "cadence_hz": 0.6161561118804608,
+   "run": false,
+   "overspeed": false,
+   "landings": [
+    1.269816,
+    0.007583,
+    0.41802183214568633,
+    -0.284771,
+    0.007522,
+    0.055093832145686306,
+    0.420811,
+    0.007459,
+    0.03720683214568632
+   ]
+  },
+  {
+   "skeleton_id": "amalgam_walker_s0047_v3",
+   "speed": 1.411741,
+   "mode": "legs",
+   "weight": 0.0,
+   "duty": 0.593333,
+   "stride_m": 1.2331353784480221,
+   "cadence_hz": 1.1448386159975104,
+   "run": false,
+   "overspeed": false,
+   "landings": [
+    1.269816,
+    0.007583,
+    0.6394079567503501,
+    -0.284771,
+    0.007522,
+    0.2764799567503502,
+    0.420811,
+    0.007459,
+    0.2585929567503502
+   ]
+  },
+  {
+   "skeleton_id": "amalgam_walker_s0047_v3",
+   "speed": 2.117611,
+   "mode": "legs",
+   "weight": 0.4999994687410796,
+   "duty": 0.5216665761469348,
+   "stride_m": 1.549974518153248,
+   "cadence_hz": 1.3662231057340706,
+   "run": false,
+   "overspeed": false,
+   "landings": [
+    1.269816,
+    0.007583,
+    0.67786295,
+    -0.284771,
+    0.007522,
+    0.31493494999999994,
+    0.420811,
+    0.007459,
+    0.29704794999999995
+   ]
+  },
+  {
+   "skeleton_id": "amalgam_walker_s0047_v3",
+   "speed": 2.823482,
+   "mode": "legs",
+   "weight": 1.0,
+   "duty": 0.45,
+   "stride_m": 1.796822,
+   "cadence_hz": 1.5713754617875337,
+   "run": true,
+   "overspeed": false,
+   "landings": [
+    1.269816,
+    0.007583,
+    0.67786295,
+    -0.284771,
+    0.007522,
+    0.31493494999999994,
+    0.420811,
+    0.007459,
+    0.29704794999999995
+   ]
+  },
+  {
+   "skeleton_id": "amalgam_walker_s0047_v3",
+   "speed": 2.5,
+   "mode": "legs",
+   "weight": 0.8665498891951289,
+   "duty": 0.4691278047319946,
+   "stride_m": 1.7235599592352522,
+   "cadence_hz": 1.450486237281386,
+   "run": true,
+   "overspeed": false,
+   "landings": [
+    1.269816,
+    0.007583,
+    0.67786295,
+    -0.284771,
+    0.007522,
+    0.31493494999999994,
+    0.420811,
+    0.007459,
+    0.29704794999999995
+   ]
+  },
+  {
+   "skeleton_id": "amalgam_walker_s0054_v3",
+   "speed": 0.3,
+   "mode": "legs",
+   "weight": 0.0,
+   "duty": 0.59,
+   "stride_m": 0.4919814574850953,
+   "cadence_hz": 0.6097790789383328,
+   "run": false,
+   "overspeed": false,
+   "landings": [
+    0.5832,
+    0.007619,
+    -0.14798747004189686,
+    -0.58357,
+    0.007639,
+    0.4883195299581031,
+    1.515681,
+    0.007544,
+    -0.07620447004189682,
+    -0.509489,
+    0.007547,
+    0.42840352995810316
+   ]
+  },
+  {
+   "skeleton_id": "amalgam_walker_s0054_v3",
+   "speed": 1.42227,
+   "mode": "legs",
+   "weight": 0.0,
+   "duty": 0.59,
+   "stride_m": 1.2515990119993194,
+   "cadence_hz": 1.1363623543678327,
+   "run": false,
+   "overspeed": false,
+   "landings": [
+    0.5832,
+    0.007619,
+    0.0760997085397992,
+    -0.58357,
+    0.007639,
+    0.7124067085397991,
+    1.515681,
+    0.007544,
+    0.14788270853979923,
+    -0.509489,
+    0.007547,
+    0.6524907085397992
+   ]
+  },
+  {
+   "skeleton_id": "amalgam_walker_s0054_v3",
+   "speed": 2.133405,
+   "mode": "legs",
+   "weight": 0.49999947267433587,
+   "duty": 0.5450000474593097,
+   "stride_m": 1.4576497813228395,
+   "cadence_hz": 1.463592302716159,
+   "run": false,
+   "overspeed": false,
+   "landings": [
+    0.5832,
+    0.007619,
+    0.1040876,
+    -0.58357,
+    0.007639,
+    0.7403946,
+    1.515681,
+    0.007544,
+    0.17587060000000004,
+    -0.509489,
+    0.007547,
+    0.6804786
+   ]
+  },
+  {
+   "skeleton_id": "amalgam_walker_s0054_v3",
+   "speed": 2.844541,
+   "mode": "legs",
+   "weight": 1.0,
+   "duty": 0.5,
+   "stride_m": 1.5888384,
+   "cadence_hz": 1.7903274492862207,
+   "run": true,
+   "overspeed": false,
+   "landings": [
+    0.5832,
+    0.007619,
+    0.1040876,
+    -0.58357,
+    0.007639,
+    0.7403946,
+    1.515681,
+    0.007544,
+    0.17587060000000004,
+    -0.509489,
+    0.007547,
+    0.6804786
+   ]
+  },
+  {
+   "skeleton_id": "amalgam_walker_s0054_v3",
+   "speed": 2.5,
+   "mode": "legs",
+   "weight": 0.8523809387847747,
+   "duty": 0.5132857155093703,
+   "stride_m": 1.5477134391157579,
+   "cadence_hz": 1.6152860967779048,
+   "run": true,
+   "overspeed": false,
+   "landings": [
+    0.5832,
+    0.007619,
+    0.1040876,
+    -0.58357,
+    0.007639,
+    0.7403946,
+    1.515681,
+    0.007544,
+    0.17587060000000004,
+    -0.509489,
+    0.007547,
+    0.6804786
+   ]
+  },
+  {
+   "skeleton_id": "amalgam_walker_s0058_v3",
+   "speed": 0.3,
+   "mode": "legs",
+   "weight": 0.0,
+   "duty": 0.593333,
+   "stride_m": 0.48345160333686127,
+   "cadence_hz": 0.6205378117051457,
+   "run": false,
+   "overspeed": false,
+   "landings": [
+    0.407718,
+    0.007515,
+    0.13054289508133496,
+    -0.327337,
+    0.007454,
+    0.513504895081335,
+    1.3485,
+    0.00755,
+    0.317011895081335
+   ]
+  },
+  {
+   "skeleton_id": "amalgam_walker_s0058_v3",
+   "speed": 1.404613,
+   "mode": "legs",
+   "weight": 0.0,
+   "duty": 0.593333,
+   "stride_m": 1.220714946701672,
+   "cadence_hz": 1.1506478263375195,
+   "run": false,
+   "overspeed": false,
+   "landings": [
+    0.407718,
+    0.007515,
+    0.3492642307356716,
+    -0.327337,
+    0.007454,
+    0.7322262307356715,
+    1.3485,
+    0.00755,
+    0.5357332307356716
+   ]
+  },
+  {
+   "skeleton_id": "amalgam_walker_s0058_v3",
+   "speed": 2.10692,
+   "mode": "legs",
+   "weight": 0.5000000000000001,
+   "duty": 0.5216665,
+   "stride_m": 1.477383539100172,
+   "cadence_hz": 1.4261157947402467,
+   "run": true,
+   "overspeed": false,
+   "landings": [
+    0.407718,
+    0.007515,
+    0.37246974999999993,
+    -0.327337,
+    0.007454,
+    0.75543175,
+    1.3485,
+    0.00755,
+    0.5589387499999999
+   ]
+  },
+  {
+   "skeleton_id": "amalgam_walker_s0058_v3",
+   "speed": 2.809227,
+   "mode": "legs",
+   "weight": 1.0,
+   "duty": 0.45,
+   "stride_m": 1.7126699999999997,
+   "cadence_hz": 1.640261696649092,
+   "run": true,
+   "overspeed": false,
+   "landings": [
+    0.407718,
+    0.007515,
+    0.37246974999999993,
+    -0.327337,
+    0.007454,
+    0.7554317499999998,
+    1.3485,
+    0.00755,
+    0.5589387499999999
+   ]
+  },
+  {
+   "skeleton_id": "amalgam_walker_s0058_v3",
+   "speed": 2.5,
+   "mode": "legs",
+   "weight": 0.8759406216986118,
+   "duty": 0.46778180287007287,
+   "stride_m": 1.647566226970277,
+   "cadence_hz": 1.517389686117365,
+   "run": true,
+   "overspeed": false,
+   "landings": [
+    0.407718,
+    0.007515,
+    0.37246974999999993,
+    -0.327337,
+    0.007454,
+    0.75543175,
+    1.3485,
+    0.00755,
+    0.5589387499999999
    ]
   },
   {

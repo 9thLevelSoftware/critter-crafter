@@ -24,7 +24,7 @@ from ..recipes.generator import generate_for_skeleton, part_accepted
 from .fit import AXES, TEMPLATE_DEFAULTS
 
 CATEGORY_BY_TEMPLATE = {"limb3": "limb", "insect_leg4": "limb", "head1": "head", "tentacle8": "appendage",
-                        "appendage1": "appendage", "core1": "core", "spine3": "core"}
+                        "appendage1": "appendage", "core1": "core", "spine3": "core", "neck2": "appendage"}
 TRIANGLES_BY_CATEGORY = {"head": 3500, "core": 4000}
 MEASURED_KEYS = ("dimensions_m", "uniform_scale", "radial_scale", "radial_scale_wanted", "nominal_girth_m",
                  "up_source", "end_to_end_bend_deg", "strain_p99", "strain_max", "islands")

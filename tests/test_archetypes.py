@@ -279,7 +279,7 @@ def test_branch_semantics_and_girth_match_the_exact_binding_profile() -> None:
                 "core" if role == "core" else
                 "head" if role == "head" else
                 "tail" if branch["branch_id"] == "body" else
-                "appendage" if branch["template"] in ("tentacle8", "appendage1") else
+                "appendage" if branch["template"] in ("tentacle8", "appendage1", "neck2") else
                 "limb"
             )
             assert branch["accepts"] == {"categories": [expected_category], "templates": [branch["template"]]}

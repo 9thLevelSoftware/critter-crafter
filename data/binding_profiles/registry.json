@@ -37,6 +37,11 @@
       "binding_profile_hash": "2ed865aaab228d8f38804f4222b8a7b13c01d195d0f2548891c069b69f231938"
     },
     {
+      "binding_profile_id": "neck2_axial",
+      "binding_profile_version": "1.0.0",
+      "binding_profile_hash": "d7741c26283e837f404547de0065155ce5d5ad13c4c3af3b69357a5d9e332e49"
+    },
+    {
       "binding_profile_id": "spine3_axial",
       "binding_profile_version": "1.0.0",
       "binding_profile_hash": "76b97cff2312313f187b7c17380c31ef7f228707dfe2c8d983da5fac3f16bfc9"

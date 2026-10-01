@@ -151,3 +151,40 @@ def test_walker_legs_are_long_and_slim_beside_the_body(compiled):
         legs = [b for b in skeleton["branches"] if b["gait_role"] == "locomotor"]
         assert all(leg["length_m"] > body["girth_m"] for leg in legs), skeleton["skeleton_id"]
         assert all(leg["girth_m"] < .5 * leg["length_m"] * .22 * 2 for leg in legs)
+
+
+def test_necked_amalgams_hang_their_heads_on_necks_and_optional_necks_have_optional_heads(compiled):
+    necked = {sid: s for sid, s in compiled.items() if any(b["gait_role"] == "neck" for b in s["branches"])}
+    assert necked, "no committed amalgam has a neck"
+    for skeleton in necked.values():
+        by_id = {b["branch_id"]: b for b in skeleton["branches"]}
+        for neck in (b for b in skeleton["branches"] if b["gait_role"] == "neck"):
+            assert neck["template"] == "neck2" and neck["binding_profile_id"] == "neck2_axial"
+            assert neck["parent_branch"] == "core" and not neck.get("contacts")
+            heads = [b for b in skeleton["branches"] if b["parent_branch"] == neck["branch_id"]]
+            assert len(heads) == 1 and heads[0]["gait_role"] == "head"
+            assert neck["required"] or not heads[0]["required"]           # a required head can't hang from an optional neck
+        assert by_id["head"]["parent_branch"] == "neck"                       # the first head keeps the id the landmark names
+        assert skeleton["anatomy"]["landmarks"]["neck"] == "head"
+
+
+def test_a_limb_tip_head_hangs_from_a_vestigial_limb_and_is_optional(compiled):
+    tipped = [s for s in compiled.values() if any(b["parent_branch"].startswith("flail") and b["gait_role"] == "head"
+                                                  for b in s["branches"])]
+    assert tipped
+    for skeleton in tipped:
+        head = next(b for b in skeleton["branches"] if b["gait_role"] == "head" and b["parent_branch"].startswith("flail"))
+        assert head["required"] is False
+
+
+def test_head_growth_leaves_the_seeds_it_does_not_name_exactly_as_they_were():
+    old = {seed: json.dumps(amalgam.build_amalgam(seed), sort_keys=True)
+           for seed in amalgam.AMALGAM_SEEDS if seed not in amalgam.HEADY_SEEDS}
+    saved = dict(amalgam.HEADY_SEEDS)
+    try:
+        amalgam.HEADY_SEEDS.clear()
+        for seed in old:
+            assert json.dumps(amalgam.build_amalgam(seed), sort_keys=True) == old[seed]
+    finally:
+        amalgam.HEADY_SEEDS.update(saved)
+    assert all(not any(b["gait"]["role"] == "neck" for b in json.loads(doc)["branches"]) for doc in old.values())

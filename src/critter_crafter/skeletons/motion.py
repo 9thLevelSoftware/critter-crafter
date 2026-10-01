@@ -229,6 +229,10 @@ def _root_vertical(name: str, u: float, bob: float, drop: float, hip_height: flo
 DEATH_DROP = .2       # of the hip height: the body sinks this far while the feet hold
 
 
+# How far a whole neck chain bends compared with a bare head's gesture.
+NECK_SHARE = .6
+
+
 def _death_drop(u: float) -> float:
     if u < .2:
         return .02 * math.sin(math.pi * u / .2) ** 2                       # stagger
@@ -252,6 +256,12 @@ def _gesture(name: str, role: str, k: int, u: float, phase: float,
         return 0.0, 0.0
     if role == "locomotor":
         return 0.0, 0.0
+    if role == "neck":
+        # A neck plays the head's gestures spread down its chain, so the whole neck bends about as far as a head
+        # does (a head on top adds its own curve): each bone takes NECK_SHARE / chain_count of the head's angle.
+        rx, rz = _gesture(name, "head", k, u, phase, amplitude, chain_count, depth=depth, tag=tag, death_style=death_style)
+        share = NECK_SHARE / max(1, chain_count)
+        return rx * share, rz * share
     th = TAU * u
     ph = phase + tag
     frac = k / max(1, chain_count - 1)
