@@ -86,3 +86,18 @@ def test_sliding_walk_wave_is_horizontal_and_readable():
     assert all(abs(swing_x) < 1e-12 for swing_x, _ in samples)
     swing_z = [value for _, value in samples]
     assert math.degrees(max(swing_z) - min(swing_z)) >= 3.0
+
+
+def test_a_neck_spreads_the_head_gesture_down_its_chain():
+    import pytest
+    from critter_crafter.skeletons.motion import NECK_SHARE, _gesture
+
+    for name in ("idle", "death", "attack", "telegraph", "stun"):
+        for u in (.1, .35, .6, .9):
+            head = _gesture(name, "head", 0, u, 0.0, 1.0, 1)
+            total = [sum(_gesture(name, "neck", k, u, 0.0, 1.0, 2)[axis] for k in range(2)) for axis in (0, 1)]
+            assert total == pytest.approx([h * NECK_SHARE for h in head]), (name, u)
+    # The recoil travels (each bone starts a little later), so only its first bone matches the scaled head exactly.
+    for u in (.1, .35, .6, .9):
+        assert _gesture("hit", "neck", 0, u, 0.0, 1.0, 2) == pytest.approx(
+            tuple(v * NECK_SHARE / 2 for v in _gesture("hit", "head", 0, u, 0.0, 1.0, 2)))

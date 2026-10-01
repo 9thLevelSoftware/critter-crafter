@@ -30,7 +30,19 @@ AMALGAM_SEEDS: tuple[int, ...] = (
     4, 5, 9, 13, 14,        # hauled
     8, 24, 29, 37, 39,      # walker
     6, 17, 18, 28, 34,      # slither
+    40, 43, 47, 54, 58, 59,   # heads on necks, in clusters and on limb tips (HEADY_SEEDS)
 )
+
+# Seeds that grow heads on necks, in clusters, or on the tips of limbs (see `_necked_heads`). They are separate from
+# the committed seeds above on purpose: a seed absent from this table grows exactly what it always did, so the
+# approved amalgams regenerate byte for byte.
+HEAD_GROWTH_NECKED, HEAD_GROWTH_CLUSTER, HEAD_GROWTH_LIMB_TIP = "necked", "cluster", "limb_tip"
+HEAD_GROWTHS = (HEAD_GROWTH_NECKED, HEAD_GROWTH_CLUSTER, HEAD_GROWTH_LIMB_TIP)
+HEADY_SEEDS: dict[int, str] = {
+    43: HEAD_GROWTH_NECKED, 47: HEAD_GROWTH_NECKED,
+    54: HEAD_GROWTH_CLUSTER, 59: HEAD_GROWTH_CLUSTER,
+    40: HEAD_GROWTH_LIMB_TIP, 58: HEAD_GROWTH_LIMB_TIP,
+}
 
 MAX_BRANCHES = 14
 # A walker's legs are tall and slim next to its body: this scales the profile's girth ratio.
@@ -212,6 +224,63 @@ def _heads(body: _Body, rng: SplitMix64) -> list[dict[str, Any]]:
     return heads
 
 
+def _necked_heads(body: _Body, rng: SplitMix64, count: int) -> list[dict[str, Any]]:
+    """*count* heads, each on its own two-bone neck (``neck``/``head``, ``neck2``/``head2``, ...), fanned across the
+    front-top of the body. The first neck and head are required; later ones are optional, and so is a head on an
+    optional neck (a required branch can't hang from an optional one). The first head keeps the id ``head``."""
+    out: list[dict[str, Any]] = []
+    for index in range(count):
+        spread = 0.0 if count == 1 else (index / (count - 1) - .5) * 2         # -1 .. 1 across the fan
+        theta = math.radians(_between(rng, -15, 15) + spread * 45)
+        origin, normal = body.point(_between(rng, .7, .95), theta)
+        yaw = spread * math.radians(_between(rng, 18, 38))
+        direction = _yaw(list(mu.normalize([normal[0] * .35, normal[1] * .55 + .2, .8])), yaw)
+        nid, hid = ("neck", "head") if index == 0 else (f"neck{index + 1}", f"head{index + 1}")
+        neck = arch._branch(nid, "neck2", "core", origin=origin, direction=_round_direction(direction), up=[0, 1, 0],
+                            length=body.radius * _between(rng, 1.0, 1.7), side=_side(origin[0]), attach=0, role="neck")
+        # A gentle forward curve, within the profile's limits, so the neck isn't a rod.
+        neck["stance_deg"] = [round(_between(rng, 4, 14), 3), round(_between(rng, -14, -4), 3)]
+        fill = None if index == 0 else 70 + 5 * rng.below(5)
+        head_dir = _round_direction(_yaw([direction[0], direction[1] * .8 - .1, direction[2]], 0.0))
+        tip = [round(v, 4) for v in mu.add(origin, mu.scale(mu.normalize(direction), neck["length_m"]))]
+        head = arch._branch(hid, "head1", nid, origin=tip, direction=head_dir, up=[0, 1, 0],
+                            length=body.radius * _between(rng, .8, 1.2), side=_side(tip[0]), attach=-1, role="head")
+        for branch in (neck, head):
+            if fill is not None:
+                branch["required"] = False
+                branch["optional_fill_pct"] = fill
+        out += [neck, head]
+    return out
+
+
+def _round_direction(vector: list[float]) -> list[float]:
+    return [round(v, 6) for v in mu.normalize(vector)]
+
+
+def _limb_tip_head(body: _Body, flails: list[dict[str, Any]], rng: SplitMix64, floor: float) -> list[dict[str, Any]]:
+    """A head grown on the free end of a vestigial limb: a mouth on the end of an arm. Optional, like its limb."""
+    # Arms only: a head on a metre of tentacle swings so far in the loops that the stun clip's seam velocity fails QA.
+    length = body.radius * _between(rng, .45, .8)
+    tips = {}
+    for b in flails:
+        if b["template"] == "limb3":
+            pz = mu.frame_from_dir_up(b["direction"], b["up"])[2]
+            tip = [round(v, 4) for v in mu.add(b["origin_m"], mu.scale(pz, b["length_m"]))]
+            # The head's own volume must clear the ground, and so must the tip when the telegraph pitches the limb
+            # and the head down (a held pose at the start of every attack clip).
+            if tip[1] - length * .6 - b["length_m"] * .35 >= floor:
+                tips[b["branch_id"]] = (b, pz, tip)
+    if not tips:
+        return []
+    parent, pz, tip = tips[sorted(tips)[rng.below(len(tips))]]
+    head = arch._branch("tiphead", "head1", parent["branch_id"],
+                        origin=tip, direction=_round_direction(list(pz)), up=_up_for(list(pz)),
+                        length=length, side=_side(tip[0]), attach=-1, role="head")
+    head["required"] = False
+    head["optional_fill_pct"] = 60 + 5 * rng.below(5)
+    return [head]
+
+
 def _striker(body: _Body, rng: SplitMix64) -> dict[str, Any]:
     """The one limb that hits: a contactless arm on the upper front flank."""
     sx = 1 if rng.below(2) else -1
@@ -369,7 +438,11 @@ def build_amalgam(seed: int) -> dict[str, Any]:
                         up=[0, 1, 0], length=length, role="core")
     core["girth_m"] = round(2 * radius, 4)
     working, supports, hint = _MODE_BUILDERS[mode](seed, body, _stream(seed, 3))
-    heads = _heads(body, _stream(seed, 4))
+    growth = HEADY_SEEDS.get(seed)
+    if growth in (HEAD_GROWTH_NECKED, HEAD_GROWTH_CLUSTER):
+        heads = _necked_heads(body, _stream(seed, 8), 1 if growth == HEAD_GROWTH_NECKED else 2 + _stream(seed, 9).below(2))
+    else:
+        heads = _heads(body, _stream(seed, 4))
     striker = _striker(body, _stream(seed, 5))
     branches = [core] + heads + working + [striker]
     target = 8 + _stream(seed, 6).below(7)
@@ -379,6 +452,8 @@ def build_amalgam(seed: int) -> dict[str, Any]:
     flails = _flails(body, branches, max(2, min(MAX_BRANCHES - len(branches), target - len(branches))), _stream(seed, 7),
                      floor=.03 + sink)
     branches += flails
+    if growth == HEAD_GROWTH_LIMB_TIP:
+        branches += _limb_tip_head(body, flails, _stream(seed, 8), floor=.03 + sink)
     _private_keys_dropped(branches)
     legs = [b for b in working if b["gait"]["role"] == "locomotor" and b.get("contacts") and b["contacts"][0]["kind"] in ("foot", "hand")]
     traits = {"min_support": 1 if len(legs) <= 3 else 2, "body_on_ground": mode == "hauled", "ring": False,
@@ -434,7 +509,8 @@ def validate_amalgam(source: dict[str, Any]) -> list[str]:
             height = contact_world(pose, branch, branch["contacts"][0])[1]
             if abs(height - clearance) > 3 * _GROUND_TOLERANCE_M:
                 problems.append(f"{branch['branch_id']} contact {height:.4f} m off the ground")
-        if role in ("flail", "none") and branch["branch_id"].startswith("flail"):
+        grown = role == "neck" or (role == "head" and branch["parent_branch"] != "core")
+        if grown or (role in ("flail", "none") and branch["branch_id"].startswith("flail")):
             lowest = min(min(pose[n]["head"][1], pose[n]["tail"][1]) for n in branch["bone_names"]) - branch["girth_m"] * .5
             if lowest < .005:
                 problems.append(f"{branch['branch_id']} dips to {lowest:.3f} m")

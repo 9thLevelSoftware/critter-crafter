@@ -1,0 +1,14 @@
+{
+  "schema_version": "3.0.0",
+  "binding_profile_id": "neck2_axial",
+  "binding_profile_version": "1.0.0",
+  "template": "neck2",
+  "joint_order": ["base", "upper"],
+  "bone_fractions": [0.5, 0.5],
+  "girth_ratio": 0.22,
+  "joints": [
+    {"joint_id": "base", "parent_joint": "", "canonical_position_n": [0, 0, 0], "canonical_rotation_xyzw": [0, 0, 0, 1], "primary_axis": [0, 0, 1], "secondary_axis": [0, 1, 0], "limits_deg": {"swing_x": [-35, 35], "swing_y": [-35, 35], "twist": [-20, 20]}},
+    {"joint_id": "upper", "parent_joint": "base", "canonical_position_n": [0, 0, 0.5], "canonical_rotation_xyzw": [0, 0, 0, 1], "primary_axis": [0, 0, 1], "secondary_axis": [0, 1, 0], "limits_deg": {"swing_x": [-35, 35], "swing_y": [-35, 35], "twist": [-20, 20]}}
+  ],
+  "landmarks": [{"landmark_id": "tip", "parent_joint": "upper", "position_n": [0, 0, 1], "rotation_xyzw": [0, 0, 0, 1]}]
+}
