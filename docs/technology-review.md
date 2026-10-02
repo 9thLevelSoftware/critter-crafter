@@ -13,16 +13,18 @@ Research reviewed repository source and primary author/vendor documentation, inc
 | Area | Implemented foundation | Important boundary |
 | --- | --- | --- |
 | Authoring | Python >=3.12, uv, JSON schemas, headless Blender 5.2 operation boundary | Host code must not import bpy. Sources, not generated skeleton JSON, are edited. |
-| Anatomy | 14 archetypes, three presets each, 28 seeded variants, 15 seeded amalgams: 85 skeletons in the documented snapshot | All are draft in the handoff; variable limb counts and neck/jaw are deferred. This is not unrestricted arbitrary anatomy. |
+| Anatomy | 14 archetypes × 3 presets (42), 28 seeded variants and 21 amalgams: 91 current v3 skeleton records | Compiled inventory: 85 approved, six draft. Selected amalgams have two-bone necks and multi-head growth; general articulated jaw support and arbitrary parameterized limb counts are not established. |
 | Composition | Skeleton-first assembly; immutable hashed binding profiles; fitted branch parts and connectors; one Animator | Exact compatibility and replay are engineering strengths. Seamless appearance across all combinations is not established. |
 | Generation | cc-gen-3 / SplitMix64 implementations in Python and C#, integer-millimetre fit rules, shared goldens | Production generation requires owner-approved records. Golden/test approval copies are not production approvals. |
 | Movement | Catalog-derived speeds, per-build mass/speed model, Unity Animation Rigging IK, Python reference planner | Turns, slopes, first steps and higher-speed motion still have documented limits. Static Python QA cannot prove rendered Unity contact. |
-| Real parts | Four Meshy-derived part records, geodesic fitting, cleanup, weights, deformation QA | Owner approval and real-part Unity albedo/import verification are pending in the handoff. Paid-private geometry is not public repository content. |
+| Real parts | Four Meshy-derived part records, geodesic fitting, cleanup, weights, deformation QA; all four currently approved in the compiled catalog | The handoff's approval-pending statement is stale. Unity albedo/import acceptance was not exercised by this review. Paid-private geometry is not public repository content. |
 | Delivery | Unity UPM assembly/import/runtime package | Expanded real inventory, CreatureBaker/draw-call target and the Synaptic Sea adapter remain roadmap work. |
 
 Evidence: [handoff](handoff.md), especially lines 16–39, 94–125, 147–186 and 188–239; [roadmap](roadmap.md), lines 5–45; [Python metadata](../pyproject.toml); [catalog compiler](../src/critter_crafter/library/catalog.py); [recipe generator](../src/critter_crafter/recipes/generator.py); [build locomotion model](../src/critter_crafter/locomotion/build.py); [Unity generator](../unity/com.ninthlevelsoftware.crittercrafter/Runtime/Generation/RecipeGenerator.cs).
 
 Documented QA/test counts and historical passes are repository snapshots, not checks rerun by this review. Keep skeleton-first assembly, Unity runtime IK, catalog speeds, owner approvals, and the private asset boundary. There is no evidence that replacing Python, Blender, Unity or JSON would itself create a competitive advantage.
+
+**Current-source reconciliation:** recent history includes merged commit `68acb5f` (via `aec56ad`), adding six head-growth amalgams and `neck2_axial`. The dated handoff/roadmap counts and approval statuses are not current inventory. A direct offline `compile_catalog(load_sources(Path('data')))` execution observed 91 skeletons (85 approved, six draft), four approved production parts, and eight `neck2_axial` branches. No records were modified or approved by this review. Source evidence: [amalgam seeds and head growth](../src/critter_crafter/skeletons/amalgam.py), [neck profile](../data/binding_profiles/neck2_axial.binding.json), [profile registry](../data/binding_profiles/registry.json). Selected-amalgam neck support is distinct from general archetype neck/jaw support. Consumer readiness still needs actual consumer-path evidence; approval alone does not establish it.
 
 ## Competitive reality
 
@@ -112,7 +114,7 @@ Ranking reflects expected product leverage and fit, not a numerical claim of pro
 
 ## Recommended sequence and decision gates
 
-1. **Establish the current consumer path.** Owner reviews/approvals, real-part albedo import in Unity, pool-id/speed contract and game integration remain prerequisites to claiming production-ready output. This is existing roadmap work, not a newly invented process gate.
+1. **Establish the current consumer path.** Existing approved inventory does not prove real-part albedo import in Unity, the pool-id/speed contract or game integration. Verify those paths before claiming production-ready output; new draft skeleton reviews remain owner-only. Do not repeat the dated roadmap's all-draft/approval-pending statements as current facts.
 2. **First differentiation experiment: connector-local SDF synthesis.** One socket/pose matrix, no paid calls. Deliver ordinary skinned assets and comparable renders. Adopt only for visible gain with preserved budgets.
 3. **In parallel when needed: current-skeleton skin-weight comparison.** Only if deformation review or correction effort identifies a real problem. Check GPU and artifact licenses before installation/downloads.
 4. **Next: capability-aware diversity selection.** Add functional descriptors and equal-budget comparisons, then symbolic effectors/variable topology. Updating generator behavior requires Python/C# callers and shared goldens together.
