@@ -667,12 +667,21 @@ def build_motion(skeleton: dict[str, Any], gait: dict[str, Any]) -> dict[str, An
                     phase_offset = 0.0
             else:
                 stance = 0.0
+            support_branch = br["branch_id"] in set(skeleton.get("anatomy", {}).get("support_branches", []))
+            released_contacts = (set(attack_plan["support_release"]["contact_ids"])
+                                 if attack_plan and name in ("telegraph", "attack") else set())
             for contact_index, contact in enumerate(br.get("contacts", [])):
-                contact_schedule.append({"contact_id":f"{br['branch_id']}:{contact_index}",
+                contact_id = f"{br['branch_id']}:{contact_index}"
+                contact_kind = contact.get("kind", kind)
+                grounding = 1.0 if support_branch and contact_kind in ("body", "sliding") else stance
+                if contact_id in released_contacts:
+                    grounding = 0.0
+                contact_schedule.append({"contact_id":contact_id,
                     "branch_id":br["branch_id"], "contact_index":contact_index,
-                    "kind":contact.get("kind", kind), "phase_offset":round(phase_offset, 7),
+                    "kind":contact_kind, "phase_offset":round(phase_offset, 7),
                     "stance_fraction":round(stance, 7),
-                    "support":br["branch_id"] in set(skeleton.get("anatomy", {}).get("support_branches", []))})
+                    "grounding_declared":True, "grounding_fraction":round(grounding, 7),
+                    "support":support_branch})
         clips.append({
             "name": name, "loop": name in LOOP_CLIPS, "phase_driven": phase_driven, "frames": frames, "fps": FPS,
             "driver_scale": round(scale, 4),

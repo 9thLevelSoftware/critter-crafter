@@ -6,6 +6,7 @@ at those speeds (overspeed, lost support, zero stroke) is a diagnostic.
 
 from __future__ import annotations
 
+import math
 from typing import Any
 
 from . import stepper
@@ -64,6 +65,7 @@ def evaluate_locomotion(skeleton: dict[str, Any]) -> list[dict[str, Any]]:
 def golden_rows(catalog: dict[str, Any]) -> list[dict[str, Any]]:
     """Planner values the C# StepPlanner must reproduce (continuous quantities, per-step landings)."""
     rows = []
+    rows.extend(landing_golden_rows())
     for skeleton in catalog["skeletons"]:
         block = skeleton.get("locomotion") or {}
         mode = block.get("mode")
@@ -86,4 +88,48 @@ def golden_rows(catalog: dict[str, Any]) -> list[dict[str, Any]]:
                 "landings": [v for leg in block["legs"]
                              for v in stepper.landing_target_local(leg, speed, params["cadence_hz"], params["duty"])],
             })
+    return rows
+
+
+def landing_golden_rows() -> list[dict[str, Any]]:
+    """Physical projections and support states shared with the allocation-free C# chooser."""
+    fixtures = [
+        ("neutral", .5, (0.0, 0.0, .5), False, 0.0, [True] * 5, True, 2, 2, False, False, 0, 6),
+        ("support_release_blocked", 1.0, (0.0, 0.0, .5), False, 0.0, [True] * 5, True, 1, 2, False, False, 0, 4),
+        ("grounded_overrun", 1.0, (0.0, 0.0, .9405), False, 0.0, [True] * 5, True, 0, 0, True, True, 2, 2),
+        ("early_swing_cap_blocked", 1.0, (0.0, 0.0, .9405), False, 0.0, [True] * 5, False, 2, 2, True, False, 2, 4),
+        ("instant_turn", 1.0, (0.0, 0.0, .9405), False, 0.0, [True] * 5, True, 3, 2, True, False, 1, 6),
+        ("ramp", 1.0, (0.0, .5, .8), False, 0.0, [True] * 5, True, 2, 2, False, False, 0, 4),
+        ("no_ground", 1.0, (0.0, 0.0, .5), False, 0.0, [False] * 5, True, 2, 2, False, False, 0, 4),
+        ("zero_stride_no_zero_hit", 0.0, (0.0, 0.0, .5), False, 0.0, [False, True, True, True, True], True, 2, 2, False, False, 0, 4),
+        ("hinge_yaw_blocked", 1.0, (0.0, 0.0, .5), True, 45.001, [True] * 5, True, 2, 2, False, False, 0, 6),
+        ("hinge_limit", 0.0, (0.0, 0.0, .97), True, 45.0, [True] * 5, True, 2, 2, False, False, 0, 6),
+        ("asymmetric_group_tie", 1.0, (0.0, 0.0, 0.0), False, 0.0, [False, True, True, True, True], True, 2, 2, False, False, 0, 5),
+        ("degenerate_reach", 0.0, (0.0, 0.0, 0.0), False, 0.0, [True] * 5, True, 2, 2, False, False, 0, 4),
+        ("physical_cost", 1.0, (0.0, -.72, .54), True, 0.0, [True] * 5, True, 2, 2, False, False, 0, 6),
+    ]
+    rows = []
+    for name, stride, base, hinge, yaw, hits, support, remaining, minimum, early, grounded, swinging, count in fixtures:
+        reach = 0.0 if name == "degenerate_reach" else 1.0
+        candidates = []
+        for index in range(5):
+            lateral, forward = stepper.candidate_offset(index, stride)
+            dx, dy, dz = base[0] + lateral, base[1], base[2] + forward
+            if name == "ramp":
+                dy += forward * math.tan(math.radians(20.0))
+            fraction = stepper.landing_reach_fraction(dx, dy, dz, reach)
+            # JSON forbids infinity; an invalid negative fraction denotes the degenerate fixture.
+            if reach <= 0.0:
+                fraction = -1.0
+            candidates.append({"index": index, "contact_index": 3, "dx": dx, "dy": dy, "dz": dz,
+                               "hinge": hinge, "reach_fraction": fraction,
+                               "coxa_yaw_deg": yaw, "ground_valid": hits[index]})
+        if name == "asymmetric_group_tie":
+            candidates = [candidates[4], candidates[2], candidates[1], candidates[3], candidates[0],
+                          {**candidates[1], "contact_index": 1}]
+        allowed = stepper.can_lift(support, remaining, minimum, early, grounded, swinging, count)
+        rows.append({"mode": "landing", "case_id": name, "stride_m": stride, "hinge": hinge, "reach_m": reach,
+                     "support": support, "remaining_supports": remaining, "minimum_supports": minimum,
+                     "early": early, "body_on_ground": grounded, "swinging": swinging, "leg_count": count,
+                     "candidates": candidates, "chosen_slot": stepper.choose_landing(candidates, stride, allowed)})
     return rows

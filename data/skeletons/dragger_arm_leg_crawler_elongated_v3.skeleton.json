@@ -3,7 +3,7 @@
   "skeleton_id": "dragger_arm_leg_crawler_elongated_v3",
   "family": "dragger",
   "locomotion_hint": "drag",
-  "status": "approved",
+  "status": "draft",
   "symmetry_pct": 92,
   "branches": [
     {
@@ -11,6 +11,7 @@
       "template": "spine3",
       "parent_branch": null,
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0,
         0.1705,
@@ -85,6 +86,11 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 2,
+      "capabilities": [
+        "support",
+        "strike",
+        "grasp"
+      ],
       "origin_m": [
         0.1549,
         0.195,
@@ -153,6 +159,7 @@
         13.2,
         17.6
       ],
+      "effector_slot": "primary_puller",
       "contacts": [
         {
           "kind": "hand",
@@ -170,6 +177,9 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         -0.1793,
         0.195,
@@ -255,6 +265,7 @@
       "template": "head1",
       "parent_branch": "core",
       "attach_bone_index": 2,
+      "capabilities": [],
       "origin_m": [
         0,
         0.252,
@@ -325,6 +336,10 @@
       "template": "tentacle8",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support",
+        "slide"
+      ],
       "origin_m": [
         0,
         0.0356,
@@ -658,10 +673,5 @@
     "generator": "cc-gen-3",
     "seed": 1,
     "preset": "elongated"
-  },
-  "review": {
-    "by": "owner",
-    "date": "2026-09-30",
-    "method": "owner"
   }
 }

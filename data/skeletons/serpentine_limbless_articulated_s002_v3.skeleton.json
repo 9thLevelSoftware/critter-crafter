@@ -3,7 +3,7 @@
   "skeleton_id": "serpentine_limbless_articulated_s002_v3",
   "family": "serpentine",
   "locomotion_hint": "slither",
-  "status": "approved",
+  "status": "draft",
   "symmetry_pct": 100,
   "branches": [
     {
@@ -11,6 +11,7 @@
       "template": "head1",
       "parent_branch": null,
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0,
         0.5349,
@@ -81,6 +82,11 @@
       "template": "tentacle8",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support",
+        "slide",
+        "whip"
+      ],
       "origin_m": [
         0,
         0.1498,
@@ -159,6 +165,7 @@
         7.487,
         -5.615
       ],
+      "effector_slot": "terminal_body_chain",
       "contacts": [
         {
           "kind": "sliding",
@@ -337,10 +344,5 @@
       "limb": 1.0002,
       "stance": 0.9589
     }
-  },
-  "review": {
-    "by": "owner",
-    "date": "2026-09-30",
-    "method": "owner"
   }
 }

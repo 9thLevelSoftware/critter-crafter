@@ -3,7 +3,7 @@
   "skeleton_id": "radial_raised_articulated_walker_balanced_v3",
   "family": "radial",
   "locomotion_hint": "crawl",
-  "status": "approved",
+  "status": "draft",
   "symmetry_pct": 92,
   "branches": [
     {
@@ -11,6 +11,7 @@
       "template": "core1",
       "parent_branch": null,
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0,
         1.031,
@@ -81,6 +82,10 @@
       "template": "insect_leg4",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support",
+        "strike"
+      ],
       "origin_m": [
         0.1169,
         1.031,
@@ -152,6 +157,7 @@
         0.0,
         0.0
       ],
+      "effector_slot": "radial_sector_0",
       "contacts": [
         {
           "kind": "foot",
@@ -169,6 +175,9 @@
       "template": "insect_leg4",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         0.2338,
         1.031,
@@ -257,6 +266,9 @@
       "template": "insect_leg4",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         0.1169,
         1.031,
@@ -345,6 +357,9 @@
       "template": "insect_leg4",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         -0.1169,
         1.031,
@@ -433,6 +448,9 @@
       "template": "insect_leg4",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         -0.2338,
         1.031,
@@ -521,6 +539,9 @@
       "template": "insect_leg4",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         -0.1169,
         1.031,
@@ -609,6 +630,7 @@
       "template": "tentacle8",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0,
         1.5465,
@@ -1056,10 +1078,5 @@
     "generator": "cc-gen-3",
     "seed": 1,
     "preset": "balanced"
-  },
-  "review": {
-    "by": "owner",
-    "date": "2026-09-30",
-    "method": "owner"
   }
 }

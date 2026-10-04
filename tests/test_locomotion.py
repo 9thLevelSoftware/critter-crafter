@@ -210,3 +210,46 @@ def test_radial_walks_in_alternating_tripods(catalog):
         legs = skeleton["locomotion"]["legs"]
         assert {round(l["walk_phase"], 3) for l in legs} == {0.0, .5}
         assert [l["walk_phase"] for l in legs] == [l["run_phase"] for l in legs]
+
+
+@pytest.mark.parametrize("name,index,contact", [
+    ("neutral", 0, 3), ("grounded_overrun", 2, 3), ("instant_turn", 2, 3),
+    ("ramp", 2, 3), ("hinge_limit", 0, 3), ("asymmetric_group_tie", 1, 1),
+    ("support_release_blocked", -1, -1), ("early_swing_cap_blocked", -1, -1),
+    ("no_ground", -1, -1), ("zero_stride_no_zero_hit", -1, -1),
+    ("hinge_yaw_blocked", -1, -1), ("degenerate_reach", -1, -1),
+    ("physical_cost", 0, 3),
+])
+def test_landing_physical_cases(name, index, contact):
+    from critter_crafter.locomotion.qa import landing_golden_rows
+    row = next(row for row in landing_golden_rows() if row["case_id"] == name)
+    chosen = row["chosen_slot"]
+    assert (-1 if chosen < 0 else row["candidates"][chosen]["index"]) == index
+    assert (-1 if chosen < 0 else row["candidates"][chosen]["contact_index"]) == contact
+
+
+def test_landing_rejects_invalid_numeric_and_reach_boundaries():
+    candidates = [{"index": 0, "contact_index": 0, "ground_valid": True,
+                   "hinge": False, "reach_fraction": float("nan"), "coxa_yaw_deg": 0.0}]
+    for invalid in (float("nan"), float("inf"), -1.0, 1.000001):
+        candidates[0]["reach_fraction"] = invalid
+        assert stepper.choose_landing(candidates, 1.0, True) == -1
+    for hinge, reach_limit in ((False, .95), (True, .97)):
+        candidates[0]["hinge"] = hinge
+        candidates[0]["reach_fraction"] = stepper.landing_reach_fraction(0, 0, reach_limit, 1)
+        assert stepper.choose_landing(candidates, 0.0, True) == 0
+        candidates[0]["reach_fraction"] = stepper.landing_reach_fraction(0, 0, reach_limit + 1e-6, 1)
+        assert stepper.choose_landing(candidates, 0.0, True) == -1
+
+
+def test_landing_offsets_use_only_five_travel_space_proposals():
+    assert [stepper.candidate_offset(i, 2.0) for i in range(5)] == [
+        (0.0, 0.0), (0.0, .2), (0.0, -.2), (.2, 0.0), (-.2, 0.0)]
+    assert all(stepper.candidate_offset(i, 0.0) == (0.0, 0.0) for i in range(5))
+
+
+def test_grounded_lifts_keep_authored_support_rule_but_not_early_swing_cap():
+    assert not stepper.can_lift(True, 0, 1, True, True, 2, 2)
+    assert stepper.can_lift(True, 1, 1, True, True, 2, 2)
+    assert not stepper.can_lift(True, 1, 1, True, False, 2, 2)
+    assert stepper.can_lift(True, 1, 1, False, False, 2, 2)

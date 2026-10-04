@@ -3,7 +3,7 @@
   "skeleton_id": "quadruped_lean_digitigrade_s003_v3",
   "family": "quadruped",
   "locomotion_hint": "quadruped",
-  "status": "approved",
+  "status": "draft",
   "symmetry_pct": 100,
   "branches": [
     {
@@ -11,6 +11,7 @@
       "template": "spine3",
       "parent_branch": null,
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0,
         0.9859,
@@ -85,6 +86,9 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 2,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         0.2589,
         0.9859,
@@ -171,6 +175,9 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 2,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         -0.2589,
         0.9859,
@@ -258,6 +265,9 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         0.2589,
         0.9859,
@@ -344,6 +354,9 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         -0.2589,
         0.9859,
@@ -431,6 +444,9 @@
       "template": "head1",
       "parent_branch": "core",
       "attach_bone_index": 2,
+      "capabilities": [
+        "bite"
+      ],
       "origin_m": [
         0,
         0.9859,
@@ -494,13 +510,15 @@
       ],
       "stance_z_deg": [
         0.0
-      ]
+      ],
+      "effector_slot": "primary_head"
     },
     {
       "branch_id": "tail",
       "template": "tentacle8",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0,
         0.9859,
@@ -586,6 +604,7 @@
       "template": "appendage1",
       "parent_branch": "core",
       "attach_bone_index": 1,
+      "capabilities": [],
       "origin_m": [
         0,
         1.1522,
@@ -657,6 +676,7 @@
       "template": "appendage1",
       "parent_branch": "core",
       "attach_bone_index": 2,
+      "capabilities": [],
       "origin_m": [
         0,
         1.1522,
@@ -1030,10 +1050,5 @@
       "limb": 1.0313,
       "stance": 0.9618
     }
-  },
-  "review": {
-    "by": "owner",
-    "date": "2026-09-30",
-    "method": "owner"
   }
 }

@@ -28,11 +28,13 @@ namespace CritterCrafter
     {
         readonly CritterLibrary _library;
         readonly AssemblyOptions _options;
+        readonly bool _preferBaked;
 
-        public DefaultCreatureVisualFactory(CritterLibrary library, AssemblyOptions options)
+        public DefaultCreatureVisualFactory(CritterLibrary library, AssemblyOptions options, bool preferBaked = true)
         {
             _library = library;
             _options = options;
+            _preferBaked = preferBaked;
         }
 
         /// <summary>
@@ -59,7 +61,7 @@ namespace CritterCrafter
                     return CreatureAssembler.CreateFallback(null, opts, new[] { e.Message }).gameObject;
                 }
             }
-            var creature = CreatureAssembler.Assemble(_library, recipe, opts);
+            var creature = CreatureAssembler.Assemble(_library, recipe, opts, _preferBaked);
             if (!creature.IsFallback) creature.gameObject.AddComponent<CreatureMotion>();
             return creature.gameObject;
         }

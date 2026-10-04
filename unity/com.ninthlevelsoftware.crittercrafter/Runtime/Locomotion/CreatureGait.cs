@@ -52,6 +52,10 @@ namespace CritterCrafter.Locomotion
             public bool push;
             /// <summary>Legs sharing a walk phase offset step together (e.g. a hexapod tripod).</summary>
             public int group;
+            public int contactIndex;
+            public Vector3 hipFromBody;
+            [NonSerialized] public Vector3 hipPoseFromBody;
+            [NonSerialized] public ReachProjectionConstraint reachProjection;
 
             [NonSerialized] public bool planted = true;
             [NonSerialized] public Vector3 plant;
@@ -62,6 +66,9 @@ namespace CritterCrafter.Locomotion
             [NonSerialized] public float swingDuration;
             [NonSerialized] public double lastSwingCycle = double.MinValue;
             [NonSerialized] public Vector3 home;
+            [NonSerialized] public Vector3 landingOffsetLocal;
+            [NonSerialized] public int landingCandidate = -1;
+            [NonSerialized] public Vector3 swingLanding;
             /// <summary>Last frame's target was beyond reach and had to be pulled in.</summary>
             [NonSerialized] public bool clamped;
             /// <summary>How far the target sat from the leg's root last frame, as a fraction of the reach limit (1 = clamped).</summary>
@@ -75,6 +82,8 @@ namespace CritterCrafter.Locomotion
             /// </summary>
             [NonSerialized] public float plantRewrite;
             [NonSerialized] public bool gripped;
+            [NonSerialized] public Vector3 plantBeforeTargets;
+            [NonSerialized] public bool heldBeforeTargets;
             /// <summary>Review diagnostics: the leg was strained but could not re-step this frame.</summary>
             [NonSerialized] public bool liftBlocked;
         }
@@ -109,6 +118,7 @@ namespace CritterCrafter.Locomotion
         CreatureMotion _motion;
         LocomotionData _block;
         Animator _animator;
+        RigBuilder _rigBuilder;
         bool _hasSpeed, _hasGait, _hasPhase;
         bool _initialised;
         bool _run;
@@ -124,6 +134,9 @@ namespace CritterCrafter.Locomotion
         float _bodyHeight, _bodyPitch, _bodyRoll, _bodyYaw, _bodySurge, _limpDip, _limpRoll, _limpYaw;
         float _lastYaw, _yawLag;
         GaitParams _params;
+        readonly Candidate[] _landingCandidates = new Candidate[5];
+        Candidate[] _groupLandings;
+        static readonly Comparison<Leg> StrainOrder = ByStrain;
 
         static readonly int SpeedParam = Animator.StringToHash("Speed");
         static readonly int GaitParam = Animator.StringToHash("Gait");
@@ -150,9 +163,13 @@ namespace CritterCrafter.Locomotion
             body = bodyTransform;
             rig = locomotionRig;
             legs = builtLegs;
+            _groupLandings = new Candidate[legs.Count];
             var groups = new List<double>();
-            foreach (var leg in legs)
+            for (int index = 0; index < legs.Count; index++)
             {
+                var leg = legs[index];
+                leg.contactIndex = index;
+                if (leg.hip != null) leg.hipFromBody = Quaternion.Inverse(body.rotation) * (leg.hip.position - body.position);
                 int g = groups.FindIndex(x => Math.Abs(x - leg.walkPhase) < 1e-6);
                 if (g < 0) { groups.Add(leg.walkPhase); g = groups.Count - 1; }
                 leg.group = g;
@@ -161,6 +178,7 @@ namespace CritterCrafter.Locomotion
             _order = new List<Leg>(legs);
             bodyBaseLocalPosition = body.localPosition;
             bodyBaseLocalRotation = body.localRotation;
+            Bind();
         }
 
         void Awake() => Bind();
@@ -171,6 +189,7 @@ namespace CritterCrafter.Locomotion
             _motion = GetComponent<CreatureMotion>();
             _block = _creature != null ? _creature.GaitBlock : null;
             _animator = _creature != null ? _creature.Animator : null;
+            _rigBuilder = _animator != null ? _animator.GetComponent<RigBuilder>() : null;
             if (_animator != null && _animator.runtimeAnimatorController != null)
                 foreach (var p in _animator.parameters)
                 {
@@ -190,18 +209,42 @@ namespace CritterCrafter.Locomotion
                 leg.position = leg.plant;
                 leg.planted = true;
                 leg.forced = false;
+                leg.landingOffsetLocal = Vector3.zero;
+                leg.landingCandidate = -1;
+                leg.swingLanding = leg.plant;
             }
             ApplyTargets();
             _lastPosition = transform.position;
             _lastYaw = transform.eulerAngles.y;
             _yawLag = 0f;
             _velocity = Vector3.zero;
+            _landVelocity = Vector3.zero;
             // Standing again: the next move re-seeds the gait clock with every foot mid-stance.
             _wasMoving = false;
             _initialised = true;
         }
 
         void OnEnable() => _initialised = false;
+
+        internal void SynchronizeRigTargets()
+        {
+            if (_rigBuilder == null || !_rigBuilder.graph.IsValid()) return;
+            foreach (var leg in legs)
+            {
+                if (!leg.hinge || leg.target == null || leg.reachProjection == null
+                    || !leg.reachProjection.TryGetResult(out ReachProjectionResult result) || !result.clamped) continue;
+                Quaternion frame = leg.target.rotation * Quaternion.Inverse(leg.ankleRotation);
+                leg.position = leg.target.position - frame * leg.ankleOffset;
+                leg.clamped = true;
+                leg.reachFrac = Mathf.Max(leg.reachFrac, result.reachFraction);
+                if (leg.planted)
+                {
+                    leg.plant = leg.position;
+                    if (leg.heldBeforeTargets)
+                        leg.plantRewrite = Vector3.Distance(leg.plantBeforeTargets, leg.plant);
+                }
+            }
+        }
 
         void Update() => Step(Time.deltaTime);
 
@@ -212,6 +255,10 @@ namespace CritterCrafter.Locomotion
             if (_block == null || !(_block.HasLegs && legs.Count > 0 || _block.Slides)) return;
             if (!_initialised) ResetFeet();
             if (dt <= 0f) return;
+            Quaternion inverseBody = Quaternion.Inverse(body != null ? body.rotation : transform.rotation);
+            Vector3 bodyOrigin = body != null ? body.position : transform.position;
+            foreach (var leg in legs)
+                leg.hipPoseFromBody = leg.hip != null ? inverseBody * (leg.hip.position - bodyOrigin) : leg.hipFromBody;
 
             Vector3 position = transform.position;
             if ((position - _lastPosition).sqrMagnitude > teleportDistance * teleportDistance)
@@ -269,13 +316,13 @@ namespace CritterCrafter.Locomotion
             }
             _wasMoving = moving;
             if (moving) _clock += _params.cadenceHz * dt;
+            // Haul pose is clock-driven: reach/lift checks must see this frame's hips, not the last haul pose.
+            if (_block.body_on_ground) UpdateBody(dt, speed);
 
             // A dying creature stops stepping: an idle re-step of a strained foot looked like a tidy-up while it fell.
             bool dead = _motion != null && _motion.State == CreatureState.Dead;
             float swingTime = (float)StepPlanner.SwingTime(_params.cadenceHz, _params.duty);
-            float lead = (float)StepPlanner.LandingLead(speed, _params.cadenceHz, _params.duty);
-            Vector3 heading = speed > 1e-4f ? _velocity / speed : transform.forward;
-            Vector3 landHeading = _landVelocity.sqrMagnitude > 1e-6f ? _landVelocity.normalized : heading;
+            Vector3 heading = TravelHeading();
             Quaternion lag = Quaternion.Euler(0f, _yawLag, 0f);
 
             // Pass 1: advance swings. A swing owns its own monotonic progress, so gait changes (duty,
@@ -287,20 +334,14 @@ namespace CritterCrafter.Locomotion
                 leg.swingT += dt;
                 float u = Mathf.Clamp01(leg.swingT / leg.swingDuration);
                 float remaining = Mathf.Max(0f, leg.swingDuration - leg.swingT);
-                // Land where the foot's home will be when it touches down: the body is still catching up its yaw,
-                // so the home now is a half-turned one and the foot would need another step at once.
-                Vector3 land;
-                if (_block.body_on_ground)
-                    land = moving ? Ground(leg.home + _velocity * remaining + heading * lead, leg.homeLocal.y) : leg.home;
-                else
-                {
-                    float landIn = remaining + (moving ? 0.5f * (float)_params.duty / (float)_params.cadenceHz : 0f);
-                    var lagThen = Quaternion.Euler(0f, Mathf.MoveTowards(_yawLag, 0f, _turnRateNow * landIn), 0f);
-                    Vector3 homeThen = Ground(transform.TransformPoint(lagThen * leg.stanceLocal), leg.homeLocal.y);
-                    land = moving
-                        ? Ground(homeThen + _landVelocity * remaining + landHeading * (leg.limp > 0f ? lead * LimpLead : lead), leg.homeLocal.y)
-                        : homeThen;
-                }
+                Vector3 predicted = leg.landingCandidate > 0
+                    ? ReachableLanding(leg, remaining, out _, out _)
+                    : PredictLanding(leg, remaining, out _, out _);
+                Vector3 offset = Vector3.Cross(Vector3.up, heading) * leg.landingOffsetLocal.x
+                    + heading * leg.landingOffsetLocal.z;
+                if (TryGround(predicted + offset, leg.homeLocal.y, out Vector3 projected))
+                    leg.swingLanding = projected;
+                Vector3 land = leg.swingLanding;
                 // A limping leg scuffs: it lifts less than a sound one.
                 float clearance = leg.forced ? leg.clearance * 0.6f : leg.clearance;
                 if (leg.limp > 0f) clearance *= LimpClearance;
@@ -309,10 +350,12 @@ namespace CritterCrafter.Locomotion
                 if (u >= 1f) Plant(leg, land);
             }
 
+            if (_block.body_on_ground) UpdatePlantedReach();
+
             // Pass 2: lift planted feet, on schedule while moving, or early when strained. The most strained leg
             // goes first: in list order the first legs used up the swing cap and the worst one waited, dragging.
             bool strainedBlocked = false;
-            _order.Sort(ByStrain);
+            _order.Sort(StrainOrder);
             foreach (var leg in _order)
             {
                 leg.liftBlocked = false;
@@ -333,7 +376,8 @@ namespace CritterCrafter.Locomotion
                         {
                             // Land when the schedule says stance begins again.
                             float duration = (float)((1.0 - phase) / _params.cadenceHz);
-                            Lift(leg, Mathf.Max(0.08f, duration), false, cycle);
+                            if (!TryLift(leg, Mathf.Max(0.08f, duration), false, cycle))
+                                leg.liftBlocked = true;
                         }
                         else
                             leg.liftBlocked = true;
@@ -341,8 +385,14 @@ namespace CritterCrafter.Locomotion
                     else if (Overrun(leg, leg.home))
                     {
                         if (CanLift(leg, true))
-                            Lift(leg, Mathf.Clamp(swingTime, 0.12f, 0.2f), true,
-                                StepPlanner.InStance(phase, _params.duty) ? cycle - 1 : cycle);
+                        {
+                            if (!TryLift(leg, Mathf.Clamp(swingTime, 0.12f, 0.2f), true,
+                                StepPlanner.InStance(phase, _params.duty) ? cycle - 1 : cycle))
+                            {
+                                leg.liftBlocked = true;
+                                strainedBlocked = true;
+                            }
+                        }
                         else
                         {
                             leg.liftBlocked = true;
@@ -360,13 +410,13 @@ namespace CritterCrafter.Locomotion
 
             if (strainedBlocked) HurryLandings(dt);
             UpdateWeights(dt);
-            UpdateBody(dt, speed);
+            if (!_block.body_on_ground) UpdateBody(dt, speed);
             ApplyTargets();
             UpdateAnimator(speed);
         }
 
         const float MaxCoxaYawDeg = 45f;
-        const float HingeReachFraction = 0.97f;
+        internal const float HingeReachFraction = 0.97f;
 
         /// <summary>
         /// Place every IK target for the foot contacts in leg.position, never asking a chain for more than it
@@ -384,6 +434,9 @@ namespace CritterCrafter.Locomotion
             {
                 leg.plantRewrite = 0f;
                 bool held = leg.planted && leg.gripped;
+                leg.plantBeforeTargets = leg.plant;
+                leg.heldBeforeTargets = held;
+                if (leg.reachProjection != null) leg.reachProjection.data.planted = leg.planted;
                 leg.gripped = leg.planted;
                 if (leg.target == null) continue;
                 if (!leg.hinge || leg.coxa == null)
@@ -449,6 +502,8 @@ namespace CritterCrafter.Locomotion
             leg.forced = false;
             leg.clamped = false;        // a foot that has just landed is not being dragged; ApplyTargets decides again
             leg.plantedTime = 0f;
+            leg.landingOffsetLocal = Vector3.zero;
+            leg.landingCandidate = -1;
         }
 
         const float MaxReachFraction = 0.95f;
@@ -467,7 +522,7 @@ namespace CritterCrafter.Locomotion
         /// the height alone is already out of reach, fall back to pulling it in straight (there is no ground point
         /// that reaches).
         /// </summary>
-        static Vector3 ClampHorizontally(Vector3 point, Vector3 centre, float max)
+        internal static Vector3 ClampHorizontally(Vector3 point, Vector3 centre, float max)
         {
             Vector3 d = point - centre;
             if (d.sqrMagnitude <= max * max) return point;
@@ -510,7 +565,11 @@ namespace CritterCrafter.Locomotion
             return Mathf.Lerp(bodyTurnRateDeg, allowed, turnReachGate);
         }
 
-        static int ByStrain(Leg a, Leg b) => b.reachFrac.CompareTo(a.reachFrac);
+        static int ByStrain(Leg a, Leg b)
+        {
+            int strain = b.reachFrac.CompareTo(a.reachFrac);
+            return strain != 0 ? strain : a.contactIndex.CompareTo(b.contactIndex);
+        }
 
         /// <summary>
         /// A strained leg is waiting on a support that is still in the air: bring the airborne legs down faster
@@ -557,15 +616,196 @@ namespace CritterCrafter.Locomotion
         /// </summary>
         bool CanLift(Leg leg, bool early)
         {
-            if (leg.support && PlantedSupports(leg) < _block.min_support) return false;
-            if (!early || _block.body_on_ground) return true;
             int swinging = 0;
             foreach (var other in legs) if (!other.planted) swinging++;
-            return swinging < Mathf.Max(1, legs.Count / 2);
+            return StepPlanner.CanLift(leg.support, PlantedSupports(leg), _block.min_support,
+                early, _block.body_on_ground, swinging, legs.Count);
         }
 
-        static void Lift(Leg leg, float duration, bool early, double cycle)
+        Vector3 TravelHeading()
         {
+            Vector3 velocity = _block.body_on_ground ? _velocity : _landVelocity;
+            return velocity.sqrMagnitude > 1e-6f ? velocity.normalized : transform.forward;
+        }
+
+        Vector3 PredictLanding(Leg leg, float remaining, out Vector3 travel, out Quaternion yawDelta)
+        {
+            bool moving = Speed > 0.05f && _params.cadenceHz > 0.0;
+            float lead = moving ? (float)StepPlanner.LandingLead(Speed, _params.cadenceHz, _params.duty) : 0f;
+            float yawThen = _yawLag;
+            float touchdownYaw = _yawLag;
+            if (!_block.body_on_ground)
+            {
+                float landIn = remaining + (moving ? 0.5f * (float)_params.duty / (float)_params.cadenceHz : 0f);
+                yawThen = Mathf.MoveTowards(_yawLag, 0f, _turnRateNow * landIn);
+                touchdownYaw = Mathf.MoveTowards(_yawLag, 0f, _turnRateNow * remaining);
+                if (leg.limp > 0f) lead *= LimpLead;
+            }
+            yawDelta = Quaternion.AngleAxis(touchdownYaw - _yawLag, Vector3.up);
+            travel = moving ? (_block.body_on_ground ? _velocity : _landVelocity) * remaining : Vector3.zero;
+            // The stance home is aimed for mid-stance; the body frame separately forecasts touchdown yaw.
+            Vector3 home = transform.TransformPoint(Quaternion.Euler(0f, yawThen, 0f) * leg.stanceLocal);
+            return home + travel + TravelHeading() * lead;
+        }
+
+
+        void PredictBodyFrame(float duration, Vector3 travel, Quaternion yawDelta,
+            out Vector3 origin, out Quaternion rotation)
+        {
+            if (body == null)
+            {
+                origin = transform.position + travel;
+                rotation = yawDelta * transform.rotation;
+                return;
+            }
+            if (!_block.body_on_ground)
+            {
+                float walkSpeed = Speed;
+                double clock = _clock + duration * _params.cadenceHz;
+                WalkerBodyGoal(walkSpeed, clock, duration, out float walkHeight, out float walkPitch, out float walkRoll,
+                    out float limpDip, out float limpRoll, out float limpYaw);
+                float terrainBlend = 1f - Mathf.Exp(-duration / 0.12f);
+                float limpBlend = 1f - Mathf.Exp(-duration / 0.07f);
+                Vector3 walkLocal = bodyBaseLocalPosition + Vector3.up *
+                    (Mathf.Lerp(_bodyHeight, walkHeight, terrainBlend) + WalkerBob(walkSpeed, clock) - Mathf.Lerp(_limpDip, limpDip, limpBlend));
+                Quaternion walkTilt = Quaternion.Euler(Mathf.Lerp(_bodyPitch, walkPitch, terrainBlend),
+                    _bodyYaw + Mathf.Lerp(_limpYaw, limpYaw, limpBlend),
+                    Mathf.Lerp(_bodyRoll, walkRoll, terrainBlend) + Mathf.Lerp(_limpRoll, limpRoll, limpBlend));
+                origin = (body.parent != null ? body.parent.TransformPoint(walkLocal) : walkLocal) + travel;
+                Quaternion localRotation = yawDelta * Quaternion.Euler(0f, _yawLag, 0f) * walkTilt * bodyBaseLocalRotation;
+                rotation = (body.parent != null ? body.parent.rotation : Quaternion.identity) * localRotation;
+                return;
+            }
+            float speed = Speed;
+            bool moving = speed > 0.05f && _params.cadenceHz > 0.0;
+            float pull = -1f, surge = 0f;
+            int side = 0;
+            bool push = false;
+            if (moving) surge = HaulSurge(speed, _clock + duration * _params.cadenceHz, out pull, out side, out push);
+            float strength = Mathf.Clamp01(speed / Mathf.Max(0.1f, (float)_block.v_walk_mps));
+            float arc = pull >= 0f ? Mathf.Sin(Mathf.PI * pull) : 0f;
+            float tiltBlend = 1f - Mathf.Exp(-duration / 0.06f);
+            float pitch = Mathf.Lerp(_bodyPitch, -dragHeaveDeg * (push ? dragPushHeave : 1f) * strength * arc, tiltBlend);
+            float roll = Mathf.Lerp(_bodyRoll, dragRollDeg * side * strength * arc, tiltBlend);
+            float yaw = Mathf.Lerp(_bodyYaw, dragYawDeg * side * strength * arc, tiltBlend);
+            float surgeBlend = 1f - Mathf.Exp(-duration / (moving ? 0.03f : Mathf.Max(0.01f, dragStopSettle)));
+            surge = Mathf.Lerp(_bodySurge, surge, surgeBlend);
+            Quaternion lag = yawDelta * Quaternion.Euler(0f, _yawLag, 0f);
+            Quaternion tilt = Quaternion.Euler(pitch, yaw, roll);
+            Vector3 pivot = _block.body_pivot_m != null && _block.body_pivot_m.Length == 3
+                ? CritterFrame.Position(_block.body_pivot_m) : Vector3.zero;
+            Vector3 local = bodyBaseLocalPosition + lag * (Vector3.forward * surge + pivot - tilt * pivot);
+            origin = (body.parent != null ? body.parent.TransformPoint(local) : local) + travel;
+            rotation = (body.parent != null ? body.parent.rotation : Quaternion.identity) * lag * tilt * bodyBaseLocalRotation;
+        }
+
+
+        void LandingGeometry(Leg leg, Vector3 point, Vector3 bodyOrigin, Quaternion bodyRotation,
+            out Vector3 distance, out float reach, out float yaw)
+        {
+            yaw = 0f;
+            if (!leg.hinge || leg.coxa == null)
+            {
+                Vector3 hip = leg.hip != null ? bodyOrigin + bodyRotation * leg.hipPoseFromBody : point;
+                distance = point - hip;
+                reach = leg.hip != null ? leg.reach : 0f;
+                return;
+            }
+            Vector3 up = bodyRotation * Vector3.up;
+            Vector3 coxa = bodyOrigin + bodyRotation * leg.hipPoseFromBody;
+            Vector3 neutral = Vector3.ProjectOnPlane(bodyRotation * leg.homeFromCoxa, up);
+            Vector3 now = Vector3.ProjectOnPlane(point - coxa, up);
+            if (leg.coxaAim != null && neutral.sqrMagnitude > 1e-8f && now.sqrMagnitude > 1e-8f)
+                yaw = Vector3.SignedAngle(neutral, now, up);
+            // The foot's azimuth is not the coxa command: the lower hinge still reaches from the bounded frame.
+            yaw = Mathf.Clamp(yaw, -MaxCoxaYawDeg, MaxCoxaYawDeg);
+            Quaternion frame = Quaternion.AngleAxis(yaw, up) * bodyRotation;
+            Vector3 femur = coxa + frame * leg.femurFromCoxa;
+            distance = point + frame * leg.ankleOffset - femur;
+            reach = leg.hingeReach;
+        }
+
+        void UpdatePlantedReach()
+        {
+            Quaternion rotation = body != null ? body.rotation : transform.rotation;
+            foreach (var leg in legs)
+            {
+                if (!leg.planted || leg.hip == null) continue;
+                Vector3 origin = leg.hip.position - rotation * leg.hipPoseFromBody;
+                LandingGeometry(leg, leg.plant, origin, rotation, out Vector3 distance, out float reach, out _);
+                float limit = (leg.hinge ? HingeReachFraction : MaxReachFraction) * reach;
+                if (limit <= 0f) continue;
+                leg.reachFrac = distance.magnitude / limit;
+                leg.clamped = distance.sqrMagnitude > limit * limit;
+            }
+        }
+
+        Vector3 ReachableLanding(Leg leg, float duration, out Vector3 bodyOrigin, out Quaternion bodyRotation)
+        {
+            Vector3 point = PredictLanding(leg, duration, out Vector3 travel, out Quaternion yawDelta);
+            PredictBodyFrame(duration, travel, yawDelta, out bodyOrigin, out bodyRotation);
+            point.y = leg.home.y;
+            // Preserve the existing solver's horizontal destination projection before proposing offsets.
+            // The chooser compares double reach fractions, but the projected destination and coxa
+            // frame are evaluated in world-space floats; leave a coordinate-scaled representable margin.
+            for (int pass = 0; pass < 3; pass++)
+            {
+                LandingGeometry(leg, point, bodyOrigin, bodyRotation, out Vector3 distance, out float reach, out _);
+                float limit = (leg.hinge ? HingeReachFraction : MaxReachFraction) * reach;
+                if (limit <= 0f || distance.y * distance.y >= limit * limit) break;
+                Vector3 centre = point - distance;
+                float worldScale = Mathf.Max(Mathf.Max(Mathf.Abs(point.x), Mathf.Abs(point.z)),
+                    Mathf.Max(Mathf.Abs(centre.x), Mathf.Abs(centre.z)));
+                float margin = Mathf.Max(1e-6f, Mathf.Max(limit * 1e-5f, worldScale * 2.4e-7f));
+                point = ClampHorizontally(point, centre, Mathf.Max(0f, limit - margin));
+            }
+            return point;
+        }
+
+        bool TryChooseLanding(Leg leg, float duration, out Candidate landing)
+        {
+            Vector3 predicted = ReachableLanding(leg, duration, out Vector3 bodyOrigin, out Quaternion bodyRotation);
+            Vector3 heading = TravelHeading();
+            Vector3 lateralDirection = Vector3.Cross(Vector3.up, heading);
+            for (int index = 0; index < _landingCandidates.Length; index++)
+            {
+                StepPlanner.CandidateOffset(index, _params.strideM, out double lateral, out double forward);
+                Vector3 point = predicted + lateralDirection * (float)lateral + heading * (float)forward;
+                var candidate = new Candidate { index = index, contactIndex = leg.contactIndex, hinge = leg.hinge };
+                LandingGeometry(leg, point, bodyOrigin, bodyRotation, out Vector3 distance, out float reach, out float yaw);
+                float limit = (leg.hinge ? HingeReachFraction : MaxReachFraction) * reach;
+                // Height is unknown until the probe, but excessive XZ reach can never be repaired by it.
+                if ((_params.strideM > 0.0 || index == 0) && limit > 0f
+                    && distance.x * distance.x + distance.z * distance.z <= limit * limit
+                    && Mathf.Abs(yaw) <= MaxCoxaYawDeg
+                    && TryGround(point, leg.homeLocal.y, out Vector3 projected))
+                {
+                    LandingGeometry(leg, projected, bodyOrigin, bodyRotation, out distance, out reach, out yaw);
+                    candidate.groundValid = true;
+                    candidate.x = projected.x; candidate.y = projected.y; candidate.z = projected.z;
+                    candidate.reachFraction = StepPlanner.LandingReachFraction(distance.x, distance.y, distance.z, reach);
+                    candidate.coxaYawDeg = yaw;
+                }
+                _landingCandidates[index] = candidate;
+            }
+            int selected = StepPlanner.ChooseLanding(_landingCandidates, _landingCandidates.Length, _params.strideM, true);
+            landing = selected >= 0 ? _landingCandidates[selected] : default;
+            return selected >= 0;
+        }
+
+        bool TryLift(Leg leg, float duration, bool early, double cycle)
+        {
+            if (!TryChooseLanding(leg, duration, out Candidate landing)) return false;
+            Lift(leg, duration, early, cycle, landing, _params.strideM);
+            return true;
+        }
+
+        static void Lift(Leg leg, float duration, bool early, double cycle, Candidate landing, double stride)
+        {
+            StepPlanner.CandidateOffset(landing.index, stride, out double lateral, out double forward);
+            leg.landingOffsetLocal = new Vector3((float)lateral, 0f, (float)forward);
+            leg.landingCandidate = landing.index;
+            leg.swingLanding = new Vector3((float)landing.x, (float)landing.y, (float)landing.z);
             leg.swingStart = leg.plant;
             leg.swingT = 0f;
             leg.swingDuration = Mathf.Max(0.08f, duration);
@@ -585,20 +825,45 @@ namespace CritterCrafter.Locomotion
                 foreach (var other in legs) if (!other.planted) return;
             if (PlantedSupports(null, leg.group) >= _block.min_support)
             {
-                foreach (var other in legs)
-                    if (other.group == leg.group && other.planted) Lift(other, duration, true, other.lastSwingCycle);
+                bool complete = true;
+                for (int index = 0; index < legs.Count; index++)
+                {
+                    var other = legs[index];
+                    if (other.group != leg.group || !other.planted) continue;
+                    if (!TryChooseLanding(other, duration, out _groupLandings[index])) complete = false;
+                }
+                if (complete)
+                {
+                    for (int index = 0; index < legs.Count; index++)
+                    {
+                        var other = legs[index];
+                        if (other.group == leg.group && other.planted)
+                            Lift(other, duration, true, other.lastSwingCycle, _groupLandings[index], _params.strideM);
+                    }
+                    return;
+                }
             }
-            else if (CanLift(leg, true))
-                Lift(leg, duration, true, leg.lastSwingCycle);
+            if (CanLift(leg, true))
+                TryLift(leg, duration, true, leg.lastSwingCycle);
         }
 
         Vector3 Ground(Vector3 point, float soleHeight)
         {
+            return TryGround(point, soleHeight, out Vector3 projected)
+                ? projected : new Vector3(point.x, transform.position.y + soleHeight, point.z);
+        }
+
+        bool TryGround(Vector3 point, float soleHeight, out Vector3 projected)
+        {
             float probe = (float)_block.hip_height_m + 1f;
             if (Physics.Raycast(point + Vector3.up * probe, Vector3.down, out var hit, probe + 2f, groundMask,
                     QueryTriggerInteraction.Ignore))
-                return new Vector3(point.x, hit.point.y + soleHeight, point.z);
-            return new Vector3(point.x, transform.position.y + soleHeight, point.z);
+            {
+                projected = new Vector3(point.x, hit.point.y + soleHeight, point.z);
+                return true;
+            }
+            projected = point;
+            return false;
         }
 
         void UpdateWeights(float dt)
@@ -645,7 +910,7 @@ namespace CritterCrafter.Locomotion
         /// as the hand grips, lunges through the pull and stops. Returns the torso's lead over the root along
         /// the heading (m), and the pull progress (0..1, or -1 outside the pull) and its side.
         /// </summary>
-        float HaulSurge(float speed, out float pull, out int side, out bool push)
+        float HaulSurge(float speed, double clock, out float pull, out int side, out bool push)
         {
             pull = -1f;
             side = 0;
@@ -658,7 +923,7 @@ namespace CritterCrafter.Locomotion
             foreach (var leg in legs)
             {
                 // The arm that planted most recently (phase within its first haul span) is the one pulling.
-                double phase = StepPlanner.LegPhase(_clock, PhaseOffset(leg, _run));
+                double phase = StepPlanner.LegPhase(clock, PhaseOffset(leg, _run));
                 if (phase >= span) continue;
                 w = (float)(phase / span);
                 side = leg.homeLocal.x < 0f ? -1 : 1;
@@ -689,7 +954,7 @@ namespace CritterCrafter.Locomotion
                 float pull = -1f, surge = 0f;
                 int side = 0;
                 bool push = false;
-                if (moving) surge = HaulSurge(speed, out pull, out side, out push);
+                if (moving) surge = HaulSurge(speed, _clock, out pull, out side, out push);
                 float strength = Mathf.Clamp01(speed / Mathf.Max(0.1f, (float)_block.v_walk_mps));
                 float arc = pull >= 0f ? Mathf.Sin(Mathf.PI * pull) : 0f;
                 float kg = 1f - Mathf.Exp(-dt / 0.06f);
@@ -713,6 +978,23 @@ namespace CritterCrafter.Locomotion
                 body.localRotation = BodyRotation();
                 return;
             }
+            WalkerBodyGoal(speed, _clock, 0f, out float height, out float pitch, out float roll,
+                out float limpDip, out float limpRoll, out float limpYaw);
+            float kl = 1f - Mathf.Exp(-dt / 0.07f);
+            _limpDip = Mathf.Lerp(_limpDip, limpDip, kl);
+            _limpRoll = Mathf.Lerp(_limpRoll, limpRoll, kl);
+            _limpYaw = Mathf.Lerp(_limpYaw, limpYaw, kl);
+            float k = 1f - Mathf.Exp(-dt / 0.12f);
+            _bodyHeight = Mathf.Lerp(_bodyHeight, height, k);
+            _bodyPitch = Mathf.Lerp(_bodyPitch, pitch, k);
+            _bodyRoll = Mathf.Lerp(_bodyRoll, roll, k);
+            body.localPosition = bodyBaseLocalPosition + Vector3.up * (_bodyHeight + WalkerBob(speed, _clock) - _limpDip);
+            body.localRotation = BodyRotation();
+        }
+
+        void WalkerBodyGoal(float speed, double clock, float forecast,
+            out float height, out float pitch, out float roll, out float limpDip, out float limpRoll, out float limpYaw)
+        {
             // Least-squares plane y = a + b x + c z through the ground height errors under every supporting leg's
             // home (root-local x, z). Homes exist for all legs every frame (pass 1 already raycast them), so the
             // plane no longer collapses whenever fewer than three feet happen to be planted (every trot frame).
@@ -728,13 +1010,13 @@ namespace CritterCrafter.Locomotion
                 double x = leg.homeLocal.x, z = leg.homeLocal.z;
                 n++; sx += x; sz += z; sy += err;
                 sxx += x * x; szz += z * z; sxz += x * z; sxy += x * err; szy += z * err;
-                if (leg.planted)
+                if (ForecastPlanted(leg, clock, forecast))
                 {
                     plantedCount++;
                     plantedSum += transform.InverseTransformPoint(leg.plant).y - leg.homeLocal.y;
                 }
             }
-            float height = 0f, pitch = 0f, roll = 0f;
+            height = 0f; pitch = 0f; roll = 0f;
             if (n > 0)
             {
                 // Bounded: a foot that couldn't reach its plant must never drag the body up with it.
@@ -766,13 +1048,13 @@ namespace CritterCrafter.Locomotion
             }
             // A limping leg: the body drops and rolls toward it while it carries weight, and lifts as it swings,
             // so the walk lurches instead of gliding level over its feet.
-            float limpDip = 0f, limpRoll = 0f, limpYaw = 0f;
+            limpDip = 0f; limpRoll = 0f; limpYaw = 0f;
             if (_block.body_limp_m > 0.0 && speed > 0.05f)
             {
                 float strength = Mathf.Clamp01(speed / Mathf.Max(0.1f, (float)_block.v_walk_mps));
                 foreach (var leg in legs)
                 {
-                    if (leg.limp <= 0f || !leg.planted) continue;
+                    if (leg.limp <= 0f || !ForecastPlanted(leg, clock, forecast)) continue;
                     limpDip = leg.limp * strength;
                     float side = leg.homeLocal.x >= 0f ? 1f : -1f;        // +1: the limping leg is on the right
                     float share = strength * leg.limp / (float)_block.body_limp_m;
@@ -780,23 +1062,20 @@ namespace CritterCrafter.Locomotion
                     limpYaw = side * limpYawDeg * share;                   // and the body turns a little toward the weak side
                 }
             }
-            float kl = 1f - Mathf.Exp(-dt / 0.07f);
-            _limpDip = Mathf.Lerp(_limpDip, limpDip, kl);
-            _limpRoll = Mathf.Lerp(_limpRoll, limpRoll, kl);
-            _limpYaw = Mathf.Lerp(_limpYaw, limpYaw, kl);
-            float k = 1f - Mathf.Exp(-dt / 0.12f);
-            _bodyHeight = Mathf.Lerp(_bodyHeight, height, k);
-            _bodyPitch = Mathf.Lerp(_bodyPitch, pitch, k);
-            _bodyRoll = Mathf.Lerp(_bodyRoll, roll, k);
-            // A small vertical dip at twice the stride frequency while moving. It only ever lowers the
-            // body: raising the hips would cost reach exactly when a trailing foot is furthest back.
-            float bob = speed > 0.05f
-                ? -0.03f * (float)_block.hip_height_m * (float)_params.weight
-                  * (0.5f + 0.5f * Mathf.Cos((float)(_clock * 4.0 * Math.PI)))
-                : 0f;
-            body.localPosition = bodyBaseLocalPosition + Vector3.up * (_bodyHeight + bob - _limpDip);
-            body.localRotation = BodyRotation();
         }
+        bool ForecastPlanted(Leg leg, double clock, float forecast)
+        {
+            if (forecast <= 0f) return leg.planted;
+            if (!leg.planted && forecast < leg.swingDuration - leg.swingT) return false;
+            double scheduledDuty = leg.limp > 0f ? _params.duty * LimpStanceFraction : _params.duty;
+            return StepPlanner.InStance(StepPlanner.LegPhase(clock, PhaseOffset(leg, _run)), scheduledDuty);
+        }
+
+
+        float WalkerBob(float speed, double clock) => speed > 0.05f
+            ? -0.03f * (float)_block.hip_height_m * (float)_params.weight
+              * (0.5f + 0.5f * Mathf.Cos((float)(clock * 4.0 * Math.PI)))
+            : 0f;
 
         const float MaxBodyDropFraction = 0.35f;
         const float MaxBodyRiseFraction = 0.15f;

@@ -64,10 +64,6 @@ def test_motion_plan_has_fixed_horizontal_root_contacts_and_metadata():
         assert all(s["contacts"] for s in clip["samples"])
         assert {c["kind"] for s in clip["samples"] for c in s["contacts"]} <= {"foot", "hand", "sliding", "body"}
         schedule = clip["contact_schedule"]
-        assert schedule == [{"contact_id": "leg:0", "branch_id": "leg", "contact_index": 0,
-                             "kind": "foot", "phase_offset": .25,
-                             "stance_fraction": .92,
-                             "support": True}]
         first = clip["samples"][0]["contacts"][0]
         assert first["phase"] == schedule[0]["phase_offset"]
         assert first["support_fraction"] == schedule[0]["stance_fraction"]

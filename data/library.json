@@ -1,7 +1,7 @@
 {
   "schema_version": "3.0.0",
   "library_id": "biomass_core",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "frame": "gltf_rh_yup_zfwd_m",
   "limits": {
     "max_triangles": 30000,

@@ -19,7 +19,7 @@ Assembles skinned, Animator-driven procedural monsters at runtime from seeded re
 
 Re-importing replaces the whole folder, so keep your own assets elsewhere.
 
-**Which versions import.** The importer and the generator accept a catalog whose schema major is 3 and whose generator is `cc-gen-3` with `splitmix64`. The library's own release number (0.2.0, 0.2.1, 0.3.0) is not gated. A *saved recipe* replays only on the library id and version it was made on (`CC_LIBRARY_VERSION`), so a library bump invalidates saved recipes: keep the version you saved against, or store the pool and seed and regenerate.
+**Which versions import.** The importer and the generator accept a catalog whose schema major is 3 and whose generator is `cc-gen-3` with `splitmix64`. A saved recipe replays only against its exact `(library_id, library_version)` (`CC_LIBRARY_VERSION`). Keep immutable older libraries loaded when saves require them; select the matching version before building. A missing version is an explicit failure, never permission to regenerate its seed against a different catalog. Enhanced authoring targets v0.3.0; existing v0.2.0 exports remain unchanged.
 
 **Only `approved` content generates.** Skeletons and parts start as `draft`. Until the owner approves some, every pool fails with `CC_GEN_NO_SKELETON` and the factory returns a fallback.
 
@@ -80,6 +80,13 @@ motion.SetState(CreatureState.Telegraph);    // then Attacking; Stunned; Dead
 ## Textures
 
 Real (Meshy-derived) parts carry an albedo texture. The importer binds it to `_MainTex` and, where the shader has one, `_BaseMap`. The `_MainTex` path is covered by an EditMode test; **the URP `_BaseMap` path has not been run in Unity** (the test project has no URP).
+
+Enhanced authoring can bake organic SDF connectors offline. Catalog `connector_surface` records
+their authoring settings only; runtime assembly still uses ordinary skinned FBX meshes, scale one,
+the identity socket and exactly `b0=parent` / `b1=child`. There is no runtime volume mesher.
+The authoring operation enforces each connector's existing triangle budget and physical ellipse;
+deformation/visual review does not grant approval. Immutable v0.2.0 assets keep their original
+geometry; enhanced output targets v0.3.0. See `docs/parts.md` for review commands and evidence status.
 
 ## Review tooling
 

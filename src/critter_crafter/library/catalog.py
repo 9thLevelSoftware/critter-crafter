@@ -10,6 +10,7 @@ from typing import Any
 
 from .. import mathutil as mu
 from ..locomotion.block import locomotion_block
+from ..skeletons.actions import AttackPlanError, resolve_attack, validate_action_metadata
 from ..binding.profiles import (
     CONNECTOR_INTERFACE_ID,
     CONNECTOR_INTERFACE_VERSION,
@@ -181,6 +182,10 @@ def compile_skeleton(
         raise CatalogError("CC_SKELETON_SCHEMA_VERSION", f"{src.get('skeleton_id', '<unknown>')}")
     profiles = profiles or {}
     sid = src["skeleton_id"]
+    try:
+        validate_action_metadata(src)
+    except AttackPlanError as exc:
+        raise CatalogError(exc.code, f"{sid}: {exc.message}") from exc
     bones: list[dict[str, Any]] = [{
         "name": ROOT_BONE,
         "parent": "",
@@ -241,6 +246,7 @@ def compile_skeleton(
         gait = dict(branch.get("gait", {}))
         out = {
             "branch_id": branch_id,
+            "capabilities": list(branch["capabilities"]),
             "template": branch.get("template", profile["template"]),
             "parent_branch": parent_id,
             "attach_bone": attach_bone,
@@ -286,6 +292,8 @@ def compile_skeleton(
             "stance_z_deg": [mu.r6(float(value)) for value in branch.get("stance_z_deg", [])],
             "snap": {"position_m": mu.r6v(origin), "rotation_xyzw": mu.r6v(snap_rotation)},
         }
+        if "effector_slot" in branch:
+            out["effector_slot"] = branch["effector_slot"]
         by_id[branch_id] = out
         branches_out.append(out)
     for branch in branches_out:
@@ -303,6 +311,11 @@ def compile_skeleton(
         "branches": branches_out,
         "asset": {"fbx": "", "glb": "", "clips": []},
     }
+    try:
+        resolve_attack(compiled)
+    except AttackPlanError as exc:
+        if exc.code != "CC_ACTION_ARCHETYPE":
+            raise CatalogError(exc.code, f"{sid}: {exc.message}") from exc
     compiled["locomotion"] = locomotion_block(compiled)
     return compiled
 
@@ -334,6 +347,18 @@ def _compile_connector_interface(part_id: str, connector: dict[str, Any]) -> dic
         "position_m": [0.0, 0.0, 0.0],
         "rotation_xyzw": [0.0, 0.0, 0.0, 1.0],
     }
+
+
+def _connector_surface(connector: dict[str, Any]) -> dict[str, Any]:
+    from ..blender.connector_surface import DEFAULT_SURFACE, grid_spec
+
+    settings = dict(connector.get("surface") or DEFAULT_SURFACE)
+    # Reuse the producer's range checks; actual dimensions are checked before allocation.
+    try:
+        grid_spec(1.0, 1.0, [-1.0, 1.0], settings)
+    except ValueError as exc:
+        raise CatalogError("CC_CONNECTOR_SURFACE", str(exc)) from exc
+    return settings
 
 
 def compile_part(
@@ -375,6 +400,7 @@ def compile_part(
         "connector_radius_m": mu.r6(float(connector.get("radius_m", 0.0))),
         "connector_span_m": mu.r6v(connector.get("span_m", [0.0, 0.0])) if connector else [],
         "connector_interface": connector_interface,
+        **({"connector_surface": _connector_surface(connector)} if is_connector else {}),
         "fallback_primitive": src.get("fallback", {}).get("primitive", "capsule"),
         "albedo": src.get("fallback", {}).get("albedo", "#a07a80"),
         "source": src.get("provenance", {}).get("source", "production"),
@@ -396,6 +422,8 @@ def _compile_real(src: dict[str, Any]) -> dict[str, Any]:
     }
     if real.get("approved_pipeline"):
         compiled["approved_pipeline"] = real["approved_pipeline"]
+    if real.get("learned_weights"):
+        compiled["learned_weights"] = dict(real["learned_weights"])
     return {"real": compiled}
 
 
@@ -425,6 +453,8 @@ def _reference_cap(t: float) -> float:
 
 def _reference_profile_radius(category: str, t: float) -> float:
     """Match the deterministic reference loft used by ``ops_placeholder``."""
+    if category == "connector":
+        return 1.0
     if category == "core":
         radius = (0.8 + 0.2 * math.sin(math.pi * t)) * _reference_cap(t)
     elif category == "head":
@@ -576,6 +606,7 @@ def _reference_parts(skeletons: list[dict[str, Any]]) -> list[dict[str, Any]]:
                     "max_material_slots": 1,
                     "connector_radius_m": mu.r6(girth / 2),
                     "connector_span_m": [-span, span],
+                    "connector_surface": _connector_surface({}),
                     "connector_interface": {
                         "interface_id": CONNECTOR_INTERFACE_ID,
                         "interface_version": CONNECTOR_INTERFACE_VERSION,

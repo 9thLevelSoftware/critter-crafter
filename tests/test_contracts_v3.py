@@ -19,6 +19,7 @@ from critter_crafter.recipes.generator import GenerationError, connector_accepte
 from critter_crafter.recipes.validate import validate_recipe
 from critter_crafter.schema.validate import validate_sources
 from critter_crafter.skeletons.motion import build_motion
+from critter_crafter.skeletons.archetypes import build_candidate
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -53,6 +54,7 @@ def _profile() -> dict:
 def _sources() -> dict:
     branch = {
         "branch_id": "limb_L",
+        "capabilities": ["support"],
         "template": "limb1",
         "parent_branch": None,
         "direction": [0.0, 0.0, 1.0],
@@ -228,6 +230,7 @@ def test_low_sliding_reference_volume_keeps_nominal_girth_but_caps_physical_thic
     source_branch["contacts"] = [
         {"kind": "sliding", "bone_index": 0, "local_point_m": [0.0, 0.0, 0.5]}
     ]
+    source_branch["capabilities"] = ["support", "slide"]
     source_branch["socket"]["position_m"] = [0.0, 0.1, 0.0]
     source_branch["connector_size_class"] = "M"
     catalog = compile_catalog(sources)
@@ -306,6 +309,7 @@ def test_low_reference_volume_rejects_a_centreline_at_or_below_ground_clearance(
     branch["contacts"] = [
         {"kind": "sliding", "bone_index": 0, "local_point_m": [0.0, 0.0, 0.5]}
     ]
+    branch["capabilities"] = ["support", "slide"]
     branch["socket"]["position_m"] = [0.0, centre_y, 0.0]
 
     with pytest.raises(CatalogError) as exc:
@@ -351,6 +355,50 @@ def test_v3_generator_uses_reference_parts_and_emits_binding_identity():
     assert len(fill["binding_profile_hash"]) == 64
     assert fill["length_scale"] == 1.0
     assert fill["girth_scale"] == 1.0
+    assert validate_recipe(catalog, recipe) == []
+
+
+@pytest.mark.parametrize("girth_mm,expected_scale", [(180, 1.111111), (220, 0.909091)])
+def test_recipe_accepts_physical_girth_boundaries_with_reciprocal_scale(girth_mm, expected_scale):
+    catalog = compile_catalog(_sources())
+    part = next(p for p in catalog["parts"] if p["inventory_kind"] == "reference")
+    part["girth_mm"] = girth_mm
+    catalog["parts"] = [part]
+    recipe = generate(catalog, "any", 7)
+    assert recipe["fills"][0]["girth_scale"] == expected_scale
+    assert validate_recipe(catalog, recipe) == []
+    schema = json.loads((ROOT / "schemas/recipe.v3.schema.json").read_text())
+    assert list(Draft202012Validator(schema).iter_errors(recipe)) == []
+
+
+@pytest.mark.parametrize("girth_mm", [179, 221])
+def test_recipe_rejects_girth_just_outside_physical_fit(girth_mm):
+    catalog = compile_catalog(_sources())
+    recipe = generate(catalog, "any", 7)
+    part = next(p for p in catalog["parts"] if p["part_id"] == recipe["fills"][0]["part_id"])
+    part["girth_mm"] = girth_mm
+    assert any(d.startswith("CC_PART_REJECTED:") for d in validate_recipe(catalog, recipe))
+
+
+@pytest.mark.parametrize("forged_scale", [0.9, 0.90909, 0.95, 1.05, 1.111112])
+def test_recipe_rejects_forged_girth_scale(forged_scale):
+    catalog = compile_catalog(_sources())
+    recipe = generate(catalog, "any", 7)
+    recipe["fills"][0]["girth_scale"] = forged_scale
+    diagnostics = validate_recipe(catalog, recipe)
+    assert any(d.startswith(("CC_RECIPE_SCHEMA:", "CC_GIRTH_SCALE:")) for d in diagnostics)
+    if forged_scale < 0.909091 or forged_scale > 1.111111:
+        schema = json.loads((ROOT / "schemas/recipe.v3.schema.json").read_text())
+        assert any(list(e.path) == ["fills", 0, "girth_scale"]
+                   for e in Draft202012Validator(schema).iter_errors(recipe))
+
+
+@pytest.mark.parametrize("recipe_seed", [24, 28, 76])
+def test_amalgam_recipe_seed_reciprocal_girth_regression(recipe_seed):
+    catalog = json.loads((ROOT / "tests/golden_v3/catalog.json").read_text())
+    for skeleton in catalog["skeletons"]:
+        skeleton["status"] = "approved"
+    recipe = generate(catalog, "amalgam", recipe_seed)
     assert validate_recipe(catalog, recipe) == []
 
 
@@ -988,3 +1036,69 @@ def test_anatomy_contact_support_and_symmetry_metadata_are_consistent(
     diagnostics, catalog = validate_sources(tmp_path, ROOT / "schemas")
     assert catalog is None
     assert any(item.startswith(code) for item in diagnostics), diagnostics
+
+
+def _action_sources() -> dict:
+    sources = load_sources(ROOT / "data")
+    sources["skeletons"] = [build_candidate("crawler_bilateral_eight_legged", "balanced")]
+    sources["pools"] = [pool for pool in sources["pools"] if pool["pool_id"] == "any"]
+    return sources
+
+
+@pytest.mark.parametrize("mutation,code", [
+    ("missing_slot", "CC_ACTION_EFFECTOR"),
+    ("duplicate_slot", "CC_ACTION_EFFECTOR"),
+    ("wrong_capability", "CC_ACTION_CAPABILITY"),
+    ("unknown_release", "CC_ACTION_SUPPORT"),
+    ("wrong_remainder", "CC_ACTION_SUPPORT"),
+])
+def test_source_validation_rejects_semantic_action_metadata(tmp_path: Path, mutation: str, code: str) -> None:
+    sources = _action_sources()
+    skeleton = sources["skeletons"][0]
+    selected = next(branch for branch in skeleton["branches"] if branch.get("effector_slot") == "forward_outer_left")
+    if mutation == "missing_slot":
+        selected.pop("effector_slot")
+    elif mutation == "duplicate_slot":
+        skeleton["branches"][0]["effector_slot"] = "forward_outer_left"
+    elif mutation == "wrong_capability":
+        selected["capabilities"] = ["support", "bite"]
+    else:
+        skeleton["anatomy"]["action_support"] = {
+            "released_contact_ids": ["leg0_R:0"] if mutation == "unknown_release" else ["leg3_L:0"],
+            "minimum_preserved": 7 if mutation == "unknown_release" else 2,
+        }
+    _write_source_tree(tmp_path, sources)
+    diagnostics, catalog = validate_sources(tmp_path, ROOT / "schemas")
+    assert catalog is None
+    assert any(item.startswith(code) for item in diagnostics), diagnostics
+
+
+def test_source_topology_policy_validates_and_preserves_concrete_contact_contract(tmp_path: Path) -> None:
+    sources = _action_sources()
+    sources["skeletons"][0]["anatomy"]["action_support"] = {
+        "released_contact_ids": ["leg3_L:0"], "minimum_preserved": 7,
+    }
+    _write_source_tree(tmp_path, sources)
+    diagnostics, catalog = validate_sources(tmp_path, ROOT / "schemas")
+    assert diagnostics == []
+    from critter_crafter.skeletons.actions import resolve_attack
+    policy = resolve_attack(catalog["skeletons"][0])["support_release"]
+    assert policy["contact_ids"] == ["leg3_L:0"]
+    assert set(policy["preserved_contact_ids"]) == {
+        "leg0_L:0", "leg0_R:0", "leg1_L:0", "leg1_R:0", "leg2_L:0", "leg2_R:0", "leg3_R:0",
+    }
+    assert policy["minimum_preserved"] == 7
+
+
+@pytest.mark.parametrize("capabilities", [None, ["support", "support"], ["unknown"], []])
+def test_source_requires_unique_known_contact_capabilities(tmp_path: Path, capabilities) -> None:
+    sources = _sources()
+    branch = sources["skeletons"][0]["branches"][0]
+    if capabilities is None:
+        branch.pop("capabilities")
+    else:
+        branch["capabilities"] = capabilities
+    _write_source_tree(tmp_path, sources)
+    diagnostics, catalog = validate_sources(tmp_path, ROOT / "schemas")
+    assert catalog is None
+    assert any(item.startswith(("CC_SCHEMA", "CC_ACTION_CAPABILITY")) for item in diagnostics), diagnostics

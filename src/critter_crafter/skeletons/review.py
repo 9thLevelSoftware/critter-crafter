@@ -92,4 +92,7 @@ def resolve_polish(directory: Path, skeleton_id: str, fingerprint: str) -> Path 
     path = (directory / doc["blend"]).resolve()
     if not path.is_relative_to(directory.resolve()) or not path.is_file():
         raise ReviewError(f"CC_POLISH_PATH: {skeleton_id}: {path}")
+    expected_blend = doc.get("authoring", {}).get("blend_sha256")
+    if expected_blend is not None and file_hash(path) != expected_blend:
+        raise ReviewError(f"CC_POLISH_STALE: {skeleton_id}; authored master bytes changed")
     return path

@@ -3,7 +3,7 @@
   "skeleton_id": "hexapod_elongated_insect_s002_v3",
   "family": "hexapod",
   "locomotion_hint": "crawl",
-  "status": "approved",
+  "status": "draft",
   "symmetry_pct": 100,
   "branches": [
     {
@@ -11,6 +11,7 @@
       "template": "spine3",
       "parent_branch": null,
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0,
         0.5221,
@@ -85,6 +86,9 @@
       "template": "insect_leg4",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         0.1997,
         0.5221,
@@ -172,6 +176,9 @@
       "template": "insect_leg4",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         -0.1997,
         0.5221,
@@ -260,6 +267,9 @@
       "template": "insect_leg4",
       "parent_branch": "core",
       "attach_bone_index": 1,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         0.1997,
         0.5221,
@@ -347,6 +357,9 @@
       "template": "insect_leg4",
       "parent_branch": "core",
       "attach_bone_index": 1,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         -0.1997,
         0.5221,
@@ -435,6 +448,10 @@
       "template": "insect_leg4",
       "parent_branch": "core",
       "attach_bone_index": 2,
+      "capabilities": [
+        "support",
+        "strike"
+      ],
       "origin_m": [
         0.1997,
         0.5221,
@@ -515,13 +532,17 @@
             0.0
           ]
         }
-      ]
+      ],
+      "effector_slot": "forward_left"
     },
     {
       "branch_id": "leg2_R",
       "template": "insect_leg4",
       "parent_branch": "core",
       "attach_bone_index": 2,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         -0.1997,
         0.5221,
@@ -610,6 +631,7 @@
       "template": "appendage1",
       "parent_branch": "core",
       "attach_bone_index": 2,
+      "capabilities": [],
       "origin_m": [
         0.0713,
         0.5817,
@@ -681,6 +703,7 @@
       "template": "appendage1",
       "parent_branch": "core",
       "attach_bone_index": 2,
+      "capabilities": [],
       "origin_m": [
         -0.0713,
         0.5817,
@@ -753,6 +776,7 @@
       "template": "appendage1",
       "parent_branch": "core",
       "attach_bone_index": 1,
+      "capabilities": [],
       "origin_m": [
         0,
         0.667,
@@ -1166,10 +1190,5 @@
       "limb": 0.9544,
       "stance": 0.9994
     }
-  },
-  "review": {
-    "by": "owner",
-    "date": "2026-09-30",
-    "method": "owner"
   }
 }

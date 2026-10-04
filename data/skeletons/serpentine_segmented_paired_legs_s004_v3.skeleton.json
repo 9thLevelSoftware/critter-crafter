@@ -3,7 +3,7 @@
   "skeleton_id": "serpentine_segmented_paired_legs_s004_v3",
   "family": "serpentine",
   "locomotion_hint": "slither",
-  "status": "approved",
+  "status": "draft",
   "symmetry_pct": 100,
   "branches": [
     {
@@ -11,6 +11,7 @@
       "template": "head1",
       "parent_branch": null,
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0,
         0.5992,
@@ -81,6 +82,9 @@
       "template": "tentacle8",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "whip"
+      ],
       "origin_m": [
         0,
         0.3295,
@@ -158,13 +162,17 @@
         -11.323,
         9.058,
         -6.794
-      ]
+      ],
+      "effector_slot": "terminal_body_chain"
     },
     {
       "branch_id": "leg0_L",
       "template": "limb3",
       "parent_branch": "body",
       "attach_bone_index": 3,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         0.3281,
         0.3295,
@@ -250,6 +258,9 @@
       "template": "limb3",
       "parent_branch": "body",
       "attach_bone_index": 3,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         -0.3281,
         0.3295,
@@ -336,6 +347,9 @@
       "template": "limb3",
       "parent_branch": "body",
       "attach_bone_index": 3,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         0.3281,
         0.3295,
@@ -421,6 +435,9 @@
       "template": "limb3",
       "parent_branch": "body",
       "attach_bone_index": 3,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         -0.3281,
         0.3295,
@@ -764,10 +781,5 @@
       "limb": 1.0318,
       "stance": 1.0157
     }
-  },
-  "review": {
-    "by": "owner",
-    "date": "2026-09-30",
-    "method": "owner"
   }
 }

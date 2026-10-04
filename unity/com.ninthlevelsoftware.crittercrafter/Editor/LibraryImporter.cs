@@ -58,6 +58,12 @@ namespace CritterCrafter.Editor
             if (!RecipeGenerator.SupportedCatalogSchema(catalog.schema_version) || catalog.document_kind != "critter_library"
                 || catalog.frame != "gltf_rh_yup_zfwd_m" || !RecipeGenerator.SupportedGenerator(catalog.generator))
                 throw new InvalidDataException("not a supported critter library v3 catalog: " + catalogPath);
+            if (string.IsNullOrEmpty(catalog.library_id) || string.IsNullOrEmpty(catalog.version)
+                || catalog.library_id.IndexOfAny(new[] { '/', '\\', ':', '.' }) >= 0
+                || catalog.version.IndexOfAny(new[] { '/', '\\', ':' }) >= 0 || catalog.version == "." || catalog.version == "..")
+                throw new InvalidDataException("invalid library identity path");
+            var bakedIndex = CreatureBaker.ValidateIndex(sourceDir, catalog);
+            string sourceCatalogHash = BakedCreatureIdentity.Hash(File.ReadAllBytes(CreatureBaker.ConfinedPath(sourceDir, "catalog.json")));
 
             var report = new Report();
             ValidateCatalogContract(catalog, report.Problems, true);
@@ -73,9 +79,10 @@ namespace CritterCrafter.Editor
             foreach (var file in Directory.GetFiles(sourceDir, "*.fbx", SearchOption.AllDirectories))
             {
                 var rel = Path.GetRelativePath(sourceDir, file);
-                var dst = Path.Combine(abs, rel);
+                var src = CreatureBaker.ConfinedPath(sourceDir, rel.Replace('\\', '/'));
+                var dst = CreatureBaker.ConfinedPath(abs, rel.Replace('\\', '/'));
                 Directory.CreateDirectory(Path.GetDirectoryName(dst));
-                File.Copy(file, dst);
+                File.Copy(src, dst);
             }
             // Real parts carry a base-colour map next to their FBX (FBX exports strip texture paths).
             foreach (var p in catalog.parts)
@@ -90,6 +97,7 @@ namespace CritterCrafter.Editor
                 Directory.CreateDirectory(Path.GetDirectoryName(dst));
                 File.Copy(src, dst, true);
             }
+            CreatureBaker.CopyAssets(sourceDir, abs, bakedIndex);
             Directory.CreateDirectory(Path.Combine(abs, "Materials"));
             Directory.CreateDirectory(Path.Combine(abs, "Controllers"));
             AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
@@ -171,7 +179,9 @@ namespace CritterCrafter.Editor
             }
 
             var lib = ScriptableObject.CreateInstance<CritterLibrary>();
-            lib.EditorSetContents(AssetDatabase.LoadAssetAtPath<TextAsset>(folder + "/catalog.json"), skeletons.ToArray(), parts.ToArray());
+            var baked = CreatureBaker.ImportAssets(folder, bakedIndex);
+            lib.EditorSetContents(AssetDatabase.LoadAssetAtPath<TextAsset>(folder + "/catalog.json"), skeletons.ToArray(), parts.ToArray(),
+                sourceCatalogHash, bakedIndex, baked);
             AssetDatabase.CreateAsset(lib, $"{folder}/{catalog.library_id}.asset");
             AssetDatabase.SaveAssets();
             report.Library = lib;

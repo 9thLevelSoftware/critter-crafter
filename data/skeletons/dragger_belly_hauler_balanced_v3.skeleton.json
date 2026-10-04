@@ -3,7 +3,7 @@
   "skeleton_id": "dragger_belly_hauler_balanced_v3",
   "family": "dragger",
   "locomotion_hint": "drag",
-  "status": "approved",
+  "status": "draft",
   "symmetry_pct": 100,
   "branches": [
     {
@@ -11,6 +11,7 @@
       "template": "spine3",
       "parent_branch": null,
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0,
         0.1827,
@@ -85,6 +86,11 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 2,
+      "capabilities": [
+        "support",
+        "strike",
+        "grasp"
+      ],
       "origin_m": [
         0.1928,
         0.209,
@@ -153,6 +159,7 @@
         15.0,
         20.0
       ],
+      "effector_slot": "hauler_puller",
       "contacts": [
         {
           "kind": "hand",
@@ -170,6 +177,10 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 2,
+      "capabilities": [
+        "support",
+        "grasp"
+      ],
       "origin_m": [
         -0.1928,
         0.209,
@@ -256,6 +267,7 @@
       "template": "head1",
       "parent_branch": "core",
       "attach_bone_index": 2,
+      "capabilities": [],
       "origin_m": [
         0,
         0.2703,
@@ -326,6 +338,10 @@
       "template": "tentacle8",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support",
+        "slide"
+      ],
       "origin_m": [
         0,
         0.0425,
@@ -659,10 +675,5 @@
     "generator": "cc-gen-3",
     "seed": 1,
     "preset": "balanced"
-  },
-  "review": {
-    "by": "owner",
-    "date": "2026-09-30",
-    "method": "owner"
   }
 }

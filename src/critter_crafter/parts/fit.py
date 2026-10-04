@@ -87,7 +87,7 @@ def resolve_params(fit: dict[str, Any], template: str) -> dict[str, Any]:
     lo, hi = params["trim_n"]
     if not 0.0 <= lo < hi <= 1.0:
         raise FitError(f"CC_FIT_TRIM: trim_n must satisfy 0 <= root < tip <= 1, got {params['trim_n']}")
-    if params["weights"] not in ("smooth", "flesh", "jointed", "single"):
+    if params["weights"] not in ("smooth", "flesh", "jointed", "single", "learned"):
         raise FitError(f"CC_FIT_WEIGHTS: unknown weighting {params['weights']!r}")
     if params["root_center"] not in ("slice", "bbox"):
         raise FitError(f"CC_FIT_ROOT: root_center must be 'slice' or 'bbox', got {params['root_center']!r}")
@@ -509,9 +509,13 @@ def chain_weights(z: float, bones: Sequence[tuple[float, float]], mode: str,
 
 
 def fit(verts: Sequence[Sequence[float]], faces: Sequence[Sequence[int]], fit_block: dict[str, Any],
-        template: str, fractions: Sequence[float], length_m: float, girth_m: float) -> dict[str, Any]:
-    """Fit ``verts`` (source glTF frame) onto a chain; return part-space positions, weights, metrics."""
+        template: str, fractions: Sequence[float], length_m: float, girth_m: float,
+        *, compute_weights: bool = True) -> dict[str, Any]:
+    """Fit geometry independently of the selected weight producer."""
     params = resolve_params(fit_block, template)
+    loop_mode = fit_block.get("joint_loop_mode", TEMPLATE_DEFAULTS.get(template, {}).get("weights", "smooth"))
+    if loop_mode not in ("smooth", "flesh", "jointed", "single"):
+        raise FitError("CC_FIT_WEIGHTS: invalid joint_loop_mode")
     src: list[Vec] = [(float(v[0]), float(v[1]), float(v[2])) for v in verts]
     if not src:
         raise FitError("CC_FIT_EMPTY: no vertices")
@@ -595,19 +599,26 @@ def fit(verts: Sequence[Sequence[float]], faces: Sequence[Sequence[int]], fit_bl
     for frac in fractions:
         bones.append((z, z + float(frac) * length_m))
         z += float(frac) * length_m
-    bands = None
-    if params["weights"] in ("flesh", "jointed"):
-        bands = []
+    def mode_bands(mode):
+        if mode not in ("flesh", "jointed"):
+            return None
+        result = []
         for k in range(len(bones) - 1):
             joint = bones[k][1]
             shorter = min(bones[k][1] - bones[k][0], bones[k + 1][1] - bones[k + 1][0])
-            if params["weights"] == "jointed":
-                bands.append(0.12 * shorter)
+            if mode == "jointed":
+                result.append(0.12 * shorter)
             else:
                 near = [math.hypot(x, y) for x, y, zz in part if abs(zz - joint) < 0.05 * length_m]
                 local_r = _quantile(near, 0.5) if near else 0.1 * length_m
-                bands.append(min(0.45 * shorter, max(0.06 * length_m, 0.6 * local_r)))
-    weights = [chain_weights(p[2], bones, params["weights"], bands) for p in part]
+                result.append(min(0.45 * shorter, max(0.06 * length_m, 0.6 * local_r)))
+        return result
+
+    loop_bands = mode_bands(loop_mode)
+    bands = loop_bands if params["weights"] == loop_mode else mode_bands(params["weights"])
+    if params["weights"] == "learned" and compute_weights:
+        raise FitError("CC_SKIN_MODEL_UNAVAILABLE: learned weights require a verified artifact")
+    weights = [chain_weights(p[2], bones, params["weights"], bands) for p in part] if compute_weights else []
 
     # Edge strain of the straightening (uniform scale removed): tears show up as large ratios.
     strains = []
@@ -633,7 +644,7 @@ def fit(verts: Sequence[Sequence[float]], faces: Sequence[Sequence[int]], fit_bl
         "nominal_girth_m": round(nominal_girth, 6),
         "radial_scale_wanted": round(raw, 6),
         "radial_scale": round(radial_scale, 6),
-        "bands_m": [round(b, 6) for b in bands] if bands else [],
+        "bands_m": [round(b, 6) for b in loop_bands] if loop_bands else [],
         "strain_p01": round(_quantile(strains, 0.01), 4) if strains else 1.0,
         "strain_p99": round(_quantile(strains, 0.99), 4) if strains else 1.0,
         "strain_max": round(max(strains), 4) if strains else 1.0,
@@ -642,7 +653,7 @@ def fit(verts: Sequence[Sequence[float]], faces: Sequence[Sequence[int]], fit_bl
         "dimensions_m": [round(hi[0] - lo[0], 6), round(hi[1] - lo[1], 6), round(hi[2] - lo[2], 6)],
     }
     return {"positions": part, "weights": weights, "params": params, "metrics": metrics,
-            "bones": bones, "bands": bands, "planes": joint_planes(bones, bands, params["weights"]),
+            "bones": bones, "bands": bands, "planes": joint_planes(bones, loop_bands, loop_mode),
             "centerline": [tuple(round(c, 6) for c in p) for p in poly]}
 
 

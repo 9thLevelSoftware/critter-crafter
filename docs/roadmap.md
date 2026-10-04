@@ -2,7 +2,7 @@
 
 The milestone list below was restored from the original plan (`git show 6379277:.claude/plans/floating-wiggling-sprout.md`, "Milestones & acceptance"). That plan file was later overwritten by the runtime-locomotion plan, so this page is now the one place that holds the milestones and their status. Live counts (skeletons, parts, tests) belong here too, so other docs can point at this page instead of repeating them.
 
-**Live counts (2026-09-29):** 14 archetypes × 3 presets = 42 draft anchors, 28 seeded variants and 15 seeded amalgams (85 skeletons), none approved; 4 real parts, all `draft`; pytest collects 402 tests; the Unity EditMode suite has 41 cases (40 passed, 1 skipped for missing env vars).
+**Live counts (2026-10-04):** 14 archetypes × 3 presets = 42 draft anchors, 28 seeded variants and 21 seeded amalgams (91 skeletons), none approved; 4 real parts, all `draft`; 9 authored native-SDF connector variants, all `draft`. All 91 skeletons pass eight-clip QA; all nine connectors pass unchanged deformation QA. The current build, tests, capture measurements and approval gates are recorded in `docs/handoff.md`.
 
 ## M0: Scaffold, schemas, placeholders, first Unity assembly — done
 
@@ -13,7 +13,7 @@ The milestone list below was restored from the original plan (`git show 6379277:
 
 - Work: 7 families, `skeleton vary`, the clip generator, review sheets.
 - Accepted when: at least 40 skeletons across the 7 families pass QA, clips play without root motion, and **the owner approves the per-family review GIFs**.
-- Status: 85 skeletons (the 42 curated anchors, 28 seeded variants and 15 amalgams; the tentacle radial archetype was retired and the one-arm-one-leg dragger added), all `draft`. That meets the "at least 40" target once approved. The owner has approved every family visually in locomotion captures, but no skeleton has been formally approved. The `skeleton review` receipt process predates runtime locomotion and may deserve simplifying.
+- Status: 91 skeletons (42 curated anchors, 28 seeded variants and 21 amalgams), all `draft`, pass eight-clip QA. The owner has approved the original families visually in locomotion captures, but no skeleton has been formally approved; enhancement geometry and captures still require owner review.
 
 ## Inserted milestone: runtime locomotion ("option B") — merged
 
@@ -32,17 +32,17 @@ The milestone list below was restored from the original plan (`git show 6379277:
 - Work: torso, claw and maw, plus re-runs of rejected scouts, capped at 250 credits. **The owner confirms the cost before every paid call.**
 - Accepted when: the ledger is within the cap, all 8 pilot parts are approved, a style sheet shows consistency, `assemble preview` renders exist for at least 10 creatures, and library v0.3.0 is published.
 
-## M4: Expansion and bake — not started
+## M4: Expansion and bake — partially implemented, not accepted
 
 - Work: at least 9 connector variants, at least 24 parts, at least 80 skeletons, species and tag affinity, `CreatureBaker`.
 - Accepted when: each family yields at least 80 distinct creatures per 100 seeds, a baked creature takes at most 2 draw calls, and baked and runtime screenshots match.
-- Status: connectors exist only as generated reference lofts; the skeleton target is met (85, in the library), the parts target is not. The "80 distinct creatures per 100 seeds" target is met by every pool (`critter recipe sweep`: 100 of 100, serpentine 89), though the distinctness comes from placeholder reference parts, not real ones.
+- **Status:** nine native-SDF connector variants pass full deformation QA; the skeleton target is met (91), but the 24-part target is not. Blender portable baking preserves the eight actions; current real Unity GUI proof records 15 live versus 1 baked body submission in each isolated color, shadow and depth pass, with zero pose error in the portable comparison. Bake proof is complete, but M4 is not accepted: functional-search acceptance, 24 parts and owner review/publication remain open. The earlier distinctness result (`critter recipe sweep`: 100 of 100, serpentine 89) comes from placeholder reference parts, not real-part diversity.
 
-## M5: synaptic-sea-unity integration — not started
+## M5: synaptic-sea-unity integration — owner-gated
 
-- Work: `BiomassThreatVisualFactory : ICreatureVisualFactory` plugged in at `ThreatPlaceholderFactory.Build`, keeping the `Threat_<id>` root and `"Mesh"` child. Event mapping: moved → velocity, attacked → attack, AI state → `SetState`, killed → death. Save recipe and seed; fall back to the old placeholder on failure; `drone_swarm` stays mechanical.
-- Accepted when: the game's tests stay green, a PlayMode test spawns all 6 archetypes, a save/load round trip restores an identical recipe, and iso screenshots pass review.
-- Preconditions not yet met: every skeleton and part is `draft`, so pool + seed generation yields nothing at runtime (the owner approves with `critter skeleton approve --owner`). The game reads `move_speed_mps` from the creature's own locomotion block (`AssembledCreature.Locomotion`; see `docs/locomotion.md`).
+- **Owner decision:** package enhancements proceed, but game cutover is blocked until the intended gameplay checkout/revision provides its actual spawn, visual factory/view, movement/event and save implementations. Public main `8dcc95c10ab5e08658546319f51f49b4abd256fc` has no referenced `ThreatPlaceholderFactory` or live threat runtime; the inspected cursor branches are model lineage, not an authorized integration target. Do not invent the missing gameplay subsystem or revive those branches.
+- Retained work: one consumer-owned `ICreatureVisualFactory`, preserving `Threat_<id>` root/collider and `"Mesh"` child, game-owned movement/no root motion, catalog speeds for moving biomass, authoritative saved recipe plus seed and exact library-version lookup. Failures retain the existing game placeholder; `drone_swarm` stays mechanical and `hull_tendril` stays anchored at its configured zero speed. Actual source wiring must distinguish outgoing attacks from received hits and preserve terminal death presentation.
+- Accepted only after actual game tests, Play Mode spawns of `biomatter_swarm`, `puppet_corpse`, `stalker`, `mimic`, `hull_tendril`, `drone_swarm`, identical-recipe save/load round trip and owner-reviewed iso screenshots. Package mocks cannot release this gate.
 
 ## Merged since the locomotion thread
 

@@ -56,6 +56,20 @@ def bent_tube(length=2.0, radius=0.1, bend_deg=80.0, bend_radius=0.3, rings=60, 
     return verts, faces, tip
 
 
+def test_geometry_only_fit_and_loop_policy_survive_learned_weight_selection():
+    verts, faces, _ = bent_tube(spike=31)
+    smooth = fit(verts, faces, {"axis": "+x", "weights": "smooth"}, "limb3", LIMB, 1.0, 0.22,
+                 compute_weights=False)
+    learned = fit(verts, faces, {"axis": "+x", "weights": "learned"}, "limb3", LIMB, 1.0, 0.22,
+                  compute_weights=False)
+    assert learned["positions"] == smooth["positions"]
+    assert learned["planes"] == smooth["planes"]
+    assert learned["metrics"] == smooth["metrics"]
+    assert learned["weights"] == []
+    with pytest.raises(FitError, match="CC_SKIN_MODEL_UNAVAILABLE"):
+        fit(verts, faces, {"axis": "+x", "weights": "learned"}, "limb3", LIMB, 1.0, 0.22)
+
+
 def test_straightens_a_bent_tube_to_the_declared_length_and_radius():
     verts, faces, _ = bent_tube()
     result = fit(verts, faces, {"axis": "+x", "radial_scale": 1.0}, "limb3", LIMB, 1.0, 0.22)

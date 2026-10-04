@@ -105,7 +105,8 @@ def _round_vector(vector: list[float]) -> list[float]:
 def _branch(branch_id: str, template: str, parent: str | None, *, origin: list[float], direction: list[float],
             up: list[float], length: float, side: str = "C", attach: int = 0, mirror_of: str = "",
             role: str = "none", phase: float = 0.0, support: float = 0.5, contact: str | None = None,
-            parent_joint: str = "root", gait: dict[str, float] | None = None, profile_id: str | None = None) -> dict[str, Any]:
+            parent_joint: str = "root", gait: dict[str, float] | None = None, profile_id: str | None = None,
+            capabilities: tuple[str, ...] = (), effector_slot: str | None = None) -> dict[str, Any]:
     joints = _FRACTIONS[template]
     profile_id = profile_id or _PROFILES[template]
     length = round(length, 4)
@@ -122,6 +123,10 @@ def _branch(branch_id: str, template: str, parent: str | None, *, origin: list[f
                 if profile_id == "tentacle8_flexible" and contact in {"sliding", "body"} else [0.0] * joints)
     record: dict[str, Any] = {
         "branch_id": branch_id, "template": template, "parent_branch": parent, "attach_bone_index": attach,
+        "capabilities": list(dict.fromkeys(
+            (("support", "slide") if contact in {"sliding", "body"} else ("support",) if contact else ())
+            + capabilities
+        )),
         "origin_m": origin, "direction": _round_vector(direction), "up": _round_vector(up), "length_m": length,
         "girth_m": round(length * _PROFILE_GIRTH[profile_id], 4),
         "size_class": "L" if template in {"core1", "spine3"} else "M", "side": side,
@@ -135,6 +140,8 @@ def _branch(branch_id: str, template: str, parent: str | None, *, origin: list[f
                   "cadence_hz": 1.5 if role == "locomotor" else 0.0},
         "stance_deg": stance, "stance_z_deg": stance_z,
     }
+    if effector_slot is not None:
+        record["effector_slot"] = effector_slot
     if mirror_of:
         record["mirror_of"] = mirror_of
     if contact:
@@ -299,7 +306,8 @@ def _biped(a: dict[str, Any], h: float, length: float, width: float) -> tuple[li
                                 direction=[sx * .4, -.8, .1], up=[0, 0, -1], length=arm_len, side=side,
                                 attach=2, mirror_of="arm_L" if side == "R" else "", role="manipulator",
                                 phase=math.pi if side == "L" else 0, support=0.0, contact="hand", parent_joint="end",
-                                profile_id="limb3_brachial"))
+                                profile_id="limb3_brachial", capabilities=("strike", "grasp") if side == "R" else ("grasp",),
+                                effector_slot="primary_strike" if side == "R" else None))
     branches.append(_branch("head", "head1", "core", origin=_v(0, torso_origin_y + torso_length, 0),
                             direction=[0, .5, 1], up=[0, 1, 0], length=h * .18,
                             role="head", attach=2, parent_joint="end"))
@@ -320,7 +328,8 @@ def _quadruped(a: dict[str, Any], h: float, length: float, width: float) -> tupl
         _mammal_leg(leg, fore=leg["branch_id"].endswith("0"))
         leg["gait"]["phase_rad"] = round(walk[leg["branch_id"]] * 2 * math.pi, 6)
         leg["gait"]["run_phase_rad"] = round(trot[leg["branch_id"]] * 2 * math.pi, 6)
-    branches.append(_branch("head", "head1", "core", origin=_v(0, h, length * .38), direction=[0, .05, 1], up=[0, 1, 0], length=length * .18, role="head", attach=2, parent_joint="end"))
+    branches.append(_branch("head", "head1", "core", origin=_v(0, h, length * .38), direction=[0, .05, 1], up=[0, 1, 0], length=length * .18, role="head", attach=2, parent_joint="end",
+                            capabilities=("bite",), effector_slot="primary_head"))
     return branches, ["leg_L0", "leg_R0", "leg_L1", "leg_R1"], ["leg_L0", "leg_R0", "leg_L1", "leg_R1"], "bilateral"
 
 
@@ -328,21 +337,33 @@ def _crawler(a: dict[str, Any], h: float, length: float, width: float) -> tuple[
     branches = [_branch("core", "core1", None, origin=_v(0, h, -length * .28), direction=[0, 0, 1], up=[0, 1, 0], length=length * .56, role="core")]
     supports: list[str] = []
     if a["variant"] == "tripod":
-        angles = (90, 210, 330)
+        count = a.get("topology_count", 3)
+        angles = ((90, 210, 330) if "topology_count" not in a else
+                  tuple((90 if count % 2 else 180 / count) + i * 360 / count for i in range(count)))
         for i, deg in enumerate(angles):
             rad = math.radians(deg); bid = f"leg_{i}"; supports.append(bid)
-            leg = _branch(bid, "insect_leg4", "core", origin=_v(math.sin(rad) * width * .22, h, math.cos(rad) * length * .18), direction=[math.sin(rad), 0.0, math.cos(rad)], up=[0, 1, 0], length=width * .80 * a["limb_scale"], role="locomotor", phase=i * 2 * math.pi / 3, support=.62, contact="foot", parent_joint="upper")
+            leg = _branch(bid, "insect_leg4", "core", origin=_v(math.sin(rad) * width * .22, h, math.cos(rad) * length * .18), direction=[math.sin(rad), 0.0, math.cos(rad)], up=[0, 1, 0], length=width * .80 * a["limb_scale"], role="locomotor", phase=i * 2 * math.pi / count, support=.62, contact="foot", parent_joint="upper",
+                          capabilities=("strike",) if i == 2 else (),
+                          effector_slot="designated_tripod_striker" if i == 2 else None)
             _insect_leg(leg)
             branches.append(leg)
-        symmetry = "radial_3"
+        symmetry = f"radial_{count}"
     else:
-        for i, z in enumerate((-.22, -.07, .08, .23)):
-            fan = (-.6, -.2, .2, .6)[i]
+        count = a.get("topology_count", 4)
+        positions = ((-.22, -.07, .08, .23) if "topology_count" not in a else
+                     tuple(-.22 + .45 * i / (count - 1) for i in range(count)))
+        fans = ((-.6, -.2, .2, .6) if "topology_count" not in a else
+                tuple(-.6 + 1.2 * i / (count - 1) for i in range(count)))
+        for i, z in enumerate(positions):
+            fan = fans[i]
             for leg in _paired_legs(branches, prefix=f"leg{i}", parent="core", positions=[(width * .12, h, z * length)],
                                     length=width * .66 * a["limb_scale"], template="insect_leg4", attach=0,
                                     phases=(0 if i % 2 == 0 else math.pi, math.pi if i % 2 == 0 else 0),
                                     direction=lambda sx, _i, fan=fan: [sx * 1.0, 0.0, fan], up=[0, 1, 0]):
                 _insect_leg(leg)
+                if i == count - 1 and leg["side"] == "L":
+                    leg["capabilities"].append("strike")
+                    leg["effector_slot"] = "forward_outer_left"
             supports.extend((f"leg{i}_L", f"leg{i}_R"))
         symmetry = "bilateral"
     return branches, supports, supports, symmetry
@@ -351,10 +372,15 @@ def _crawler(a: dict[str, Any], h: float, length: float, width: float) -> tuple[
 def _hexapod(a: dict[str, Any], h: float, length: float, width: float) -> tuple[list[dict[str, Any]], list[str], list[str], str]:
     branches = [_core(h, length * .72, width)]
     supports: list[str] = []
-    for i, z in enumerate((-.22, 0, .22)):
-        fan = (-.45, 0.0, .45)[i]
+    count = a.get("topology_count", 3)
+    positions = ((-.22, 0, .22) if "topology_count" not in a else
+                 tuple(-.22 + .44 * i / (count - 1) for i in range(count)))
+    fans = ((-.45, 0.0, .45) if "topology_count" not in a else
+            tuple(-.45 + .9 * i / (count - 1) for i in range(count)))
+    for i, z in enumerate(positions):
+        fan = fans[i]
         legs = _paired_legs(branches, prefix=f"leg{i}", parent="core", positions=[(width * .14, h, z * length)],
-                            length=width * .75 * a["limb_scale"], template="insect_leg4", attach=i,
+                            length=width * .75 * a["limb_scale"], template="insect_leg4", attach=(i if "topology_count" not in a else (4 * i + count - 1) // (2 * (count - 1))),
                             phases=(0 if i % 2 == 0 else math.pi, math.pi if i % 2 == 0 else 0),
                             direction=lambda sx, _i, fan=fan: [sx * 1.0, 0.0, fan], up=[0, 1, 0])
         for leg in legs:
@@ -363,6 +389,9 @@ def _hexapod(a: dict[str, Any], h: float, length: float, width: float) -> tuple[
             # knee sits above the body and the tarsus meets the ground steeply.
             leg["stance_deg"] = [45.0, -60.0, -70.0, 10.0]
             leg["_extension_target"] = _INSECT_EXTENSION
+            if i == count - 1 and leg["side"] == "L":
+                leg["capabilities"].append("strike")
+                leg["effector_slot"] = "forward_left"
         supports.extend((f"leg{i}_L", f"leg{i}_R"))
     return branches, supports, supports, "bilateral"
 
@@ -370,13 +399,15 @@ def _hexapod(a: dict[str, Any], h: float, length: float, width: float) -> tuple[
 def _radial(a: dict[str, Any], h: float, length: float, width: float) -> tuple[list[dict[str, Any]], list[str], list[str], str]:
     template = "tentacle8" if a["variant"] == "low" else "insect_leg4"
     branches = [_branch("core", "core1", None, origin=_v(0, h, 0), direction=[0, 1, 0], up=[0, 0, 1], length=h * .5, role="core")]
-    count = 8 if a["variant"] == "low" else 6; supports: list[str] = []
+    count = a.get("topology_count", 8 if a["variant"] == "low" else 6); supports: list[str] = []
     for i in range(count):
         # Half a step off the axes: a leg lying along the travel axis has its stance run through its own hip
         # (the coxa yaw flips 180 degrees), so no leg may point straight ahead or behind.
-        angle = 2 * math.pi * (i + .5) / count; bid = f"arm_{i}"; supports.append(bid)
+        offset = .25 if "topology_count" in a and count % 2 else .5
+        angle = 2 * math.pi * (i + offset) / count; bid = f"arm_{i}"; supports.append(bid)
         vertical = 0.0 if template == "tentacle8" else -.72
-        arm = _branch(bid, template, "core", origin=_v(math.sin(angle) * width * .16, h, math.cos(angle) * length * .16), direction=[math.sin(angle), vertical, math.cos(angle)], up=[0, 1, 0], length=width * .58 * a["limb_scale"], role="locomotor", phase=angle, support=.68, contact="sliding" if template == "tentacle8" else "foot", parent_joint="upper")
+        arm = _branch(bid, template, "core", origin=_v(math.sin(angle) * width * .16, h, math.cos(angle) * length * .16), direction=[math.sin(angle), vertical, math.cos(angle)], up=[0, 1, 0], length=width * .58 * a["limb_scale"], role="locomotor", phase=angle, support=.68, contact="sliding" if template == "tentacle8" else "foot", parent_joint="upper",
+                      capabilities=("strike",) if i == 0 else (), effector_slot="radial_sector_0" if i == 0 else None)
         if template == "insect_leg4":
             arm["direction"] = _round_vector([math.sin(angle), 0.0, math.cos(angle)])
             _insect_leg(arm)
@@ -389,7 +420,8 @@ def _radial(a: dict[str, Any], h: float, length: float, width: float) -> tuple[l
 
 def _serpentine(a: dict[str, Any], h: float, length: float, width: float) -> tuple[list[dict[str, Any]], list[str], list[str], str]:
     branches = [_branch("core", "head1", None, origin=_v(0, h, length * .43), direction=[0, .1, 1], up=[0, 1, 0], length=length * .16, role="head"),
-                _branch("body", "tentacle8", "core", origin=_v(0, h * .28, length * .35), direction=[0, 0, -1], up=[0, 1, 0], length=length * .9, role="locomotor", support=.8, contact="sliding", parent_joint="upper")]
+                _branch("body", "tentacle8", "core", origin=_v(0, h * .28, length * .35), direction=[0, 0, -1], up=[0, 1, 0], length=length * .9, role="locomotor", support=.8, contact="sliding", parent_joint="upper",
+                        capabilities=("whip",), effector_slot="terminal_body_chain")]
     if a["variant"] == "limbless":
         return branches, ["body"], ["body"], "bilateral"
     # Legged serpentines carry the body clear of the ground on their legs: the hips sit at body height.
@@ -401,6 +433,7 @@ def _serpentine(a: dict[str, Any], h: float, length: float, width: float) -> tup
             _mammal_leg(leg)
         supports.extend((f"leg{i}_L", f"leg{i}_R"))
     branches[1].pop("contacts")
+    branches[1]["capabilities"] = ["whip"]
     return branches, supports, supports, "bilateral"
 
 
@@ -434,6 +467,8 @@ def _dragger(a: dict[str, Any], h: float, length: float, width: float) -> tuple[
             length=arm_length, side=side, attach=2,
             mirror_of="arm_L" if side == "R" else "", role="locomotor",
             phase=phase, support=.6, contact="hand", parent_joint="end", profile_id="limb3_brachial",
+            capabilities=("strike", "grasp") if side == "L" else ("grasp",),
+            effector_slot=("primary_puller" if pull else "hauler_puller") if side == "L" else None,
         )
         # Mid-pull: the upper arm lifts toward ``up``, the forearm folds down to the ground (profile
         # flexion is bone -X), the hand lies flat. At the far end of the stroke the arm is almost straight.
@@ -759,9 +794,11 @@ def build_candidate(archetype: str, preset: str, seed: int = 1, style: str = "an
 
 
 def _build(archetype: str, shape: dict[str, float], seed: int, style: str, skeleton_id: str,
-           provenance: dict[str, Any]) -> dict[str, Any]:
+           provenance: dict[str, Any], *, topology_count: int | None = None, appendages: bool = True) -> dict[str, Any]:
     a = dict(ARCHETYPES[archetype])
     a["limb_scale"] = shape["limb"]
+    if topology_count is not None:
+        a["topology_count"] = topology_count
     h = a["height"] * shape["height"] * _r(seed, 1)
     if a["plan"] == "radial":
         diameter = a["length"] * shape["radial"] * _r(seed, 2)
@@ -770,7 +807,10 @@ def _build(archetype: str, shape: dict[str, float], seed: int, style: str, skele
         length = a["length"] * shape["length"] * _r(seed, 2)
         width = a["width"] * shape["width"] * _r(seed, 3)
     branches, supports, contacts, symmetry = _BUILDERS[a["plan"]](a, h, length, width)
-    branches += _extras(a, h, length, width)
+    if appendages:
+        branches += _extras(a, h, length, width)
+    if topology_count is not None and (a["plan"] == "radial" or a["variant"] == "tripod"):
+        _topology_phases([branch for branch in branches if branch["branch_id"] in supports])
     _scale_stance(branches, shape["stance"])
     if style == "horror":
         _apply_horror_modifier(branches)
@@ -790,15 +830,37 @@ def _build(archetype: str, shape: dict[str, float], seed: int, style: str, skele
             _fit_leg_to_hip(branch, hip if grounded else hip * shape["limb"])
     locomotion = {"biped": "biped", "quadruped": "quadruped", "crawler": "crawl", "hexapod": "crawl",
                   "radial": "crawl", "serpentine": "slither", "dragger": "drag"}[a["plan"]]
+    action_support = _topology_action_support(branches, supports) if topology_count is not None else None
     return _finalise(branches, supports, contacts, symmetry, archetype=archetype, body_plan=a["plan"], family=a["family"],
-                     style=style, hint=locomotion, skeleton_id=skeleton_id, dims=(h, length, width), provenance=provenance)
+                     style=style, hint=locomotion, skeleton_id=skeleton_id, dims=(h, length, width), provenance=provenance,
+                     action_support=action_support)
+
+
+def _topology_phases(branches: list[dict[str, Any]]) -> None:
+    count = len(branches)
+    alternating = count >= 4 and count % 2 == 0
+    for index, branch in enumerate(branches):
+        phase = (index % 2) * math.pi if alternating else index * math.tau / count
+        branch["gait"]["phase_rad"] = round(phase, 6)
+        branch["gait"]["run_phase_rad"] = round(phase, 6)
+        if not alternating:
+            branch["gait"]["support_phase"] = round(max(branch["gait"]["support_phase"], (count - 1) / count + .01), 6)
+
+
+def _topology_action_support(branches: list[dict[str, Any]], supports: list[str]) -> dict[str, Any]:
+    effector = next(branch for branch in branches if branch.get("effector_slot"))
+    released = [f"{effector['branch_id']}:{index}" for index, _ in enumerate(effector.get("contacts", []))]
+    support_contacts = {f"{branch['branch_id']}:{index}" for branch in branches
+                        if branch["branch_id"] in supports for index, _ in enumerate(branch.get("contacts", []))}
+    return {"released_contact_ids": released, "minimum_preserved": len(support_contacts - set(released))}
 
 
 def _finalise(branches: list[dict[str, Any]], supports: list[str], contacts: list[str], symmetry: str, *,
               archetype: str, body_plan: str, family: str, style: str, hint: str, skeleton_id: str,
               dims: tuple[float, float, float], provenance: dict[str, Any],
               landmarks: dict[str, str] | None = None, symmetry_pct: int | None = None,
-              traits: dict[str, Any] | None = None) -> dict[str, Any]:
+              traits: dict[str, Any] | None = None,
+              action_support: dict[str, Any] | None = None) -> dict[str, Any]:
     """Assemble the finished skeleton record from authored branches (shared by every builder)."""
     _align_distributed_supports(branches, supports)
     _socketize(branches)
@@ -815,6 +877,8 @@ def _finalise(branches: list[dict[str, Any]], supports: list[str], contacts: lis
                "symmetry": symmetry_data, "landmarks": landmarks,
                "silhouette": {"height_m": round(h, 4), "length_m": round(length, 4), "width_m": round(width, 4)},
                "budgets": {"bones": bone_count, "parts": len(branches), "triangles": min(30_000, 900 + bone_count * 155)}}
+    if action_support is not None:
+        anatomy["action_support"] = action_support
     if symmetry_pct is None:
         symmetry_pct = 100 if symmetry == "bilateral" else 92
     return {"schema_version": "3.0.0", "skeleton_id": skeleton_id, "family": family, "locomotion_hint": hint, "status": "draft",

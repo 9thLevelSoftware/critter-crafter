@@ -84,7 +84,8 @@ def _rename_groups(obj: bpy.types.Object, mapping: dict[str, str]) -> None:
 
 
 def assemble(skeleton: dict[str, Any], parts: dict[str, dict[str, Any]], library_dir: str,
-             recipe: dict[str, Any], gait: dict[str, Any]) -> tuple[bpy.types.Object, bpy.types.Object]:
+             recipe: dict[str, Any], gait: dict[str, Any], *,
+             prepare_pieces=None) -> tuple[bpy.types.Object, bpy.types.Object]:
     built_blend = skeleton.get("asset", {}).get("blend")
     if built_blend:
         path = Path(library_dir) / built_blend
@@ -106,6 +107,7 @@ def assemble(skeleton: dict[str, Any], parts: dict[str, dict[str, Any]], library
         ops_skeleton._bake_clips(arm, skeleton, gait)
     branches = {b["branch_id"]: b for b in skeleton["branches"]}
     pieces = []
+    piece_records = []
     for fill in recipe["fills"]:
         br = branches[fill["branch_id"]]
         part = parts[fill["part_id"]]
@@ -121,6 +123,8 @@ def assemble(skeleton: dict[str, Any], parts: dict[str, dict[str, Any]], library
         _rename_groups(mesh, {f"b{i}": name for i, name in enumerate(names)})
         mesh.data.transform(snap_matrix_blender(br["snap"], s))
         pieces.append(mesh)
+        piece_records.append({"object": mesh, "branch_id": br["branch_id"],
+                              "part_id": part["part_id"], "connector": False})
         if fill["connector_part_id"]:
             conn = parts[fill["connector_part_id"]]
             if not connector_accepted(conn, br):
@@ -131,6 +135,10 @@ def assemble(skeleton: dict[str, Any], parts: dict[str, dict[str, Any]], library
             _rename_groups(cm, {"b0": br["attach_bone"], "b1": names[0]})
             cm.data.transform(snap_matrix_blender(br["snap"], 1.0))
             pieces.append(cm)
+            piece_records.append({"object": cm, "branch_id": br["branch_id"],
+                                  "part_id": conn["part_id"], "connector": True})
+    if prepare_pieces is not None:
+        prepare_pieces(arm, piece_records, branches)
     rigkit.select_only(pieces)
     bpy.ops.object.join()
     body = bpy.context.view_layer.objects.active

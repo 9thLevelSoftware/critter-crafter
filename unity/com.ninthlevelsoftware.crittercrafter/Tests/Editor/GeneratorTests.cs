@@ -105,6 +105,52 @@ namespace CritterCrafter.Tests
                 new PartData { length_mm = 800, girth_mm = 441 }, branch));
         }
 
+        [TestCase(180, 1.111111)]
+        [TestCase(220, 0.909091)]
+        public void RecipeAcceptsPhysicalGirthBoundariesWithReciprocalScale(int girth, double scale)
+        {
+            var catalog = Catalog();
+            catalog.parts[0].girth_mm = girth;
+            var recipe = RecipeGenerator.Generate(catalog, "any", 7);
+            Assert.AreEqual(scale, recipe.fills[0].girth_scale);
+            CollectionAssert.IsEmpty(RecipeValidator.Validate(catalog, recipe));
+        }
+
+        [TestCase(179)]
+        [TestCase(221)]
+        public void RecipeRejectsGirthJustOutsidePhysicalFit(int girth)
+        {
+            var catalog = Catalog();
+            var recipe = RecipeGenerator.Generate(catalog, "any", 7);
+            catalog.parts[0].girth_mm = girth;
+            Assert.That(RecipeValidator.Validate(catalog, recipe),
+                Has.Member("CC_PART_REJECTED: limb_L=limb_part"));
+        }
+
+        [TestCase(0.9)]
+        [TestCase(0.90909)]
+        [TestCase(0.95)]
+        [TestCase(1.05)]
+        [TestCase(1.111112)]
+        public void RecipeRejectsForgedGirthScale(double scale)
+        {
+            var catalog = Catalog();
+            var recipe = RecipeGenerator.Generate(catalog, "any", 7);
+            recipe.fills[0].girth_scale = scale;
+            Assert.That(RecipeValidator.Validate(catalog, recipe), Has.Member("CC_GIRTH_SCALE: limb_L"));
+        }
+
+        [TestCase(24)]
+        [TestCase(28)]
+        [TestCase(76)]
+        public void AmalgamRecipeSeedReciprocalGirthRegression(int recipeSeed)
+        {
+            var catalog = JsonUtility.FromJson<CatalogData>(File.ReadAllText(V3Path("catalog.json")));
+            foreach (var skeleton in catalog.skeletons) skeleton.status = "approved";
+            var recipe = RecipeGenerator.Generate(catalog, "amalgam", recipeSeed);
+            CollectionAssert.IsEmpty(RecipeValidator.Validate(catalog, recipe));
+        }
+
         [Test]
         public void GeneratesAndRoundTripsV3Recipe()
         {

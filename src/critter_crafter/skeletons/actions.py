@@ -36,7 +36,8 @@ class AttackProfile:
 
     attack_id: str
     solver: str
-    branch_id: str
+    effector_slot: str
+    required_capability: str
     bone_index: int
     local_point_n: tuple[float, float, float]
     windup_offset_n: tuple[float, float, float]
@@ -52,7 +53,7 @@ class AttackProfile:
 def _profile(
     attack_id: str,
     solver: str,
-    branch_id: str,
+    effector_slot: str,
     bone_index: int,
     windup: tuple[float, float, float],
     impact: tuple[float, float, float],
@@ -61,13 +62,15 @@ def _profile(
     release: tuple[int, ...] = (),
     minimum_preserved: int,
     solver_bone_count: int | None = None,
+    required_capability: str = "strike",
     max_reach_n: float = .30,
     minimum_displacement_n: float = .07,
 ) -> AttackProfile:
     return AttackProfile(
         attack_id=attack_id,
         solver=solver,
-        branch_id=branch_id,
+        effector_slot=effector_slot,
+        required_capability=required_capability,
         bone_index=bone_index,
         local_point_n=(0.0, 1.0, 0.0),
         windup_offset_n=windup,
@@ -86,75 +89,79 @@ def _profile(
 # body contact.  The remaining declared contacts stay planted throughout.
 ATTACK_PROFILES: Mapping[str, AttackProfile] = MappingProxyType({
     "biped_plantigrade_humanoid": _profile(
-        "straight_punch", "temporary_ik", "arm_R", 2,
+        "straight_punch", "temporary_ik", "primary_strike", 2,
         (.04, .03, -.09), (-.03, .04, .20), (.28, .50, .62, 1.0),
         minimum_preserved=2, max_reach_n=.26, minimum_displacement_n=.10,
     ),
     "biped_digitigrade_creature": _profile(
-        "raking_claw", "temporary_ik", "arm_R", 2,
+        "raking_claw", "temporary_ik", "primary_strike", 2,
         (.07, .05, -.08), (.12, -.03, .17), (.22, .43, .55, 1.0),
         minimum_preserved=2, max_reach_n=.25, minimum_displacement_n=.11,
     ),
     "quadruped_stocky_plantigrade": _profile(
-        "driving_bite", "analytic_chain", "head", 0,
+        "driving_bite", "analytic_chain", "primary_head", 0,
         (0.0, .10, -.012), (0.0, -.22, -.03), (.34, .58, .70, 1.0),
         minimum_preserved=4, solver_bone_count=1, max_reach_n=.25, minimum_displacement_n=.12,
+        required_capability="bite",
     ),
     "quadruped_lean_digitigrade": _profile(
-        "snap_bite", "analytic_chain", "head", 0,
+        "snap_bite", "analytic_chain", "primary_head", 0,
         (.03, .09, -.01), (-.04, -.20, -.025), (.24, .45, .56, 1.0),
         minimum_preserved=4, solver_bone_count=1, max_reach_n=.24, minimum_displacement_n=.12,
+        required_capability="bite",
     ),
     "crawler_bilateral_eight_legged": _profile(
-        "foreleg_spear", "temporary_ik", "leg3_L", 3,
+        "foreleg_spear", "temporary_ik", "forward_outer_left", 3,
         (-.02, .04, -.08), (.03, .09, .17), (.25, .47, .59, 1.0),
         release=(0,), minimum_preserved=7, max_reach_n=.24, minimum_displacement_n=.11,
     ),
     "crawler_alien_tripod": _profile(
-        "tripod_hook", "temporary_ik", "leg_2", 3,
+        "tripod_hook", "temporary_ik", "designated_tripod_striker", 3,
         (.06, .04, -.07), (-.08, .10, .15), (.32, .55, .67, 1.0),
         release=(0,), minimum_preserved=2, max_reach_n=.25, minimum_displacement_n=.10,
     ),
     "hexapod_compact_insect": _profile(
-        "foreleg_jab", "temporary_ik", "leg2_L", 3,
+        "foreleg_jab", "temporary_ik", "forward_left", 3,
         (-.02, .05, -.07), (.02, .10, .16), (.20, .39, .50, 1.0),
         release=(0,), minimum_preserved=5, max_reach_n=.23, minimum_displacement_n=.11,
     ),
     "hexapod_elongated_insect": _profile(
-        "foreleg_lance", "temporary_ik", "leg2_L", 3,
+        "foreleg_lance", "temporary_ik", "forward_left", 3,
         (-.03, .04, -.10), (.025, .07, .19), (.29, .52, .64, 1.0),
         release=(0,), minimum_preserved=5, max_reach_n=.24, minimum_displacement_n=.12,
     ),
     "radial_raised_articulated_walker": _profile(
-        "radial_stab", "temporary_ik", "arm_0", 3,
+        "radial_stab", "temporary_ik", "radial_sector_0", 3,
         (.04, .03, -.08), (-.04, .08, .18), (.27, .49, .60, 1.0),
         release=(0,), minimum_preserved=5, max_reach_n=.23, minimum_displacement_n=.11,
     ),
     "serpentine_limbless_articulated": _profile(
-        "tail_whip", "analytic_chain", "body", 7,
+        "tail_whip", "analytic_chain", "terminal_body_chain", 7,
         # Leave a small displacement margin for the joint-limited baked solve.
         (-.06, .20, .063), (.0601, .19, .06), (.38, .61, .72, 1.0),
         release=(2,), minimum_preserved=2, solver_bone_count=3,
         max_reach_n=.22, minimum_displacement_n=.12,
+        required_capability="whip",
     ),
     "serpentine_segmented_paired_legs": _profile(
-        "segmented_tail_sweep", "analytic_chain", "body", 7,
+        "segmented_tail_sweep", "analytic_chain", "terminal_body_chain", 7,
         (.06, .19, .06), (-.06, .18, .06), (.35, .58, .70, 1.0),
         minimum_preserved=4, solver_bone_count=3, max_reach_n=.21, minimum_displacement_n=.11,
+        required_capability="whip",
     ),
     "dragger_forelimb_puller": _profile(
-        "puller_hammer", "temporary_ik", "arm_L", 2,
+        "puller_hammer", "temporary_ik", "primary_puller", 2,
         (.04, .08, -.09), (-.04, .12, .18), (.31, .54, .67, 1.0),
         release=(0,), minimum_preserved=4, max_reach_n=.24, minimum_displacement_n=.12,
     ),
     "dragger_arm_leg_crawler": _profile(
         # The single arm is the striker; the leg only drives the crawl.
-        "lopsided_hammer", "temporary_ik", "arm_L", 2,
+        "lopsided_hammer", "temporary_ik", "primary_puller", 2,
         (.04, .08, -.09), (-.04, .12, .18), (.31, .54, .67, 1.0),
         release=(0,), minimum_preserved=4, max_reach_n=.24, minimum_displacement_n=.12,
     ),
     "dragger_belly_hauler": _profile(
-        "hauler_shove", "temporary_ik", "arm_L", 2,
+        "hauler_shove", "temporary_ik", "hauler_puller", 2,
         # The hauler's low, compact arm drives upward and forward without
         # asking the three-bone chain to extend past its physical length.
         (-.03, .05, -.07), (.04, .09, .11), (.36, .60, .73, 1.0),
@@ -268,6 +275,91 @@ def _support_contacts(skeleton: Mapping[str, Any]) -> list[str]:
     ]
 
 
+CAPABILITIES = ("support", "strike", "bite", "whip", "grasp", "slide")
+_DERIVED_ARCHETYPES = frozenset(("amalgam_hauled", "amalgam_walker", "amalgam_slither"))
+
+
+def _slot_branch(skeleton: Mapping[str, Any], slot: str, capability: str) -> Mapping[str, Any]:
+    matches = [branch for branch in skeleton.get("branches", []) if branch.get("effector_slot") == slot]
+    if len(matches) != 1:
+        raise AttackPlanError("CC_ACTION_EFFECTOR", f"slot {slot!r} requires exactly one branch, got {len(matches)}")
+    branch = matches[0]
+    if capability not in branch.get("capabilities", []):
+        raise AttackPlanError("CC_ACTION_CAPABILITY", f"slot {slot!r} requires {capability}")
+    return branch
+
+
+def _support_policy(
+    skeleton: Mapping[str, Any], branch: Mapping[str, Any], release_indices: Sequence[int], minimum: int,
+) -> tuple[list[str], list[str], int]:
+    contacts = list(branch.get("contacts", []))
+    branch_id = branch["branch_id"]
+    support_contacts = _support_contacts(skeleton)
+    policy = skeleton.get("anatomy", {}).get("action_support")
+    if policy is None:
+        if any(not 0 <= index < len(contacts) for index in release_indices):
+            raise AttackPlanError("CC_ACTION_SUPPORT", f"{branch_id}: missing release contact")
+        released = [f"{branch_id}:{index}" for index in release_indices]
+    else:
+        if not isinstance(policy, Mapping) or set(policy) != {"released_contact_ids", "minimum_preserved"}:
+            raise AttackPlanError("CC_ACTION_SUPPORT", "action_support requires released_contact_ids and minimum_preserved")
+        released = policy["released_contact_ids"]
+        minimum = policy["minimum_preserved"]
+        if (not isinstance(released, list) or any(not isinstance(value, str) for value in released)
+                or len(released) != len(set(released)) or type(minimum) is not int or minimum < 0):
+            raise AttackPlanError("CC_ACTION_SUPPORT", "invalid action_support values")
+        effector_contacts = [f"{branch_id}:{index}" for index, _ in enumerate(contacts)]
+        if set(released) != set(effector_contacts):
+            raise AttackPlanError("CC_ACTION_SUPPORT", "topology policy must release exactly the effector's contacts")
+    if not set(released) <= set(support_contacts):
+        raise AttackPlanError("CC_ACTION_SUPPORT", "release is not a support contact")
+    preserved = [contact_id for contact_id in support_contacts if contact_id not in set(released)]
+    if policy is not None:
+        if minimum != len(preserved):
+            raise AttackPlanError("CC_ACTION_SUPPORT", "topology minimum must equal the preserved contact remainder")
+        support_floor = skeleton.get("anatomy", {}).get("traits", {}).get("min_support")
+        if type(support_floor) is not int or support_floor < 0:
+            raise AttackPlanError("CC_ACTION_SUPPORT", "topology policy requires an explicit support floor")
+        remaining_branches = {contact_id.rsplit(":", 1)[0] for contact_id in preserved}
+        if len(remaining_branches) < support_floor:
+            raise AttackPlanError("CC_ACTION_SUPPORT", "effector release violates the authored support floor")
+    if len(preserved) < minimum:
+        raise AttackPlanError("CC_ACTION_SUPPORT", f"preserves {len(preserved)}, requires {minimum}")
+    return list(released), preserved, minimum
+
+
+def validate_action_metadata(skeleton: Mapping[str, Any]) -> None:
+    """Check source and compiled semantic metadata without requiring evaluated poses."""
+    slots: set[str] = set()
+    for branch in skeleton.get("branches", []):
+        capabilities = branch.get("capabilities")
+        if (not isinstance(capabilities, list) or any(value not in CAPABILITIES for value in capabilities)
+                or len(capabilities) != len(set(capabilities))):
+            raise AttackPlanError("CC_ACTION_CAPABILITY", f"{branch.get('branch_id')}: invalid capabilities")
+        contacts = branch.get("contacts", [])
+        if contacts and "support" not in capabilities:
+            raise AttackPlanError("CC_ACTION_CAPABILITY", f"{branch.get('branch_id')}: contact requires support")
+        if any(contact.get("kind") in {"sliding", "body"} for contact in contacts) and "slide" not in capabilities:
+            raise AttackPlanError("CC_ACTION_CAPABILITY", f"{branch.get('branch_id')}: body contact requires slide")
+        if "effector_slot" in branch:
+            slot = branch["effector_slot"]
+            if not isinstance(slot, str) or not slot or slot in slots:
+                raise AttackPlanError("CC_ACTION_EFFECTOR", f"invalid or duplicate effector slot {slot!r}")
+            slots.add(slot)
+    archetype = skeleton.get("anatomy", {}).get("archetype_id")
+    profile = ATTACK_PROFILES.get(archetype)
+    if profile:
+        branch = _slot_branch(skeleton, profile.effector_slot, profile.required_capability)
+        _support_policy(skeleton, branch, profile.release_contact_indices, profile.minimum_preserved)
+    elif archetype in _DERIVED_ARCHETYPES or "primary_strike" in slots:
+        branch = _slot_branch(skeleton, "primary_strike", "strike")
+        if branch.get("template") != "limb3" or branch.get("contacts"):
+            raise AttackPlanError("CC_ACTION_EFFECTOR", "derived primary_strike must be a contactless limb3")
+        _support_policy(skeleton, branch, (), len(_support_contacts(skeleton)))
+    elif skeleton.get("anatomy", {}).get("action_support") is not None:
+        raise AttackPlanError("CC_ACTION_SUPPORT", "action_support has no semantic action")
+
+
 def _sphere_project(anchor: Sequence[float], target: Sequence[float], radius: float) -> tuple[float, float, float]:
     direction = mu.sub(target, anchor)
     distance = mu.length(direction)
@@ -277,16 +369,13 @@ def _sphere_project(anchor: Sequence[float], target: Sequence[float], radius: fl
 
 
 def derive_attack_profile(skeleton: Mapping[str, Any]) -> AttackProfile | None:
-    """An attack for a skeleton with no authored profile (the seeded amalgams): a hammer swing by its striker.
-
-    The striker is the one contactless limb3 arm marked ``manipulator``. The dragger hammer's offsets are
-    turned about the vertical to the direction the arm points, and every support contact stays planted.
-    """
-    striker = next((b for b in skeleton.get("branches", [])
-                    if b.get("template") == "limb3" and not b.get("contacts")
-                    and str(b.get("gait_role", b.get("gait", {}).get("role", ""))) == "manipulator"), None)
-    if striker is None or len(striker.get("bone_names", [])) != 3:
+    """Derive a hammer from the uniquely authored primary strike slot."""
+    slots = [branch for branch in skeleton.get("branches", []) if branch.get("effector_slot") == "primary_strike"]
+    if not slots:
         return None
+    striker = _slot_branch(skeleton, "primary_strike", "strike")
+    if striker.get("template") != "limb3" or striker.get("contacts") or len(striker.get("bone_names", [])) != 3:
+        raise AttackPlanError("CC_ACTION_EFFECTOR", "derived primary_strike must be a contactless three-bone limb3")
     geometry = _neutral_geometry(skeleton)
     names = striker["bone_names"]
     shoulder, tip = geometry[names[0]]["head_m"], geometry[names[2]]["tail_m"]
@@ -297,7 +386,7 @@ def derive_attack_profile(skeleton: Mapping[str, Any]) -> AttackProfile | None:
         return (round(v[0] * cos + v[2] * sin, 6), v[1], round(-v[0] * sin + v[2] * cos, 6))
 
     return _profile(
-        "derived_hammer", "temporary_ik", striker["branch_id"], 2,
+        "derived_hammer", "temporary_ik", "primary_strike", 2,
         turn((.04, .08, -.09)), turn((-.04, .12, .18)), (.31, .54, .67, 1.0),
         minimum_preserved=len(_support_contacts(skeleton)), max_reach_n=.24, minimum_displacement_n=.12,
     )
@@ -305,22 +394,19 @@ def derive_attack_profile(skeleton: Mapping[str, Any]) -> AttackProfile | None:
 
 def resolve_attack(skeleton: Mapping[str, Any]) -> dict[str, Any]:
     """Resolve one authored (or derived) profile to concrete metres and skeleton bone names."""
+    validate_action_metadata(skeleton)
     archetype_id = str(skeleton.get("anatomy", {}).get("archetype_id", ""))
     profile = ATTACK_PROFILES.get(archetype_id) or derive_attack_profile(skeleton)
     if profile is None:
         raise AttackPlanError("CC_ACTION_ARCHETYPE", f"no attack profile for {archetype_id or '<missing>'}")
 
-    branch = next(
-        (item for item in skeleton.get("branches", []) if item.get("branch_id") == profile.branch_id),
-        None,
-    )
-    if branch is None:
-        raise AttackPlanError("CC_ACTION_EFFECTOR", f"{archetype_id}: missing branch {profile.branch_id}")
+    branch = _slot_branch(skeleton, profile.effector_slot, profile.required_capability)
+    branch_id = str(branch["branch_id"])
     names = list(branch.get("bone_names", []))
     if not 0 <= profile.bone_index < len(names):
         raise AttackPlanError(
             "CC_ACTION_EFFECTOR",
-            f"{archetype_id}.{profile.branch_id}: missing bone index {profile.bone_index}",
+            f"{archetype_id}.{branch_id}: missing bone index {profile.bone_index}",
         )
     bone_name = str(names[profile.bone_index])
     bone = next((item for item in skeleton.get("bones", []) if item.get("name") == bone_name), None)
@@ -329,7 +415,7 @@ def resolve_attack(skeleton: Mapping[str, Any]) -> dict[str, Any]:
 
     branch_length = float(branch.get("length_m", 0.0))
     if not math.isfinite(branch_length) or branch_length <= 0:
-        raise AttackPlanError("CC_ACTION_EFFECTOR", f"{archetype_id}.{profile.branch_id}: invalid branch length")
+        raise AttackPlanError("CC_ACTION_EFFECTOR", f"{archetype_id}.{branch_id}: invalid branch length")
     local_point = _scaled(profile.local_point_n, _bone_length(bone))
     authored_windup = _scaled(profile.windup_offset_n, branch_length)
     authored_impact = _scaled(profile.impact_offset_n, branch_length)
@@ -338,28 +424,13 @@ def resolve_attack(skeleton: Mapping[str, Any]) -> dict[str, Any]:
         raise AttackPlanError("CC_ACTION_REACH", f"{archetype_id}: declared target exceeds reach budget")
 
     contacts = list(branch.get("contacts", []))
-    released: list[str] = []
-    for index in profile.release_contact_indices:
-        if not 0 <= index < len(contacts):
-            raise AttackPlanError(
-                "CC_ACTION_SUPPORT",
-                f"{archetype_id}.{profile.branch_id}: missing release contact {index}",
-            )
-        released.append(f"{profile.branch_id}:{index}")
-    support_contacts = _support_contacts(skeleton)
-    unknown_release = set(released) - set(support_contacts)
-    if unknown_release:
-        raise AttackPlanError("CC_ACTION_SUPPORT", f"{archetype_id}: release is not a support contact")
-    preserved = [contact_id for contact_id in support_contacts if contact_id not in set(released)]
-    if len(preserved) < profile.minimum_preserved:
-        raise AttackPlanError(
-            "CC_ACTION_SUPPORT",
-            f"{archetype_id}: preserves {len(preserved)}, requires {profile.minimum_preserved}",
-        )
+    released, preserved, minimum_preserved = _support_policy(
+        skeleton, branch, profile.release_contact_indices, profile.minimum_preserved,
+    )
     preserved_branches = list(dict.fromkeys(contact_id.rsplit(":", 1)[0] for contact_id in preserved))
     windup_end, impact_phase, recovery_start, recovery_end = profile.timing
 
-    source_contact_ids = [f"{profile.branch_id}:{index}" for index, _ in enumerate(contacts)]
+    source_contact_ids = [f"{branch_id}:{index}" for index, _ in enumerate(contacts)]
     tolerance = _r6(max(.008, min(.02, branch_length * .02)))
     chain_start = profile.bone_index + 1 - profile.solver_bone_count
     if chain_start < 0:
@@ -416,7 +487,7 @@ def resolve_attack(skeleton: Mapping[str, Any]) -> dict[str, Any]:
         "attack_id": profile.attack_id,
         "solver": profile.solver,
         "effector": {
-            "branch_id": profile.branch_id,
+            "branch_id": branch_id,
             "bone_index": profile.bone_index,
             "bone_name": bone_name,
             "local_point_m": local_point,
@@ -459,7 +530,7 @@ def resolve_attack(skeleton: Mapping[str, Any]) -> dict[str, Any]:
             "active_condition": "0 < global_phase < 1",
             "preserved_contact_ids": preserved,
             "preserved_branch_ids": preserved_branches,
-            "minimum_preserved": profile.minimum_preserved,
+            "minimum_preserved": minimum_preserved,
         },
         "qa": {
             "minimum_displacement_m": _r6(profile.minimum_displacement_n * branch_length),
@@ -540,10 +611,12 @@ def attack_target_at(plan: Mapping[str, Any], phase: float) -> dict[str, Any]:
 
 __all__ = [
     "ACTION_PLAN_VERSION",
+    "CAPABILITIES",
     "ATTACK_PROFILES",
     "AttackPlanError",
     "AttackProfile",
     "action_global_phase",
     "attack_target_at",
     "resolve_attack",
+    "validate_action_metadata",
 ]

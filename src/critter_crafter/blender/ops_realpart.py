@@ -13,6 +13,8 @@ from __future__ import annotations
 
 import hashlib
 import math
+import json
+from pathlib import Path
 import os
 from typing import Any
 
@@ -22,6 +24,9 @@ import bpy
 from . import rigkit
 from .frame import to_blender
 from ..parts.fit import chain_weights, fit
+from ..authoring.jobs import write_json
+from ..parts.learned_weights import (geometry_identity, geometry_inputs, geometry_producer_sha256,
+                                    resolve_weights, validate_csr, vertex_sha256)
 
 MERGE_DISTANCE_N = 1e-5     # of the bounding-box diagonal: rejoins glTF UV-seam splits only
 DEBRIS_TRIANGLES = 4        # islands at or below this many triangles are removed
@@ -181,10 +186,40 @@ def _write_texture(image: bpy.types.Image, size: int, path: str) -> dict[str, An
     return {"image": copy, "size": list(copy.size)}
 
 
+def _public_fixture(path):
+    """A closed, asymmetric, rights-cleared tube used only for weight-transfer review."""
+    rigkit.reset_scene()
+    vertices, faces = [], []
+    rings, sectors = 32, 12
+    for ring in range(rings + 1):
+        t = ring / rings
+        for sector in range(sectors):
+            angle = sector * math.tau / sectors
+            radius = 0.075 * (1.0 + 0.3 * math.sin(math.pi * t))
+            spike = 0.08 if ring == 13 and sector == 2 else 0.0
+            vertices.append(to_blender((0.06 * math.sin(math.pi * t) + (radius + spike) * math.cos(angle),
+                                        radius * 0.7 * math.sin(angle), t)))
+    for ring in range(rings):
+        for sector in range(sectors):
+            a, b = ring * sectors + sector, ring * sectors + (sector + 1) % sectors
+            faces.append((a, b, b + sectors, a + sectors))
+    faces.extend([tuple(reversed(range(sectors))), tuple(rings * sectors + i for i in range(sectors))])
+    mesh = bpy.data.meshes.new("PublicAsymmetricSkinFixture")
+    mesh.from_pydata(vertices, [], faces)
+    mesh.update()
+    obj = bpy.data.objects.new(mesh.name, mesh)
+    bpy.context.collection.objects.link(obj)
+    rigkit.export_glb(path, [obj], animated=False)
+
+
 def run(args: dict[str, Any]) -> dict[str, Any]:
     part = args["part"]
     profile = args["template"]
     source = args["source_path"]
+    if args.get("public_fixture"):
+        if not Path(source).is_file():
+            _public_fixture(source)
+        part = dict(part, real=dict(part["real"], sha256=_sha256(source)))
     expected = part.get("real", {}).get("sha256")
     actual = _sha256(source)
     if expected and actual != expected:
@@ -198,15 +233,13 @@ def run(args: dict[str, Any]) -> dict[str, Any]:
     source_gltf = [(v.co.x, v.co.z, -v.co.y) for v in mesh.vertices]
     faces = [tuple(p.vertices) for p in mesh.polygons]
     fitted = fit(source_gltf, faces, part["real"]["fit"], part["template"], profile["bone_fractions"],
-                 float(part["length_m"]), float(part["girth_m"]))
+                 float(part["length_m"]), float(part["girth_m"]), compute_weights=False)
     if fitted["params"]["mirror_x"]:
         mesh.flip_normals()
     for v, p in zip(mesh.vertices, fitted["positions"]):
         v.co = to_blender(p)
     mesh.update()
     loops = _joint_loops(obj, fitted["planes"], int(part["max_triangles"]))
-    weights = [_prune(chain_weights(v.co.y, fitted["bones"], fitted["params"]["weights"], fitted["bands"]))
-               for v in mesh.vertices]
     if mesh.has_custom_normals:
         bpy.context.view_layer.objects.active = obj
         bpy.ops.mesh.customdata_custom_splitnormals_clear()
@@ -230,6 +263,43 @@ def run(args: dict[str, Any]) -> dict[str, Any]:
                       "tail_m": [0.0, 0.0, z1], "up_m": [0.0, 1.0, 0.0]})
         z = z1
     arm = rigkit.build_armature("Armature", bones)
+    geometry = {
+        "vertices": [[float(c) for c in (v.co.x, v.co.z, -v.co.y)] for v in mesh.vertices],
+        "faces": [list(poly.vertices) for poly in mesh.polygons],
+        "uvs": [[float(c) for c in loop.uv] for loop in mesh.uv_layers.active.data]
+               if mesh.uv_layers.active else [],
+        "face_loop_indices": [list(poly.loop_indices) for poly in mesh.polygons],
+        "bones": bones,
+        "bind_matrices": [[list(row) for row in bone.matrix_local] for bone in arm.data.bones],
+    }
+    inputs = geometry_inputs(part, profile, geometry_producer_sha256())
+    identity = geometry_identity(inputs, geometry)
+    if args.get("mode") == "prepare":
+        out = Path(args["job_dir"])
+        out.mkdir(parents=True, exist_ok=True)
+        write_json(out / "geometry.json", geometry)
+        write_json(out / "geometry_inputs.json", inputs)
+        obj.parent = arm
+        rigkit.export_glb(str(out / "fitted.glb"), [arm, obj], animated=False)
+        return {"input_sha256": identity, "vertex_sha256": vertex_sha256(geometry["vertices"]),
+                "profile_sha256": part["binding_profile_hash"], "vertices": len(mesh.vertices),
+                "fit": fitted["metrics"]}
+    if args.get("mode") == "validate_weights":
+        if args["input_sha256"] != identity:
+            raise ValueError("CC_SKIN_STALE: prepared geometry/profile/producer changed")
+        weights = validate_csr(args["weights_path"], geometry, out_path=args["out_weights"])
+        return {"input_sha256": identity, "vertices": len(weights), "max_influences": max(map(len, weights))}
+    if fitted["params"]["weights"] == "learned":
+        metadata = part.get("real", {}).get("learned_weights", {})
+        if metadata.get("input_sha256") != identity:
+            raise ValueError("CC_SKIN_STALE: fitted geometry/profile/producer changed")
+        if metadata.get("profile_sha256") != part["binding_profile_hash"]:
+            raise ValueError("CC_SKIN_BIND: profile changed")
+        root = args.get("artifact_root") or str(Path(__file__).resolve().parents[3])
+        weights = validate_csr(resolve_weights(part, root), geometry)
+    else:
+        weights = [_prune(chain_weights(v.co.y, fitted["bones"], fitted["params"]["weights"], fitted["bands"]))
+                   for v in mesh.vertices]
     groups = {b["name"]: obj.vertex_groups.new(name=b["name"]) for b in bones}
     for vi, w in enumerate(weights):
         for name, value in w.items():
