@@ -3,7 +3,7 @@
   "skeleton_id": "biped_plantigrade_humanoid_balanced_v3",
   "family": "biped",
   "locomotion_hint": "biped",
-  "status": "approved",
+  "status": "draft",
   "symmetry_pct": 100,
   "branches": [
     {
@@ -11,6 +11,7 @@
       "template": "spine3",
       "parent_branch": null,
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0,
         0.8345,
@@ -85,6 +86,9 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         0.1776,
         0.8345,
@@ -170,6 +174,9 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         -0.1776,
         0.8345,
@@ -256,6 +263,10 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 2,
+      "capabilities": [
+        "support",
+        "grasp"
+      ],
       "origin_m": [
         0.1589,
         1.4263,
@@ -341,6 +352,11 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 2,
+      "capabilities": [
+        "support",
+        "strike",
+        "grasp"
+      ],
       "origin_m": [
         -0.1589,
         1.4263,
@@ -409,6 +425,7 @@
         0.0,
         0.0
       ],
+      "effector_slot": "primary_strike",
       "mirror_of": "arm_L",
       "contacts": [
         {
@@ -427,6 +444,7 @@
       "template": "head1",
       "parent_branch": "core",
       "attach_bone_index": 2,
+      "capabilities": [],
       "origin_m": [
         0,
         1.6342,
@@ -497,6 +515,7 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 1,
+      "capabilities": [],
       "origin_m": [
         0.1402,
         1.2344,
@@ -572,6 +591,7 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 1,
+      "capabilities": [],
       "origin_m": [
         -0.1402,
         1.2344,
@@ -904,10 +924,5 @@
     "generator": "cc-gen-3",
     "seed": 1,
     "preset": "balanced"
-  },
-  "review": {
-    "by": "owner",
-    "date": "2026-09-30",
-    "method": "owner"
   }
 }

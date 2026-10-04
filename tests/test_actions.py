@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from critter_crafter.library.catalog import compile_catalog, load_sources
+from critter_crafter.library.catalog import CatalogError, compile_catalog, load_sources
 from critter_crafter.skeletons.actions import (
     ACTION_PLAN_VERSION,
     ATTACK_PROFILES,
@@ -18,7 +18,8 @@ from critter_crafter.skeletons.actions import (
     attack_target_at,
     resolve_attack,
 )
-from critter_crafter.skeletons.archetypes import ARCHETYPES
+from critter_crafter.skeletons.archetypes import ARCHETYPES, build_candidate
+from critter_crafter.skeletons.amalgam import AMALGAM_SEEDS, build_amalgam
 
 
 def _skeletons() -> list[dict]:
@@ -38,7 +39,7 @@ def _contact_ids(skeleton: dict) -> set[str]:
 def test_profiles_cover_all_fourteen_archetypes_with_declared_semantics() -> None:
     assert set(ATTACK_PROFILES) == set(ARCHETYPES)
     assert len({profile.attack_id for profile in ATTACK_PROFILES.values()}) == len(ATTACK_PROFILES)
-    assert all(profile.branch_id and profile.bone_index >= 0 for profile in ATTACK_PROFILES.values())
+    assert all(profile.effector_slot and profile.bone_index >= 0 for profile in ATTACK_PROFILES.values())
 
 
 @pytest.mark.parametrize("skeleton", _skeletons(), ids=lambda item: item["skeleton_id"])
@@ -101,8 +102,11 @@ def test_declared_effectors_match_the_intended_anatomical_attacks() -> None:
         "dragger_arm_leg_crawler": ("arm_L", "lopsided_hammer"),
     }
     assert {
-        archetype_id: (profile.branch_id, profile.attack_id)
-        for archetype_id, profile in ATTACK_PROFILES.items()
+        skeleton["anatomy"]["archetype_id"]: (
+            resolve_attack(skeleton)["effector"]["branch_id"], resolve_attack(skeleton)["attack_id"],
+        )
+        for skeleton in _skeletons()
+        if skeleton["anatomy"]["archetype_id"] in expected
     } == expected
 
 
@@ -226,3 +230,160 @@ def test_unknown_archetype_and_structural_drift_fail_loudly() -> None:
     missing_effector["branches"] = [branch for branch in missing_effector["branches"] if branch["branch_id"] != "leg_2"]
     with pytest.raises(AttackPlanError, match="CC_ACTION_EFFECTOR"):
         resolve_attack(missing_effector)
+
+
+def _compile_source(source: dict) -> dict:
+    sources = load_sources(Path("data"))
+    sources["skeletons"] = [source]
+    return compile_catalog(sources)["skeletons"][0]
+
+
+def _rename_branch(value, old: str, new: str):
+    if isinstance(value, dict):
+        return {
+            key: copy.deepcopy(item) if key in {"role", "gait_role", "categories"} else _rename_branch(item, old, new)
+            for key, item in value.items()
+        }
+    if isinstance(value, list):
+        return [_rename_branch(item, old, new) for item in value]
+    if isinstance(value, str) and (value == old or value.startswith(old + "_b") or value.startswith(old + ":")):
+        return new + value[len(old):]
+    return value
+
+
+@pytest.mark.parametrize("archetype", sorted(ARCHETYPES))
+def test_semantic_effectors_survive_branch_and_bone_renaming(archetype: str) -> None:
+    source = build_candidate(archetype, "balanced")
+    original = resolve_attack(_compile_source(source))
+    old = original["effector"]["branch_id"]
+    changed = resolve_attack(_compile_source(_rename_branch(source, old, "renamed_effector")))
+    assert changed == _rename_branch(original, old, "renamed_effector")
+    for phase in (0.0, .1, original["timing"]["windup_end"], original["timing"]["impact"], .9, 1.0):
+        assert attack_target_at(changed, phase) == _rename_branch(
+            attack_target_at(original, phase), old, "renamed_effector",
+        )
+
+
+@pytest.mark.parametrize("seed", AMALGAM_SEEDS)
+def test_amalgam_selection_ignores_branch_order_and_unrelated_manipulators(seed: int) -> None:
+    skeleton = _compile_source(build_amalgam(seed))
+    original = resolve_attack(skeleton)
+    renamed = _rename_branch(skeleton, "striker", "unrelated_name")
+    detail = copy.deepcopy(next(branch for branch in renamed["branches"] if branch.get("effector_slot") == "primary_strike"))
+    detail.pop("effector_slot")
+    detail["branch_id"] = "decoy"
+    detail["capabilities"] = ["grasp"]
+    renamed["branches"].insert(0, detail)
+    changed = resolve_attack(renamed)
+    assert changed == _rename_branch(original, "striker", "unrelated_name")
+
+
+def _break_semantics(skeleton: dict, mutation: str) -> None:
+    selected = next(branch for branch in skeleton["branches"] if branch.get("effector_slot") == "designated_tripod_striker")
+    if mutation == "missing":
+        selected.pop("effector_slot")
+    elif mutation == "duplicate":
+        skeleton["branches"][0]["effector_slot"] = selected["effector_slot"]
+    elif mutation == "wrong":
+        selected["capabilities"] = ["support", "bite"]
+    elif mutation == "duplicate_capability":
+        selected["capabilities"].append("strike")
+    elif mutation == "unsupported_contact":
+        selected["capabilities"].remove("support")
+
+
+@pytest.mark.parametrize("mutation,code", [
+    ("missing", "CC_ACTION_EFFECTOR"),
+    ("duplicate", "CC_ACTION_EFFECTOR"),
+    ("wrong", "CC_ACTION_CAPABILITY"),
+    ("duplicate_capability", "CC_ACTION_CAPABILITY"),
+    ("unsupported_contact", "CC_ACTION_CAPABILITY"),
+])
+def test_source_compiler_and_resolver_reject_invalid_semantics(mutation: str, code: str) -> None:
+    source = build_candidate("crawler_alien_tripod", "balanced")
+    compiled = _compile_source(source)
+    _break_semantics(source, mutation)
+    _break_semantics(compiled, mutation)
+    with pytest.raises(CatalogError, match=code):
+        _compile_source(source)
+    with pytest.raises(AttackPlanError, match=code):
+        resolve_attack(compiled)
+
+
+def _reduced_support_topology() -> dict:
+    skeleton = _compile_source(build_candidate("crawler_bilateral_eight_legged", "balanced"))
+    removed = {"leg0_L", "leg0_R"}
+    skeleton["branches"] = [branch for branch in skeleton["branches"] if branch["branch_id"] not in removed]
+    for field in ("support_branches", "contact_branches"):
+        skeleton["anatomy"][field] = [value for value in skeleton["anatomy"][field] if value not in removed]
+    return skeleton
+
+
+def test_topology_policy_preserves_every_other_contact_without_lowering_curated_requirement() -> None:
+    skeleton = _reduced_support_topology()
+    with pytest.raises(AttackPlanError, match="requires 7"):
+        resolve_attack(skeleton)
+    skeleton["anatomy"]["action_support"] = {
+        "released_contact_ids": ["leg3_L:0"], "minimum_preserved": 5,
+    }
+    plan = resolve_attack(skeleton)
+    assert plan["support_release"]["contact_ids"] == ["leg3_L:0"]
+    assert set(plan["support_release"]["preserved_contact_ids"]) == _contact_ids(skeleton) - {"leg3_L:0"}
+    assert plan["support_release"]["minimum_preserved"] == 5
+    curated = resolve_attack(_compile_source(build_candidate("crawler_bilateral_eight_legged", "balanced")))
+    assert curated["support_release"]["minimum_preserved"] == 7
+
+
+@pytest.mark.parametrize("release,minimum", [
+    (["leg3_R:0"], 5),
+    (["leg3_L:1"], 5),
+    (["leg3_L:0", "leg3_L:0"], 5),
+    ([], 6),
+    (["leg3_L:0"], 2),
+    (["leg3_L:0"], 6),
+])
+def test_topology_policy_rejects_wrong_unknown_duplicate_missing_or_miscounted_contacts(release, minimum) -> None:
+    skeleton = _reduced_support_topology()
+    skeleton["anatomy"]["action_support"] = {
+        "released_contact_ids": release, "minimum_preserved": minimum,
+    }
+    with pytest.raises(AttackPlanError, match="CC_ACTION_SUPPORT"):
+        resolve_attack(skeleton)
+
+
+def test_topology_policy_cannot_release_below_the_authored_support_floor() -> None:
+    skeleton = _compile_source(build_candidate("crawler_alien_tripod", "balanced"))
+    skeleton["anatomy"]["traits"]["min_support"] = 3
+    skeleton["anatomy"]["action_support"] = {
+        "released_contact_ids": ["leg_2:0"], "minimum_preserved": 2,
+    }
+    with pytest.raises(AttackPlanError, match="support floor"):
+        resolve_attack(skeleton)
+
+
+@pytest.mark.parametrize("mutation,code", [
+    ("missing", "CC_ACTION_EFFECTOR"),
+    ("duplicate", "CC_ACTION_EFFECTOR"),
+    ("wrong", "CC_ACTION_CAPABILITY"),
+])
+def test_derived_amalgam_cannot_fall_back_to_another_arm(mutation: str, code: str) -> None:
+    skeleton = _compile_source(build_amalgam(AMALGAM_SEEDS[0]))
+    selected = next(branch for branch in skeleton["branches"] if branch.get("effector_slot") == "primary_strike")
+    if mutation == "missing":
+        selected.pop("effector_slot")
+    elif mutation == "duplicate":
+        skeleton["branches"][0]["effector_slot"] = "primary_strike"
+    else:
+        selected["capabilities"] = ["grasp"]
+    with pytest.raises(AttackPlanError, match=code):
+        resolve_attack(skeleton)
+
+
+def test_contactless_amalgam_policy_preserves_all_body_and_limb_supports() -> None:
+    for seed in AMALGAM_SEEDS:
+        skeleton = _compile_source(build_amalgam(seed))
+        original = resolve_attack(skeleton)
+        skeleton["anatomy"]["action_support"] = {
+            "released_contact_ids": [], "minimum_preserved": len(_contact_ids(skeleton)),
+        }
+        assert resolve_attack(skeleton) == original

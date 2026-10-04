@@ -152,6 +152,7 @@ from the seed and maps onto machinery that already exists:
 ## Known limitations
 
 - **Instant agent turns** cause foot drag while re-stepping groups catch up with the body yaw. On the flat `turns` course (walk and 2.5 m/s) the longest a foot travels in one stance (`max_stance_drift_m`) is now about 0.1-0.5 m for the radial, tripod, hexapod, biped and walker amalgams and about 1 m for the quadruped (before the strain-detection change: up to 1.9 m for the tripod); per-frame slip is still 3-20 cm. The quadruped's hips sit about 0.6 m from the body's pivot, so its yaw outruns its feet; gating the yaw by reach is the next step (plan A3).
+- **Bounded contact-proposal experiment (2026-10-04, not accepted):** paired real Play Mode captures covered 15 review rows, 15 turn rows and five stationary reactions with complete measurements. The no-regression gate still fails: review worsened nine maxima, including `amalgam_walker_s0024_v3` max-speed slip by 0.008086 m and stance drift by 0.008395 m, and `dragger_belly_hauler_balanced_v3` walk reach fraction by 0.066038; turns worsened eight maxima, including walker max-speed slip by 0.008273 m; reactions had none. Temporary traces in `work/enhancements/proposals-contact-diagnostics-{walker,belly}.log` show a support-gated walker lift refusal and that the belly-hauler reach peak followed a center landing, but do not establish a counterfactual fix. No gate was weakened and no source correction was justified; see `docs/handoff.md`.
 - **Dragger hands after instant turns** can still be dragged for one frame (a centimetre or two; at most 3 cm in the test sweep) between the reach clamp and the re-step, because the clamp is only seen after the body has moved. Before the fix in "Dragging" below they slid 4–20 cm.
 - **On a 20° ramp** the body now pitches to the ground plane under all supporting homes (it used to stay level whenever fewer than three feet were planted, which is every trot frame, and the tilt limit was below the ramp angle); the height still follows the planted feet, because following the ground under the homes lifted the body ahead of feet that were still low and dragged them. The quadruped's ramp slip went from 0.139 to 0.000 m at walk. A biped's two side-by-side feet give roll only, no pitch.
 - **Starting from standing to full speed in one frame** can drag a foot during the first stride. Tests allow a one-second warmup.
@@ -166,3 +167,72 @@ from the seed and maps onto machinery that already exists:
   reaches the game's shared 2.5 m/s, so the game should use each creature's own published speeds.
 - **Arms used as legs are the hardest amalgam kit.** About a third of the seeds that use one fail the bake
   (an IK flip or a twist past the limit), so seeds are vetted by `skeleton qa`.
+
+## Offline owned-motion authoring
+
+`critter authoring motion prepare --out work/authoring/motion-training` exports evaluated Blender
+30 Hz bone/contact motion only. It does not transfer private part meshes or textures. Existing
+owner-authored polish is read through its exact-armature/source checks. The job records complete
+lineage splits: radial and serpentine lineages are held out; amalgam seeds divisible by five are
+held out across variants. Missing amalgam mode/split coverage is filled with generated sources
+in the job, not production data.
+
+The verified local preparation contains **92 skeletons and 460 records**, with **74 training
+and 18 held-out records per action category**. Its `work/authoring/motion-training/job.json`
+identity is `02ecfcd80fff96a9d6e699b74bacf899bdc9e446ebba195880a6d91e8fa56937`.
+The consumer manifest/hash checks, 13-channel frames, 768-wide roles, 30 Hz samples and disjoint
+category split lists passed. The focused motion-authoring, polish, motion and freshness suite
+passed 33 tests. This verifies dataset preparation and the existing polish path, not a trained model.
+
+The portable `cc-motion-world-1` channels are horizontal-root-centered world positions divided
+by body height, the first two world-rotation matrix columns, backward-difference velocity in
+body heights/second, and actual associated-joint contact activity. Bind-relative rotations and
+fixed-rest joint positions must round-trip within `1e-5`. Contact-point schedules remain separate.
+World rotations are composed through the parent hierarchy from evaluated authoritative local
+quaternions and orthonormalized bind rotation components. Raw Blender matrix columns can retain
+small nonorthogonality; independently orthogonalizing each world matrix loses local-delta
+consistency on long chains. Evaluated joint positions remain unchanged, and raw-export cache
+identity is separate from encoder identity so an encoder repair reuses verified Blender samples.
+
+Use the owner's isolated [AnyTop environment](https://github.com/Anytop2025/Anytop/blob/main/environment.yaml)
+(Python 3.8.15, Torch 2.4.1/CUDA 12.1) and explicit `CRITTER_ANYTOP_ROOT`. No Truebones loader,
+pretrained motion weights, SMPL, T5 download or external corpus is used. The custom adapter uses
+AnyTop's [collator](https://github.com/Anytop2025/Anytop/blob/main/data_loaders/tensors.py) and
+[graph model](https://github.com/Anytop2025/Anytop/blob/main/model/anytop.py), with deterministic
+768-channel role/capability conditioning and neutral-token-aware mixed-topology masks.
+Transfer the complete prepared job directory to the owner-managed worker manually; keep its
+relative artifact paths intact and use the matching project code checkout for the worker CLI.
+Set `CRITTER_ANYTOP_ROOT` to the owner's installed upstream checkout, not a model checkpoint.
+
+A separate prepared inference job, `work/authoring/motion-held-out`, contains 15 evaluated records
+for the held-out radial, limbless serpent and asymmetric slither-amalgam cases below. Its identity
+is `b4ee16f944c8943ffdbbee55b58a808ba53e4ef3f650507a358f3904d0e13357`.
+Transfer this directory separately from the 92-skeleton training job. After actual training,
+infer against this held-out job and return the result directory for each source-checked import.
+
+```text
+python tools/authoring_worker/cli.py motion train --job work/authoring/motion-training --out <model-dir> --check-only
+python tools/authoring_worker/cli.py motion train --job work/authoring/motion-training --out <model-dir>
+python tools/authoring_worker/cli.py motion infer --model <model-dir> --job work/authoring/motion-held-out --seed 1 --out <result-dir>
+critter authoring motion import --skeleton radial_raised_articulated_walker_balanced_v3 --result <result-dir>
+critter authoring motion import --skeleton serpentine_limbless_articulated_balanced_v3 --result <result-dir>
+critter authoring motion import --skeleton amalgam_slither_s0040_v3 --result <result-dir>
+```
+
+`--check-only --device cpu` exercises the actual forward/backward loss and constrained inpainting
+contract without training. Full GPU work requires the owner-managed device with at least 16 GB.
+Five models train from scratch: idle, stun, joined telegraph/attack, hit and death. Each uses
+100,000 AdamW updates, microbatch two accumulated eight times, and best fixed-noise held-out loss
+checkpoint selection. Training purely on procedural examples does not establish improved motion.
+
+Inference fixes authored endpoints, horizontal roots, required stance features and the
+telegraph/attack seam; its `True=fixed` inpainting masks are distinct from padding masks.
+Import projects joint limits, contact pinning, temporary attack IK and the existing reach
+budget, then rejects failed motion/action/export QA. Passing candidates become full eight-action
+masters under the existing `work/polish/skeletons/<id>/override.json` path; walk/run and unselected
+actions remain unchanged. Data/model/settings/sample hashes are recorded in both the master and
+override. Adoption returns the source to draft; only the owner can approve it.
+
+Real GPU training/inference and reviewed held-out-motion quality remain unverified until the
+owner transfers jobs and returns actual model results. These commands are not a claim of model
+acceptance, and there is no procedural fallback for an unavailable model.

@@ -78,6 +78,15 @@ changed.
    `girth_scale = branch_girth / (part_girth * length_scale)`, both rounded to 6 decimals.
 4. Recipe id = `gen_<pool_id>_<seed>`.
 
+The physical post-uniform-scale girth ratio
+`part_girth * length_scale / branch_girth` must lie in the inclusive interval
+`[0.9, 1.1]`, checked with integer millimetres before rounding. The recorded
+corrective `girth_scale` is its reciprocal, so its six-decimal inclusive interval
+is `[0.909091, 1.111111]`, not `[0.9, 1.1]`. Validators still require physical fit
+and agreement with the recomputed scale; an in-range forged scale is invalid.
+This contract repair does not clamp output or change `cc-gen-3`, RNG consumption,
+candidate ordering, recipe identities or compositions.
+
 ## Review path: `generate_for_skeleton(catalog, skeleton_id, seed)`
 Fills an explicitly named skeleton, drafts included, for anatomy review. Each branch takes its
 dedicated reference part (and reference connector) instead of a random pick; optional branches

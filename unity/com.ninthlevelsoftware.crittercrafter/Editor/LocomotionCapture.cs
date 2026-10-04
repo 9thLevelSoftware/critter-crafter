@@ -15,7 +15,7 @@ namespace CritterCrafter.Editor
     /// Play Mode is used so the Animator, the Animation Rigging graph and skinning run exactly as in the
     /// game. Headless:
     ///   Unity -batchmode -projectPath ... -executeMethod CritterCrafter.Editor.LocomotionCapture.CaptureFromCommandLine
-    ///         -critterLibrary &lt;dir&gt; -critterSkeletons id[,id...] -critterOut &lt;dir&gt; [-critterSpeeds walk,run,2.5]
+    ///         -critterLibrary &lt;dir&gt; -critterSkeletons id[,id...] -critterOut &lt;dir&gt; [-critterSpeeds walk,run,max]
     /// Draft skeletons are marked approved in memory only, so the review can run before approval.
     /// </summary>
     public static class LocomotionCapture
@@ -48,6 +48,7 @@ namespace CritterCrafter.Editor
             _library = report.Library;
             _outRoot = Arg("-critterOut", "locomotion_capture");
             _jobs = new Queue<Job>();
+            Results.Clear();
             foreach (var id in Arg("-critterSkeletons", "").Split(','))
             {
                 if (string.IsNullOrWhiteSpace(id)) continue;
@@ -106,9 +107,10 @@ namespace CritterCrafter.Editor
             Physics.SyncTransforms();
             var creature = Spawn(_library, job.skeletonId, _holder.transform, out _restore);
             var gait = creature.GetComponent<CreatureGait>();
-            if (gait == null) throw new System.InvalidOperationException(job.skeletonId + " has no runtime legs");
+            if (gait == null) throw new System.InvalidOperationException(job.skeletonId + " has no runtime gait");
             float speed = SpeedFor(gait.Block, job.speedLabel);
             _recorder = _holder.AddComponent<LocomotionRecorder>();
+            _recorder.UseAuthoredContactSchedules = job.course == "reactions";
             if (job.course == "reactions") ScriptReactions(_recorder, creature);
             _recorder.Begin(gait, job.course == "turns" ? ReviewCourse.Turns(speed)
                 : job.course == "reactions" ? ReviewCourse.Still(ReactionSeconds) : ReviewCourse.Path(speed),
@@ -135,6 +137,7 @@ namespace CritterCrafter.Editor
         public static float SpeedFor(LocomotionData block, string label) =>
             label == "walk" ? (float)block.v_walk_mps
             : label == "run" ? (float)block.v_run_mps
+            : label == "max" ? (float)block.v_max_mps
             : float.Parse(label, CultureInfo.InvariantCulture);
 
         /// <summary>

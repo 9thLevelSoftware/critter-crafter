@@ -82,7 +82,7 @@ namespace CritterCrafter.Locomotion
 
             Matrix4x4 catalogToWorld = creature.transform.localToWorldMatrix;
             var targets = new GameObject(TargetsName).transform;
-            targets.SetParent(creature.transform, false);
+            targets.SetParent(animRoot, false);
             var rigGo = new GameObject(RigName);
             rigGo.transform.SetParent(animRoot, false);
             var rig = rigGo.AddComponent<Rig>();
@@ -145,6 +145,12 @@ namespace CritterCrafter.Locomotion
                         built.coxaAim = aim;
                         built.coxaDirection = toBody * direction;
                     }
+                    var reachHolder = new GameObject(leg.branch_id + "_reach");
+                    reachHolder.transform.SetParent(rigGo.transform, false);
+                    reachHolder.transform.SetSiblingIndex(holder.transform.GetSiblingIndex());
+                    var projection = reachHolder.AddComponent<ReachProjectionConstraint>();
+                    projection.data = new ReachProjectionData { root = upper, mid = knee, tip = ankle, target = target, planted = true };
+                    built.reachProjection = projection;
                     var c = holder.AddComponent<TwoBoneIKConstraint>();
                     var d = c.data;
                     d.root = upper; d.mid = knee; d.tip = ankle; d.target = target; d.hint = hint;
@@ -205,6 +211,8 @@ namespace CritterCrafter.Locomotion
             var gait = creature.gameObject.GetComponent<CreatureGait>();
             if (gait == null) gait = creature.gameObject.AddComponent<CreatureGait>();
             gait.Configure(animRoot, rig, legs, groundMask);
+            if (creature.gameObject.GetComponent<CreatureRigSynchronizer>() == null)
+                creature.gameObject.AddComponent<CreatureRigSynchronizer>();
             return gait;
         }
     }

@@ -3,7 +3,7 @@
   "skeleton_id": "amalgam_slither_s0006_v3",
   "family": "amalgam",
   "locomotion_hint": "slither",
-  "status": "approved",
+  "status": "draft",
   "symmetry_pct": 92,
   "branches": [
     {
@@ -11,6 +11,7 @@
       "template": "core1",
       "parent_branch": null,
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0.0,
         0.412,
@@ -81,6 +82,7 @@
       "template": "head1",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0.1422,
         0.7604,
@@ -151,6 +153,7 @@
       "template": "head1",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0.0295,
         0.7871,
@@ -221,6 +224,10 @@
       "template": "tentacle8",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support",
+        "slide"
+      ],
       "origin_m": [
         0.0,
         0.0499,
@@ -334,6 +341,10 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "strike",
+        "grasp"
+      ],
       "origin_m": [
         0.3705,
         0.4776,
@@ -401,13 +412,15 @@
         0.0,
         0.0,
         0.0
-      ]
+      ],
+      "effector_slot": "primary_strike"
     },
     {
       "branch_id": "flail1",
       "template": "tentacle8",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0.315,
         0.6386,
@@ -493,6 +506,7 @@
       "template": "insect_leg4",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         -0.1926,
         0.7488,
@@ -570,6 +584,7 @@
       "template": "insect_leg4",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0.3062,
         0.6504,
@@ -647,6 +662,7 @@
       "template": "tentacle8",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         -0.2959,
         0.6629,
@@ -732,6 +748,7 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0.0043,
         0.8,
@@ -807,6 +824,7 @@
       "template": "appendage1",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0.2929,
         0.6665,
@@ -1311,10 +1329,5 @@
     "seed": 6,
     "preset": "amalgam",
     "mode": "slither"
-  },
-  "review": {
-    "by": "owner",
-    "date": "2026-09-30",
-    "method": "owner"
   }
 }

@@ -193,10 +193,12 @@ def _drag_block(skeleton: dict[str, Any], legs: list[dict[str, Any]], legs_src: 
     leg_length = sum(l["reach_m"] for l in legs) / len(legs)
     cadence_max = cadence_max_hz(leg_length)
     attack_branch = ""
-    try:
-        attack_branch = resolve_attack(skeleton)["effector"]["branch_id"]
-    except (AttackPlanError, KeyError):
-        pass
+    if skeleton.get("anatomy", {}).get("archetype_id"):
+        try:
+            attack_branch = resolve_attack(skeleton)["effector"]["branch_id"]
+        except AttackPlanError as exc:
+            if exc.code != "CC_ACTION_ARCHETYPE":
+                raise
     core = next((b for b in skeleton["branches"] if b.get("gait_role") == "core"), None)
     # Heave pivot: the rear of the grounded torso (hips), at ground height, so lifting the chest never
     # sinks the hips or the dragged remains into the floor.
@@ -303,8 +305,11 @@ def _locomotion_block(skeleton: dict[str, Any]) -> dict[str, Any]:
     stroke = min(l["stroke_m"] for l in supports)
     walk_support = sum(float(next(b for b in legs_src if b["branch_id"] == l["branch_id"])
                              .get("gait", {}).get("support_phase", .6)) for l in legs) / len(legs)
-    duty_walk = _min_duty([l["walk_phase"] for l in supports], max(.55, min(.85, walk_support)), minimum)
-    duty_run = _min_duty([l["run_phase"] for l in supports], MIN_DUTY_RUN, minimum)
+    authored_topology = "action_support" in skeleton.get("anatomy", {})
+    walk_floor = max(.55, walk_support) if authored_topology else max(.55, min(.85, walk_support))
+    run_floor = max(MIN_DUTY_RUN, walk_support) if authored_topology else MIN_DUTY_RUN
+    duty_walk = _min_duty([l["walk_phase"] for l in supports], walk_floor, minimum)
+    duty_run = _min_duty([l["run_phase"] for l in supports], run_floor, minimum)
     cadence_max = cadence_max_hz(leg_length)
     stride_max_run = STROKE_FRACTION * stroke / duty_run
     v_max = cadence_max * stride_max_run
@@ -314,8 +319,9 @@ def _locomotion_block(skeleton: dict[str, Any]) -> dict[str, Any]:
     if skeleton.get("anatomy", {}).get("archetype_id"):
         try:
             attack_branch = resolve_attack(skeleton)["effector"]["branch_id"]
-        except (AttackPlanError, KeyError):
-            attack_branch = ""
+        except AttackPlanError as exc:
+            if exc.code != "CC_ACTION_ARCHETYPE":
+                raise
     return {
         "version": LOCOMOTION_VERSION, "mode": "legs", "attack_branch_id": attack_branch,
         **({"body_limp_m": max(l.get("limp", 0.0) for l in legs)} if any("limp" in l for l in legs) else {}),

@@ -146,7 +146,7 @@ def build_mesh(part: dict[str, Any], template: dict[str, Any]) -> tuple[list, li
     bones = _chain_bones(part, template)
     if connector:
         z0, z1 = part["connector_span_m"]
-        if reference:
+        if reference or part.get("connector_surface"):
             # Reference records carry an authored physical ellipse.  The
             # nominal girth/radius remains the binding interface; thickness
             # is the ventral-safe profile envelope, formed before skinning.
@@ -161,6 +161,12 @@ def build_mesh(part: dict[str, Any], template: dict[str, Any]) -> tuple[list, li
             rx, ry = float(part["girth_m"]) * .5, float(part["girth_m"]) * .46
         else:
             rx, ry = part["dimensions_m"][0] / 2, part["dimensions_m"][1] / 2
+    if connector and part.get("connector_surface"):
+        from .connector_surface import build_surface
+
+        verts, faces = build_surface(rx, ry, [z0, z1], part["connector_surface"], part["max_triangles"], template)
+        weights = [_weights(to_gltf(vertex)[2], bones, True, [z0, z1]) for vertex in verts]
+        return verts, faces, weights
     profile = PROFILES[_profile_for(part)]
     seg = 16 if max(rx, ry) > 0.2 else 12
     jointed = _jointed(part, bones)
@@ -229,7 +235,7 @@ def run(args: dict[str, Any]) -> dict[str, Any]:
     groups = {b["name"]: obj.vertex_groups.new(name=b["name"]) for b in bones}
     for vi, w in enumerate(weights):
         for name, value in w.items():
-            if value > 1e-4:
+            if value > (0.0 if part["category"] == "connector" else 1e-4):
                 groups[name].add([vi], value, "REPLACE")
     obj.parent = arm
     mod = obj.modifiers.new("Armature", "ARMATURE")

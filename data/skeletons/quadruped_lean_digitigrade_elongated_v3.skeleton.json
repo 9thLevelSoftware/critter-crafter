@@ -3,7 +3,7 @@
   "skeleton_id": "quadruped_lean_digitigrade_elongated_v3",
   "family": "quadruped",
   "locomotion_hint": "quadruped",
-  "status": "approved",
+  "status": "draft",
   "symmetry_pct": 100,
   "branches": [
     {
@@ -11,6 +11,7 @@
       "template": "spine3",
       "parent_branch": null,
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0,
         1.1571,
@@ -85,6 +86,9 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 2,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         0.2282,
         1.1571,
@@ -171,6 +175,9 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 2,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         -0.2282,
         1.1571,
@@ -258,6 +265,9 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         0.2282,
         1.1571,
@@ -344,6 +354,9 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         -0.2282,
         1.1571,
@@ -431,6 +444,9 @@
       "template": "head1",
       "parent_branch": "core",
       "attach_bone_index": 2,
+      "capabilities": [
+        "bite"
+      ],
       "origin_m": [
         0,
         1.1571,
@@ -494,13 +510,15 @@
       ],
       "stance_z_deg": [
         0.0
-      ]
+      ],
+      "effector_slot": "primary_head"
     },
     {
       "branch_id": "tail",
       "template": "tentacle8",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0,
         1.1571,
@@ -586,6 +604,7 @@
       "template": "appendage1",
       "parent_branch": "core",
       "attach_bone_index": 1,
+      "capabilities": [],
       "origin_m": [
         0,
         1.4014,
@@ -657,6 +676,7 @@
       "template": "appendage1",
       "parent_branch": "core",
       "attach_bone_index": 2,
+      "capabilities": [],
       "origin_m": [
         0,
         1.4014,
@@ -1022,10 +1042,5 @@
     "generator": "cc-gen-3",
     "seed": 1,
     "preset": "elongated"
-  },
-  "review": {
-    "by": "owner",
-    "date": "2026-09-30",
-    "method": "owner"
   }
 }

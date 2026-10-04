@@ -236,6 +236,8 @@ namespace CritterCrafter
     public class BranchData
     {
         public string branch_id;
+        public string[] capabilities;
+        public string effector_slot;
         public string template;
         public string binding_profile_id;
         public string binding_profile_version;
@@ -321,6 +323,15 @@ namespace CritterCrafter
     }
 
     [Serializable]
+    public class ConnectorSurface
+    {
+        public string method;
+        public int voxel_divisions;
+        public int fillet_iterations;
+        public double bulge;
+    }
+
+    [Serializable]
     public class GaitData
     {
         public string role;
@@ -362,10 +373,18 @@ namespace CritterCrafter
         public string style;
         public string[] support_branches;
         public string[] contact_branches;
+        public ActionSupportData action_support;
         public AnatomySymmetry symmetry;
         public AnatomyLandmarks landmarks;
         public AnatomySilhouette silhouette;
         public AnatomyBudgets budgets;
+    }
+
+    [Serializable]
+    public class ActionSupportData
+    {
+        public string[] released_contact_ids;
+        public int minimum_preserved;
     }
 
     [Serializable]
@@ -451,6 +470,8 @@ namespace CritterCrafter
         public string kind;
         public double phase_offset;
         public double stance_fraction;
+        public bool grounding_declared;
+        public double grounding_fraction;
         public bool support;
     }
 
@@ -480,6 +501,7 @@ namespace CritterCrafter
         public double connector_radius_m;
         public double[] connector_span_m;
         public PartConnectorInterface connector_interface;
+        public ConnectorSurface connector_surface;
         public string fallback_primitive;
         public string albedo;
         public string source;

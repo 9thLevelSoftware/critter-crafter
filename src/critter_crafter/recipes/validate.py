@@ -48,7 +48,7 @@ _RECIPE_SCHEMA: dict[str, Any] = {
                     "binding_profile_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
                     "binding_profile_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
                     "length_scale": {"type": "number", "minimum": 0.8, "maximum": 1.25},
-                    "girth_scale": {"type": "number", "minimum": 0.9, "maximum": 1.1},
+                    "girth_scale": {"type": "number", "minimum": 0.909091, "maximum": 1.111111},
                 },
             },
         },

@@ -3,7 +3,7 @@
   "skeleton_id": "amalgam_hauled_s0004_v3",
   "family": "amalgam",
   "locomotion_hint": "drag",
-  "status": "approved",
+  "status": "draft",
   "symmetry_pct": 92,
   "branches": [
     {
@@ -11,6 +11,7 @@
       "template": "core1",
       "parent_branch": null,
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0.0,
         0.5003,
@@ -81,6 +82,7 @@
       "template": "head1",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0.2012,
         0.9153,
@@ -151,6 +153,9 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         0.4707,
         0.5122,
@@ -237,6 +242,9 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         -0.4707,
         0.4191,
@@ -323,6 +331,9 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         0.4707,
         0.5899,
@@ -409,6 +420,10 @@
       "template": "tentacle8",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support",
+        "slide"
+      ],
       "origin_m": [
         0.0,
         0.0306,
@@ -522,6 +537,10 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "strike",
+        "grasp"
+      ],
       "origin_m": [
         0.4491,
         0.6048,
@@ -589,13 +608,15 @@
         0.0,
         0.0,
         0.0
-      ]
+      ],
+      "effector_slot": "primary_strike"
     },
     {
       "branch_id": "flail1",
       "template": "tentacle8",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0.1759,
         0.9421,
@@ -681,6 +702,7 @@
       "template": "insect_leg4",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         -0.3663,
         0.8036,
@@ -1125,10 +1147,5 @@
     "seed": 4,
     "preset": "amalgam",
     "mode": "hauled"
-  },
-  "review": {
-    "by": "owner",
-    "date": "2026-09-30",
-    "method": "owner"
   }
 }

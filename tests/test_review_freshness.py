@@ -76,16 +76,21 @@ def test_failed_qa_can_be_reviewed_and_rejected_but_not_approved(tmp_path):
         review.verify_receipt(receipt, "test", "abc", require_passing=False)
 
 
-def test_polish_override_requires_matching_source_and_never_overwrites(tmp_path):
+def test_owner_polish_without_authoring_resolves_and_requires_matching_source(tmp_path):
+    source, profiles, settings, _ = fixture(tmp_path)
+    fingerprint = review.source_fingerprint(source, profiles, settings)
     directory = tmp_path / "polish"
     directory.mkdir()
     blend = directory / "master.blend"
     blend.write_bytes(b"authored polish")
     manifest = directory / "override.json"
-    manifest.write_text(json.dumps({"skeleton_id": "test", "source_fingerprint": "abc", "blend": "master.blend"}))
-    assert review.resolve_polish(directory, "test", "abc") == blend
+    manifest.write_text(json.dumps({"skeleton_id": "test", "source_fingerprint": fingerprint,
+                                    "blend": "master.blend"}))
+    assert review.resolve_polish(directory, "test", fingerprint) == blend
+    changed_source = copy.deepcopy(source)
+    changed_source["branches"][0]["length_m"] = 1.01
     with pytest.raises(review.ReviewError, match="CC_POLISH_STALE"):
-        review.resolve_polish(directory, "test", "different")
+        review.resolve_polish(directory, "test", review.source_fingerprint(changed_source, profiles, settings))
     assert blend.read_bytes() == b"authored polish"
 
 
@@ -109,3 +114,57 @@ def test_edited_polish_and_pipeline_changes_invalidate_existing_build(tmp_path, 
         commands.skeleton_content_hash(authored_catalog, skeleton, tmp_path)
     monkeypatch.setattr(commands, "build_pipeline_fingerprint", lambda: "changed implementation")
     assert commands.skeleton_source_hash(authored_catalog, skeleton) != original
+
+
+def test_authoring_polish_rejects_changed_selected_master_bytes(tmp_path):
+    source, profiles, settings, _ = fixture(tmp_path)
+    fingerprint = review.source_fingerprint(source, profiles, settings)
+    directory = tmp_path / "polish"
+    directory.mkdir()
+    blend = directory / "selected.blend"
+    blend.write_bytes(b"selected authored motion")
+    manifest = {"skeleton_id": "test", "source_fingerprint": fingerprint,
+                "blend": blend.name, "authoring": {"blend_sha256": review.file_hash(blend)}}
+    (directory / "override.json").write_text(json.dumps(manifest))
+    assert review.resolve_polish(directory, "test", fingerprint) == blend
+
+    blend.write_bytes(b"edited selected authored motion")
+    with pytest.raises(review.ReviewError, match="CC_POLISH_STALE"):
+        review.resolve_polish(directory, "test", fingerprint)
+
+
+@pytest.mark.parametrize("metadata_key", ["model_sha256", "settings_sha256"])
+def test_changed_authoring_provenance_invalidates_cached_skeleton_content(tmp_path, monkeypatch, metadata_key):
+    from types import SimpleNamespace
+    from critter_crafter.library import commands
+    from critter_crafter.library.catalog import compile_catalog, load_sources
+    from critter_crafter.config import paths
+
+    catalog = compile_catalog(load_sources(paths().data))
+    monkeypatch.setattr(commands, "paths", lambda: SimpleNamespace(work=tmp_path))
+    skeleton = copy.deepcopy(catalog["skeletons"][0])
+    source_fingerprint = commands.skeleton_source_hash(catalog, skeleton)
+    directory = tmp_path / "polish" / "skeletons" / skeleton["skeleton_id"]
+    directory.mkdir(parents=True)
+    blend = directory / "master.blend"
+    blend.write_bytes(b"unchanged authored motion")
+    manifest = {"skeleton_id": skeleton["skeleton_id"], "source_fingerprint": source_fingerprint,
+                "blend": blend.name, "authoring": {"blend_sha256": review.file_hash(blend),
+                "model_sha256": "1" * 64, "settings_sha256": "2" * 64}}
+    override = directory / "override.json"
+    override.write_text(json.dumps(manifest))
+    skeleton["asset"] = {"polish_fingerprint": commands.skeleton_polish_hash(catalog, skeleton)}
+    for kind in ("fbx", "glb", "blend", "motion"):
+        artifact = tmp_path / f"baked.{kind}"
+        artifact.write_bytes(f"cached {kind}".encode())
+        skeleton["asset"][kind] = artifact.name
+    cached_content = commands.skeleton_content_hash(catalog, skeleton, tmp_path)
+
+    manifest["authoring"][metadata_key] = "3" * 64
+    override.write_text(json.dumps(manifest))
+    assert review.resolve_polish(directory, skeleton["skeleton_id"], source_fingerprint) == blend
+    with pytest.raises(review.ReviewError, match="CC_BUILD_STALE"):
+        commands.skeleton_content_hash(catalog, skeleton, tmp_path)
+
+    skeleton["asset"]["polish_fingerprint"] = commands.skeleton_polish_hash(catalog, skeleton)
+    assert commands.skeleton_content_hash(catalog, skeleton, tmp_path) != cached_content

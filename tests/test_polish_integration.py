@@ -33,7 +33,8 @@ def _sample(motion: dict, clip_name: str, frame: int, bone_name: str) -> dict:
 
 
 def _rotation_distance(left: list[float], right: list[float]) -> float:
-    dot = abs(sum(a * b for a, b in zip(left, right, strict=True)))
+    norms = math.sqrt(sum(value * value for value in left) * sum(value * value for value in right))
+    dot = abs(sum(a * b for a, b in zip(left, right, strict=True))) / norms
     return 2.0 * math.acos(max(-1.0, min(1.0, dot)))
 
 
@@ -157,3 +158,54 @@ def test_incompatible_polish_override_is_rejected(polish_build, key: str, messag
     )
     with pytest.raises(BlenderError, match=message):
         run_op("skeleton", args)
+
+
+def test_owned_motion_interchange_recovers_evaluated_bind_rotations_and_positions(polish_build):
+    from critter_crafter.authoring.motion_dataset import CATEGORIES, decode_frames, make_record, recovered_heads
+    artifact = polish_build["polished_motion"]
+    for category in CATEGORIES:
+        record = make_record(artifact, category)
+        decoded = decode_frames(record["features"], record)
+        clips = {clip["name"]: clip for clip in artifact["clips"]}
+        samples = (clips["telegraph"]["samples"] + clips["attack"]["samples"][1:]
+                   if category == "telegraph_attack" else clips[category]["samples"])
+        for source, restored in zip(samples, decoded, strict=True):
+            heads = recovered_heads(restored, record)
+            for bone in source["bones"]:
+                assert heads[bone["name"]] == pytest.approx(bone["head_m"], abs=1e-5)
+                a, b = bone["rotation_xyzw"], restored["rotations_xyzw"][bone["name"]]
+                assert min(max(abs(x-y) for x,y in zip(a,b)), max(abs(x+y) for x,y in zip(a,b))) < 1e-5
+
+
+def test_motion_import_projects_and_preserves_unselected_authored_actions(polish_build):
+    from critter_crafter.authoring.motion_dataset import decode_frames, make_record
+    from critter_crafter.skeletons.motion import quat_axis, quat_mul
+    record = make_record(polish_build["polished_motion"], "idle")
+    samples = decode_frames(record["features"], record)
+    frame, name = polish_build["frame"], polish_build["bone_name"]
+    samples[frame]["rotations_xyzw"][name] = list(quat_mul(
+        samples[frame]["rotations_xyzw"][name], quat_axis(0, math.radians(1.))))
+    out = polish_build["root"] / "motion-proposal"
+    proposal = {"source_fingerprint": polish_build["fingerprint"], "clips": {"idle": samples}}
+    result = run_op("skeleton", {
+        "mode": "motion_import", "skeleton": polish_build["skeleton"], "gait_profile": polish_build["gait"],
+        "binding_profiles": polish_build["profiles"], "source_fingerprint": polish_build["fingerprint"],
+        "polish_blend": str(polish_build["authored"]), "proposal": proposal,
+        "authoring": {"sample_sha256": "public-synthetic-regression"},
+        "out_blend": str(out / "master.blend"), "out_motion": str(out / "motion.json"),
+    })["result"]
+    artifact = json.loads(Path(result["motion"]).read_text(encoding="utf-8"))
+    before = _sample(polish_build["polished_motion"], "idle", frame, name)
+    after = _sample(artifact, "idle", frame, name)
+    assert _rotation_distance(before["rotation_xyzw"], after["rotation_xyzw"]) > math.radians(.5)
+    for category in ("walk", "run", "stun", "telegraph", "attack", "hit", "death"):
+        original = next(c for c in polish_build["polished_motion"]["clips"] if c["name"] == category)
+        imported = next(c for c in artifact["clips"] if c["name"] == category)
+        for expected, actual in zip(original["samples"], imported["samples"], strict=True):
+            by_name = {b["name"]:b for b in expected["bones"]}
+            for bone in actual["bones"]:
+                old = by_name[bone["name"]]
+                assert bone["head_m"] == pytest.approx(old["head_m"], abs=1e-5)
+                assert bone["tail_m"] == pytest.approx(old["tail_m"], abs=1e-5)
+                assert _rotation_distance(bone["rotation_xyzw"], old["rotation_xyzw"]) < .001
+    assert _digest(polish_build["authored"]) == polish_build["authored_hash"]

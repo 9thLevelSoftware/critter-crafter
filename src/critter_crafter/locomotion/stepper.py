@@ -114,3 +114,52 @@ def swing_point(start: Sequence[float], end: Sequence[float], u: float, clearanc
 def support_count(block: dict[str, Any], clock: float, duty: float, run: bool) -> int:
     return sum(1 for leg in block["legs"] if leg.get("support", True)
                and in_stance(leg_phase(clock, leg_offset(leg, run)), duty))
+
+
+def candidate_offset(index: int, stride: float) -> tuple[float, float]:
+    """Lateral/forward offsets in the current planar travel frame, in stable order."""
+    if not 0 <= index < 5:
+        raise ValueError("landing candidate index must be in [0,5)")
+    distance = .10 * max(0.0, stride)
+    return ((0.0, 0.0), (0.0, distance), (0.0, -distance),
+            (distance, 0.0), (-distance, 0.0))[index]
+
+
+def can_lift(support: bool, remaining_supports: int, minimum_supports: int,
+             early: bool, body_on_ground: bool, swinging: int, leg_count: int) -> bool:
+    if support and remaining_supports < minimum_supports:
+        return False
+    return not early or body_on_ground or swinging < max(1, leg_count // 2)
+
+
+def landing_reach_fraction(dx: float, dy: float, dz: float, reach: float) -> float:
+    return math.sqrt(dx * dx + dy * dy + dz * dz) / reach if reach > 0.0 else math.inf
+
+
+def choose_landing(candidates: Sequence[dict[str, Any]], stride: float, lift_allowed: bool) -> int:
+    """Return the input slot of the best legal projected candidate, or -1.
+
+    Physics supplies ground validity and the projected reach/yaw; no fallback height is a hit.
+    Reach fractions use the full physical span; .95/.97 remain the landing legality bounds.
+    """
+    best, best_key = -1, None
+    if not lift_allowed:
+        return best
+    for slot, candidate in enumerate(candidates):
+        index = int(candidate["index"])
+        if not 0 <= index < 5 or (stride <= 0.0 and index != 0):
+            continue
+        reach = float(candidate["reach_fraction"])
+        limit = .97 if candidate["hinge"] else .95
+        yaw = float(candidate.get("coxa_yaw_deg", 0.0))
+        if (not candidate["ground_valid"] or not math.isfinite(reach) or reach < 0.0
+                or reach > limit or not math.isfinite(yaw) or abs(yaw) > 45.0):
+            continue
+        lateral, forward = candidate_offset(index, stride)
+        cost = max(0.0, reach - .8) ** 2
+        if stride > 0.0:
+            cost += (lateral * lateral + forward * forward) / (stride * stride)
+        key = (cost, index, int(candidate["contact_index"]))
+        if best_key is None or key < best_key:
+            best, best_key = slot, key
+    return best

@@ -5,6 +5,7 @@ using System.Linq;
 using CritterCrafter.Editor;
 using CritterCrafter.Review;
 using NUnit.Framework;
+using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -430,6 +431,308 @@ namespace CritterCrafter.Tests
             Time.captureFramerate = 0;
             yield return new ExitPlayMode();
             Assert.IsEmpty(failures, "dragger hands slid or missed their targets after an instant turn:\n" + string.Join("\n", failures));
+        }
+
+        [Test]
+        public void SwingLandingOffsetAffectsEveryRecomputedDestinationAndClearsOnPlantAndTeleport()
+        {
+            var ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            _spawned.Add(ground);
+            ground.transform.localScale = Vector3.one * 10f;
+            Physics.SyncTransforms();
+            var c = SpawnSkeleton(RuntimeLegSkeleton);
+            var gait = c.GetComponent<CritterCrafter.Locomotion.CreatureGait>();
+            gait.enabled = false;
+            gait.ResetFeet();
+            foreach (var other in gait.Legs)
+            {
+                Vector3 stance = c.transform.TransformPoint(other.stanceLocal);
+                stance.y = other.homeLocal.y;
+                other.plant = stance;
+                other.position = stance;
+                other.clamped = false;
+                other.reachFrac = 0f;
+            }
+            var leg = gait.Legs[0];
+            Vector3 start = leg.plant;
+            Vector3 offset = new Vector3(-Mathf.Sign(leg.stanceLocal.x) * 0.001f, 0f, 0f);
+            Vector3 end = c.transform.TransformPoint(leg.stanceLocal) + offset;
+            end.y = leg.homeLocal.y;
+            leg.planted = false;
+            leg.swingStart = start;
+            leg.swingDuration = 0.25f;
+            leg.swingT = 0f;
+            leg.clearance = 0f;
+            leg.landingOffsetLocal = offset;
+            leg.landingCandidate = offset.x < 0f ? 4 : 3;
+            leg.swingLanding = end;
+            for (int frame = 1; frame <= 2; frame++)
+            {
+                gait.Step(0.0625f);
+                float progress = (float)CritterCrafter.Locomotion.StepPlanner.Smoothstep(frame * 0.25);
+                Assert.Less(Vector3.Distance(Vector3.Lerp(start, end, progress), leg.position), 1e-5f,
+                    "the selected travel-space offset must survive destination recomputation");
+            }
+            gait.Step(0.0625f);
+            gait.Step(0.0625f);
+            Assert.IsTrue(leg.planted);
+            Assert.Less(Vector3.Distance(end, leg.plant), 1e-5f);
+            Assert.AreEqual(Vector3.zero, leg.landingOffsetLocal);
+            Assert.AreEqual(-1, leg.landingCandidate);
+            leg.landingOffsetLocal = offset;
+            leg.landingCandidate = 3;
+            c.transform.position += Vector3.forward * (gait.teleportDistance + 1f);
+            gait.Step(0.04f);
+            Assert.IsTrue(leg.planted);
+            Assert.AreEqual(Vector3.zero, leg.landingOffsetLocal);
+            Assert.AreEqual(-1, leg.landingCandidate);
+        }
+        [Test]
+        public void WalkerLandingHomeKeepsMidstanceYawWhileBodyForecastUsesTouchdownYaw()
+        {
+            var ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            _spawned.Add(ground);
+            ground.transform.localScale = Vector3.one * 100f;
+            Physics.SyncTransforms();
+            var c = SpawnSkeleton(RuntimeLegSkeleton);
+            var gait = c.GetComponent<CritterCrafter.Locomotion.CreatureGait>();
+            gait.enabled = false;
+            gait.ResetFeet();
+            c.transform.rotation = Quaternion.Euler(0f, 90f, 0f);
+            c.transform.position += c.transform.forward * 0.1f;
+            gait.Step(0.1f);
+
+            const float remaining = 0.05f;
+            var gaitType = typeof(CritterCrafter.Locomotion.CreatureGait);
+            var leg = gait.Legs[0];
+            float yawLag = (float)gaitType.GetField("_yawLag", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(gait);
+            float turnRate = (float)gaitType.GetField("_turnRateNow", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(gait);
+            float landIn = remaining + 0.5f * (float)gait.Current.duty / (float)gait.Current.cadenceHz;
+            float midstanceYaw = Mathf.MoveTowards(yawLag, 0f, turnRate * landIn);
+            float touchdownYawDegrees = Mathf.MoveTowards(yawLag, 0f, turnRate * remaining);
+            var predict = gaitType.GetMethod("PredictLanding", BindingFlags.Instance | BindingFlags.NonPublic);
+            object[] args = { leg, remaining, Vector3.zero, Quaternion.identity };
+            Vector3 landing = (Vector3)predict.Invoke(gait, args);
+            Vector3 travel = (Vector3)args[2];
+            Quaternion touchdownYaw = (Quaternion)args[3];
+            Vector3 expectedHome = c.transform.TransformPoint(Quaternion.Euler(0f, midstanceYaw, 0f) * leg.stanceLocal);
+            float lead = (float)CritterCrafter.Locomotion.StepPlanner.LandingLead(
+                gait.Speed, gait.Current.cadenceHz, gait.Current.duty);
+            Vector3 recoveredHome = landing - gait.Velocity.normalized * lead - travel;
+
+            Assert.Greater(Mathf.Abs(Mathf.DeltaAngle(midstanceYaw, touchdownYawDegrees)), 1f,
+                "the mid-stance home heading and touchdown body heading are distinct");
+            Assert.Less(Quaternion.Angle(touchdownYaw,
+                    Quaternion.AngleAxis(touchdownYawDegrees - yawLag, Vector3.up)), 1e-4f,
+                "the landing pose delta uses the remaining swing time, not mid-stance lead time");
+            Assert.Less(Vector3.Distance(expectedHome, recoveredHome), 1e-4f,
+                "the landing center uses the predicted mid-stance home heading");
+
+            var predictBody = gaitType.GetMethod("PredictBodyFrame", BindingFlags.Instance | BindingFlags.NonPublic);
+            object[] bodyArgs = { remaining, travel, touchdownYaw, Vector3.zero, Quaternion.identity };
+            predictBody.Invoke(gait, bodyArgs);
+            var body = (Transform)gaitType.GetField("body", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(gait);
+            var baseRotation = (Quaternion)gaitType.GetField("bodyBaseLocalRotation", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(gait);
+            Quaternion expectedBodyRotation = body.parent.rotation * Quaternion.Euler(0f, touchdownYawDegrees, 0f) * baseRotation;
+            Vector3 actualHeading = Vector3.ProjectOnPlane(((Quaternion)bodyArgs[4]) * Vector3.forward, Vector3.up);
+            Vector3 expectedHeading = Vector3.ProjectOnPlane(expectedBodyRotation * Vector3.forward, Vector3.up);
+            Assert.Less(Vector3.Angle(actualHeading, expectedHeading), 1f,
+                "the projected body rotation follows touchdown yaw");
+        }
+        [Test]
+        public void ZeroStrideLandingKeepsCenterCandidateInsideFloatReachBoundary()
+        {
+            var ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            _spawned.Add(ground);
+            ground.transform.localScale = Vector3.one * 1000f;
+            var c = SpawnSkeleton(RuntimeLegSkeleton);
+            c.transform.position = new Vector3(2048f, 0f, 2048f);
+            ground.transform.position = c.transform.position;
+            Physics.SyncTransforms();
+            var gait = c.GetComponent<CritterCrafter.Locomotion.CreatureGait>();
+            gait.enabled = false;
+            gait.ResetFeet();
+            var paramsField = typeof(CritterCrafter.Locomotion.CreatureGait)
+                .GetField("_params", BindingFlags.Instance | BindingFlags.NonPublic);
+            var gaitParams = CritterCrafter.Locomotion.StepPlanner.Params(gait.Block, 0.0);
+            gaitParams.strideM = 0.0;
+            paramsField.SetValue(gait, gaitParams);
+            var leg = gait.Legs[0];
+            var choose = typeof(CritterCrafter.Locomotion.CreatureGait)
+                .GetMethod("TryChooseLanding", BindingFlags.Instance | BindingFlags.NonPublic);
+
+            object[] args = { leg, 0.1f, null };
+            Assert.IsTrue((bool)choose.Invoke(gait, args), "the unmodified reachable center can be grounded");
+            object original = args[2];
+            double originalFraction = (double)original.GetType().GetField("reachFraction").GetValue(original);
+            if (leg.hinge) leg.hingeReach *= (float)(originalFraction / 0.97);
+            else leg.reach *= (float)(originalFraction / 0.95);
+
+            args[2] = null;
+            Assert.IsTrue((bool)choose.Invoke(gait, args),
+                "rounding a world-space center onto the exact reach boundary must not make a stride-zero re-step fail");
+            object selected = args[2];
+            Assert.AreEqual(0, selected.GetType().GetField("index").GetValue(selected));
+            Assert.LessOrEqual((double)selected.GetType().GetField("reachFraction").GetValue(selected),
+                leg.hinge ? 0.97 : 0.95);
+        }
+        [Test]
+        public void WalkerBodyForecastUsesTheShortenedLimpStanceSchedule()
+        {
+            var c = SpawnSkeleton("amalgam_walker_s0024_v3");
+            var gait = c.GetComponent<CritterCrafter.Locomotion.CreatureGait>();
+            gait.enabled = false;
+            gait.ResetFeet();
+            var paramsField = typeof(CritterCrafter.Locomotion.CreatureGait)
+                .GetField("_params", BindingFlags.Instance | BindingFlags.NonPublic);
+            paramsField.SetValue(gait, CritterCrafter.Locomotion.StepPlanner.Params(gait.Block, (float)gait.Block.v_walk_mps));
+            typeof(CritterCrafter.Locomotion.CreatureGait)
+                .GetField("_run", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(gait, false);
+            var limp = gait.Legs.FirstOrDefault(leg => leg.limp > 0f);
+            var sound = gait.Legs.FirstOrDefault(leg => leg.limp <= 0f);
+            Assert.IsNotNull(limp, "walker fixture has a limp leg");
+            Assert.IsNotNull(sound, "walker fixture has a sound leg");
+
+            double phase = gait.Current.duty * 0.94;
+            double clock = phase - limp.walkPhase;
+            var forecastPlanted = typeof(CritterCrafter.Locomotion.CreatureGait)
+                .GetMethod("ForecastPlanted", BindingFlags.Instance | BindingFlags.NonPublic);
+            bool limpCarries = (bool)forecastPlanted.Invoke(gait, new object[] { limp, clock, 0.01f });
+            double soundClock = phase - sound.walkPhase;
+            bool soundCarries = (bool)forecastPlanted.Invoke(gait, new object[] { sound, soundClock, 0.01f });
+
+            Assert.IsFalse(limpCarries, "at 94% of ordinary duty the shorter limp stance has ended");
+            Assert.IsTrue(soundCarries, "the sound leg retains the ordinary stance schedule");
+        }
+
+
+
+
+
+        [Test]
+        public void MissingGroundProbeCannotStartAnIdleRestep()
+        {
+            var c = SpawnSkeleton(RuntimeLegSkeleton);
+            var gait = c.GetComponent<CritterCrafter.Locomotion.CreatureGait>();
+            gait.enabled = false;
+            gait.groundMask = 0;
+            gait.ResetFeet();
+            var leg = gait.Legs[0];
+            leg.clamped = true;
+            gait.Step(0.04f);
+            Assert.IsTrue(leg.planted, "Ground's fallback height is not a successful landing probe");
+            Assert.IsTrue(leg.liftBlocked);
+            Assert.AreEqual(-1, leg.landingCandidate);
+        }
+
+        [UnityTest]
+        public IEnumerator GroundedOverrunReadsCurrentHaulPoseBeforeClamping()
+        {
+            EditorSettings.enterPlayModeOptionsEnabled = true;
+            EditorSettings.enterPlayModeOptions = EnterPlayModeOptions.DisableDomainReload | EnterPlayModeOptions.DisableSceneReload;
+            yield return new EnterPlayMode();
+            Time.captureFramerate = 30;
+            var failures = new List<string>();
+            foreach (var id in DraggersForTurns)
+            {
+                var holder = new GameObject("GroundedPoseTest");
+                var ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
+                ground.transform.SetParent(holder.transform, false);
+                ground.transform.localScale = Vector3.one * 10f;
+                Physics.SyncTransforms();
+                var c = LocomotionCapture.Spawn(Lib, id, holder.transform, out var restore);
+                var gait = c.GetComponent<CritterCrafter.Locomotion.CreatureGait>();
+                foreach (float speed in new[] { (float)gait.Block.v_walk_mps, (float)gait.Block.v_run_mps, (float)gait.Block.v_max_mps })
+                {
+                    var recorder = holder.AddComponent<LocomotionRecorder>();
+                    recorder.Begin(gait, ReviewCourse.Turns(speed), new LocomotionMetrics { warmup_frames = 0 });
+                    while (!recorder.Done)
+                    {
+                        yield return null;
+                        foreach (var leg in gait.Legs)
+                            if (leg.planted && !leg.liftBlocked && leg.plantRewrite > 1e-5f)
+                                failures.Add($"{id} @ {speed:R}: {leg.branchId} slid {leg.plantRewrite:R} despite a legal re-grip");
+                    }
+                    Object.Destroy(recorder);
+                    yield return null;
+                }
+                Object.Destroy(holder);
+                restore();
+                yield return null;
+            }
+            Time.captureFramerate = 0;
+            yield return new ExitPlayMode();
+            Assert.IsEmpty(failures, string.Join("\n", failures));
+        }
+
+        [UnityTest]
+        public IEnumerator AnimatedHingeRootsStayReachableAndPlantedClampMotionIsMeasured()
+        {
+            EditorSettings.enterPlayModeOptionsEnabled = true;
+            EditorSettings.enterPlayModeOptions = EnterPlayModeOptions.DisableDomainReload | EnterPlayModeOptions.DisableSceneReload;
+            yield return new EnterPlayMode();
+            Time.captureFramerate = 30;
+            var failures = new List<string>();
+            foreach (var id in new[] { "dragger_belly_hauler_balanced_v3", "amalgam_walker_s0024_v3" })
+            {
+                var holder = new GameObject("AnimatedRootReachTest");
+                var ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
+                ground.transform.SetParent(holder.transform, false);
+                ground.transform.localScale = Vector3.one * 10f;
+                Physics.SyncTransforms();
+                var creature = LocomotionCapture.Spawn(Lib, id, holder.transform, out var restore);
+                var gait = creature.GetComponent<CritterCrafter.Locomotion.CreatureGait>();
+                var recorder = holder.AddComponent<LocomotionRecorder>();
+                recorder.Begin(gait, ReviewCourse.Turns((float)gait.Block.v_max_mps), new LocomotionMetrics { warmup_frames = 0 });
+                while (!recorder.Done) yield return null;
+                var metrics = recorder.Metrics;
+                // Allow only float roundoff; the measured root is the Animator/IK result, not the planner's prediction.
+                if (metrics.max_reach_fraction > 0.97f + 1e-6f)
+                    failures.Add($"{id}: actual hinge-root reach {metrics.max_reach_fraction:R}");
+                // A physical slide must be represented by plant rewrites, apart from the measured solver residual.
+                if (metrics.all_frames_max_planted_slip_m > metrics.max_plant_rewrite_m + 2f * metrics.max_ik_residual_m + 1e-5f)
+                    failures.Add($"{id}: physical planted slip {metrics.all_frames_max_planted_slip_m:R} exceeds recorded clamp motion");
+                Object.Destroy(holder);
+                restore();
+                yield return null;
+            }
+            Time.captureFramerate = 0;
+            yield return new ExitPlayMode();
+            Assert.IsEmpty(failures, string.Join("\n", failures));
+        }
+
+        [UnityTest]
+        public IEnumerator CrawlerSupportsReleaseAtTheirAuthoredStepOpportunities()
+        {
+            EditorSettings.enterPlayModeOptionsEnabled = true;
+            EditorSettings.enterPlayModeOptions = EnterPlayModeOptions.DisableDomainReload | EnterPlayModeOptions.DisableSceneReload;
+            yield return new EnterPlayMode();
+            Time.captureFramerate = 30;
+            var failures = new List<string>();
+            foreach (var id in new[] { "crawler_bilateral_eight_legged_balanced_v3", "crawler_alien_tripod_balanced_v3" })
+            {
+                var holder = TestScene("CrawlerSupportReleaseTest", false);
+                var creature = LocomotionCapture.Spawn(Lib, id, holder.transform, out var restore);
+                var gait = creature.GetComponent<CritterCrafter.Locomotion.CreatureGait>();
+                var released = new HashSet<string>();
+                var recorder = holder.AddComponent<LocomotionRecorder>();
+                recorder.Begin(gait, ReviewCourse.Straight((float)gait.Block.v_run_mps, 3f), new LocomotionMetrics { warmup_frames = 0 });
+                while (!recorder.Done)
+                {
+                    yield return null;
+                    foreach (var leg in gait.Legs)
+                        if (leg.support && !leg.planted) released.Add(leg.branchId);
+                }
+                foreach (var leg in gait.Legs)
+                    if (leg.support && !released.Contains(leg.branchId))
+                        failures.Add($"{id}: {leg.branchId} never released despite its authored step schedule");
+                Object.Destroy(holder);
+                restore();
+                yield return null;
+            }
+            Time.captureFramerate = 0;
+            yield return new ExitPlayMode();
+            Assert.IsEmpty(failures, string.Join("\n", failures));
         }
 
         [Test]

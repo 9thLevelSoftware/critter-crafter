@@ -217,6 +217,10 @@ from .parts import commands as _part_commands  # noqa: E402
 
 main.add_command(_part_commands.part)
 
+from .authoring.commands import authoring
+
+main.add_command(authoring)
+
 
 if __name__ == "__main__":
     main()

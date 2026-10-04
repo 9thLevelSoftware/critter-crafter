@@ -1,8 +1,19 @@
-# Handoff: critter-crafter (2026-09-30)
+# Handoff: critter-crafter (2026-10-04)
+
+Read the concise [enhancement handoff package](handoff-package.md) before resuming on a larger workstation.
 
 ## Current state (one paragraph)
 
-The v3 skeleton foundation and **runtime foot-placement locomotion** are merged to `main` ([PR #1](https://github.com/9thLevelSoftware/critter-crafter/pull/1)). The library has **14 archetypes × 3 presets = 42 draft anchors, 28 seeded variants and 15 seeded amalgams (85 skeletons)**, all passing QA, and 41 of the 42 curated ones can reach the game's 2.5 m/s within their `v_max_mps` (the compact radial walker tops out at 2.34; many have `v_run_mps` below 2.5, so a threat forced to 2.5 m/s runs above its natural run speed). **M2 (real parts) is implemented and waiting on the owner.** Four Meshy scout meshes are fitted into production parts: an insect leg, a frayed arm, an animal skull and a tentacle. All four are built into the library with their textures and pass deformation QA through every clip against the placeholders they replace (see [M2 status](#m2-status-real-parts)). They stay `draft` until the owner reviews the sheets and runs `critter part approve`. The Unity `_MainTex` texture binding is covered by an EditMode test (the URP `_BaseMap` path still hasn't been run). **Per-creature speeds** (`build-1`) are merged: each assembled creature derives its speeds from its mass and balance (`docs/locomotion.md` → Per-creature speeds). **Next:** the owner approves skeletons and parts (`critter skeleton approve --owner`, `critter part approve --owner`) after looking at the GIFs, then **M5** (Synaptic Sea integration).
+Enhancement execution targets **v0.3.0**, preserving immutable `library/biomass_core-v0.2.0/` for exact saved-recipe replay. All **91 skeletons**, four refitted owned parts and nine native-SDF collars remain draft; only the owner can approve them. The `cc-gen-3` repair preserved its complete-output hash: 1,200 valid recipes, zero invalids or replay mismatches. The refreshed library contains 1,517 assets and 91 assemblies; all 91 skeletons pass eight-clip motion/action/export QA, and all nine collars pass unchanged deformation QA. The full Python/Blender suite passed 674 tests with one skip. Current Unity, native bake, contact-proposal and owner-worker evidence is summarized below; no owner approval or model-output quality is claimed.
+
+## Enhancement execution gates (2026-10-04)
+
+- `critter schema validate` reported zero diagnostics. `critter recipe golden` generated 1,200 recipe rows, 468 locomotion rows and 211 creature rows; all four v3 goldens match their Unity copies byte-for-byte. The library build wrote 1,517 assets and 91 assemblies; `critter skeleton qa` passed all 91 sources across eight clips.
+- Python/Blender: 674 passed, one skipped. Final Unity EditMode: 114 passed, zero failed, one skipped (`PrototypeImportTests.ExportedSkeletonMatchesCatalogBindAndSocketFrames`; the `CRITTER_PROTOTYPE_FBX` and `CRITTER_PROTOTYPE_CATALOG` inputs are not configured).
+- Bake proof: `work/review/creature-bake-unity-resume-final/proof.json`. A non-batch Unity 6000.6 GUI run used the RTX 4070 Laptop GPU / Direct3D12; native isolated-frame capture completed with 15 live versus one baked body submission in each color, shadow and depth pass. Eight actions and 14 locomotion courses were captured. The portable 4096² atlas comparison retained 32 px gutters and measured zero pose error over three samples of each action. This verifies the reference bake path, not M4 acceptance or owner visual approval.
+- Bounded contact proposals remain **unaccepted**: paired real Play Mode measurements cover 15 review rows, 15 turn rows and five stationary reaction rows with complete support/grounding measurements. Against controls, review worsened nine maxima and turns worsened eight; examples are walker/max slip +0.008086 m and stance drift +0.008395 m, belly-hauler/walk reach fraction +0.066038, and walker/max turn slip +0.008273 m. Reactions had no regressions. No gate was weakened. Targeted temporary traces are preserved in `work/enhancements/proposals-contact-diagnostics-{walker,belly}.log`: walker leg3 clamped at frame 101 and its lift was refused with one support remaining versus minimum two; its earlier frame-73 rear candidate cost .011609 versus .012216 for center, a temporal association but not a causal counterfactual. Belly-hauler's .9107 arm_L peak at frame 822 followed a center landing at frame 777 and remained below the .95 nonhinge limit. These traces do not establish a compliant correction; the no-regression gate remains failed.
+- Morphology search remains blocked: its seed-2, 17-proposal run produced zero feasible elites (`CC_SEARCH_NO_FEASIBLE`) and no candidate eligible for draft export. The prepared skin and owned-motion jobs are real, but inference/import/QA require the unavailable owner-managed GPU worker and pinned model/checkpoint environments. The local RTX 4070 has 8 GiB; no synthetic or procedural output substitutes for the required model output.
+- Skeletons, parts and collars remain draft. M4 still lacks 24 approved parts, functional-search acceptance and owner review/publication. M5 remains owner-gated until the intended gameplay checkout supplies its real runtime and save/event contracts.
 
 ## What the project is
 
@@ -41,12 +52,12 @@ critter-crafter is a standalone tool that builds procedural monsters from three 
 ## Everyday commands
 
 ```powershell
-uv run pytest                                   # 402 tests, ~20 min with Blender (-m "not blender": ~20 s)
-uv run critter skeleton vary --force            # regenerate the 85 draft skeletons (archetypes, variants, amalgams)
+uv run pytest                                   # full suite includes actual Blender asset checks
+uv run critter skeleton vary --force            # regenerate the 91 draft skeletons (archetypes, variants, amalgams)
 uv run critter schema validate
 uv run critter recipe golden                    # writes tests/golden_v3/{catalog,recipes,locomotion}.json
 Copy-Item tests/golden_v3/*.json unity/com.ninthlevelsoftware.crittercrafter/Tests/Editor/GoldenV3/
-uv run critter library build                    # ~15 min for 85 skeletons (--no-clean rebuilds only what changed)
+uv run critter library build                    # current version only; --no-clean reuses unchanged assets
 uv run critter skeleton qa                      # motion + export + locomotion QA for all skeletons
 uv run critter part list                        # real parts: status, archive source, last QA verdict
 uv run critter part refit --all                 # after changing parts/fit.py or ops_realpart.py (approved -> draft)
@@ -62,7 +73,7 @@ Unity, headless (close any open editor on the TestProject first):
 $U = "F:\Unity\6000.6.0f1\Editor\Unity.exe"; $root = (Get-Location).Path   # run from the repo root
 # Unity is a GUI exe: Start-Process -Wait, or PowerShell returns before it finishes. -testResults,
 # -critterLibrary and -critterOut resolve against unity/TestProject, so pass absolute paths.
-# Tests (~2 min): expect 40 passed + 1 skipped (PrototypeImportTests needs env vars).
+# Library/Play Mode cases need built assets; PrototypeImportTests also needs its environment variables.
 # Add '-testFilter','<TestName>' to run one test.
 Start-Process $U -Wait -PassThru -ArgumentList '-batchmode','-projectPath','unity/TestProject','-runTests',
   '-testPlatform','EditMode','-testResults',"$root/work/unity_results.xml",'-logFile',"$root/work/unity_tests.log"
@@ -181,9 +192,9 @@ The golden, Unity-test and QA steps fail loudly if skipped.
 - **Airborne run (3b).** Quadrupeds and bipeds top out near 2–4 m/s under `build-1` because a trot plants half its feet. Reaching 5 m/s needs a lower `duty_run` plus a minimum-support setting that `CanLift` respects; deferred until the owner has reviewed the `build-speeds` GIFs.
 - **Pools** (`data/pools/pools.json`): `any` covers the seven curated families, each has a pool of its own, there are themed pools (puppet_corpse, stalker, biomatter_swarm), and the amalgams have their own `amalgam` pool (not in `any`, by the owner's decision). **Still to check against the game:** when a spawn request's `poolId` is empty the factory uses the game's archetype id as the pool id, so the game's archetype ids must match `pool_id`s or it gets `CC_GEN_UNKNOWN_POOL`. `synaptic-sea-unity` isn't on this machine; diff its archetype ids against the pools before M5.
 - **Optional sprouts (`archetypes._extras`).** Quadrupeds and digitigrade bipeds grow a tail, quadrupeds/hexapods/eight-legged crawlers dorsal spines, bipeds a second pair of arms, hexapods antennae, tripods and radials a crown. They are contactless `sway` (arms: `manipulator`) branches off the core, `required: false` with a fill of 25-80%, so a recipe leaves each off part of the time and they can't carry weight. Bones always exist and always animate. Deferred from the same plan step: the neck and jaw (a new `neck2_axial` profile), which needs its own registry entries and a head re-parent.
-- **Amalgams (`skeletons/amalgam.py`).** Asymmetric, glued-together creatures grown from committed seeds (5 hauled, 5 walker, 5 slither; see `docs/locomotion.md` → Amalgams). All `draft`, in their own `amalgam` pool (not in `any`). The reference image's giant splayed hands are a parts job (Meshy, owner cost confirmation first): the rig grounds brachial arms as pullers, but placeholder parts read as feet. Amalgam seeds are chosen with `skeleton amalgam-sweep`, then vetted by the bake, because the sweep can't see Blender IK flips or assembled-mesh ground penetration.
-- **All 85 skeletons are still `draft`.** The owner approves with `critter skeleton approve --owner <ids>` (or `--family`) after looking at the GIFs; it records `review: {by: owner, date, method: owner}` in the source and needs no Blender receipt. A decision is not part of the creature, so built assets stay valid, and `skeleton vary --force` carries an approval forward when the regenerated source is identical (a source that really changed comes back as a draft). The shared golden fixtures record every skeleton and real part as a draft (`cli.golden_catalog`), so approving never moves them. The receipt path (`critter skeleton review`, then approve without `--owner`) still exists for anyone who wants it. Only the owner runs either; Claude never does.
-- **Variety.** 85 skeletons now meet M4's "at least 80" target: 42 anchors (seed 1), 28 seeded variants (`archetypes.build_variant`, seeds in `VARIANT_SEEDS`, ids `<archetype>_s002_v3`) and 15 amalgams. A variant blends continuously between the compact, balanced and elongated presets and jitters height, length, width, limb and stance independently; topology (legs, supports, attack effector) never changes, so no per-variant attack or motion entry is needed. Still open: variable leg counts (attack profiles name specific legs, so they would need symbolic effectors), and the neck/jaw. Distinct creatures per 100 seeds is already measured by `critter recipe sweep` (distinct = skeleton plus the part chosen for every branch, ignoring scales): with everything approved every pool gives 100 of 100 except serpentine, 89 (2026-09-30).
+- **Amalgams (`skeletons/amalgam.py`).** Asymmetric creatures grown from 21 committed seeds, all draft and in their own `amalgam` pool (not `any`). Generated neck-bearing and held-out examples support the owned-motion dataset. Giant splayed hands remain a parts job requiring Meshy cost confirmation. Source sweeps cannot prove Blender IK or assembled-surface grounding; real bake and Unity measurements remain required.
+- **All 91 skeletons remain `draft`.** Only the owner approves after reviewing GIFs, using `critter skeleton approve --owner <ids>` or the existing receipt path. Regeneration retains approval only for unchanged source; changed source returns to draft. Goldens use fixture-only in-memory approval, not production approval.
+- **Variety.** The 91-source inventory meets M4's numerical skeleton target: 42 anchors, 28 seeded variants and 21 amalgams. Historical variant/amalgam wrappers preserve their seeded geometry; explicit morphology parameters add variable counts/growth with capability-based effectors and topology-specific support policies. Real functional search acceptance is still pending, not established by IDs or recipe distinctness. The earlier recipe sweep's 100/100 per pool (serpentine 89) came from placeholder diversity.
 
 ## M2 status (real parts)
 
@@ -210,9 +221,7 @@ Status against acceptance:
   and `work/parts/<id>/preview.png`, then run `critter part approve <id>`. Approval makes a part
   generatable, which changes the golden recipes: re-run `recipe golden` and copy the goldens into the
   Unity package.
-- **Unity import and animation:** pending. A built library now carries `asset.albedo_png` per real part.
-  `LibraryImporter` copies the PNG and binds it to `_BaseMap`/`_MainTex`. That C# is unverified: run the
-  EditMode tests and import `library/biomass_core-v0.2.0` once. Until a part is approved, draft-review
+- **Unity import:** built-in pipeline texture binding now passes the actual enhanced-library EditMode case; URP `_BaseMap` remains unexercised here. Mixed real-part animation and visual acceptance remain pending owner review. Until a part is approved, draft-review
   assemblies still use the placeholders. To look at a real part in Unity before approval, use the
   mixed creature `critter part review` exports (`work/review/parts/<id>/<skeleton>_mixed.fbx|.glb`):
   the first reviewed skeleton, with the real part on every accepting branch and all eight clips. The
@@ -233,7 +242,7 @@ Not done in M2, by design or for lack of time:
 
 ## M5 notes (Synaptic Sea)
 
-- Threats move with `NavMeshAgent` (`acceleration = 999`, `angularSpeed = 999`). The runtime already handles instant turns.
-- Set each threat's `move_speed` from the skeleton's published speeds.
-- Keep the game's `Threat_<id>` root / `"Mesh"` child contract. The adapter plugs in at `ThreatPlaceholderFactory.Build`.
-- `CreatureGait` runs at execution order 1000, after agent movement.
+- **Owner-gated:** public main `8dcc95c10ab5e08658546319f51f49b4abd256fc` lacks the referenced threat factory/live runtime. Port-branch movement/event behavior is historical investigation, not an authorized integration API.
+- Retain `Threat_<id>` root/collider and `"Mesh"` child, game-owned travel, catalog speeds for moving biomass, anchored `hull_tendril`, and mechanical `drone_swarm`.
+- Save the authoritative requested recipe plus seed; resolve its exact library ID/version or retain the game placeholder. Never regenerate a saved recipe against a different catalog.
+- Actual six-ID game Play Mode, save/load and owner-reviewed screenshots await the intended gameplay checkout. Package mocks cannot release this gate.

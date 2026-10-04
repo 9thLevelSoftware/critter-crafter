@@ -161,8 +161,13 @@ namespace CritterCrafter.Review
             heading = path[path.Count - 1].headingDeg;
         }
 
-        public static float GroundY(Vector3 p) =>
-            Physics.Raycast(p + Vector3.up * 5f, Vector3.down, out var hit, 20f, ~0, QueryTriggerInteraction.Ignore)
-                ? hit.point.y : 0f;
+        public static bool TryGroundY(Vector3 p, out float height)
+        {
+            bool found = Physics.Raycast(p + Vector3.up * 5f, Vector3.down, out var hit, 20f, ~0, QueryTriggerInteraction.Ignore);
+            height = found ? hit.point.y : 0f;
+            return found;
+        }
+
+        public static float GroundY(Vector3 p) => TryGroundY(p, out var height) ? height : 0f;
     }
 }

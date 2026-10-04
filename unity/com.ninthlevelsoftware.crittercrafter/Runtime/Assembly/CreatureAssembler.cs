@@ -90,7 +90,8 @@ namespace CritterCrafter
             MotionBoundsCache.Clear();
         }
 
-        public static AssembledCreature Assemble(CritterLibrary library, CritterRecipe recipe, AssemblyOptions options)
+        public static AssembledCreature Assemble(CritterLibrary library, CritterRecipe recipe, AssemblyOptions options,
+            bool preferBaked = true)
         {
             var catalog = library != null ? library.Catalog : null;
             if (catalog == null)
@@ -113,7 +114,8 @@ namespace CritterCrafter
             GameObject root = null;
             try
             {
-                return AssembleValidated(library, catalog, recipe, options, skelEntry, created => root = created);
+                var baked = preferBaked ? library.FindBakedValidated(recipe) : null;
+                return AssembleValidated(library, catalog, recipe, options, skelEntry, baked, created => root = created);
             }
             catch (Exception e)
             {
@@ -130,7 +132,7 @@ namespace CritterCrafter
         }
 
         static AssembledCreature AssembleValidated(CritterLibrary library, CatalogData catalog, CritterRecipe recipe,
-            AssemblyOptions options, CritterLibrary.SkeletonEntry skelEntry, Action<GameObject> onCreated)
+            AssemblyOptions options, CritterLibrary.SkeletonEntry skelEntry, ImportedBakedCreature baked, Action<GameObject> onCreated)
         {
             var skeleton = catalog.FindSkeleton(recipe.skeleton_id);
             var root = new GameObject("Creature_" + recipe.recipe_id);
@@ -172,21 +174,24 @@ namespace CritterCrafter
                     else UnityEngine.Object.DestroyImmediate(sourceRenderer);
                 }
             int triangles = 0;
-            foreach (var fill in recipe.fills)
-            {
-                var branch = skeleton.FindBranch(fill.branch_id);
-                var part = catalog.FindPart(fill.part_id);
-                triangles += BindPart(library, skeleton, branch, part, (float)fill.length_scale,
-                    false, bones, catalogToWorld, root.transform, creature);
-                if (!string.IsNullOrEmpty(fill.connector_part_id))
+            if (baked != null)
+                triangles = BindBaked(baked, bones, catalogToWorld, root.transform, creature);
+            else
+                foreach (var fill in recipe.fills)
                 {
-                    var conn = catalog.FindPart(fill.connector_part_id);
-                    triangles += BindPart(library, skeleton, branch, conn, 1f, true, bones, catalogToWorld, root.transform, creature);
+                    var branch = skeleton.FindBranch(fill.branch_id);
+                    var part = catalog.FindPart(fill.part_id);
+                    triangles += BindPart(library, skeleton, branch, part, (float)fill.length_scale,
+                        false, bones, catalogToWorld, root.transform, creature);
+                    if (!string.IsNullOrEmpty(fill.connector_part_id))
+                    {
+                        var conn = catalog.FindPart(fill.connector_part_id);
+                        triangles += BindPart(library, skeleton, branch, conn, 1f, true, bones, catalogToWorld, root.transform, creature);
+                    }
                 }
-            }
             creature.Triangles = triangles;
 
-            string boundsKey = BoundsKey(library, recipe);
+            string boundsKey = BoundsKey(library, recipe) + (baked == null ? "|live" : "|baked:" + baked.data.asset_sha256);
             if (!BoundsCache.TryGetValue(boundsKey, out var measured))
             {
                 measured.bind = MeasureBounds(creature);
@@ -226,6 +231,51 @@ namespace CritterCrafter
                     .Append(fill.length_scale.ToString("R", CultureInfo.InvariantCulture));
             }
             return key.ToString();
+        }
+        static int BindBaked(ImportedBakedCreature baked, Dictionary<string, Transform> bones,
+            Matrix4x4 catalogToWorld, Transform parent, AssembledCreature creature)
+        {
+            var renderers = baked.model.GetComponentsInChildren<SkinnedMeshRenderer>(true);
+            if (renderers.Length != 1 || baked.material == null)
+                throw new AssemblyException("CC_BAKE_INVALID: expected one body renderer and material");
+            var source = renderers[0];
+            var original = source.sharedMesh;
+            if (original == null || original.subMeshCount != 1 || source.bones.Length > 120
+                || TriangleCount(original) > 30000 || original.bindposes.Length != source.bones.Length)
+                throw new AssemblyException("CC_BAKE_INVALID: body exceeds mesh/bone contract");
+            var targets = new Transform[source.bones.Length];
+            var matrix = MeshToPart(baked.model, source);
+            var importedBind = original.bindposes;
+            for (int i = 0; i < targets.Length; i++)
+            {
+                if (source.bones[i] == null || !bones.TryGetValue(source.bones[i].name, out targets[i]))
+                    throw new AssemblyException("CC_BAKE_BIND: unknown skeleton bone");
+                var expected = catalogToWorld.inverse * targets[i].localToWorldMatrix;
+                var actual = matrix * importedBind[i].inverse;
+                for (int component = 0; component < 16; component++)
+                    if (Mathf.Abs(expected[component] - actual[component]) > 1e-4f)
+                        throw new AssemblyException("CC_BAKE_BIND: incompatible rest matrix " + source.bones[i].name);
+            }
+            string cacheKey = "baked|" + baked.data.key + "|" + baked.data.source_sha256 + "|" + baked.data.asset_sha256;
+            if (!MeshCache.TryGetValue(cacheKey, out var mesh) || mesh == null)
+            {
+                mesh = UnityEngine.Object.Instantiate(original);
+                var bind = new Matrix4x4[targets.Length];
+                for (int i = 0; i < targets.Length; i++)
+                    bind[i] = (catalogToWorld.inverse * targets[i].localToWorldMatrix).inverse * matrix;
+                mesh.bindposes = bind;
+                MeshCache[cacheKey] = mesh;
+            }
+            var body = new GameObject("BakedBody");
+            body.transform.SetParent(parent, false);
+            var renderer = body.AddComponent<SkinnedMeshRenderer>();
+            renderer.sharedMesh = mesh;
+            renderer.bones = targets;
+            renderer.rootBone = bones.TryGetValue(RootBoneName, out var root) ? root : targets[0];
+            renderer.sharedMaterial = baked.material;
+            renderer.updateWhenOffscreen = false;
+            creature.AddRenderer(renderer, "", baked.data.key, false);
+            return TriangleCount(mesh);
         }
 
         static int BindPart(CritterLibrary library, SkeletonData skeleton, BranchData branch, PartData part,

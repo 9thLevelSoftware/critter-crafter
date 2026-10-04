@@ -3,7 +3,7 @@
   "skeleton_id": "amalgam_walker_s0039_v3",
   "family": "amalgam",
   "locomotion_hint": "crawl",
-  "status": "approved",
+  "status": "draft",
   "symmetry_pct": 92,
   "branches": [
     {
@@ -11,6 +11,7 @@
       "template": "core1",
       "parent_branch": null,
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0.0,
         1.0173,
@@ -81,6 +82,7 @@
       "template": "head1",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         -0.1486,
         1.1579,
@@ -151,6 +153,9 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         0.1991,
         0.9526,
@@ -240,6 +245,9 @@
       "template": "insect_leg4",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         -0.205,
         0.9761,
@@ -330,6 +338,10 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "strike",
+        "grasp"
+      ],
       "origin_m": [
         -0.1957,
         1.0772,
@@ -397,13 +409,15 @@
         0.0,
         0.0,
         0.0
-      ]
+      ],
+      "effector_slot": "primary_strike"
     },
     {
       "branch_id": "flail1",
       "template": "tentacle8",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0.211,
         1.0195,
@@ -489,6 +503,7 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0.167,
         1.1463,
@@ -564,6 +579,7 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0.0519,
         1.2218,
@@ -639,6 +655,7 @@
       "template": "appendage1",
       "parent_branch": "flail3",
       "attach_bone_index": 1,
+      "capabilities": [],
       "origin_m": [
         0.0748,
         1.3259,
@@ -710,6 +727,7 @@
       "template": "tentacle8",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         -0.1905,
         1.1081,
@@ -795,6 +813,7 @@
       "template": "limb3",
       "parent_branch": "flail2",
       "attach_bone_index": 1,
+      "capabilities": [],
       "origin_m": [
         0.2785,
         1.2535,
@@ -870,6 +889,7 @@
       "template": "insect_leg4",
       "parent_branch": "flail1",
       "attach_bone_index": 1,
+      "capabilities": [],
       "origin_m": [
         0.3025,
         1.0342,
@@ -1382,10 +1402,5 @@
     "seed": 39,
     "preset": "amalgam",
     "mode": "walker"
-  },
-  "review": {
-    "by": "owner",
-    "date": "2026-09-30",
-    "method": "owner"
   }
 }

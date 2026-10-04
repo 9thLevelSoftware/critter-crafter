@@ -3,7 +3,7 @@
   "skeleton_id": "crawler_alien_tripod_s003_v3",
   "family": "crawler",
   "locomotion_hint": "crawl",
-  "status": "approved",
+  "status": "draft",
   "symmetry_pct": 92,
   "branches": [
     {
@@ -11,6 +11,7 @@
       "template": "core1",
       "parent_branch": null,
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0,
         0.7315,
@@ -81,6 +82,9 @@
       "template": "insect_leg4",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         0.2352,
         0.7315,
@@ -168,6 +172,9 @@
       "template": "insect_leg4",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         -0.1176,
         0.7315,
@@ -255,6 +262,10 @@
       "template": "insect_leg4",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support",
+        "strike"
+      ],
       "origin_m": [
         -0.1176,
         0.7315,
@@ -325,6 +336,7 @@
         0.0,
         0.0
       ],
+      "effector_slot": "designated_tripod_striker",
       "contacts": [
         {
           "kind": "foot",
@@ -342,6 +354,7 @@
       "template": "appendage1",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0,
         0.8293,
@@ -606,10 +619,5 @@
       "limb": 1.0025,
       "stance": 1.0037
     }
-  },
-  "review": {
-    "by": "owner",
-    "date": "2026-09-30",
-    "method": "owner"
   }
 }

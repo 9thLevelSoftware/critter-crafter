@@ -337,12 +337,16 @@ def _legacy_ground_lift(arm: bpy.types.Object, skeleton: dict[str, Any], neutral
 
 
 def _key_evaluated_action(arm: bpy.types.Object, clip: dict[str, Any], controls: dict[str, dict[str, Any]],
-                          action_control: dict[str, Any] | None, root_lift: float) -> bpy.types.Action:
+                          action_control: dict[str, Any] | None, root_lift: float,
+                          fixed_matrices: dict[int, dict[str, Matrix]] | None = None) -> bpy.types.Action:
     names = [b.name for b in arm.data.bones if b.use_deform]
     matrices: list[dict[str, Matrix]] = []
     arm.animation_data.action = None
     for sample in clip["samples"]:
         bpy.context.scene.frame_set(sample["frame"])
+        if fixed_matrices and sample["frame"] in fixed_matrices:
+            matrices.append(fixed_matrices[sample["frame"]])
+            continue
         _apply_sample(arm, sample, root_lift)
         _seed_action_bend(arm, action_control, sample)
         _set_targets(arm, controls, sample, True)
@@ -571,9 +575,28 @@ def _minimum_support(skeleton: dict[str, Any], clip_name: str, desired_sample: d
     return desired_min, False
 
 
+def _world_rotation(matrix: Matrix) -> list[list[float]]:
+    columns = [to_gltf(matrix.to_3x3().col[i].normalized()) for i in range(3)]
+    return [[float(columns[j][i]) for j in range(3)] for i in range(3)]
+
+
+def _world_sample(arm: bpy.types.Object) -> dict[str, Any]:
+    return {"root_position_m": list(to_gltf(arm.pose.bones["root"].head)),
+            "bones": [{"name": pb.name, "head_m": list(to_gltf(pb.head)),
+                       "world_rotation": _world_rotation(pb.matrix),
+                       "rotation_xyzw": [pb.rotation_quaternion.x, pb.rotation_quaternion.y,
+                                         pb.rotation_quaternion.z, pb.rotation_quaternion.w]}
+                      for pb in arm.pose.bones if pb.bone.use_deform], "contacts": []}
+
+
 def _sample_artifact(arm: bpy.types.Object, mannequin: bpy.types.Object, skeleton: dict[str, Any],
                      clips: list[dict[str, Any]], plan: dict[str, Any], profiles: list[dict[str, Any]]) -> dict[str, Any]:
     bases = _neutral_contact_bases(arm, skeleton, plan, float(arm.get("cc_root_lift_m", 0.0)))
+    neutral_world = _world_sample(arm)
+    bind_rotations = {bone.name: _world_rotation(bone.matrix_local) for bone in arm.data.bones if bone.use_deform}
+    contact_bones = {f"{branch['branch_id']}:{record['contact_index']}": record["bone_name"]
+                     for branch in skeleton["branches"] for record in _contact_records(branch, skeleton)}
+    neutral_world["contacts"] = [{"contact_id":name,"planted":True} for name in contact_bones]
     attack_plan = plan.get("attack_plan")
     action_base = None
     if attack_plan:
@@ -594,6 +617,7 @@ def _sample_artifact(arm: bpy.types.Object, mannequin: bpy.types.Object, skeleto
                 head, tail = Vector(to_gltf(pb.head)), Vector(to_gltf(pb.tail)); points += [head, tail]
                 q = pb.rotation_quaternion
                 bones.append({"name": pb.name, "head_m": _r6v(head), "tail_m": _r6v(tail),
+                              "world_rotation": _world_rotation(pb.matrix),
                               "rotation_xyzw": [round(q.x,7),round(q.y,7),round(q.z,7),round(q.w,7)]})
             contacts = []
             for path in sample["contacts"]:
@@ -660,6 +684,7 @@ def _sample_artifact(arm: bpy.types.Object, mannequin: bpy.types.Object, skeleto
     return {"schema_version":"motion-samples-1","sample_source":"evaluated_blender","skeleton_id":skeleton["skeleton_id"],
             "source_fingerprint":str(arm.get("cc_source_fingerprint", "")),
             "binding_profiles":profile_provenance,
+            "bind_rotations":bind_rotations, "neutral_world_sample":neutral_world, "contact_bones":contact_bones,
             "skeleton_snapshot":{key:skeleton[key] for key in snapshot_keys if key in skeleton},
             "fps":planner.FPS,"bone_names":[b["name"] for b in skeleton["bones"]],"root_motion":"fixed_horizontal",
             "neutral_basis":plan["neutral_basis"],"motion_profile_id":plan["motion_profile_id"],"clips":out_clips,
@@ -669,8 +694,175 @@ def _sample_artifact(arm: bpy.types.Object, mannequin: bpy.types.Object, skeleto
             "metrics":{"max_contact_error_m":round(max_error,7),"min_contact_height_m":round(min_y if min_y<math.inf else 0,7)}}
 
 
+def _project_motion_samples(arm, skeleton, profiles, clip, proposed, controls, lift):
+    if len(proposed) != len(clip["samples"]):
+        raise ValueError("CC_MOTION_SHAPE: proposed frame count differs")
+    names = {b["name"] for b in skeleton["bones"]}
+    frozen = planner._frozen_bones(skeleton)
+    pindex = {(p["binding_profile_id"], p["binding_profile_version"]): p for p in profiles}
+    limits = {name: joint.get("limits_deg", {}) for branch in skeleton["branches"]
+              for name, joint in zip(branch["bone_names"], pindex[
+                  (branch["binding_profile_id"], branch["binding_profile_version"])]["joints"])}
+    _apply_sample(arm, _neutral_sample(skeleton), lift); bpy.context.view_layer.update()
+    budgets = []
+    for control in controls.values():
+        branch = control["branch"]; hip = arm.pose.bones[branch["bone_names"][0]].head.copy()
+        reach = sum(arm.pose.bones[name].length for name in branch["bone_names"][:control["contact"]["bone_index"]+1])
+        budgets.append((branch["branch_id"], branch["bone_names"][0], hip,
+                        planner.REACH_BUDGET * max(0., reach-(control["base"]-hip).length)))
+    minimum_fraction = 1.
+    for desired, incoming in zip(clip["samples"], proposed):
+        if incoming["frame"] != desired["frame"] or set(incoming["rotations_xyzw"]) != names:
+            raise ValueError("CC_MOTION_TOPOLOGY: changed bones or frame indices")
+        if not all(math.isfinite(v) for q in incoming["rotations_xyzw"].values() for v in q):
+            raise ValueError("CC_MOTION_NONFINITE")
+        original = dict(desired["rotations_xyzw"]); rotations = {}
+        for name, values in incoming["rotations_xyzw"].items():
+            if len(values) != 4 or sum(v*v for v in values) < 1e-12:
+                raise ValueError("CC_MOTION_ROTATION")
+            q = _q(values).normalized()
+            euler = q.to_euler("XYZ")
+            for axis, index, sign in (("swing_x",0,-1), ("twist",1,1), ("swing_y",2,1)):
+                pair = limits.get(name, {}).get(axis)
+                if pair:
+                    value = sign*math.degrees(euler[index])
+                    euler[index] = sign*math.radians(max(pair[0], min(pair[1], value)))
+            q = euler.to_quaternion()
+            rotations[name] = original[name] if name in frozen else [q.x,q.y,q.z,q.w]
+        original_root = list(desired["root_position_m"])
+        root = list(incoming["root_position_m"])
+        if len(root) != 3 or not all(math.isfinite(v) for v in root):
+            raise ValueError("CC_MOTION_NONFINITE")
+        if max(abs(root[i]-original_root[i]) for i in (0,2)) > 1e-5:
+            raise ValueError("CC_MOTION_ROOT: changed authoritative horizontal travel")
+        # Body-contact ancestors retain their authored root trajectory.
+        if "root" in frozen:
+            root = original_root
+        def apply_fraction(fraction):
+            mixed = {}
+            for name in names:
+                q = _q(original[name]).slerp(_q(rotations[name]), fraction)
+                mixed[name] = [q.x,q.y,q.z,q.w]
+            desired["rotations_xyzw"] = mixed
+            desired["root_position_m"] = [a+(b-a)*fraction for a,b in zip(original_root,root)]
+            _apply_sample(arm, desired, lift); bpy.context.view_layer.update()
+        active = {p["branch_id"] for p in desired["contacts"] if p["support"]}
+        def reachable():
+            return all((arm.pose.bones[name].head-hip).length <= budget+1e-5
+                       for branch, name, hip, budget in budgets if branch in active)
+        apply_fraction(1.)
+        if not reachable():
+            lo,hi = 0.,1.
+            apply_fraction(0.)
+            if not reachable():
+                raise ValueError("CC_MOTION_REACH: authored support budget unavailable")
+            for _ in range(24):
+                middle = (lo+hi)*.5; apply_fraction(middle)
+                if reachable(): lo = middle
+                else: hi = middle
+            if lo < 1e-6:
+                raise ValueError("CC_MOTION_REACH: proposal cannot satisfy authored reach budget")
+            apply_fraction(lo); minimum_fraction = min(minimum_fraction,lo)
+    return minimum_fraction
+
+
+def _verify_motion_endpoints(baseline, candidate, selected):
+    original = {clip["name"]:clip for clip in baseline["clips"]}
+    proposed = {clip["name"]:clip for clip in candidate["clips"]}
+    for name in selected:
+        before,after = original[name]["samples"],proposed[name]["samples"]
+        if len(before) != len(after):
+            raise ValueError("CC_MOTION_SHAPE: changed clip duration")
+        for frame in {0,1,len(before)-2,len(before)-1}:
+            left,right = before[frame],after[frame]
+            if max(abs(a-b) for a,b in zip(left["root_position_m"],right["root_position_m"])) > 1e-5:
+                raise ValueError("CC_MOTION_SEAM: authored root endpoint changed")
+            expected = {b["name"]:b for b in left["bones"]}
+            for bone in right["bones"]:
+                a,b = expected[bone["name"]]["rotation_xyzw"],bone["rotation_xyzw"]
+                if min(max(abs(x-y) for x,y in zip(a,b)),max(abs(x+y) for x,y in zip(a,b))) > 1e-5:
+                    raise ValueError("CC_MOTION_SEAM: authored rotation endpoint changed")
+
+
+def _import_motion(args):
+    from ..skeletons.qa import evaluate_motion
+    from ..skeletons.action_qa import evaluate_actions
+    skeleton, gait, profiles = args["skeleton"], args["gait_profile"], args["binding_profiles"]
+    fingerprint = args["source_fingerprint"]
+    if args.get("polish_blend"):
+        arm, mannequin, clips, plan = _load_polished_actions(
+            args["polish_blend"], skeleton, gait, profiles, fingerprint)
+    else:
+        rigkit.reset_scene(); arm = rigkit.build_armature(ARMATURE_NAME,skeleton["bones"])
+        clips = _bake_clips(arm,skeleton,gait,profiles)
+        plan = json.loads(arm["_cc_plan"]); del arm["_cc_plan"]
+        mannequin = ops_reference.add_reference_mesh(arm,skeleton); add_bind_proxy(arm)
+    arm["cc_source_fingerprint"] = fingerprint
+    proposal = args["proposal"]
+    if proposal["source_fingerprint"] != fingerprint or not proposal["clips"]:
+        raise ValueError("CC_MOTION_STALE: proposal targets different anatomy")
+    if set(proposal["clips"]) - {"idle","stun","telegraph","attack","hit","death"}:
+        raise ValueError("CC_MOTION_CATEGORY: walk/run are unchanged runtime overlays")
+    if ("telegraph" in proposal["clips"]) != ("attack" in proposal["clips"]):
+        raise ValueError("CC_MOTION_CATEGORY: telegraph and attack must be imported together")
+    baseline = _sample_artifact(arm,mannequin,skeleton,clips,plan,profiles)
+    fixed_endpoints = {}
+    root_bind = next(b["head_m"] for b in skeleton["bones"] if b["name"] == "root")
+    for clip in baseline["clips"]:
+        name = clip["name"]
+        if name not in proposal["clips"]: continue
+        incoming = proposal["clips"][name]
+        if len(incoming) != len(clip["samples"]):
+            raise ValueError("CC_MOTION_SHAPE: changed proposed clip duration")
+        matrices = {}
+        arm.animation_data.action = bpy.data.actions[name]
+        for frame in {0,1,len(incoming)-2,len(incoming)-1}:
+            source = clip["samples"][frame]; candidate = incoming[frame]
+            root_offset = [a-b for a,b in zip(source["root_position_m"],root_bind)]
+            if max(abs(a-b) for a,b in zip(root_offset,candidate["root_position_m"])) > 1e-5:
+                raise ValueError("CC_MOTION_SEAM: changed proposed root endpoint")
+            for bone in source["bones"]:
+                a,b = bone["rotation_xyzw"],candidate["rotations_xyzw"][bone["name"]]
+                if min(max(abs(x-y) for x,y in zip(a,b)),max(abs(x+y) for x,y in zip(a,b))) > 1e-5:
+                    raise ValueError("CC_MOTION_SEAM: changed proposed rotation endpoint")
+            bpy.context.scene.frame_set(frame); bpy.context.view_layer.update()
+            matrices[frame] = {pb.name:pb.matrix.copy() for pb in arm.pose.bones if pb.bone.use_deform}
+        fixed_endpoints[name] = matrices
+    lift = float(arm.get("cc_root_lift_m",0.))
+    clear_pose(arm); _apply_sample(arm,_neutral_sample(skeleton),lift); bpy.context.view_layer.update()
+    controls = _make_controls(arm,skeleton,profiles)
+    action_control = _make_action_control(arm,skeleton,plan,profiles)
+    fractions = {}
+    for clip in plan["clips"]:
+        if clip["name"] not in proposal["clips"]: continue
+        fractions[clip["name"]] = _project_motion_samples(
+            arm,skeleton,profiles,clip,proposal["clips"][clip["name"]],controls,lift)
+        old = bpy.data.actions.get(clip["name"])
+        if old: bpy.data.actions.remove(old,do_unlink=True)
+        _key_evaluated_action(arm,clip,controls,action_control,lift,fixed_endpoints[clip["name"]])
+    _remove_controls(controls)
+    if action_control:
+        arm.pose.bones[action_control["bone_name"]].constraints.remove(action_control["constraint"])
+        bpy.data.objects.remove(action_control["target"],do_unlink=True)
+        for name, stiffness in action_control.get("original_stiffness",{}).items():
+            arm.pose.bones[name].ik_stiffness_x = stiffness
+    artifact = _sample_artifact(arm,mannequin,skeleton,clips,plan,profiles)
+    _verify_motion_endpoints(baseline,artifact,proposal["clips"])
+    motion_qa = evaluate_motion(skeleton,artifact,profiles=profiles)
+    action_qa = evaluate_actions(skeleton,artifact)
+    if not motion_qa["passed"] or not action_qa["passed"]:
+        raise ValueError("CC_MOTION_QA: "+json.dumps({"motion":motion_qa,"action":action_qa}))
+    arm["cc_authoring"] = json.dumps(args["authoring"],sort_keys=True,separators=(",",":"))
+    clear_pose(arm); rigkit.save_blend(args["out_blend"])
+    Path(args["out_motion"]).write_text(json.dumps(artifact,allow_nan=False),encoding="utf-8")
+    return {"motion_qa":motion_qa,"action_qa":action_qa,"projection_fractions":fractions,
+            "blend":args["out_blend"],"motion":args["out_motion"]}
+
+
 def run(args: dict[str, Any]) -> dict[str, Any]:
     skeleton, gait = args["skeleton"], args["gait_profile"]
+    if args.get("mode") == "motion_import":
+        return _import_motion(args)
     profiles = args.get("binding_profiles", [])
     polish = args.get("polish_blend", "")
     if polish:
@@ -687,9 +879,13 @@ def run(args: dict[str, Any]) -> dict[str, Any]:
     if args.get("source_fingerprint"):
         arm["cc_source_fingerprint"] = args["source_fingerprint"]
     artifact = _sample_artifact(arm, mannequin, skeleton, clips, plan, profiles)
+    artifact["source_provenance"] = args.get("source_provenance", {})
+    artifact["authorship"] = "project_owned_polish" if polish else "project_procedural"
     out_motion = args.get("out_motion") or str(Path(args["out_fbx"]).with_name("motion.json"))
     os.makedirs(os.path.dirname(out_motion), exist_ok=True)
     with open(out_motion,"w",encoding="utf-8",newline="\n") as f: json.dump(artifact,f,indent=2); f.write("\n")
+    if args.get("mode") == "motion_dataset":
+        return {"skeleton_id": skeleton["skeleton_id"], "motion": out_motion}
     bpy.context.scene.frame_start=0; bpy.context.scene.frame_end=max(c["frames"] for c in clips)
     clear_pose(arm); rigkit.export_fbx(args["out_fbx"],[arm,mannequin,proxy],animated=True)
     if args.get("out_glb"): clear_pose(arm); rigkit.export_glb(args["out_glb"],[arm,mannequin],animated=True)

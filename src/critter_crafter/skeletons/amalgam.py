@@ -288,7 +288,8 @@ def _striker(body: _Body, rng: SplitMix64) -> dict[str, Any]:
     direction = mu.normalize([normal[0] * .8, normal[1] * .2 + .1, .7])
     arm = arch._branch("striker", "limb3", "core", origin=origin, direction=list(direction), up=[0, 1, 0],
                        length=body.length * _between(rng, .45, .7),
-                       side=_side(origin[0]), attach=0, role="manipulator", profile_id="limb3_brachial", support=0.0)
+                       side=_side(origin[0]), attach=0, role="manipulator", profile_id="limb3_brachial", support=0.0,
+                       capabilities=("strike", "grasp"), effector_slot="primary_strike")
     arm["stance_deg"] = [10.0, -70.0, 8.0]
     return arm
 
@@ -355,9 +356,11 @@ def _belly(body: _Body, bid: str, length: float, kind: str) -> dict[str, Any]:
 
 # ---- modes ---------------------------------------------------------------------------------------------
 
-def _hauled(seed: int, body: _Body, rng: SplitMix64) -> tuple[list[dict[str, Any]], list[str], str]:
-    count = 1 + rng.below(3)
-    kinds = ["pull"] + [("pull" if rng.below(100) < 55 else "push") for _ in range(count - 1)]
+def _hauled(seed: int, body: _Body, rng: SplitMix64, count: int | None = None) -> tuple[list[dict[str, Any]], list[str], str]:
+    sampled_count = 1 + rng.below(3)
+    explicit = count is not None
+    count = sampled_count if count is None else count
+    kinds = ["pull"] * count if explicit else ["pull"] + [("pull" if rng.below(100) < 55 else "push") for _ in range(count - 1)]
     first_side = 1 if rng.below(2) else -1
     limbs = []
     for index, kind in enumerate(kinds):
@@ -373,8 +376,10 @@ def _hauled(seed: int, body: _Body, rng: SplitMix64) -> tuple[list[dict[str, Any
     return limbs + [belly], [b["branch_id"] for b in limbs] + ["belly"], "drag"
 
 
-def _walker(seed: int, body: _Body, rng: SplitMix64) -> tuple[list[dict[str, Any]], list[str], str]:
-    count = 2 + rng.below(3)
+def _walker(seed: int, body: _Body, rng: SplitMix64, count: int | None = None) -> tuple[list[dict[str, Any]], list[str], str]:
+    sampled_count = 2 + rng.below(3)
+    explicit = count is not None
+    count = sampled_count if count is None else count
     kind_pool = ("mammal", "digitigrade", "insect", "arm")
     kinds = [kind_pool[rng.below(4)] for _ in range(count)]
     if len(set(kinds)) < 2:
@@ -409,10 +414,12 @@ def _walker(seed: int, body: _Body, rng: SplitMix64) -> tuple[list[dict[str, Any
     # One leg limps: the body drops toward it whenever it carries weight.
     limper = order[rng.below(len(order))]
     _set_gait(limper, limp=round(limper["origin_m"][1] * _between(rng, .06, .12), 4))
+    if explicit:
+        arch._topology_phases(order)
     return legs, [b["branch_id"] for b in legs], "crawl"
 
 
-def _slither(seed: int, body: _Body, rng: SplitMix64) -> tuple[list[dict[str, Any]], list[str], str]:
+def _slither(seed: int, body: _Body, rng: SplitMix64, count: int | None = None) -> tuple[list[dict[str, Any]], list[str], str]:
     tail = _belly(body, "body", body.length * _between(rng, 1.0, 1.4), "sliding")
     residuals = [-arch._contact_height(tail, tail["stance_deg"], c, tail["stance_z_deg"]) for c in tail["contacts"]]
     delta = sum(residuals) / len(residuals)
@@ -425,20 +432,31 @@ _MODE_BUILDERS = {"hauled": _hauled, "walker": _walker, "slither": _slither}
 
 
 def build_amalgam(seed: int) -> dict[str, Any]:
-    """Grow one amalgam skeleton from *seed* (raises :class:`AmalgamError` if it can't stand)."""
-    mode = mode_for_seed(seed)
+    """Grow a curated seed using the historical independent authoring streams."""
+    return _build_amalgam(seed)
+
+
+def _build_amalgam(seed: int, *, mode: str | None = None, body_length: float | None = None,
+                   fat_ratio: float | None = None, clearance_ratio: float | None = None,
+                   working_count: int | None = None, growth: str | None = None,
+                   skeleton_id: str | None = None, provenance: dict[str, Any] | None = None,
+                   appendages: bool = True) -> dict[str, Any]:
+    mode = mode_for_seed(seed) if mode is None else mode
     body_rng = _stream(seed, 2)
-    length = _between(body_rng, .9, 1.7) * (.78 if mode == "walker" else 1.0)     # walkers are carried high, so smaller
-    fat = _between(body_rng, .26, .40)
+    sampled_length = _between(body_rng, .9, 1.7)
+    length = (sampled_length if body_length is None else body_length) * (.78 if mode == "walker" else 1.0)
+    sampled_fat = _between(body_rng, .26, .40)
+    fat = sampled_fat if fat_ratio is None else fat_ratio
     # A walker's body is a smaller pod carried high on long legs; the others are fat blobs lying on the ground.
     radius = length * (.18 + (fat - .26) / .14 * .10 if mode == "walker" else fat)
-    center_y = radius + length * _between(body_rng, .45, .85) if mode == "walker" else radius + .02
+    sampled_clearance = _between(body_rng, .45, .85) if mode == "walker" else 0.0
+    center_y = radius + length * (sampled_clearance if clearance_ratio is None else clearance_ratio) if mode == "walker" else radius + .02
     body = _Body(length, radius, center_y, on_ground=mode != "walker")
     core = arch._branch("core", "core1", None, origin=[0.0, round(center_y, 4), round(body.rear_z, 4)], direction=[0, 0, 1],
                         up=[0, 1, 0], length=length, role="core")
     core["girth_m"] = round(2 * radius, 4)
-    working, supports, hint = _MODE_BUILDERS[mode](seed, body, _stream(seed, 3))
-    growth = HEADY_SEEDS.get(seed)
+    working, supports, hint = _MODE_BUILDERS[mode](seed, body, _stream(seed, 3), working_count)
+    growth = HEADY_SEEDS.get(seed) if growth is None else growth
     if growth in (HEAD_GROWTH_NECKED, HEAD_GROWTH_CLUSTER):
         heads = _necked_heads(body, _stream(seed, 8), 1 if growth == HEAD_GROWTH_NECKED else 2 + _stream(seed, 9).below(2))
     else:
@@ -449,8 +467,8 @@ def build_amalgam(seed: int) -> dict[str, Any]:
     # A walker sinks by DEATH_DROP of its hip height when it dies; a body already on the ground doesn't.
     hips = [b["origin_m"][1] for b in working if b["gait"]["role"] == "locomotor"]
     sink = motion_planner.DEATH_DROP * (sum(hips) / len(hips)) if mode == "walker" and hips else 0.0
-    flails = _flails(body, branches, max(2, min(MAX_BRANCHES - len(branches), target - len(branches))), _stream(seed, 7),
-                     floor=.03 + sink)
+    flails = (_flails(body, branches, max(2, min(MAX_BRANCHES - len(branches), target - len(branches))), _stream(seed, 7),
+                      floor=.03 + sink) if appendages else [])
     branches += flails
     if growth == HEAD_GROWTH_LIMB_TIP:
         branches += _limb_tip_head(body, flails, _stream(seed, 8), floor=.03 + sink)
@@ -460,10 +478,11 @@ def build_amalgam(seed: int) -> dict[str, Any]:
               "pole_ik": False, "compact_clip": len(legs) >= 4}
     return arch._finalise(
         branches, supports, list(supports), "asymmetric", archetype=f"amalgam_{mode}", body_plan="amalgam",
-        family="amalgam", style="anatomical", hint=hint, skeleton_id=amalgam_id(seed, mode),
+        family="amalgam", style="anatomical", hint=hint, skeleton_id=skeleton_id or amalgam_id(seed, mode),
         dims=(center_y + radius, length, 2 * radius),
-        provenance={"generator": "cc-gen-3", "seed": seed, "preset": "amalgam", "mode": mode},
-        landmarks={"pelvis": "core", "shoulder": "core", "neck": "head"}, traits=traits)
+        provenance=provenance or {"generator": "cc-gen-3", "seed": seed, "preset": "amalgam", "mode": mode},
+        landmarks={"pelvis": "core", "shoulder": "core", "neck": "head"}, traits=traits,
+        action_support=arch._topology_action_support(branches, supports) if working_count is not None else None)
 
 
 def committed_amalgams() -> list[dict[str, Any]]:

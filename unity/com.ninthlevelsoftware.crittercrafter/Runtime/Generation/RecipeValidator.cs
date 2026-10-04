@@ -67,6 +67,8 @@ namespace CritterCrafter
                     || f.binding_profile_version != br.binding_profile_version
                     || f.binding_profile_hash != br.binding_profile_hash)
                     diags.Add("CC_FILL_BINDING_IDENTITY: " + f.branch_id);
+                if (!(f.girth_scale >= 0.909091 && f.girth_scale <= 1.111111))
+                    diags.Add("CC_GIRTH_SCALE: " + f.branch_id);
                 if (part.category == "connector" || !RecipeGenerator.PartAccepted(part, br))
                     diags.Add("CC_PART_REJECTED: " + f.branch_id + "=" + f.part_id);
                 else

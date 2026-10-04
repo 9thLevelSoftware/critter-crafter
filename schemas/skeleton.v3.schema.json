@@ -140,6 +140,19 @@
             "compact_clip": {"type": "boolean"}
           }
         },
+        "action_support": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["released_contact_ids", "minimum_preserved"],
+          "properties": {
+            "released_contact_ids": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {"type": "string", "pattern": "^[a-zA-Z][a-zA-Z0-9_]*:[0-9]+$"}
+            },
+            "minimum_preserved": {"type": "integer", "minimum": 0}
+          }
+        },
         "support_branches": {
           "type": "array",
           "uniqueItems": true,
@@ -276,6 +289,7 @@
       "additionalProperties": false,
       "required": [
         "branch_id",
+        "capabilities",
         "template",
         "parent_branch",
         "direction",
@@ -296,6 +310,12 @@
         "branch_id": {
           "$ref": "#/$defs/branch_name"
         },
+        "capabilities": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"enum": ["support", "strike", "bite", "whip", "grasp", "slide"]}
+        },
+        "effector_slot": {"$ref": "#/$defs/id"},
         "template": {
           "$ref": "#/$defs/id"
         },

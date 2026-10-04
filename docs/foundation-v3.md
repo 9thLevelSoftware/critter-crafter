@@ -28,9 +28,39 @@ Every v3 branch carries the exact profile identity triple, side, length, girth, 
 
 The skeleton's `neutral_pose` is independent of the chain profile. It contains one local quaternion delta for every compiled bone, in compiled bone order, plus `root_offset_m`. The Blender rest-bone basis is preserved: local +Y follows the bone, +Z is the orthogonal up axis, and +X is `Y cross Z`. Runtime assembly binds geometry to the straight rest skeleton first, then applies the neutral local deltas once. FBX validation accounts for the exporter's local `Ry(180°)` bone-coordinate reparameterization while comparing the recovered semantic basis; GLB uses the canonical rest basis directly.
 
+### Capabilities and semantic actions
+
+Regenerated v3 source branches require a unique `capabilities` array drawn from `support`, `strike`, `bite`, `whip`, `grasp`, and `slide`; an empty array is valid for decorative branches. Every contact-bearing branch declares `support`, and sliding/body-contact branches also declare `slide`. Optional `effector_slot` values are unique within the skeleton. Action profiles select exactly one slot with the required capability, never a branch-name or family fallback. Resolved plans still publish concrete branch IDs, bone names and contact IDs, so renaming an effector does not change its trajectory or support schedule. Amalgams explicitly author `primary_strike`.
+
+An optional `anatomy.action_support` block contains `released_contact_ids` and `minimum_preserved` for generated topology. It releases exactly the selected effector's declared contacts, preserves every other support contact, records that preserved remainder, and must leave the authored `traits.min_support` floor. Without this block, curated action requirements remain unchanged (including seven preserved crawler contacts and five radial contacts). Source validation, compilation and action resolution reject missing/duplicate slots, incompatible capabilities and invalid support policies. Unity catalog data carries these fields; frozen compiled libraries can still load their baked assets without reauthoring or compatibility aliases.
+
+The capability migration smoke exercised all 91 generated sources: geometry/neutral-pose/gait/provenance matched their previous source records after excluding capability/slot metadata and owner review/status, all 91 actions resolved, all produced eight-clip motion plans, and a temporary regenerated source tree passed schema and semantic validation. This is host authoring evidence, not a Blender bake or Unity visual review. Changed sources return to `draft` when regenerated; only the owner approves them.
+
 ## Parts and recipes
 
 Production parts carry profile ID/version, side, length, and girth. Compilation adds the locked profile hash and marks them `inventory_kind: production`; only approved production parts are generatable. The compiler also creates deterministic reference inventory for each branch requirement, so anatomy and review can proceed while production coverage is incomplete. Connectors are optional versioned two-bone skinned parts. They use `skinned_parent_child@1.0.0`; `b0` maps to the parent attachment bone and `b1` maps to the branch root bone. Connector matching requires exact chain profile identity/hash, compatible side, exact girth, normalized two-influence weights, preserved submeshes and materials, and the identity local transform. Size class requests a connector but does not establish compatibility.
+
+Enhanced connector sources optionally author native-SDF surface settings; new compiled v3
+connectors publish `connector_surface` and generated reference inventory defaults to this strategy.
+The physical ellipse/span, identity socket and exact parent/child bone remapping stay authoritative.
+SDF generation is offline: Blender exports a closed, budgeted mesh with analytical two-bone
+weights, and Unity consumes the same FBX binding interface without running an SDF mesher.
+See [parts.md](parts.md#native-organic-connectors) for limits, paired loft/SDF review and pending
+visual acceptance. Frozen previously published v0.2.0 assets are not rewritten.
+
+The owner-authorized deformation-safe taper supersedes the initially prescribed full waist,
+which failed actual shoulder review. Native union/fillet/intersection now bounds the surface
+using the tested profile's smoothstep-LBS Jacobian along the full unchanged span; sockets,
+two-bone weights, physical envelope and QA criteria did not change. All nine draft S/M/L
+straight/bulged/asymmetric variants passed fresh exports, asymmetric bind checks, all eight
+clips and profile extrema: zero flipped faces/penetration, p01 0.54486–0.60731 and p99 at most
+1.44003, each at 300 triangles. The focused suite passed 35 cases, including the default flail
+reference that exposed a coarse-triangle twist reversal during the whole-library refresh.
+Constraint-aware simplification retained its unchanged guards and exported a passing
+284-triangle mesh within the same envelope and two-bone contract. The original failed reports
+remain available; measured success does not approve any content or replace owner visual review.
+This covers actual clips and selected single-axis extrema, not arbitrary combined rotations:
+the shared two-bone LBS singularity at 180 degrees remains documented in `parts.md`.
 
 Recipe matching uses one uniform length scale in the inclusive 0.8–1.25 range and checks scaled girth within 10 percent. Side and exact profile identity must match. The hard budgets are 120 bones, 16 parts, 30,000 triangles, and 4 influences per vertex. A v3 recipe contains schema/library identity, `cc-gen-3`, the profile identity triple on each fill, and derived scale diagnostics.
 

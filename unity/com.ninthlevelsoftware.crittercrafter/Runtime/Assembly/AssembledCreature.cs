@@ -42,6 +42,8 @@ namespace CritterCrafter
         public Bounds NeutralBoundsLocal => neutralBoundsLocal;
         public Bounds AnimationBoundsLocal => animationBoundsLocal;
         public SkeletonData Skeleton { get; private set; }
+        public IReadOnlyDictionary<string, Matrix4x4> ImportedRest =>
+            skeletonModel != null ? SkeletonRest.Get(skeletonModel) : null;
         /// <summary>This creature's gait block: the skeleton's, with speeds rescaled by its build (CreatureLocomotion).</summary>
         public LocomotionData Locomotion { get; internal set; }
         /// <summary>The block the runtime gait follows: the per-creature one when built, else the skeleton's.</summary>

@@ -1,0 +1,76 @@
+{
+  "schema_version": "3.0.0",
+  "part_id": "organic_collar_l_bulged_v1",
+  "category": "connector",
+  "template": "connector2",
+  "binding_profile_id": "limb3_brachial",
+  "binding_profile_version": "1.0.0",
+  "side": "symmetric",
+  "girth_m": 0.1734,
+  "species_tags": [],
+  "roles": [
+    "connector"
+  ],
+  "size_class": "L",
+  "status": "draft",
+  "style_profile": "flesh_stylized_v1",
+  "dimensions_m": [
+    0.1734,
+    0.1734,
+    0.16
+  ],
+  "length_m": 0.16,
+  "budget": {
+    "max_triangles": 300,
+    "max_material_slots": 1
+  },
+  "connector": {
+    "radius_m": 0.0867,
+    "span_m": [
+      -0.08,
+      0.08
+    ],
+    "interface": {
+      "interface_id": "skinned_parent_child",
+      "interface_version": "1.0.0",
+      "bone_groups": [
+        {
+          "group": "b0",
+          "role": "parent"
+        },
+        {
+          "group": "b1",
+          "role": "child"
+        }
+      ],
+      "max_influences": 2,
+      "weights_normalized": true,
+      "position_m": [
+        0,
+        0,
+        0
+      ],
+      "rotation_xyzw": [
+        0,
+        0,
+        0,
+        1
+      ]
+    },
+    "surface": {
+      "method": "sdf_grid",
+      "voxel_divisions": 24,
+      "fillet_iterations": 3,
+      "bulge": 1.2
+    }
+  },
+  "fallback": {
+    "primitive": "cylinder",
+    "albedo": "#8f7a82"
+  },
+  "provenance": {
+    "source": "procedural_native_sdf",
+    "license": "project-authored",
+    "review_envelope": "bulged"
+  }
+}

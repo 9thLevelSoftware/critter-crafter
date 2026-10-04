@@ -11,6 +11,7 @@
       "template": "core1",
       "parent_branch": null,
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0.0,
         0.4644,
@@ -81,6 +82,7 @@
       "template": "head1",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0.319,
         0.7476,
@@ -151,6 +153,10 @@
       "template": "tentacle8",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support",
+        "slide"
+      ],
       "origin_m": [
         0.0,
         0.0745,
@@ -264,6 +270,10 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "strike",
+        "grasp"
+      ],
       "origin_m": [
         0.3932,
         0.63,
@@ -331,13 +341,15 @@
         0.0,
         0.0,
         0.0
-      ]
+      ],
+      "effector_slot": "primary_strike"
     },
     {
       "branch_id": "flail1",
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0.14,
         0.8815,
@@ -413,6 +425,7 @@
       "template": "tentacle8",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         -0.1459,
         0.8795,
@@ -498,6 +511,7 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0.2524,
         0.8247,
@@ -573,6 +587,7 @@
       "template": "tentacle8",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0.3838,
         0.6795,
@@ -658,6 +673,7 @@
       "template": "insect_leg4",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         -0.2255,
         0.8421,
@@ -735,6 +751,7 @@
       "template": "tentacle8",
       "parent_branch": "flail3",
       "attach_bone_index": 1,
+      "capabilities": [],
       "origin_m": [
         0.3107,
         0.9537,
@@ -820,6 +837,7 @@
       "template": "appendage1",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0.0067,
         0.9043,
@@ -891,6 +909,7 @@
       "template": "insect_leg4",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0.1296,
         0.8848,
@@ -968,6 +987,7 @@
       "template": "head1",
       "parent_branch": "flail1",
       "attach_bone_index": -1,
+      "capabilities": [],
       "origin_m": [
         0.2247,
         1.2536,

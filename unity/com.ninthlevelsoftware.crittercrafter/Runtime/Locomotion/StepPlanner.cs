@@ -15,6 +15,13 @@ namespace CritterCrafter.Locomotion
         public bool overspeed;
     }
 
+    public struct Candidate
+    {
+        public int index, contactIndex;
+        public double x, y, z, reachFraction, coxaYawDeg;
+        public bool groundValid, hinge;
+    }
+
     /// <summary>
     /// Double-precision port of src/critter_crafter/locomotion/stepper.py. Pure and Unity-free so the
     /// golden tests can compare it with the Python reference. All distances are metres, times seconds.
@@ -145,6 +152,52 @@ namespace CritterCrafter.Locomotion
             foreach (var leg in block.legs)
                 if (leg.support && InStance(LegPhase(clock, LegOffset(leg, run)), duty)) n++;
             return n;
+        }
+
+        public static void CandidateOffset(int index, double stride, out double lateral, out double forward)
+        {
+            if (index < 0 || index >= 5) throw new ArgumentOutOfRangeException(nameof(index));
+            double distance = 0.10 * Math.Max(0.0, stride);
+            lateral = index == 3 ? distance : index == 4 ? -distance : 0.0;
+            forward = index == 1 ? distance : index == 2 ? -distance : 0.0;
+        }
+
+        public static bool CanLift(bool support, int remainingSupports, int minimumSupports,
+            bool early, bool bodyOnGround, int swinging, int legCount)
+        {
+            if (support && remainingSupports < minimumSupports) return false;
+            return !early || bodyOnGround || swinging < Math.Max(1, legCount / 2);
+        }
+
+        public static double LandingReachFraction(double dx, double dy, double dz, double reach) =>
+            reach > 0.0 ? Math.Sqrt(dx * dx + dy * dy + dz * dz) / reach : double.PositiveInfinity;
+
+        public static int ChooseLanding(Candidate[] candidates, int count, double stride, bool liftAllowed)
+        {
+            if (!liftAllowed) return -1;
+            int best = -1;
+            double bestCost = double.PositiveInfinity;
+            for (int slot = 0; slot < count; slot++)
+            {
+                Candidate candidate = candidates[slot];
+                if (candidate.index < 0 || candidate.index >= 5 || (stride <= 0.0 && candidate.index != 0))
+                    continue;
+                double reach = candidate.reachFraction, yaw = candidate.coxaYawDeg;
+                double limit = candidate.hinge ? 0.97 : 0.95;
+                if (!candidate.groundValid || double.IsNaN(reach) || double.IsInfinity(reach)
+                    || reach < 0.0 || reach > limit || double.IsNaN(yaw) || double.IsInfinity(yaw)
+                    || Math.Abs(yaw) > 45.0) continue;
+                CandidateOffset(candidate.index, stride, out double lateral, out double forward);
+                double penalty = Math.Max(0.0, reach - 0.8);
+                double cost = penalty * penalty;
+                if (stride > 0.0) cost += (lateral * lateral + forward * forward) / (stride * stride);
+                if (best >= 0 && (cost > bestCost || (cost == bestCost &&
+                    (candidate.index > candidates[best].index || (candidate.index == candidates[best].index &&
+                        candidate.contactIndex >= candidates[best].contactIndex))))) continue;
+                best = slot;
+                bestCost = cost;
+            }
+            return best;
         }
     }
 }

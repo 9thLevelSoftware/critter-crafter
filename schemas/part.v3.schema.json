@@ -29,6 +29,12 @@
     "connector": {"type": "object", "additionalProperties": false, "required": ["radius_m", "span_m", "interface"], "properties": {
       "radius_m": {"type": "number", "exclusiveMinimum": 0},
       "span_m": {"type": "array", "prefixItems": [{"type": "number", "exclusiveMaximum": 0}, {"type": "number", "exclusiveMinimum": 0}], "items": false, "minItems": 2, "maxItems": 2},
+      "surface": {"type": "object", "additionalProperties": false, "required": ["method", "voxel_divisions", "fillet_iterations", "bulge"], "properties": {
+        "method": {"const": "sdf_grid"},
+        "voxel_divisions": {"type": "integer", "minimum": 12, "maximum": 64},
+        "fillet_iterations": {"type": "integer", "minimum": 0, "maximum": 8},
+        "bulge": {"type": "number", "minimum": 1, "maximum": 1.2}
+      }},
       "interface": {
         "type": "object", "additionalProperties": false,
         "required": ["interface_id", "interface_version", "bone_groups", "max_influences", "weights_normalized", "position_m", "rotation_xyzw"],
@@ -66,12 +72,21 @@
         "trim_n": {"type": "array", "items": {"type": "number", "minimum": 0, "maximum": 1}, "minItems": 2, "maxItems": 2},
         "joints_n": {"type": "array", "items": {"type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1}},
         "radial_scale": {"anyOf": [{"const": "auto"}, {"type": "number", "minimum": 0.25, "maximum": 4}]},
-        "weights": {"enum": ["smooth", "flesh", "jointed", "single"]},
+        "weights": {"enum": ["smooth", "flesh", "jointed", "single", "learned"]},
+        "joint_loop_mode": {"enum": ["smooth", "flesh", "jointed", "single"]},
         "mirror_x": {"type": "boolean"},
         "root_center": {"enum": ["slice", "bbox"]},
         "sharp_angle_deg": {"type": "number", "minimum": 0, "maximum": 180}
       }},
       "measured": {"type": "object"},
+      "learned_weights": {"type": "object", "additionalProperties": false, "required": ["artifact_path", "sha256", "input_sha256", "profile_sha256", "model_sha256", "settings_sha256"], "properties": {
+        "artifact_path": {"type": "string", "pattern": "^(?![/.])(?!.*(^|/)\\.\\.(/|$))[^\\\\:]+$"},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "input_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "profile_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "model_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "settings_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }},
       "approved_pipeline": {"type": "string", "pattern": "^[0-9a-f]{64}$", "description": "Real-part pipeline fingerprint of the build the owner approved; set by `critter part approve`."}
     }}
   },

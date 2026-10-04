@@ -58,17 +58,73 @@ def build_pipeline_fingerprint() -> str:
 def part_pipeline_fingerprint() -> str:
     """Fingerprint only code that produces placeholder/reference part assets."""
     package = Path(__file__).resolve().parents[1]
-    names = ("blender/ops_placeholder.py", "blender/rigkit.py", "blender/frame.py")
+    names = ("blender/ops_placeholder.py", "blender/connector_surface.py", "blender/rigkit.py", "blender/frame.py")
     payload = {name: hashlib.sha256((package / name).read_bytes()).hexdigest() for name in names}
-    payload["contract"] = "cc-gen-3/blender-5.2/placeholder-fbx-secondary-X-v1"
+    payload["contract"] = "cc-gen-3/blender-5.2/placeholder-fbx-secondary-X/native-sdf-safe-taper-v2"
     return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
+
+
+def connector_qa_fingerprint(inputs: dict[str, Any]) -> str:
+    """Identity for the actual settings, assets, clips, profiles and connector QA producers."""
+    package = Path(__file__).resolve().parents[1]
+    names = ("blender/connector_surface.py", "blender/ops_connectorqa.py", "blender/ops_placeholder.py",
+             "blender/ops_partqa.py", "blender/ops_assemble.py", "blender/ops_binding_fixture.py",
+             "blender/rigkit.py", "blender/frame.py", "parts/commands.py")
+    payload = {"inputs": inputs, "producers": {
+        name: hashlib.sha256((package / name).read_bytes()).hexdigest() for name in names}}
+    return hashlib.sha256(json.dumps(payload, sort_keys=True, separators=(",", ":"),
+                                    ensure_ascii=False, allow_nan=False).encode("utf-8")).hexdigest()
+
+
+def connector_review_inputs(catalog: dict[str, Any], part_id: str, out: Path,
+                            review_out: Path, skeleton_id: str | None = None) -> dict[str, Any]:
+    """Prepare reproducible, private-asset-free connector review against a built v3 skeleton."""
+    from ..recipes.generator import connector_accepted
+
+    part = next(item for item in catalog["parts"] if item["part_id"] == part_id)
+    eligible = [s for s in catalog["skeletons"] if (skeleton_id is None or s["skeleton_id"] == skeleton_id)
+                and any(connector_accepted(part, b) for b in s["branches"])]
+    if not eligible:
+        raise click.ClickException(f"CC_CONNECTORQA_INPUT: {part_id} has no compatible skeleton")
+    skeleton = sorted(eligible, key=lambda s: s["skeleton_id"])[0]
+    review_catalog = copy.deepcopy(catalog)
+    review_catalog["parts"] = [p for p in review_catalog["parts"] if p["inventory_kind"] == "reference"]
+    recipe = generate_for_skeleton(review_catalog, skeleton["skeleton_id"], 1)
+    branches = {b["branch_id"]: b for b in skeleton["branches"]}
+    replaced = False
+    for fill in recipe["fills"]:
+        if connector_accepted(part, branches[fill["branch_id"]]):
+            fill["connector_part_id"] = part_id
+            replaced = True
+    if not replaced:
+        raise click.ClickException(f"CC_CONNECTORQA_INPUT: {part_id} has no filled compatible branch")
+    used = _used_part_ids(recipe)
+    parts = {p["part_id"]: copy.deepcopy(p) for p in catalog["parts"] if p["part_id"] in used}
+    profile = next(p for p in catalog["binding_profiles"]
+                   if p["binding_profile_hash"] == part["binding_profile_hash"])
+    inputs = {"part": copy.deepcopy(part), "template": profile, "skeleton": skeleton, "parts": parts,
+              "recipe": recipe, "gait_profile": _gait(catalog, skeleton["locomotion_hint"]),
+              "library_dir": str(out.resolve()), "out_dir": str(review_out.resolve()),
+              "shots": [{"clip": clip, "at": at} for clip in
+                        ("idle", "walk", "run", "stun", "telegraph", "attack", "hit", "death")
+                        for at in (0.0, .5, 1.0)]}
+    assets = {skeleton["asset"]["blend"], *(p["asset"]["fbx"] for p in parts.values() if p["part_id"] != part_id)}
+    asset_hashes = {}
+    for relative in sorted(assets):
+        path = out / relative
+        if not path.is_file():
+            raise click.ClickException(f"CC_CONNECTORQA_INPUT: missing built asset {path}")
+        asset_hashes[relative] = hashlib.sha256(path.read_bytes()).hexdigest()
+    inputs["input_fingerprint"] = connector_qa_fingerprint({**inputs, "asset_hashes": asset_hashes})
+    return inputs
 
 
 @functools.lru_cache(maxsize=None)
 def realpart_pipeline_fingerprint() -> str:
     """Fingerprint the code that cleans, fits, weights and exports real (sourced) parts."""
     package = Path(__file__).resolve().parents[1]
-    names = ("blender/ops_realpart.py", "parts/fit.py", "blender/rigkit.py", "blender/frame.py", "mathutil.py")
+    names = ("blender/ops_realpart.py", "parts/fit.py", "parts/learned_weights.py", "authoring/jobs.py",
+             "blender/rigkit.py", "blender/frame.py", "mathutil.py")
     payload = {name: hashlib.sha256((package / name).read_bytes()).hexdigest() for name in names}
     payload["contract"] = "cc-gen-3/blender-5.2/realpart-fbx-secondary-X-v1"
     return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
@@ -249,9 +305,15 @@ def skeleton_source_hash(catalog: dict, skeleton: dict) -> str:
 
 def skeleton_polish_hash(catalog: dict, skeleton: dict) -> str:
     sid = skeleton["skeleton_id"]
-    polish = resolve_polish(paths().work / "polish" / "skeletons" / sid, sid,
-                            skeleton_source_hash(catalog, skeleton))
-    return hashlib.sha256(polish.read_bytes()).hexdigest() if polish else ""
+    directory = paths().work / "polish" / "skeletons" / sid
+    polish = resolve_polish(directory, sid, skeleton_source_hash(catalog, skeleton))
+    if polish is None:
+        return ""
+    identity = {
+        "override_sha256": hashlib.sha256((directory / "override.json").read_bytes()).hexdigest(),
+        "blend_sha256": hashlib.sha256(polish.read_bytes()).hexdigest(),
+    }
+    return hashlib.sha256(json.dumps(identity, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
 
 
 def skeleton_content_hash(catalog: dict, skeleton: dict, out: Path) -> str:
@@ -262,6 +324,8 @@ def skeleton_content_hash(catalog: dict, skeleton: dict, out: Path) -> str:
     if len(required) != 4:
         raise ReviewError(f"CC_REVIEW_ASSET_MISSING: {skeleton['skeleton_id']} requires FBX, GLB, blend and motion")
     settings = _build_settings(catalog, skeleton)
+    if asset.get("polish_fingerprint"):
+        settings = settings | {"polish_fingerprint": asset["polish_fingerprint"]}
     if asset.get("assembled_glb"):
         required.append(out / asset["assembled_glb"])
         recipe = _review_recipe(catalog, skeleton)
@@ -336,13 +400,15 @@ def build_jobs(catalog: dict[str, Any], out: Path, only: set[str] | None = None)
             jobs.append({"op": "realpart", "args": {
                 "part": p, "template": profile or templates[p["template"]],
                 "source_path": str(source) if source else "",
+                "artifact_root": str(paths().root),
                 "out_fbx": str(out / kind / pid / f"{pid}.fbx"),
                 "out_glb": str(out / kind / pid / f"{pid}.glb"),
                 "out_albedo_png": str(out / kind / pid / f"{pid}_albedo.png"),
                 "out_blend": str(masters / kind / pid / "master.blend"),
             }})
             continue
-        if p["source"] not in ("placeholder", "reference"):
+        if p["source"] not in ("placeholder", "reference") and not (
+                p["category"] == "connector" and p.get("connector_surface")):
             continue
         jobs.append({"op": "placeholder", "args": {
             "part": p, "template": profile or templates[p["template"]],
@@ -472,7 +538,16 @@ def library() -> None:
 @click.option("--clean/--no-clean", default=True, show_default=True)
 def library_build(out_root: Path | None, clean: bool) -> None:
     """Build fresh skeleton, reference, and draft-review assembly artifacts."""
-    catalog = _catalog()
+    build_catalog(_catalog(), out_root, clean)
+
+
+def build_catalog(catalog: dict[str, Any], out_root: Path | None, clean: bool = True) -> Path:
+    """Build the supplied catalog, including isolated authoring catalogs outside production data."""
+    from ..parts.learned_weights import resolve_weights
+
+    for part in catalog["parts"]:
+        if (part.get("real") or {}).get("fit", {}).get("weights") == "learned":
+            resolve_weights(part, paths().root)
     # Pin the part pipelines to the code as it is now: the fingerprints are cached, so sources edited
     # while Blender runs cannot be recorded as the code that produced this build.
     part_pipeline_fingerprint()
@@ -620,19 +695,41 @@ def library_build(out_root: Path | None, clean: bool) -> None:
     state_path.write_text(json.dumps(state, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
     manifest = write_manifest(out)
     click.echo(f"catalog.json + {len(manifest['files'])} files written")
+    return out
 
 
 def pack_files(src: Path, slim: bool) -> list[Path]:
-    """The files of a built library to zip. Slim keeps what the Unity importer reads and nothing else: the
-    catalog, every FBX model, the PNG textures and each skeleton's motion.json (the importer validates it). The
-    .blend sources, GLB exports and assembled review GLBs (about 215 of the library's 930 MB on disk) only matter
-    to the authoring side. The motion files stay although they are the largest item (480 MB raw): the importer
-    validates them, and they deflate about 17:1 in the zip."""
+    """Validate indexed bakes for either package mode; retain their dependencies in slim packages."""
     files = sorted(f for f in src.rglob("*") if f.is_file())
+    from .bake import index_input_paths
+
+    bake_files = set(index_input_paths(src))
     if not slim:
         return files
     return [f for f in files if f.name == "catalog.json" and f.parent == src
-            or f.suffix in (".fbx", ".png") or f.name == "motion.json"]
+            or f.suffix in (".fbx", ".png") or f.name == "motion.json"
+            or f.relative_to(src).as_posix() in bake_files]
+
+
+@library.command("bake")
+@click.option("--recipe", "recipe_path", required=True,
+              type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.option("--out", "out_dir", type=click.Path(file_okay=False, path_type=Path),
+              help="Built library directory (default: current library version)")
+@click.option("--allow-review", is_flag=True, help="Permit draft assets for owner review")
+@click.option("--force", is_flag=True, help="Rebuild an existing bake")
+def library_bake(recipe_path: Path, out_dir: Path | None, allow_review: bool, force: bool) -> None:
+    """Bake a validated recipe into one skinned mesh and opaque atlas."""
+    from .bake import bake_recipe
+
+    destination = out_dir if out_dir is not None else library_dir(_catalog())
+    try:
+        recipe = json.loads(recipe_path.read_text(encoding="utf-8"))
+        entry = bake_recipe(recipe, destination, allow_review=allow_review, force=force)
+        write_manifest(destination)
+    except (ValueError, OSError, BlenderError) as error:
+        raise click.ClickException(str(error)) from error
+    click.echo(json.dumps(entry, indent=2))
 
 
 @library.command("pack")

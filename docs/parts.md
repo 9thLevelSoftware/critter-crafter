@@ -118,10 +118,79 @@ pipeline fingerprint, so changing the fitter doesn't rebuild placeholders.
 | `trim_n` | Root and tip quantiles of the chain coordinate that define 0 and `length_m` | `[0.005, 0.995]` |
 | `joints_n` | Natural interior joint fractions | the profile's fractions |
 | `radial_scale` | `auto` or a number | `auto` for chains, 1 for heads |
-| `weights` | `flesh`, `smooth`, `jointed`, `single` | `flesh` for limb3, `smooth` for insect_leg4 and tentacle8, `single` for heads |
+| `weights` | `flesh`, `smooth`, `jointed`, `single`, or opt-in `learned` | `flesh` for limb3, `smooth` for insect_leg4 and tentacle8, `single` for heads |
+| `joint_loop_mode` | Geometry-only loop/band policy (`flesh`, `smooth`, `jointed`, `single`), independent of learned weight selection | template's analytical mode |
 | `mirror_x` | Mirror across part X (a left/right variant) | false |
 | `root_center` | `slice` (centroid of the root 5%) or `bbox` | `slice`; `bbox` for straight parts |
 | `sharp_angle_deg` | Edge angle rendered sharp | 40 |
+
+## Offline learned weights (owner-managed worker)
+
+Preparation and production share the same import, cleanup, fit and post-joint-loop geometry path.
+Preparation computes **no weights**. It freezes canonical vertex indices, polygons, UV loops and
+the exact profile bind data; changing only `real.fit.weights` or learned artifact metadata does not
+change its identity. Geometry-affecting fit settings, profile, source bytes and producers do.
+
+```powershell
+uv run critter authoring skin prepare --part meshy_insect_leg_a_v1 --out work/authoring/jobs/insect
+# Repeat for meshy_frayed_arm_a_v1, meshy_animal_skull_a_v1 and meshy_tentacle_a_v1.
+# Transfer jobs manually to the owner's private worker. No automatic upload/provisioning.
+```
+
+SkinTokens runs in a separate Python 3.11 environment with torch 2.7.0/cu128 and an NVIDIA GPU
+with at least 16 GB. Set `CRITTER_SKINTOKENS_ROOT` to the official checkout at
+`273b691d35989d71cd17ff2895fdc735097b92d1`; install its documented requirements and both
+official MIT checkpoints locally. The adapter checks their exact SHA-256 hashes before inference.
+It supplies `skeleton_tokens` to TokenRig's actual `generate` API, captures/inverts preprocessing
+and maps skin columns bijectively back to original profile indices. It never calls `use_transfer`,
+adopts decoded joints, or exports a replacement mesh/armature.
+
+```sh
+python tools/authoring_worker/cli.py skin --job /owner/jobs/insect --out /owner/results/insect
+```
+
+Return the entire result directory (including `input/`) to the host:
+
+```powershell
+uv run critter authoring skin import --part meshy_insect_leg_a_v1 --result work/authoring/results/insect
+uv run critter library build
+uv run critter part review meshy_insect_leg_a_v1
+```
+
+Import verifies manifests, confined paths, hashes, unchanged fitted geometry and profile identity.
+Blender reads `weights.npz` CSR arrays without pickle, rejects invalid topology/indices/values,
+keeps the strongest four influences with bone-index tie breaks, and renormalizes. It retains the
+canonical mesh/UVs/materials/bones. Imported records are **draft**, never automatically approved.
+Missing model/artifact errors are `CC_SKIN_MODEL_UNAVAILABLE`; stale inputs/bytes are
+`CC_SKIN_STALE`; topology, bind and influence failures use `CC_SKIN_TOPOLOGY`,
+`CC_SKIN_BIND`, and `CC_SKIN_WEIGHTS`. No analytical fallback is presented as learned output.
+
+For a separately selected UniRig comparison, prepare with `--backend unirig`, set
+`CRITTER_UNIRIG_ROOT` to official revision `6793c6640ff01c8fb389f3993434124bb43d2933` in
+its own upstream environment, and use the same worker command with its official skin checkpoint
+(`--checkpoint` can locate it). This is a distinct proposal under the same weight-only contract,
+not a fallback. Model/checkpoint/settings/source hashes are retained in the result.
+
+Public asymmetric transfer smoke, without private Meshy bytes:
+
+```powershell
+uv run python tools/authoring_worker/skin_fixture.py prepare --job work/authoring/jobs/public-asymmetric
+# Run the same real worker command after manual transfer, then return its result.
+uv run python tools/authoring_worker/skin_fixture.py validate --job work/authoring/jobs/public-asymmetric --result work/authoring/results/public-asymmetric
+```
+
+On 2026-10-02, actual Blender preparation completed for all four owned parts under
+`work/authoring/jobs/<part_id>/`, and for the public asymmetric fixture under
+`work/authoring/jobs/public-asymmetric/`. Starting the worker on the fixture failed explicitly
+with `CC_SKIN_MODEL_UNAVAILABLE` because the upstream checkout is absent.
+GPU inference and improved deformation have **not** been demonstrated. Acceptance still requires
+returned real-worker results, the unchanged relative QA judge below, comparison against
+smooth/flesh/jointed weighting, and owner review showing improved distortion. The local 8 GB
+laptop is not the supported model worker.
+
+Primary APIs: [SkinTokens](https://github.com/VAST-AI-Research/SkinTokens),
+[official MIT checkpoints](https://huggingface.co/VAST-AI/SkinTokens),
+[UniRig](https://github.com/VAST-AI-Research/UniRig).
 
 ## Matching
 
@@ -175,6 +244,99 @@ Scout meshes not imported yet:
   (`01a0c137…`): they need the decimation path. It is implemented but not yet reviewed visually.
 - The frayed stumps and shoulders: connector candidates. Connectors are two-bone skinned parts with a
   different fit, not handled yet.
+
+## Native organic connectors
+
+Enhanced v3 connector authoring uses Blender 5.2 native SDF grids; ordinary parts and the frozen
+v2 connector sources are unchanged. Optional source `connector.surface` compiles to
+`connector_surface`: `{"method":"sdf_grid","voxel_divisions":24,"fillet_iterations":3,"bulge":1.08}`.
+Divisions are 12–64, fillet iterations 0–8 and bulge 1–1.2. New compiled reference connectors use
+these settings by default. This is an offline baked surface, not a Unity runtime mesher or a fusion
+of the adjoining production meshes.
+
+The closed collar remains in its authored elliptical `dimensions_m` envelope and axial `span_m`.
+The owner-selected taper redesign replaces the rejected fixed 0.83 waist/full central bulge.
+The new waist follows a span-wide Jacobian radius bound derived from the profile's tested
+single-axis angle extrema, with rounded caps and parent-side fullness away from the largest
+smoothstep weight gradient. At a symmetric span midpoint the bound is
+`radius <= (1-margin)*span_length/(3*tan(angle/2))`. Inputs retain a 60% relative Jacobian
+margin; native union/fillet is intersected with the same safe-envelope SDF before meshing.
+Simplified triangle interiors must retain the looser 25% numerical margin, and their actual
+single-axis deformed normals are checked without changing deformation QA tolerances.
+Mesh-to-SDF uses the smallest envelope radius/span divided by the voxel divisions and a
+three-voxel narrow band. Padded grids exceeding 1,024 cells on any axis or 256³ total cells fail,
+never silently coarsen. Native union and concave filleting evaluate to a mesh simplified only to
+the existing connector budget (300 triangles for reference inventory). Nonmanifold, degenerate,
+inverted or out-of-envelope results fail before export. Blender coordinates are converted back
+to the canonical frame before axial smoothstep weights; the identity socket, scale-one assembly,
+`b0=parent`, `b1=child` and normalized two-group contract remain unchanged.
+
+Nine `organic_collar_{s,m,l}_{straight,bulged,asymmetric}_v1` records are **draft** procedural
+fixtures using the released `limb3_brachial` profile. Their girths match the compact, balanced
+and elongated plantigrade biped arms respectively. The asymmetric records have unequal
+parent/child spans and reduced transverse thickness, not guessed socket translations.
+
+Review uses the existing runner op `connectorqa`. Its complete inputs are produced by
+`library.commands.connector_review_inputs(built_catalog, part_id, library_dir, review_dir)`.
+For example, after a verified v0.3.0 library build:
+
+```powershell
+uv run python -c "import json; from pathlib import Path; from critter_crafter.library.commands import connector_review_inputs; from critter_crafter.blender.runner import run_op; root=Path('library/biomass_core-v0.3.0'); c=json.loads((root/'catalog.json').read_text()); p='organic_collar_m_bulged_v1'; a=connector_review_inputs(c,p,root,Path('work/review/connectors')/p); print(run_op('connectorqa',a)['result'])"
+```
+
+The op exports paired loft/SDF FBX and GLB, checks the actual asymmetric FBX attachment and
+parent/child deformation, then measures all frames of all eight clips, bind/neutral, IK stride
+extremes and selected socket profile-limit extremes. Stretch/compression/flipped-face acceptance
+matches `parts.commands.judge`; surface penetration is limited to the existing 5 mm tolerance.
+Paired bind, neutral, clip and limit stills use the same material and shared cameras/bounds.
+Failed QA writes `qa.json` then raises `CC_CONNECTORQA_FAILED`; reviewed distortion, buried caps,
+socket gaps and ground collision still require owner visual judgment. `structure_only: true`
+exercises export/binding without claiming complete deformation acceptance.
+
+Review input identity includes exact built assets, recipe, profile, settings and producer hashes;
+normal part build identity includes the SDF producer/settings. Changed inputs invalidate old
+cached artifacts. The initial fixed-waist implementation passed 23 structural/export cases but
+failed full eight-clip and profile-extreme QA on all nine shoulder variants for flipped faces;
+the large bulged and small asymmetric variants also failed compression. These failures are
+retained under `work/review/connectors/`, not relabeled as acceptance. In the balanced medium
+bulged fixture,
+recorded SDF faces flipped at shoulder ±120°/±90° extremes (maximum 7.5%) and attack frame 8
+(0.667%); the matched original loft remained at zero flips, including a triangle-only diagnostic.
+Those failures preceded the owner-authorized taper redesign. The redesigned producer applies
+to all new authored/reference connectors, not a substitute lower-angle fixture set. The 35
+focused structural/analytical tests passed, and all nine redesigned variants completed fresh
+FBX/GLB export, asymmetric assembly/bind checks, every frame of all eight clips, IK stride
+extremes and the unchanged profile-limit extrema. All nine passed the existing deformation
+criteria: zero flipped faces and surface penetration, p01 0.54486–0.60731, and worst p99 1.44003.
+Every exported SDF fixture had 300 triangles; maximum asymmetric attachment error was
+5.96e-8 m. Paired images share cameras/materials and live under
+`work/review/connectors-safe-taper/<part_id>/`; aggregate reports are in
+`work/enhancements-connectors-safe-taper-results.json`.
+
+The whole-library refresh exposed a separate coarse-triangle twist reversal in
+`reference_connector_amalgam_hauled_s0013_v3_flail2_v1`; a positive continuous Jacobian
+alone does not guarantee deformation-safe simplified triangle chords. Simplification now
+tests each budget-compliant candidate against the unchanged manifold, envelope and actual
+profile-extreme normal guards before accepting it. Up to 16 decreasing collapse ratios select
+the highest-detail passing result; no passing topology means explicit failure. That exact
+reference subsequently exported 284 triangles/144 vertices with two bones, at most two
+influences and normalized weights, and passed its asymmetric fixture. The focused 35-case
+suite includes this regression alongside all nine authored variants and binding checks.
+
+This is measured geometry/deformation evidence, not owner approval or completed visual
+acceptance. All nine source records remain draft. The enhanced v0.3.0 reference/placeholder
+refresh and final whole-library QA are separate integration steps. Keep the original failed
+reports/renders, and judge continuity, buried caps, visible gaps and collision from the paired
+images. QA records worst-pose witnesses; its continuous edge-interval certificate covers
+triangle interiors rather than merely sampling vertices or comparing unrelated axial locations.
+
+The proof and existing QA cover each selected single-axis profile extreme and all eight
+authored clips, not every Cartesian combination of independent Euler limits. For example,
+the brachial profile permits a combined `(swing_x,twist,swing_y)=(90,90,90)` rotation of
+180°. At half weights, two-bone linear blend skinning then loses two transverse dimensions
+for any positive-radius surface, including the old loft. This shared LBS limitation is not
+solved by tapering; future combined motion must pass its actual deformation review.
+Do not rebuild or mutate immutable v0.2.0 exports; all new local output belongs to v0.3.0.
 
 ## Known limits
 

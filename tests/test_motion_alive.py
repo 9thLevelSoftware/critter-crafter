@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 import math
 
 import pytest
@@ -119,3 +120,82 @@ def test_loop_clips_still_close_after_the_new_gestures(plans):
             if clip["loop"]:
                 assert clip["samples"][0]["rotations_xyzw"] == clip["samples"][-1]["rotations_xyzw"]
                 assert clip["samples"][0]["root_position_m"] == clip["samples"][-1]["root_position_m"]
+
+
+@pytest.mark.parametrize("kind", ("body", "sliding"))
+def test_dragger_body_contacts_stay_grounded_through_reactions(skeletons, plans, kind):
+    sid = "dragger_belly_hauler_balanced_v3"
+    skeleton = deepcopy(skeletons[sid])
+    belly = next(b for b in skeleton["branches"] if b["branch_id"] == "belly")
+    for contact in belly["contacts"]:
+        contact["kind"] = kind
+    plan = plans[sid] if kind == "body" else m.build_motion(skeleton, GAIT)
+    expected_ids = {f"belly:{i}" for i in range(len(belly["contacts"]))}
+    assert expected_ids == {"belly:0", "belly:1", "belly:2"}
+    for name, stance in (("idle", 1.0), ("hit", 1.0), ("death", .25)):
+        schedule = {c["contact_id"]: c for c in _clip(plan, name)["contact_schedule"]
+                    if c["branch_id"] == "belly"}
+        assert set(schedule) == expected_ids
+        for contact in schedule.values():
+            assert contact["kind"] == kind
+            assert contact["support"] is True
+            assert contact["grounding_declared"] is True
+            assert contact["grounding_fraction"] == 1.0
+            assert contact["stance_fraction"] == stance
+
+
+def test_serpent_attack_releases_only_terminal_ground_contact(plans):
+    plan = plans["serpentine_limbless_articulated_balanced_v3"]
+    release = plan["attack_plan"]["support_release"]
+    assert release["contact_ids"] == ["body:2"]
+    assert set(release["preserved_contact_ids"]) == {"body:0", "body:1"}
+    for name in ("idle", "telegraph", "attack"):
+        schedule = {c["contact_id"]: c for c in _clip(plan, name)["contact_schedule"]}
+        assert set(schedule) == {"body:0", "body:1", "body:2"}
+        for contact_id, contact in schedule.items():
+            assert contact["kind"] == "sliding"
+            assert contact["support"] is True
+            assert contact["grounding_declared"] is True
+            assert contact["grounding_fraction"] == (
+                0.0 if name != "idle" and contact_id == "body:2" else 1.0)
+            assert contact["stance_fraction"] == 1.0
+
+
+def test_foot_striker_releases_grounding_without_releasing_other_feet(plans):
+    plan = plans["hexapod_elongated_insect_balanced_v3"]
+    release = plan["attack_plan"]["support_release"]
+    assert release["contact_ids"] == ["leg2_L:0"]
+    preserved = {"leg0_L:0", "leg0_R:0", "leg1_L:0", "leg1_R:0", "leg2_R:0"}
+    assert set(release["preserved_contact_ids"]) == preserved
+    for name in ("idle", "telegraph", "attack"):
+        schedule = {c["contact_id"]: c for c in _clip(plan, name)["contact_schedule"]}
+        assert set(schedule) == preserved | {"leg2_L:0"}
+        for contact_id, contact in schedule.items():
+            assert contact["kind"] == "foot"
+            assert contact["support"] is True
+            assert contact["grounding_declared"] is True
+            assert contact["grounding_fraction"] == (
+                0.0 if name != "idle" and contact_id == "leg2_L:0" else 1.0)
+            assert contact["stance_fraction"] == 1.0
+
+
+@pytest.mark.parametrize("sid", (
+    "biped_plantigrade_humanoid_balanced_v3",
+    "quadruped_stocky_plantigrade_balanced_v3",
+    "hexapod_elongated_insect_balanced_v3",
+))
+def test_death_foot_grounding_follows_authored_support_release(plans, sid):
+    death = _clip(plans[sid], "death")
+    release_phase = death["support_policy"]["death_release_phase"]
+    assert release_phase == .25
+    feet = [c for c in death["contact_schedule"] if c["kind"] == "foot"]
+    assert {c["branch_id"] for c in feet} == {
+        c["branch_id"] for c in death["samples"][0]["contacts"] if c["kind"] == "foot"}
+    for contact in feet:
+        assert contact["grounding_declared"] is True
+        assert contact["grounding_fraction"] == release_phase
+        assert contact["stance_fraction"] == release_phase
+        for sample in death["samples"]:
+            foot = next(c for c in sample["contacts"] if c["branch_id"] == contact["branch_id"])
+            assert foot["support"] is (sample["phase"] < release_phase)
+            assert foot["ik"] == "pin"

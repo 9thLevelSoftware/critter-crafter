@@ -3,7 +3,7 @@
   "skeleton_id": "crawler_bilateral_eight_legged_s003_v3",
   "family": "crawler",
   "locomotion_hint": "crawl",
-  "status": "approved",
+  "status": "draft",
   "symmetry_pct": 100,
   "branches": [
     {
@@ -11,6 +11,7 @@
       "template": "core1",
       "parent_branch": null,
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0,
         0.5276,
@@ -81,6 +82,9 @@
       "template": "insect_leg4",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         0.1656,
         0.5276,
@@ -168,6 +172,9 @@
       "template": "insect_leg4",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         -0.1656,
         0.5276,
@@ -256,6 +263,9 @@
       "template": "insect_leg4",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         0.1656,
         0.5276,
@@ -343,6 +353,9 @@
       "template": "insect_leg4",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         -0.1656,
         0.5276,
@@ -431,6 +444,9 @@
       "template": "insect_leg4",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         0.1656,
         0.5276,
@@ -518,6 +534,9 @@
       "template": "insect_leg4",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         -0.1656,
         0.5276,
@@ -606,6 +625,10 @@
       "template": "insect_leg4",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support",
+        "strike"
+      ],
       "origin_m": [
         0.1656,
         0.5276,
@@ -686,13 +709,17 @@
             0.0
           ]
         }
-      ]
+      ],
+      "effector_slot": "forward_outer_left"
     },
     {
       "branch_id": "leg3_R",
       "template": "insect_leg4",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         -0.1656,
         0.5276,
@@ -781,6 +808,7 @@
       "template": "appendage1",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0,
         0.6235,
@@ -852,6 +880,7 @@
       "template": "appendage1",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0,
         0.6235,
@@ -1314,10 +1343,5 @@
       "limb": 0.965,
       "stance": 1.0099
     }
-  },
-  "review": {
-    "by": "owner",
-    "date": "2026-09-30",
-    "method": "owner"
   }
 }

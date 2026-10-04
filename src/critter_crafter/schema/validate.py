@@ -13,6 +13,7 @@ from jsonschema import Draft202012Validator
 from ..library.catalog import SCHEMA_VERSION, CatalogError, compile_catalog, load_sources
 from ..recipes.generator import connector_accepted, part_accepted
 from ..skeletons.traits import traits_of
+from ..skeletons.actions import AttackPlanError, validate_action_metadata
 
 SCHEMA_FOR = {
     "templates": "branch_template.v3.schema.json",
@@ -128,6 +129,10 @@ def _skeleton_diags(
     profiles: dict[tuple[str, str], dict[str, Any]],
 ) -> list[str]:
     diagnostics: list[str] = []
+    try:
+        validate_action_metadata(source)
+    except AttackPlanError as exc:
+        diagnostics.append(str(exc))
     skeleton_id = source["skeleton_id"]
     branches = {branch["branch_id"]: branch for branch in compiled["branches"]}
     for branch in source["branches"]:

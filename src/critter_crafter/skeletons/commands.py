@@ -330,3 +330,46 @@ def skeleton_reject(family, owner, skeleton_ids) -> None:
         raise click.ClickException("give --family or skeleton IDs")
     count = _set_status_owner(family, skeleton_ids, "rejected") if owner else _set_status(family, skeleton_ids, "rejected")
     click.echo(f"rejected {count} skeleton(s)")
+
+
+@skeleton.command("search")
+@click.option("--seed", type=click.IntRange(0), default=1, show_default=True)
+@click.option("--initial", type=click.IntRange(1), default=256, show_default=True,
+              help="Initial Latin-hypercube proposals; lower this for bounded smoke runs")
+@click.option("--mutations", type=click.IntRange(0), default=768, show_default=True)
+@click.option("--lineage", "lineages", multiple=True, help="Restrict lineages for a bounded smoke run")
+def skeleton_search(seed, initial, mutations, lineages) -> None:
+    """Evaluate deterministic morphology proposals in real Unity Play Mode; never write production sources."""
+    from .morphology import LINEAGES
+    from .search import SearchError, SearchSettings, run_search
+    try:
+        result = run_search(SearchSettings(seed=seed, initial=initial, mutations=mutations,
+                                           lineages=tuple(lineages) or LINEAGES))
+    except (SearchError, ValueError, OSError) as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(f"run {result['run_id']}: {len(result['elites'])} occupied cells; "
+               f"{len(result['diagnostics'])} rejected proposals")
+    click.echo(str(paths().work / "search" / result["run_id"] / "archive.json"))
+    if result["code"] != "OK":
+        raise click.ClickException(result["code"] + ": see archive.json for complete QA diagnostics")
+
+
+@skeleton.command("search-export")
+@click.option("--run", "run_id", required=True)
+@click.option("--candidate", required=True, help="Full morphology SHA-256 of an evaluated elite")
+def skeleton_search_export(run_id, candidate) -> None:
+    """Export one selected, current evaluated elite as a draft for owner review."""
+    from .search import SearchError, selected_source
+    try:
+        source = selected_source(run_id, candidate)
+        target = paths().data / "skeletons" / f"{source['skeleton_id']}.skeleton.json"
+        if target.is_file():
+            existing = json.loads(target.read_text(encoding="utf-8"))
+            if existing.get("provenance", {}).get("morphology_sha256") != candidate:
+                raise SearchError("CC_SEARCH_HASH_COLLISION: existing source has a different full hash")
+            if existing.get("status") != "draft":
+                raise SearchError("CC_SEARCH_REVIEWED: existing owner-reviewed source is preserved")
+        _write_skeleton(source, force=False)
+    except (SearchError, ValueError, OSError) as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(f"draft source: {source['skeleton_id']}")

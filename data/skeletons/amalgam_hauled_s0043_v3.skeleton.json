@@ -11,6 +11,7 @@
       "template": "core1",
       "parent_branch": null,
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         0.0,
         0.5171,
@@ -81,6 +82,7 @@
       "template": "neck2",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         -0.0134,
         0.9941,
@@ -153,6 +155,7 @@
       "template": "head1",
       "parent_branch": "neck",
       "attach_bone_index": -1,
+      "capabilities": [],
       "origin_m": [
         -0.0185,
         1.3813,
@@ -223,6 +226,9 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support"
+      ],
       "origin_m": [
         0.4872,
         0.5113,
@@ -309,6 +315,10 @@
       "template": "tentacle8",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "support",
+        "slide"
+      ],
       "origin_m": [
         0.0,
         0.0275,
@@ -422,6 +432,10 @@
       "template": "limb3",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [
+        "strike",
+        "grasp"
+      ],
       "origin_m": [
         -0.454,
         0.6642,
@@ -489,13 +503,15 @@
         0.0,
         0.0,
         0.0
-      ]
+      ],
+      "effector_slot": "primary_strike"
     },
     {
       "branch_id": "flail1",
       "template": "tentacle8",
       "parent_branch": "core",
       "attach_bone_index": 0,
+      "capabilities": [],
       "origin_m": [
         -0.0471,
         1.007,
@@ -581,6 +597,7 @@
       "template": "insect_leg4",
       "parent_branch": "flail1",
       "attach_bone_index": 1,
+      "capabilities": [],
       "origin_m": [
         -0.0547,
         1.1218,
